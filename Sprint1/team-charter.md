@@ -32,13 +32,13 @@
 - neslaganja pokušati riješiti unutar tima, ukoliko to nije moguće obratiti se Product Owner-u
 
 ## Početne odgovornosti
-- Koordinacija sprinta: Za koordinaciju sprinta zadužen je Amar Handanagić kao vođa tima. Njegove odgovornosti uključuju organizaciju sastanaka, praćenje rokova, uskla+ivanje aktivnosti članova tima i brigu o tome da sprint teče prema planu.
+- Koordinacija sprinta: Za koordinaciju sprinta zadužen je Amar Handanagić kao vođa tima. Njegove odgovornosti uključuju organizaciju sastanaka, praćenje rokova, usklađivanje aktivnosti članova tima i brigu o tome da sprint teče prema planu.
 - Backlog i zahtjevi: Za vođenje backloga i praćenje zahtjeva zadužen je vođa tima u saradnji sa ostalim članovima. Zahtjevi se definišu zajednički, a prioriteti se određuju kroz dogovor unutar tima tokom sastanka na Discordu.
-- Arhitektura i tehničke odluke: Tehničke odluke i arhitektura sistem definišu se kroz zajednički dogovor svih članova tima, uz koordinaciju vođe tima. Vođa učestvuje i kao developer, te aktivno doprinosi radu na sprintu.
+- Arhitektura i tehničke odluke: Tehničke odluke i arhitektura sistema definišu se kroz zajednički dogovor svih članova tima, uz koordinaciju vođe tima. Vođa učestvuje i kao developer, te aktivno doprinosi radu na sprintu.
 - Testiranje i kvalitet: Svi članovi tima su na raspolaganju za testiranje i osiguravanje kvaliteta. Zadaci se međusobno pregledaju te se eventualne greške evidentiraju i ispravljaju prije završetka sprinta.
 - Dokumentacija i evidencije: 
 
 ## Pravila u slučaju neispunjavanja obaveza
-- Kako se član upozorava: Zkoliko član tima ne izvršava svoje obaveze ili kasni sa zadacima, prvo mu se skreće pažnja preko grupnog chata na Viberu i pita za razlog, te ukoliko mu je potrebna pomoć od članova tima ili produženje roka, dogovori se.
+- Kako se član upozorava: Ukoliko član tima ne izvršava svoje obaveze ili kasni sa zadacima, prvo mu se skreće pažnja preko grupnog chata na Viberu i pita za razlog, te ukoliko mu je potrebna pomoć od članova tima ili produženje roka, dogovori se.
 - Kada se porblem prijavljuje nastavnom osoblju: Ako član i nakon par upozorenja ne izvršava svoje obaveze ili se ne odaziva, te zbog njega kasni sprint i dobija se manje bodova na sprint, onda se problem prijavljuje nastavnom osoblju.
 - Kako se evidentiraju problemi u timu: Ne evidentiramo probleme već javno u chatu opominjemo jedni druge jer svi znaju svačije obaveze te skupa komuniciramo ako neko ne radi.
