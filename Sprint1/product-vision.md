@@ -16,9 +16,9 @@ AmKoLib rješava ovaj problem pružanjem digitalnog sistema koji bibliotečkom o
 Aplikacija je namijenjena osoblju biblioteke i klijentima biblioteke koji pristupaju sistemu putem namjenskog interfejsa.
 
 Korisnici sistema su:
-- **Bibliotekar** — primarni korisnik sistema, obavlja svakodnevne operacije upravljanja fondom i korisnicima
-- **Sistem administrator** — odgovoran za upravljanje korisničkim nalozima i tehničko održavanje sistema
-- **Klijent biblioteke** — ima ograničen, read-only uvid u dostupnu literaturu i u status vlastite članarine
+- **Bibliotekar** - primarni korisnik sistema, obavlja svakodnevne operacije upravljanja fondom i korisnicima
+- **Sistem administrator** - odgovoran za upravljanje korisničkim nalozima i tehničko održavanje sistema
+- **Klijent biblioteke** - ima ograničen, read-only uvid u dostupnu literaturu i u status vlastite članarine
 
 Stakeholderi sistema su:
 - Osoblje biblioteke (direktni korisnici)
@@ -77,7 +77,7 @@ Sljedeće funkcionalnosti su svjesno isključene iz MVP-a radi formiranja stabil
 | Automatska obavještenja o roku povratka knjige | Zahtijeva integraciju eksternog notifikacionog servisa |
 | Kazne za kasno vraćanje | Ovisi o notifikacionom sistemu i poslovnoj politici |
 | Rezervacija literature | Složeniji workflow |
-| Online produžetak članarine od strane klijenta | Zahtijeva integraciju ekternog uređaja za plaćanje |
+| Online produžetak članarine od strane klijenta | Zahtijeva integraciju eksternog uređaja za plaćanje |
 | Integracija sa distributer-om knjiga | Vanjski servis |
 
 ---
