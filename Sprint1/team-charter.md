@@ -18,15 +18,15 @@
 
 ## Radna pravila tima
 - sastanak zakazati barem 24h prije istog
-- vrijeme sastanka odgovara svim članova tima
+- vrijeme sastanka odgovara svim članovima tima
 - članovi tima komuniciraju svaki radni dan putem grupnog chat-a
 - zadaci se raspoređuju na sastanku
-- obavezna 2 sedmična sastanak-a (1.sastanak za podjelu zadataka sprint-a i dogovor o radu istog, 2.sastanak za pregled urađenog i testiranje)
-- obavezno dnevno obavještavanje o statusu  zadataka
+- obavezna 2 sedmična sastanka (1. sastanak za podjelu zadataka sprinta i dogovor o radu istog, 2. sastanak za pregled urađenog i testiranje)
+- obavezno dnevno obavještavanje o statusu zadataka
 - svaki član tima mora biti upoznat sa cijelim projektom
 - dobra, otvorena, iskrena komunikacija
 - obavezno poštovanje dogovorenih rokova finalizacije pojedinačnih zadataka
-- raspodjela zadataka i odluka zapisana u zajedničkom dokumentu na discord-u
+- raspodjela zadataka i odluka zapisana u zajedničkom dokumentu na Discord-u
 - nastali problem što prije riješiti
 - objektivno sagledati situaciju, pronaći kompromis 
 - neslaganja pokušati riješiti unutar tima, ukoliko to nije moguće obratiti se Product Owner-u
@@ -40,5 +40,5 @@
 
 ## Pravila u slučaju neispunjavanja obaveza
 - Kako se član upozorava: Ukoliko član tima ne izvršava svoje obaveze ili kasni sa zadacima, prvo mu se skreće pažnja preko grupnog chata na Viberu i pita za razlog, te ukoliko mu je potrebna pomoć od članova tima ili produženje roka, dogovori se.
-- Kada se porblem prijavljuje nastavnom osoblju: Ako član i nakon par upozorenja ne izvršava svoje obaveze ili se ne odaziva, te zbog njega kasni sprint i dobija se manje bodova na sprint, onda se problem prijavljuje nastavnom osoblju.
+- Kada se problem prijavljuje nastavnom osoblju: Ako član i nakon par upozorenja ne izvršava svoje obaveze ili se ne odaziva, te zbog njega kasni sprint i dobija se manje bodova na sprint, onda se problem prijavljuje nastavnom osoblju.
 - Kako se evidentiraju problemi u timu: Ne evidentiramo probleme već javno u chatu opominjemo jedni druge jer svi znaju svačije obaveze te skupa komuniciramo ako neko ne radi.
