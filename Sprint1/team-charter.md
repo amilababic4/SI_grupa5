@@ -36,9 +36,9 @@
 - Backlog i zahtjevi: Za vođenje backloga i praćenje zahtjeva zadužen je vođa tima u saradnji sa ostalim članovima. Zahtjevi se definišu zajednički, a prioriteti se određuju kroz dogovor unutar tima tokom sastanka na Discordu.
 - Arhitektura i tehničke odluke: Tehničke odluke i arhitektura sistema definišu se kroz zajednički dogovor svih članova tima, uz koordinaciju vođe tima. Vođa učestvuje i kao developer, te aktivno doprinosi radu na sprintu.
 - Testiranje i kvalitet: Svi članovi tima su na raspolaganju za testiranje i osiguravanje kvaliteta. Zadaci se međusobno pregledaju te se eventualne greške evidentiraju i ispravljaju prije završetka sprinta.
-- Dokumentacija i evidencije: 
+- Dokumentacija i evidencije: Sva dokumentacija se vodi na GitHub-u a evidencija zadataka se vodi na grupnom chatu i Discordu.
 
 ## Pravila u slučaju neispunjavanja obaveza
 - Kako se član upozorava: Ukoliko član tima ne izvršava svoje obaveze ili kasni sa zadacima, prvo mu se skreće pažnja preko grupnog chata na Viberu i pita za razlog, te ukoliko mu je potrebna pomoć od članova tima ili produženje roka, dogovori se.
-- Kada se problem prijavljuje nastavnom osoblju: Ako član i nakon par upozorenja ne izvršava svoje obaveze ili se ne odaziva, te zbog njega kasni sprint i dobija se manje bodova na sprint, onda se problem prijavljuje nastavnom osoblju.
-- Kako se evidentiraju problemi u timu: Ne evidentiramo probleme već javno u chatu opominjemo jedni druge jer svi znaju svačije obaveze te skupa komuniciramo ako neko ne radi.
+- Kada se porblem prijavljuje nastavnom osoblju: Ako član i nakon par upozorenja ne izvršava svoje obaveze ili se ne odaziva, te zbog njega kasni sprint i dobija se manje bodova na sprint, onda se problem prijavljuje nastavnom osoblju.
+- Kako se evidentiraju problemi u timu: Svi problemi, opomene oko kašnjenja i ne izvršavanja obaveza se nalaze u grupnom chatu.
