@@ -19,7 +19,7 @@ Operativni korisnik sistema, obavlja svakodnevne operacije upravljanja fondom i 
 
 Aktivni korisnik koji ima uvid u dostupnu literaturu i status vlastite članarine, ujedno mogućnost rezervacije literature.
 
-3. **Direktor biblioteke**
+3. **Uprava biblioteke**
 
 Upravno osoblje koje sistem koristi za pregled poslovanja kroz statistike i izvještaje.
 
