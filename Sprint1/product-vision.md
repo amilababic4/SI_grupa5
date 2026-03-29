@@ -1,101 +1,114 @@
 # Naziv Projekta
-AmKoLib *(Bibliotečki sistem za upravljanje fondom i korisnicima)*
-
----
+**AmKoLib** 
 
 ## Problem koji sistem rješava
-
 Biblioteke koje nemaju digitalizovan sistem upravljanja fondom suočavaju se sa problemima poput ručnog praćenja iznajmljivanja knjiga, evidencije korisnika i statusa članarina u papirnoj formi ili improvizovanim rješenjima. To dovodi do grešaka u evidenciji, teškoća u praćenju rokova vraćanja, nepreglednog stanja dostupnih primjeraka i otežanog rada bibliotekara u svakodnevnim zadacima.
 
-AmKoLib rješava ovaj problem pružanjem digitalnog sistema koji bibliotečkom osoblju omogućava centralizovano i pregledno upravljanje bibliotečkim fondom i korisnicima, dok istovremeno klijentima biblioteke pruža uvid u dostupnost literature i status vlastite članarine.
+**AmKoLib** rješava ovaj problem pružanjem digitalnog sistema koji bibliotečkom osoblju omogućava centralizovano i pregledno upravljanje bibliotečkim fondom i korisnicima, dok istovremeno članovima biblioteke pruža uvid u dostupnost literature i status vlastite članarine.
 
----
 
-## Ciljni korisnici
+## Ciljni korisnici i Stakeholderi
+Aplikacija je namijenjena osoblju biblioteke i njenim korisnicima koji pristupaju sistemu putem namjenskog interfejsa.
 
-Aplikacija je namijenjena osoblju biblioteke i klijentima biblioteke koji pristupaju sistemu putem namjenskog interfejsa.
+### Korisnici sistema:
+1. **Bibliotekar** 
 
-Korisnici sistema su:
-- **Bibliotekar** - primarni korisnik sistema, obavlja svakodnevne operacije upravljanja fondom i korisnicima
-- **Sistem administrator** - odgovoran za upravljanje korisničkim nalozima i tehničko održavanje sistema
-- **Klijent biblioteke** - ima ograničen, read-only uvid u dostupnu literaturu i u status vlastite članarine
+Operativni korisnik sistema, obavlja svakodnevne operacije upravljanja fondom i korisnicima.
 
-Stakeholderi sistema su:
-- Osoblje biblioteke (direktni korisnici)
-- Klijenti biblioteke (direktni korisnici)
-- Distributer knjiga koji snabdijeva biblioteku
+2. **Član biblioteke (Klijent)** 
 
----
+Aktivni korisnik koji ima uvid u dostupnu literaturu i status vlastite članarine, ujedno mogućnost rezervacije literature.
+
+3. **Direktor biblioteke**
+
+Upravno osoblje koje sistem koristi za pregled poslovanja kroz statistike i izvještaje.
+
+4. **Administrator sistema** 
+
+Odgovoran za upravljanje korisničkim nalozima i tehničko održavanje sistema.
+
+### Ostali poslovni stakeholderi sistema:
+5. **IT tim** 
+
+Podrška i razvoj, odgovoran za tehničku realizaciju sistema i usklađivanje zahtjeva s implementacijom.
+
+6. **Dobavljači knjiga (Distributeri)** 
+
+Vanjski saradnici čija se komunikacija i proces nabavke olakšava preciznim uvidom u trenutno stanje bibliotečkog fonda.
+
+
+7. **Autori i izdavači**
+
+Vanjski saradnici s niskim direktnim uticajem na sistem, relevantni u kontekstu poštovanja autorskih prava i vidljivosti publikacija zastupljenih u fondu.
+
 
 ## Vrijednost sistema
 
-### Za bibliotekara
-Bibliotekar dobija pregled:
-- Kompletnog bibliotečkog fonda i dostupnosti pojedinih naslova
-- Podataka o registrovanim klijentima i statusu njihovih članarina
-- Iznajmljenih knjiga po korisniku te rokova vraćanja
-- Statusa rezervacija literature
+### Bibliotekar dobija pregled:
+* Kompletnog bibliotečkog fonda i dostupnosti pojedinih naslova.
+* Podataka o registrovanim članovima i statusu njihovih članarina.
+* Iznajmljenih knjiga po korisniku te rokova vraćanja.
+* Statusa rezervacija literature.
 
-### Za klijenta biblioteke
-Klijent putem sistema može:
-- Pregledati dostupnu literaturu u biblioteci
-- Provjeriti status vlastite članarine
-- Obaviti online produžetak članarine
-- Primiti obavještenje o isteku članarine i roku povratka iznajmljene literature
+### Član biblioteke putem sistema može:
+* Pregledati dostupnu literaturu u biblioteci.
+* Provjeriti status vlastite članarine.
+* Obaviti online produžetak članarine.
+* Primiti obavještenje o isteku članarine i roku povratka iznajmljene literature.
 
-### Za sistem administratora
-Administrator može upravljati korisničkim nalozima bibliotekara i konfiguracijom sistema.
+### Direktor biblioteke:
+* Pristup preciznim izvještajima i statistikama o radu biblioteke (npr. najčitanije knjige, broj aktivnih članova) koji olakšavaju donošenje poslovnih i finansijskih odluka.
 
----
+### Sistem administrator:
+* Administrator može upravljati korisničkim nalozima i konfiguracijom sistema.
+
+
 
 ## Scope MVP Verzije
-
-MVP verzija fokusira se na formiranje funkcionalnog kostura aplikacije sa osnovnim CRUD operacijama, bez oslanjanja na eksterne servise ili obavještajne mehanizme.
+MVP verzija fokusira se na formiranje funkcionalnog kostura aplikacije sa osnovnim CRUD operacijama, bez oslanjanja na eksterne servise, obavještajne mehanizme ili naprednu analizu podataka.
 
 ### Bibliotekar
-- Uvid u bibliotečki fond (pregled, dodavanje, uređivanje, brisanje knjiga)
-- Uvid u klijente i podatke o klijentima
-- Upravljanje iznajmljivanjem i vraćanjem knjiga
-- Pregled statusa članarine korisnika
+* Uvid u bibliotečki fond (pregled, dodavanje, uređivanje, brisanje knjiga).
+* Uvid u članove i podatke o članovima.
+* Upravljanje iznajmljivanjem i vraćanjem knjiga.
+* Pregled statusa članarine korisnika.
 
 ### Sistem administrator
-- Upravljanje korisničkim nalozima
+* Upravljanje korisničkim nalozima.
 
-### Klijent biblioteke
-- Uvid u trenutno dostupnu literaturu
-- Uvid u status vlastite članarine
+### Član biblioteke
+* Uvid u trenutno dostupnu literaturu (pretraga fonda).
+* Uvid u status vlastite članarine.
 
----
+
 
 ## Šta ne ulazi u MVP
-
 Sljedeće funkcionalnosti su svjesno isključene iz MVP-a radi formiranja stabilnog kostura aplikacije:
 
 | Funkcionalnost | Razlog isključivanja |
-|---|---|
-| Automatska obavještenja o isteku članarine | Zahtijeva integraciju eksternog notifikacionog servisa |
-| Automatska obavještenja o roku povratka knjige | Zahtijeva integraciju eksternog notifikacionog servisa |
-| Kazne za kasno vraćanje | Ovisi o notifikacionom sistemu i poslovnoj politici |
-| Rezervacija literature | Složeniji workflow |
-| Online produžetak članarine od strane klijenta | Zahtijeva integraciju eksternog uređaja za plaćanje |
-| Integracija sa distributer-om knjiga | Vanjski servis |
+| :--- | :--- |
+| **Napredni izvještaji i statistika (za Direktora)** | MVP se fokusira na operativni rad (CRUD), analitika zahtijeva suvišni početni napor. |
+| **Automatska obavještenja o isteku članarine** | Zahtijeva integraciju eksternog notifikacionog servisa. |
+| **Automatska obavještenja o roku povratka knjige** | Zahtijeva integraciju eksternog notifikacionog servisa. |
+| **Kazne za kasno vraćanje** | Ovisi o notifikacionom sistemu i poslovnoj politici. |
+| **Rezervacija literature** | Složeniji workflow. |
+| **Online produžetak članarine od strane člana** | Zahtijeva integraciju eksternog servisa za plaćanje. |
+| **Integracija sa dobavljačima/distributerima** | Vanjski servisi. |
 
----
+
 
 ## Ključna ograničenja i pretpostavke
 
 ### Ograničenja MVP verzije
-
-- Sistem podržava samo osnovne CRUD operacije nad knjigama (bez rezervacija)
-- Sistem posmatra biblioteku kao izolovan sistem, nema komunikacije između više biblioteka
-- Nema implementacije automatskih notifikacija ni eksternih komunikacijskih servisa
-- Interfejs je dizajniran isključivo za desktop platforme
-- Klijentske profile kreira i upravlja bibliotekar, nema samostalne registracije klijenata
+* Sistem podržava samo osnovne CRUD operacije nad knjigama i članovima.
+* Sistem posmatra biblioteku kao izolovan sistem, nema komunikacije između više biblioteka.
+* Nema implementacije automatskih notifikacija ni eksternih komunikacijskih servisa.
+* Interfejs je dizajniran isključivo za desktop platforme.
+* Klijentske profile kreira i njima upravljaju isključivo bibliotekar i sistem administrator, dakle nema samostalne registracije članova kroz sistem u ovoj fazi.
 
 ### Pretpostavke MVP verzije
-
-- Uneseni podaci su ispravnog formata (validacija osnovnih inputa je implementirana, ali sistem ne provjerava semantičku ispravnost unosa poput stvarnog postojanja naslova)
-- Sve kopije iste knjige smatraju se identičnim primjercima
-- Dostupna je stabilna internet konekcija u toku rada sistema
-- Sistemsko vrijeme host računara je ispravno postavljeno
-- Broj istovremenih korisnika je mali, primarno jedan aktivan bibliotekar u datom trenutku
+* Uneseni podaci su ispravnog formata (osnovna validacija je tu, ali bez duboke semantičke provjere, zanemarene su greške prilikom unošenja imena, naslova literature).
+* Sve kopije iste knjige smatraju se identičnim primjercima.
+* Dostupna je stabilna internet konekcija u toku rada sistema.
+* Sistemsko vrijeme host računara je ispravno postavljeno.
+* Mali broj istovremenih korisnika.
