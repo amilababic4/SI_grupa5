@@ -51,6 +51,7 @@ Vanjski saradnici s niskim direktnim uticajem na sistem, relevantni u kontekstu 
 * Statusa rezervacija literature.
 
 ### Član biblioteke putem sistema može:
+* Registrovati se.
 * Pregledati dostupnu literaturu u biblioteci.
 * Provjeriti status vlastite članarine.
 * Obaviti online produžetak članarine.
@@ -77,6 +78,7 @@ MVP verzija fokusira se na formiranje funkcionalnog kostura aplikacije sa osnovn
 * Upravljanje korisničkim nalozima.
 
 ### Član biblioteke
+* Može kreirati vlastiti račun.
 * Uvid u trenutno dostupnu literaturu (pretraga fonda).
 * Uvid u status vlastite članarine.
 
