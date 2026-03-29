@@ -1,10 +1,10 @@
 # Naziv Projekta
-**AmKoLib** 
+**SmartLib** 
 
 ## Problem koji sistem rješava
 Biblioteke koje nemaju digitalizovan sistem upravljanja fondom suočavaju se sa problemima poput ručnog praćenja iznajmljivanja knjiga, evidencije korisnika i statusa članarina u papirnoj formi ili improvizovanim rješenjima. To dovodi do grešaka u evidenciji, teškoća u praćenju rokova vraćanja, nepreglednog stanja dostupnih primjeraka i otežanog rada bibliotekara u svakodnevnim zadacima.
 
-**AmKoLib** rješava ovaj problem pružanjem digitalnog sistema koji bibliotečkom osoblju omogućava centralizovano i pregledno upravljanje bibliotečkim fondom i korisnicima, dok istovremeno članovima biblioteke pruža uvid u dostupnost literature i status vlastite članarine.
+**SmartLib** rješava ovaj problem pružanjem digitalnog sistema koji bibliotečkom osoblju omogućava centralizovano i pregledno upravljanje bibliotečkim fondom i korisnicima, dok istovremeno članovima biblioteke pruža uvid u dostupnost literature i status vlastite članarine.
 
 
 ## Ciljni korisnici i Stakeholderi
