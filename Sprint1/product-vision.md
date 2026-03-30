@@ -51,13 +51,12 @@ Vanjski saradnici s niskim direktnim uticajem na sistem, relevantni u kontekstu 
 * Statusa rezervacija literature.
 
 ### Član biblioteke putem sistema može:
-* Registrovati se.
 * Pregledati dostupnu literaturu u biblioteci.
 * Provjeriti status vlastite članarine.
 * Obaviti online produžetak članarine.
 * Primiti obavještenje o isteku članarine i roku povratka iznajmljene literature.
 
-### Direktor biblioteke:
+### Upravno osoblje:
 * Pristup preciznim izvještajima i statistikama o radu biblioteke (npr. najčitanije knjige, broj aktivnih članova) koji olakšavaju donošenje poslovnih i finansijskih odluka.
 
 ### Sistem administrator:
@@ -78,7 +77,6 @@ MVP verzija fokusira se na formiranje funkcionalnog kostura aplikacije sa osnovn
 * Upravljanje korisničkim nalozima.
 
 ### Član biblioteke
-* Može kreirati vlastiti račun.
 * Uvid u trenutno dostupnu literaturu (pretraga fonda).
 * Uvid u status vlastite članarine.
 
@@ -105,7 +103,7 @@ Sljedeće funkcionalnosti su svjesno isključene iz MVP-a radi formiranja stabil
 * Sistem podržava samo osnovne CRUD operacije nad knjigama i članovima.
 * Sistem posmatra biblioteku kao izolovan sistem, nema komunikacije između više biblioteka.
 * Nema implementacije automatskih notifikacija ni eksternih komunikacijskih servisa.
-* Interfejs je dizajniran isključivo za desktop platforme.
+* Interfejs sistema je web-baziran i prilagođen za korištenje na desktop i mobilnim uređajima.
 * Klijentske profile kreira i njima upravljaju isključivo bibliotekar i sistem administrator, dakle nema samostalne registracije članova kroz sistem u ovoj fazi.
 
 ### Pretpostavke MVP verzije
