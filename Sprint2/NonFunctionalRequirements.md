@@ -1,11 +1,5 @@
 # Non-Functional Requirements (NFR)
 
-## Opis dokumenta
-
-Ovaj dokument opisuje nefunkcionalne zahtjeve sistema **SmartLib**. Svaki zahtjev je definisan prema kategoriji, načinu provjere, prioritetu i napomeni.
-
----
-
 ## Tabela nefunkcionalnih zahtjeva
 
 | ID | Kategorija | Opis zahtjeva | Kako će se provjeravati | Prioritet | Napomena |
