@@ -486,13 +486,13 @@ Ovaj dokument sadrži sve User Stories za projekat Bibliotečkog informacionog s
 
 | **ID storyja** | US-34 |
 |---------------|-------|
-| **Naziv storyja** | |
-| **Opis** | |
-| **Poslovna vrijednost** | |
-| **Prioritet** |  |
-| **Acceptance Criteria** | |
-| **Pretpostavke / Otvorena pitanja** | |
-| **Veze i zavisnosti** | |
+| **Naziv storyja** | Online produžetak članarine |
+| **Opis** | Kao član biblioteke, želim online produžiti svoju članarinu, kako bih mogao nastaviti koristiti bibliotečke usluge bez dolaska u biblioteku. |
+| **Poslovna vrijednost** | Omogućava članovima jednostavno i brzo produženje članarine, smanjuje opterećenje osoblja i unapređuje korisničko iskustvo. |
+| **Prioritet** | Srednji |
+| **Acceptance Criteria** | Član može pokrenuti produženje članarine putem sistema.<br>Sistem omogućava izbor trajanja produženja (npr. 1, 3, 6 ili 12 mjeseci).<br>Nakon uspješnog produženja, datum isteka članarine se ažurira.<br>Status članarine se automatski postavlja na "Aktivna".<br>Sistem prikazuje potvrdu o uspješnom produženju. |
+| **Pretpostavke / Otvorena pitanja** | Na koji način simulirati sistem online naplate članarine? |
+| **Veze i zavisnosti** | US-19: Upravljanje statusom članarine<br>US-20: Pregled statusa članarine |
 
 ---
 
