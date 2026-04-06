@@ -3,7 +3,7 @@
 
 ## Opis dokumenta
 
-Ovaj dokument predstavlja Product Backlog projekta **Bibliotečki informacioni sistem**. Backlog sadrži stavke koje su trenutno poznate timu. Njegova svrha je da omogući pregled planiranog obima sistema, 
+Ovaj dokument predstavlja ažurirani Product Backlog projekta **Bibliotečki informacioni sistem** u sklopu Sprint 2. Backlog sadrži stavke koje su trenutno poznate timu. Njegova svrha je da omogući pregled planiranog obima sistema, 
 olakša prioritizaciju rada po sprintovima i služi kao osnova za dalju razradu.
 
 
@@ -17,22 +17,26 @@ olakša prioritizaciju rada po sprintovima i služi kao osnova za dalju razradu.
 | PB-3 | Stakeholder Map | Identifikacija stakeholdera i njihovog utjecaja | Documentation  | Visok | S | Završeno u Sprintu 1 | Sprint 1 | Obavezni artefakt |
 | PB-4 | Početni Product Backlog | Početno definisanje bitnih artefakata i taskova | Documentation  | Visok | M | Završeno u Sprintu 1 | Sprint 1 | Obavezni artefakt |
 | PB-5 | Definisanje specifičnih poslovnih pravila | Istražiti i zapisati specifična pravila kako sistem treba da funkcioniše | Research | Visok | S | Završeno u Sprintu 2 | Sprint 1 / Sprint 2 | Ključno za logiku sistema |
-| PB-6 | Razrada User Stories | Definisanje User Stories za sve stavke backloga | Documentation | Visok | M | Završeno u Sprintu 2 | Sprint 2 | Obavezni artefakt |
-| PB-7 | Razrada Nefunkcionalnih Zahtjeva | Definisanje stavki za bolje funkcionisanje sistema | Documentation | Visok | S | Završeno u Sprintu 2 | Sprint 2 | Obavezni artefakt | 
-| PB-8 | Definisanje objekata sistema | Određivanje svih entiteta koje naš sistem treba da posjeduje | Technical Task | Visok | M | U backlogu | Sprint 3 | |
+| PB-6 | Razrada User Stories i Acceptance Criteria | Definisanje User Stories i kriterija prihvatanja za sve stavke backloga | Documentation | Visok | M | Završeno u Sprintu 2 | Sprint 2 | Obavezni artefakt |
+| PB-7 | Razrada nefunkcionalnih zahtjeva | Definisanje stavki za bolje funkcionisanje sistema kao i sam kvalitet i pouzdanost | Documentation | Visok | S | Završeno u Sprintu 2 | Sprint 2 | Obavezni artefakt | 
+| PB-8 | Definisanje objekata sistema | Određivanje svih entiteta koje naš sistem treba da posjeduje | Technical Task | Visok | M | U backlogu | Sprint 3 | Preduslov za bazu podataka|
 | PB-9 | Dizajn i implementacija baze podataka | Kreiranje sheme baze, migracija i inicijalnih seed podataka | Technical Task | Visok | M | U backlogu | Sprint 4 | Preduslov za sve feature sprintove |
 | PB-10 | Početna struktura projekta | Odabir tehnologija i arhitekture projekta | Technical task | Visok | S | U backlogu | Sprint 4 | |
-| PB-11 | Sistem prijave korisnika | Član, bibliotekar i administrator se registruju, prijavljuju i odjavljuju u sistemu | Feature | Visok | M | U backlogu | Sprint 5 | Osnova za sve dalje |
-| PB-12 | AI i Decision Log | Uspostava za praćenje rada na projektu | Technical task | Visok | S | U backlogu | Sprint 5  |  |
+| PB-11 | Sistem prijave korisnika | Registrovani korisnici se prijavljuju i odjavljuju iz sistema u skladu sa svojom ulogom | Feature | Visok | M | U backlogu | Sprint 5 | Osnova za sve dalje |
+| PB-12 | AI i Decision Log | Uspostava za praćenje rada na projektu | Technical task | Srednji | S | U backlogu | Sprint 5  |  |
 | PB-13 | Pregled profila člana | Sistem prikazuje osnovne podatke člana i njegova zaduženja | Feature | Visok | M | U backlogu | Sprint 8 |  |
+| PB-13 | Pregled i pretraga članova biblioteke | Bibliotekar ili administrator može pregledati i pretraživati članove biblioteke | Feature | Visok | M | U backlogu | Sprint 8 | Osnova rada sa članovima |
 | PB-14 | Dodavanje nove knjige | Administrator ili bibliotekar dodaje novu knjigu u fond | Feature | Visok | M | U backlogu | Sprint 6 | Osnova kataloga |
 | PB-15 | Uređivanje podataka o knjizi | Administrator ili bibliotekar može izmijeniti osnovne podatke knjige | Feature | Srednji | S | U backlogu | Sprint 6 | Nema historiju promjena |
 | PB-16 | Prikaz detalja knjige | Članovi mogu pregledati osnovne podatke knjiga | Feature | Srednji | S | U backlogu | Sprint 7 | Sadrži osnovne podatke |
-| PB-17 | Pregled kataloga | Korisnik može pregledati listu dostupnih knjiga | Feature | Visok | M | U backlogu | Sprint 6 | Zavisi od knjiga i njihovog broja |
-| PB-18 | Pretraga knjiga | Korisnik može pretraživati knjige po naslovu, autoru ili ključnoj riječi | Feature | Visok | M | U backlogu | Sprint 7 | Nadogradnja kataloga |
-| PB-19 | Pregled dostupnosti knjige | Sistem prikazuje da li je knjiga dostupna i broj primjeraka | Feature | Visok | M | U backlogu | Sprint 7 | |
-| PB-20 | Evidencija zaduživanja i vraćanja | Bibliotekar evidentira da je član zadužio određenu knjigu ili je vratio | Feature | Visok | M | U backlogu | Sprint 8 | Core funkcionalnost |
-| PB-21 | Upravljanje korisnicima od strane admina | Administrator može pregledati sve korisnike, promijeniti ulogu ili deaktivirati nalog | Feature | Srednji | M | U backlogu | Sprint 8 | Osnova za administraciju sistema |
+| PB-17 | Upravljanje kategorijama knjiga | Administrator ili bibliotekar dodaje, uređuje i briše kategorije koje se koriste pri dodavanju knjiga | Feature | Srednji | S | U backlogu | Sprint 7 | |
+| PB-18 | Upravljanje primjercima knjige | Evidencija više primjeraka iste knjige i njihovog statusa | Feature | Visok | M | U backlogu | Sprint 7 | |
+| PB-19 | Brisanje knjige i deaktivacija primjerka | Bibliotekar ili administrator može ukloniti knjigu ili deaktivirati primjerak iz sistema | Feature | Srednji | S | U backlogu | Sprint 7 | Nije dozvoljeno ako postoji aktivno zaduženje |
+| PB-18 | Pregled kataloga | Korisnik može pregledati listu dostupnih knjiga | Feature | Visok | M | U backlogu | Sprint 6 | Zavisi od knjiga i njihovog broja |
+| PB-19 | Pretraga knjiga | Korisnik može pretraživati knjige po naslovu, autoru ili ključnoj riječi | Feature | Visok | M | U backlogu | Sprint 7 | Nadogradnja kataloga |
+| PB-20 | Pregled dostupnosti knjige | Sistem prikazuje da li je knjiga dostupna i broj primjeraka | Feature | Visok | M | U backlogu | Sprint 7 | |
+| PB-21 | Evidencija zaduživanja i vraćanja | Bibliotekar evidentira da je član zadužio određenu knjigu ili je vratio | Feature | Visok | M | U backlogu | Sprint 8 | Core funkcionalnost |
+| PB-22 | Upravljanje korisnicima od strane admina | Administrator može pregledati sve korisnike, promijeniti ulogu ili deaktivirati nalog | Feature | Srednji | M | U backlogu | Sprint 8 | Osnova za administraciju sistema |
 | PB-22 | Pregled vlastitih zaduženja | Član biblioteke vidi koje knjige trenutno ima zadužene | Feature | Visok | S | U backlogu | Sprint 9 | Zavisi od zaduživanja |
 | PB-23 | Pregled trenutnih zaduženja | Bibliotekar vidi koje su knjige trenutno zadužene od strane članova | Feature | Visok | S | U backlogu | Sprint 9 | Zavisi od zaduživanja |
 | PB-24 | Upravljanje primjercima knjige | Evidencija više primjeraka iste knjige i njihovog statusa | Feature | Visok | M | U backlogu | Sprint 6 | Bitno za dostupnost |
