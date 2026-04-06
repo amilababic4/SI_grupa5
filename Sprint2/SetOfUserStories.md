@@ -7,45 +7,45 @@ Ovaj dokument sadrži sve User Stories za projekat Bibliotečkog informacionog s
 
 # Sprint 5
 
-## US-01: Implementacija registracije korisnika
+## US-01: Registracija korisnika
 
 | **ID storyja** | US-01 |
 |---------------|-------|
-| **Naziv storyja** | Implementacija registracije korisnika |
+| **Naziv storyja** | Registracija korisnika |
 | **Opis** | Kao bibliotekar ili administrator, želim kreirati nalog za novog člana unosom njegovih podataka, kako bi član mogao koristiti usluge biblioteke. |
 | **Poslovna vrijednost** | Omogućava evidentiranje novih članova u sistemu i pristup bibliotečkim uslugama. |
 | **Prioritet** | Visok |
-| **Acceptance Criteria** | Bibliotekar ili administrator je unio podatke: ime, prezime, email i lozinku.<br>Email mora biti jedinstven. <br>Lozinka mora imati minimalno 8 znakova.<br>Nakon uspješnog unosa, kreira se nalog sa ulogom 'Član'.|
+| **Acceptance Criteria** | Bibliotekar ili administrator je unio podatke: ime, prezime, email i lozinku.<br>Email mora biti jedinstven. <br>Lozinka mora imati minimalno 8 znakova. <br> Ako je neki podatak neispravan ili nedostaje, sistem prikazuje odgovarajuću poruku o grešci. <br>Nakon uspješnog unosa, kreira se nalog sa ulogom 'Član'.|
 | **Pretpostavke / Otvorena pitanja** | Član fizički dolazi u biblioteku i daje svoje podatke osoblju. |
 | **Veze i zavisnosti** | Domain Model (entitet Korisnik) |
 
 ---
 
-## US-02: Implementacija prijave korisnika
+## US-02: Prijava korisnika
 
 | **ID storyja** | US-02 |
 |---------------|-------|
-| **Naziv storyja** | Implementacija prijave korisnika u sistem |
+| **Naziv storyja** | Prijava korisnika |
 | **Opis** | Kao registrovani korisnik (Član, Bibliotekar ili Administrator), želim se prijaviti putem email-a i lozinke, kako bih pristupio funkcionalnostima prema svojoj ulozi. |
 | **Poslovna vrijednost** | Omogućava sigurnu autentifikaciju korisnika i kontrolu pristupa funkcionalnostima sistema prema njihovoj ulozi. |
 | **Prioritet** | Visok |
-| **Acceptance Criteria** | Korisnik se može prijaviti sa email-om i lozinkom.<br>Nakon prijave, preusmjeren je na odgovarajući dashboard prema ulozi.|
+| **Acceptance Criteria** | Korisnik se može prijaviti sa email-om i lozinkom.<br>Ako su podaci ispravni, korisnik je preusmjeren na odgovarajući dashboard prema ulozi. <br> Ako nisu, sistem prikazuje poruku o grešci. |
 | **Pretpostavke / Otvorena pitanja** | Korisnici imaju definisane uloge: Član, Bibliotekar ili Administrator. |
 | **Veze i zavisnosti** | US-01: registracija korisnika |
 
 ---
 
-## US-03: Implementacija odjave korisnika
+## US-03: Odjava korisnika
 
 | **ID storyja** | US-03 |
 |---------------|-------|
-| **Naziv storyja** | Implementacija odjave korisnika |
+| **Naziv storyja** | Odjava korisnika |
 | **Opis** | Kao prijavljeni korisnik, želim se odjaviti iz sistema, kako bi moj nalog bio zaštićen. |
-| **Poslovna vrijednost** | Omogućava korisnicima sigurno završavanje sesije i smanjuje rizik od neovlaštenog pristupa nalogu. |
+| **Poslovna vrijednost** | Omogućava korisnicima sigurno završavanje sesije i smanjuje rizik od neovlaštenog pristupa računu. |
 | **Prioritet** | Visok |
 | **Acceptance Criteria** | Dugme za odjavu je dostupno u navigaciji na svim stranicama.<br>Korisnik je preusmjeren na stranicu za prijavu. |
 | **Pretpostavke / Otvorena pitanja** |  |
-| **Veze i zavisnosti** | US-02: prijava |
+| **Veze i zavisnosti** | US-02: korisnik je prijavljen u sistem. |
 
 ---
 
@@ -54,8 +54,8 @@ Ovaj dokument sadrži sve User Stories za projekat Bibliotečkog informacionog s
 | **ID storyja** | US-04 |
 |---------------|-------|
 | **Naziv storyja** | Uspostava AI Usage Loga i Decision Loga |
-| **Opis** | Kao tim, želimo uspostaviti strukturirane logove za praćenje korištenja AI alata i tehničkih odluka, kako bi naš proces bio transparentan i dokumentovan. |
-| **Poslovna vrijednost** | Pomaže timu u dokumentovanju važnih odluka i načina korištenja AI alata, čime se postiže bolji uvid u razvoja projekta. |
+| **Opis** | Kao tim, želimo uspostaviti evidenciju za praćenje korištenja AI alata i tehničkih odluka, kako bi naš proces bio transparentan i dokumentovan. |
+| **Poslovna vrijednost** | Pomaže timu u dokumentovanju važnih odluka i načina korištenja AI alata, čime se postiže bolji uvid u razvoj projekta. |
 | **Prioritet** | Visok |
 | **Acceptance Criteria** | AI Usage Log je kreiran u repozitoriju sa definisanom strukturom unosa.<br>Decision Log je kreiran sa definisanom strukturom.<br>Interni dogovor tima o procesu ažuriranja logova. |
 | **Pretpostavke / Otvorena pitanja** |  |
@@ -65,39 +65,39 @@ Ovaj dokument sadrži sve User Stories za projekat Bibliotečkog informacionog s
 
 # Sprint 6
 
-## US-05: Implementacija dodavanja nove knjige
+## US-05: Dodavanje nove knjige
 
 | **ID storyja** | US-05 |
 |---------------|-------|
-| **Naziv storyja** | Implementacija dodavanja nove knjige |
+| **Naziv storyja** | Dodavanje nove knjige |
 | **Opis** | Kao bibliotekar ili administrator, želim dodati novu knjigu u sistem unosom njenih podataka, kako bi knjiga bila vidljiva u katalogu. |
 | **Poslovna vrijednost** | Omogućava bibliotekarima da ažuriraju katalog i korisnicima pruži pristup novim knjigama.|
 | **Prioritet** | Visok |
-| **Acceptance Criteria** | Bibliotekar ili administrator je unio podatke o knjizi: naslov, autor, ISBN, godina izdanja, kategorija, broj primjeraka. <br>Knjiga je odmah vidljiva u katalogu nakon dodavanja. <br> Samo bibliotekar i administrator imaju pristup ovoj funkcionalnosti. <br> Svi obavezni podaci moraju biti uneseni prije spremanja. <br>  |
-| **Pretpostavke / Otvorena pitanja** | |
+| **Acceptance Criteria** | Bibliotekar ili administrator je unio podatke o knjizi: naslov, autor, ISBN, godina izdanja, kategorija, broj primjeraka. <br>Knjiga je odmah vidljiva u katalogu nakon dodavanja. <br> Samo bibliotekar i administrator imaju pristup ovoj funkcionalnosti. <br> Svi obavezni podaci moraju biti uneseni prije spremanja, u suprotnom izbacuje grešku upozorenja. <br>  |
+| **Pretpostavke / Otvorena pitanja** | Sistem ima kreirane uloge Bibliotekar i Administrator. <br> ISBN svake knjige je jedinstven u sistemu. |
 | **Veze i zavisnosti** | Korisnik prijavljen kao biblioteka ili administrator. <br> Domain Model (entitet Knjiga). |
 
 ---
 
-## US-06: Implementacija uređivanja podataka o knjizi 
+## US-06: Uređivanje podataka o knjizi 
 
 | **ID storyja** | US-06 |
 |---------------|-------|
-| **Naziv storyja** | Implementacija uređivanja podataka o knjizi |
+| **Naziv storyja** | Uređivanja podataka o knjizi |
 | **Opis** | Kao bibliotekar ili administrator, želim izmijeniti podatke o knjizi, kako bi informacije u katalogu bile tačne. |
 | **Poslovna vrijednost** | Omogućava osoblju da održava tačnost podataka u katalogu, čime se korisnicima pruža pouzdan pregled bibliotečkog fonda.|
 | **Prioritet** | Srednji |
-| **Acceptance Criteria** | Moguće je izmijeniti podatke: naslov, autor, godina izdavanja, kategorija. <br> Promjene su odmah vidljive svim korisnicima. |
-| **Pretpostavke / Otvorena pitanja** | |
+| **Acceptance Criteria** | Moguće je izmijeniti podatke: naslov, autor, godina izdavanja, kategorija. <br> Ako je unos neispravan, sistem prikazuje poruku o grešci. <br>  Promjene su odmah vidljive svim korisnicima. <br> Samo bibliotekar i administrator imaju pristup ovoj funkcionalnosti. |
+| **Pretpostavke / Otvorena pitanja** | Knjiga koju uređujemo postoji u sistemu. |
 | **Veze i zavisnosti** | US-05: Implementirano dodavanje knjiga |
 
 ---
 
-## US-07: Implementacija pregleda kataloga
+## US-07: Pregled kataloga knjiga
 
 | **ID storyja** | US-07 |
 |---------------|-------|
-| **Naziv storyja** | Implementacija pregleda kataloga |
+| **Naziv storyja** | Pregleda kataloga knjiga |
 | **Opis** | Kao korisnik sistema, želim pregledati listu svih dostupnih knjiga u biblioteci, kako bih pronašao knjige koje me interesuju.|
 | **Poslovna vrijednost** | Lak pregled dostupnih knjiga i pronalazak željenih knjiga.|
 | **Prioritet** | Visok |
@@ -107,141 +107,212 @@ Ovaj dokument sadrži sve User Stories za projekat Bibliotečkog informacionog s
 
 ---
 
-## US-08: Implementacija upravljanja primjercima knjige
+## US-08: Upravljanje primjercima knjige
 
 | **ID storyja** | US-08 |
 |---------------|-------|
-| **Naziv storyja** | Implementacija upravljanja primjercima knjige |
-| **Opis** | Kao bibliotekar ili administrator, želim upravljati fizičkim primjercima svake knjige, kako bi sistem tačno pratio fizički fond biblioteke.|
+| **Naziv storyja** | Upravljanje primjercima knjige |
+| **Opis** | Kao bibliotekar ili administrator, želim upravljati primjercima svake knjige, kako bi sistem tačno pratio fizički fond biblioteke.|
 | **Poslovna vrijednost** | Održava ažuran fond biblioteke i omogućava korisnicima pouzdane informacije o dostupnosti knjiga. |
 | **Prioritet** | Visok |
-| **Acceptance Criteria** | Moguće je dodati jedan ili više primjeraka za svaku knjigu. <br> Svaki primjerak ima jedinstven inventarni broj. <br> Nije moguće obrisati primjerak koji je trenutno zadužen. |
+| **Acceptance Criteria** | Moguće je dodati jedan ili više primjeraka za svaku knjigu. <br> Svaki primjerak ima jedinstven inventarni broj. <br> Nije moguće obrisati primjerak koji je trenutno zadužen. <br> Nije moguće dodati primjerak ako knjiga ne postoji u sistemu. <br> Nakon uspješnog dodavanja ili izmjene, promjene su odmah vidljive u sistemu. |
 | **Pretpostavke / Otvorena pitanja** | |
 | **Veze i zavisnosti** | US-05: Implementirano dodavanje knjige. <br> Domain Model (entitet Primjerak). |
+
+---
+
+## US-09: Brisanje knjige
+
+| **ID storyja** | US-09 |
+|---------------|-------|
+| **Naziv storyja** | Brisanje knjige |
+| **Opis** | Kao bibliotekar ili administrator, želim ukloniti knjigu iz sistema, kako bi katalog bio ažuran i fizički fond biblioteke precizno praćen. |
+| **Poslovna vrijednost** | Održava tačnost bibliotečkog fonda i sprječava prikaz knjiga koje više nisu dostupne korisnicima.|
+| **Prioritet** | Srednji |
+| **Acceptance Criteria** | Sistem ne dozvoljava brisanje knjige ako postoji aktivno zaduženje korisnika. <br> Nakon brisanja, promjene su odmah vidljive u katalogu. <br> Samo korisnici sa ulogom Bibliotekar ili Administrator imaju pristup ovoj funkcionalnosti. |
+| **Pretpostavke / Otvorena pitanja** | |
+| **Veze i zavisnosti** | US-05: Knjiga je dodana u sistem. |
+
+---
+
+## US-10: Upravljanje kategorijama knjiga
+
+| **ID storyja** | US-10 |
+|---------------|-------|
+| **Naziv storyja** | Upravljanje kategorijama knjiga |
+| **Opis** | Kao bibliotekar ili administrator, želim upravljati kategorijama knjiga i mijenjati kategoriju već unesenih knjiga, kako bi sistem uvijek prikazivao tačne informacije. |
+| **Poslovna vrijednost** | Omogućava bolju organizaciju knjiga u katalogu, olakšava pretragu i filtriranje za korisnike i bibliotekare, te osigurava tačnost podataka u sistemu.|
+| **Prioritet** | Srednji |
+| **Acceptance Criteria** | Bibliotekar ili administrator može dodati novu kategoriju, urediti postojeću ili obrisati kategoriju. <br> Sve promjene su odmah vidljive u sistemu. |
+| **Pretpostavke / Otvorena pitanja** | Samo bibliotekar i administrator imaju pristup ovoj funkcionalnosti. |
+| **Veze i zavisnosti** | US-05: Knjiga je dodana u sistem. |
 
 <br>
 
 # Sprint 7
 
-## US-09: Implementacija pretrage knjiga
+## US-11: Pretraživanje knjiga
 
-| **ID storyja** | US-09 |
+| **ID storyja** | US-11 |
 |---------------|-------|
-| **Naziv storyja** | Implementacija pretrage knjiga |
+| **Naziv storyja** | Pretraživanje knjiga |
 | **Opis** | Kao korisnik sistema, želim pretraživati knjige po naslovu ili autoru, kako bih brzo pronašao konkretnu knjigu. |
-| **Poslovna vrijednost** | Pretraga dramatično poboljšava UX – bez nje pregled velikog kataloga je nepraktičan.|
+| **Poslovna vrijednost** | Pretraga poboljšava UX – bez nje pregled velikog kataloga je nepraktičan.|
 | **Prioritet** | Visok |
-| **Acceptance Criteria** | Polje za pretragu je vidljivo na vrhu kataloga. <br> Pretraga radi po naslovu ili autoru. <br> Pretraga nije case-sensitive. <br> Prikazuje se broj pronađenih rezultata. <br> Ako nema rezultata, prikazuje se jasna poruka. |
-| **Pretpostavke / Otvorena pitanja** | |
+| **Acceptance Criteria** | Polje za pretragu je vidljivo na vrhu kataloga. <br> Pretraga radi po naslovu ili autoru. <br> Pretraga nije case-sensitive. <br> Prikazuje se broj pronađenih rezultata. <br> Ako nema rezultata, prikazuje se jasna poruka. <br> Rezultati pretrage su prikazani u istom formatu kao katalog. |
+| **Pretpostavke / Otvorena pitanja** | Da li rezultati pretrage trebaju biti sortirani po nekom kriterijumu? |
 | **Veze i zavisnosti** | US-07: Implementiran katalog knjiga |
 
 ---
 
-## US-10: Implementacija prikaza detalja knjige
+## US-12: Prikaz detalja knjige
 
-| **ID storyja** | US-10 |
+| **ID storyja** | US-12 |
 |---------------|-------|
-| **Naziv storyja** | Implementacija prikaza detalja knjige |
+| **Naziv storyja** | Prikaza detalja knjige |
 | **Opis** | Kao član biblioteke, želim pregledati detaljne informacije o knjizi, kako bih odlučio da li me interesuje. |
 | **Poslovna vrijednost** | Detalji knjige smanjuju nepotrebne upite bibliotekarima. |
 | **Prioritet** | Srednji |
-| **Acceptance Criteria** | Stranica prikazuje osnovne informacije o knjizi. <br> Vidljiv je ukupan broj primjeraka, kao i broj dostupnih. |
+| **Acceptance Criteria** | Korisnik može otvoriti stranicu s detaljima klikom na knjigu iz kataloga. <br> Stranica prikazuje osnovne informacije o knjizi. <br> Vidljiv je ukupan broj primjeraka, kao i broj dostupnih. |
 | **Pretpostavke / Otvorena pitanja** | |
-| **Veze i zavisnosti** | US-05: Implementirano dodavanje knjiga. |
+| **Veze i zavisnosti** | US-05: Knjige su već unesene u sistem. |
 
 ---
 
-## US-11: Implementacija pregleda dostupnosti knjige
+## US-13: Pregled dostupnosti knjige
 
-| **ID storyja** | US-11 |
+| **ID storyja** | US-13 |
 |---------------|-------|
-| **Naziv storyja** | Implementacija pregleda dostupnosti knjige |
+| **Naziv storyja** | Pregled dostupnosti knjige |
 | **Opis** | Kao član biblioteke, želim vidjeti da li je knjiga dostupna i koliko primjeraka ima, kako bih znao mogu li je odmah zadužiti. |
 | **Poslovna vrijednost** | Omogućava članovima da provjere dostupnost knjiga i broj primjeraka, čime se olakšava planiranje posudbe. |
 | **Prioritet** | Visok |
-| **Acceptance Criteria** | Na detaljima knjige jasno je prikazano: Dostupno/Zaduženo/Rezervisano. <br> Prikazuje se tačan broj slobodnih primjeraka. <br> Status se automatski ažurira pri zaduživanju ili vraćanju. |
+| **Acceptance Criteria** | Na detaljima knjige jasno je prikazan status: Dostupno/Zaduženo/Rezervisano. <br> Prikazuje se tačan broj slobodnih primjeraka. <br> Status se automatski ažurira pri zaduživanju ili vraćanju. |
 | **Pretpostavke / Otvorena pitanja** | |
-| **Veze i zavisnosti** | US-12: Implementirano zaduživanje knjiga. |
+| **Veze i zavisnosti** | US-14: Implementirano zaduživanje knjiga. |
 
 <br>
 
 # Sprint 8
 
-## US-12: Implementacija evidencije zaduživanja knjige
+## US-14: Evidencija zaduživanja knjiga
 
-| **ID storyja** | US-12 |
+| **ID storyja** | US-14 |
 |---------------|-------|
-| **Naziv storyja** | Implementacija evidencije zaduživanja knjige |
-| **Opis** | Kao bibliotekar, želim evidentirati zaduživanje knjige od strane člana, kako bi sistem znao ko ima koju knjigu. |
+| **Naziv storyja** | Evidencija zaduživanja knjiga |
+| **Opis** | Kao bibliotekar ili administrator, želim evidentirati zaduživanje knjige od strane člana, kako bi sistem znao ko ima koju knjigu. |
 | **Poslovna vrijednost** | Omogućava tačnu evidenciju posuđenih knjiga i efikasno upravljanje bibliotečkim fondom. |
 | **Prioritet** | Visok |
 | **Acceptance Criteria** | Bibliotekar može odabrati člana koji zadužuje knjigu. <br> Bibliotekar može odabrati knjigu i konkretan fizički primjerak koji se zadužuje. <br> Ako je primjerak dostupan, sistem evidentira zaduživanje i označava primjerak kao "zadužen". <br> Ako primjerak nije dostupan, sistem prikazuje odgovarajuću poruku i ne dozvoljava zaduživanje. <br> Nakon uspješnog zaduživanja, evidencija je vidljiva u sistemu (u listi zaduženja člana ili knjige). |
-| **Pretpostavke / Otvorena pitanja** | Postojanje plana po kojem se računa rok vraćanja. |
+| **Pretpostavke / Otvorena pitanja** | |
 | **Veze i zavisnosti** | US-01 i US-02: Implementirana registracija i prijava korisnika. <br> US-08: Implementirano upravljanja primjercima knjige.|
 
 ---
 
-## US-13: Implementacija evidencije vraćanja knjige
+## US-15: Evidencija vraćanja knjiga
 
-| **ID storyja** | US-13 |
+| **ID storyja** | US-15 |
 |---------------|-------|
-| **Naziv storyja** | Implementacija evidencije vraćanja knjige |
-| **Opis** | Kao bibliotekar, želim evidentirati vraćanje knjige, kako bi primjerak ponovo bio dostupan za zaduživanje. |
+| **Naziv storyja** | Evidencije vraćanja knjiga |
+| **Opis** | Kao bibliotekar ili administrator, želim evidentirati vraćanje knjige, kako bi primjerak ponovo bio dostupan za zaduživanje. |
 | **Poslovna vrijednost** | Vraćanje ažurira dostupnost knjige u katalogu. |
 | **Prioritet** | Visok |
-| **Acceptance Criteria** | Bibliotekar može pronaći zaduženje po članu. <br> Sistem prikazuje podatke o zaduženju (datum zaduživanja, rok vraćanja). <br> Nakon potvrde, primjerak knjige mijenja status u 'Dostupan'. |
+| **Acceptance Criteria** | Bibliotekar može pronaći zaduženje po članu. <br> Sistem prikazuje detalje zaduženja: naziv knjige, primjerak, datum zaduživanja, rok vraćanja i ime člana koji je zadužio knjigu. <br> Bibliotekar može evidentirati vraćanje klikom na dugme. <br> Nakon potvrde, primjerak knjige mijenja status u 'Dostupan'. <br> Promjene su odmah vidljive svim korisnicima sistema. |
 | **Pretpostavke / Otvorena pitanja** | |
-| **Veze i zavisnosti** | US-12: Implementirano zaduživanje knjiga. |
+| **Veze i zavisnosti** | US-14: Implementirano zaduživanje knjiga. |
 
 ---
 
-## US-14: Pregled profila člana
+## US-16: Pregled profila člana
 
-| **ID storyja** | US-14 |
+| **ID storyja** | US-16 |
 |---------------|-------|
 | **Naziv storyja** | Pregled profila člana |
-| **Opis** | Kao registrovani korisnik (Član, Bibliotekar ili Administrator), želim pregledati svoj profil, kako bih vidio osnovne podatke i zaduženja.|
+| **Opis** | Kao registrovani korisnik (Član, Bibliotekar ili Administrator), želim pregledati svoj profil, kako bih vidio osnovne podatke i zaduženja. |
 | **Poslovna vrijednost** | Omogućava korisnicima i osoblju biblioteke da brzo pristupe informacijama o članovima i njihovim posuđenim knjigama, što olakšava upravljanje članstvom i praćenje zaduženja. |
 | **Prioritet** | Visok |
 | **Acceptance Criteria** | Sistem prikazuje osnovne podatke člana: ime, prezime, email. <br> Sistem prikazuje trenutno posuđene knjige i status zaduženja. <br> Knjige s rokovima koji uskoro ističu su vizualno istaknute. |
 | **Pretpostavke / Otvorena pitanja** | Član ili osoblje prijavljeno u sistem. |
 | **Veze i zavisnosti** | US-01: Registracija korisnika.<br> Domain Model (entitet o korisnicima i zaduženjima). |
 
+
+---
+
+## US-17: Upravljanje korisnicima
+
+| **ID storyja** | US-17 |
+|---------------|-------|
+| **Naziv storyja** | Upravljanje korisnicima |
+| **Opis** | Kao administrator, želim pregledati sve korisnike sistema, mijenjati njihove uloge i deaktivirati naloge, kako bi pristup funkcionalnostima sistema bio siguran. |
+| **Poslovna vrijednost** | Omogućava administratoru da održava sigurnost i integritet sistema, osigurava da korisnici imaju odgovarajuće privilegije i da deaktivirani korisnici ne mogu pristupati funkcionalnostima. |
+| **Prioritet** | Srednji |
+| **Acceptance Criteria** | Administrator može vidjeti listu svih korisnika sistema sa osnovnim informacijama: ime i prezime, email, uloga. <br> Administrator može promijeniti ulogu korisnika. <br> Administrator može deaktivirati nalog, čime korisnik gubi pristup sistemu. <br> Promjene se odmah primjenjuju u sistemu i ažuriraju pristup korisnika. |
+| **Pretpostavke / Otvorena pitanja** | Samo administrator ima pristup ovoj funkcionalnosti.  |
+| **Veze i zavisnosti** | US-01: Korisnici su registrovani u sistem. |
+
+---
+
+## US-18: Pregled historije zaduženja
+
+| **ID storyja** | US-18 |
+|---------------|-------|
+| **Naziv storyja** | Pregled historije zaduženja |
+| **Opis** | Kao bibliotekar ili administrator, želim pregledati ranija zaduženja člana, kako bih mogao pratiti korištenje fonda i donositi odluke o zaduživanju ili opomenama. |
+| **Poslovna vrijednost** | Omogućava uvid u historiju zaduženja, olakšava upravljanje fondom, praćenje kašnjenja i unapređuje korisničku podršku. |
+| **Prioritet** | Nizak |
+| **Acceptance Criteria** | Bibliotekar ili administrator može pretraživati člana po imenu i prezimenu. <br> Sistem prikazuje listu svih zaduženja člana: naziv knjige, primjerak, datum zaduživanja, datum vraćanja. <br> Lista historije je sortirana po datumu zaduživanja (najnovije prvo). |
+| **Pretpostavke / Otvorena pitanja** | Bibliotekar ili administrator je prijavljen u sistem. |
+| **Veze i zavisnosti** | US-14: Evidencija kad je knjiga zadužena. <br> US-15: Evidencija kad je knjiga vraćena. |
+
+---
+
+## US-19: Početno testiranje sistema
+
+| **ID storyja** | US-19 |
+|---------------|-------|
+| **Naziv storyja** | Početno testiranje sistema |
+| **Opis** | Kao član tima, želim izvršiti početno testiranje prve verzije sistema, kako bismo osigurali da osnovne funkcionalnosti rade ispravno i da sistem može biti dalje razvijan bez kritičnih grešaka. |
+| **Poslovna vrijednost** | Otkriva osnovne bugove i nedosljednosti u ranim fazama, smanjuje rizik od problema u kasnijim sprintovima i povećava kvalitet sistema. |
+| **Prioritet** | Nizak |
+| **Acceptance Criteria** | Testiranje pokriva sve osnovne funkcionalnosti implementirane do sada. <br> Testiranje uključuje provjeru integracije između povezanih funkcionalnosti. <br> Dokumentirani su svi pronađeni bugovi i anomalije. <br>  |
+| **Pretpostavke / Otvorena pitanja** | Svi prethodni user storyji implementirani do datog sprinta su spremni za testiranje. |
+| **Veze i zavisnosti** | Zavisi od implementacije svih user storyja do sprinta 9. |
+
 <br>
 
 # Sprint 9
 
-## US-15: Pregled vlastitih zaduženja
+## US-20: Pregled vlastitih zaduženja
 
-| **ID storyja** | US-15 |
+| **ID storyja** | US-20 |
 |---------------|-------|
-| **Naziv storyja** | Pregled vlastitih zaduženja|
+| **Naziv storyja** | Pregled vlastitih zaduženja |
 | **Opis** | Kao član biblioteke, želim pregledati koje knjige trenutno imam zadužene i koji je rok vraćanja, kako bih planirao vraćanje na vrijeme. |
-| **Poslovna vrijednost** | Smanjivanje opterećenja bibliotekara i poboljšavanje korisničkog iskustvo. |
+| **Poslovna vrijednost** | Smanjivanje opterećenja bibliotekara i poboljšava korisničko iskustvo. |
 | **Prioritet** | Visok |
-| **Acceptance Criteria** | Prikazana je lista svih aktivnih zaduženja prijavljenog člana. <br> Za svako zaduženje prikazuje se: naslov, datum zaduživanja, rok vraćanja. |
-| **Pretpostavke / Otvorena pitanja** | |
-| **Veze i zavisnosti** | US-01 i US-02: Implementirana registracija i prijava korisnika <br> US-12: Implementirano zaduživanje knjiga. |
+| **Acceptance Criteria** | Prikazana je lista svih aktivnih zaduženja prijavljenog člana. <br> Za svako zaduženje prikazuje se: naslov knjige, datum zaduživanja, rok vraćanja. <br> Ako član nema aktivnih zaduženja, prikazuje se jasna poruka. <br> Član može vidjeti samo svoja vlastita zaduženja. <br> Lista se automatski ažurira kada se knjiga vrati. |
+| **Pretpostavke / Otvorena pitanja** | Treba li uključiti informacije o eventualnim kašnjenjima ili kaznama? |
+| **Veze i zavisnosti** | US-01 i US-02: Implementirana registracija i prijava korisnika <br> US-14: Implementirano zaduživanje knjiga. |
 
 ---
 
-## US-16: Pregled trenutnih zaduženja
+## US-21: Pregled trenutnih zaduženja
 
-| **ID storyja** | US-16 |
+| **ID storyja** | US-21 |
 |---------------|-------|
 | **Naziv storyja** | Pregleda trenutnih zaduženja |
-| **Opis** | Kao bibliotekar, želim pregledati sve trenutno aktivne zaduženja u sistemu, kako bih mogao pratiti stanje fonda. |
+| **Opis** | Kao bibliotekar, želim pregledati sva trenutno aktivna zaduženja u sistemu, kako bih mogao pratiti stanje fonda. |
 | **Poslovna vrijednost** | Poboljšava upravljanje posudbama knjiga i omogućava lakše praćenje članova koji trenutno imaju zadužene knjige. |
 | **Prioritet** | Visok |
-| **Acceptance Criteria** | Lista prikazuje sva aktivna zaduženja svih članova. <br> Prikazano je: ime člana, naslov knjige, datum zaduživanja, rok vraćanja. <br> Lista je sortirana po roku vraćanja. |
+| **Acceptance Criteria** | Lista prikazuje sva aktivna zaduženja svih članova. <br> Prikazano je: ime člana, email člana, naslov knjige, datum zaduživanja, rok vraćanja. <br> Lista je sortirana po roku vraćanja. <br> Sistem prikazuje jasnu poruku ako nema aktivnih zaduženja. <br> Lista se automatski ažurira kada se knjige zaduže ili vrate. |
 | **Pretpostavke / Otvorena pitanja** | |
 | **Veze i zavisnosti** | US-02: Korisnik je prijavljen kao bibliotekar. <br> US-13: Implementirano zaduživanje knjiga. |
 
 ---
 
-## US-17: Rezervacija knjiga
+## US-22: Rezervacija knjiga
 
-| **ID storyja** | US-17 |
+| **ID storyja** | US-22 |
 |---------------|-------|
 | **Naziv storyja** | Rezervacija knjiga |
 | **Opis** | Kao član biblioteke, želim rezervisati knjigu koja trenutno nije dostupna, kako bih bio obaviješten kada postane slobodna. |
@@ -253,26 +324,54 @@ Ovaj dokument sadrži sve User Stories za projekat Bibliotečkog informacionog s
 
 ---
 
-## US-18: Pregled aktivnih rezervacija
+## US-23: Pregled aktivnih rezervacija
 
-| **ID storyja** | US-18 |
+| **ID storyja** | US-23 |
 |---------------|-------|
 | **Naziv storyja** | Pregled aktivnih rezervacija |
-| **Opis** | Kao bibliotekar, želim pregledati listu aktivnih rezervacija knjiga, kako bih znao koje knjige su rezervisane i od strane kojih članova. |
-| **Poslovna vrijednost** | Omogućava bibliotekaru pregled rezervisanih knjiga i bolju organizaciju posudbi. |
+| **Opis** | Kao bibliotekar ili administrator, želim pregledati listu aktivnih rezervacija knjiga, kako bih znao koje knjige su rezervisane i od strane kojih članova. |
+| **Poslovna vrijednost** | Omogućava osoblju biblioteke pregled rezervisanih knjiga i bolju organizaciju posudbi. |
 | **Prioritet** | Srednji |
-| **Acceptance Criteria** | Bibliotekar može vidjeti listu svih aktivnih rezervacija. <br> Za svaku rezervaciju prikazuje se član, knjiga i datum rezervacije. |
-| **Pretpostavke / Otvorena pitanja** | Da li će bibliotekar moći filtrirati rezervacije po knjizi ili članu? |
+| **Acceptance Criteria** | Bibliotekar ili administrator može vidjeti listu svih aktivnih rezervacija. <br> Za svaku rezervaciju prikazuje se ime i prezime člana, email člana, naslov knjige i datum rezervacije. <br> Sistem prikazuje jasnu poruku ako trenutno nema aktivnih rezervacija. <br> Lista se ažurira kada se rezervacija realizuje ili otkaže. |
+| **Pretpostavke / Otvorena pitanja** | Prikaz rezervacija je dostupan samo bibliotekarima i administratorima. <br> Da li će se moći filtrirati rezervacije po knjizi ili članu? |
 | **Veze i zavisnosti** | US-17: Implementirana rezervacija knjiga. |
+
+---
+
+## US-24: Napredna pretraga i filteri
+
+| **ID storyja** | US-24 |
+|---------------|-------|
+| **Naziv storyja** | Napredna pretraga i filteri |
+| **Opis** | Kao član biblioteke, želim pretraživati knjige koristeći dodatne filtere poput kategorije, godine izdanja i izdavača, kako bih brže pronašao knjige koje me interesuju. |
+| **Poslovna vrijednost** | Poboljšava korisničko iskustvo i olakšava pronalazak relevantnih knjiga u katalogu, posebno kada katalog sadrži veliki broj knjiga. |
+| **Prioritet** | Nizak |
+| **Acceptance Criteria** | Sistem omogućava filtriranje po kategoriji, izdavaču, godini izdavanja. <br> Filteri se mogu kombinovati. <br> Rezultati pretrage se ažuriraju nakon primjene filtera. <br> Sistem prikazuje broj rezultata koji odgovaraju pretrazi. <br> Ako nema rezultata, prikazuje se jasna poruka. |
+| **Pretpostavke / Otvorena pitanja** | Da li filteri uključuju i knjige koje su rezervisane? |
+| **Veze i zavisnosti** | US-07: Implementiran katalog knjiga. <br> US-11: Pretraga knjiga – proširenje osnovne funkcionalnosti pretrage. |
+
+---
+
+## US-25: Automatsko otkazivanje rezervacije
+
+| **ID storyja** | US-25 |
+|---------------|-------|
+| **Naziv storyja** | Automatsko otkazivanje rezervacije|
+| **Opis** | Kao sistem, želim automatski otkazi rezervaciju ako član ne preuzme knjigu u predviđenom roku, kako bi knjiga postala dostupna drugim članovima i smanjila broj neiskorištenih rezervacija. |
+| **Poslovna vrijednost** | Poboljšava upravljanje fondom, povećava dostupnost knjiga i smanjuje administrativni posao osoblja biblioteke. |
+| **Prioritet** | Nizak |
+| **Acceptance Criteria** | Sistem automatski prati sve aktivne rezervacije. <br> Ako član ne preuzme knjigu u definisanom roku, rezervacija se automatski otkazuje. <br> Nakon otkazivanja, knjiga postaje dostupna za nove rezervacije ili zaduživanje. <br> Automatsko otkazivanje se izvršava periodično. |
+| **Pretpostavke / Otvorena pitanja** | Tim je postigao interni dogovor o broju dana nakon kojih rezervacija prestaje važiti. |
+| **Veze i zavisnosti** | US-22: Knjiga je rezervisana. |
 
 <br>
 
 # Sprint 10
 
 
-## US-19: Slanje email podsjetnika
+## US-26: Slanje email podsjetnika
 
-| **ID storyja** | US-19 |
+| **ID storyja** | US-26 |
 |---------------|-------|
 | **Naziv storyja** | Slanje email podsjetnika |
 | **Opis** | Kao sistem, želim automatski slati podsjetnike članovima za rok vraćanja knjiga, kako bi članovi pravovremeno vratili posuđene knjige. |
@@ -284,9 +383,9 @@ Ovaj dokument sadrži sve User Stories za projekat Bibliotečkog informacionog s
 
 ---
 
-## US-20: Slanje email upozorenja
+## US-27: Slanje email upozorenja
 
-| **ID storyja** | US-20 |
+| **ID storyja** | US-27 |
 |---------------|-------|
 | **Naziv storyja** | Slanje email upozorenja |
 | **Opis** | Kao sistem, želim automatski slati upozorenja članovima kada im istekne rok vraćanja knjiga, kako bi bili obaviješteni o kašnjenju. |
@@ -298,40 +397,96 @@ Ovaj dokument sadrži sve User Stories za projekat Bibliotečkog informacionog s
 
 ---
 
-## US-21: Mjesečni izvještaji za upravu
+## US-28: Obavještavanje bibliotekara o novoj rezervaciji
 
-| **ID storyja** | US-21 |
+| **ID storyja** | US-28 |
 |---------------|-------|
-| **Naziv storyja** | Mjesečni izvještaji za upravu |
-| **Opis** | Kao administrator biblioteke, želim generisati mjesečne izvještaje o zaduživanjima, rezervacijama i članstvu, kako bih mogao pratiti stanje biblioteke i donositi informisane odluke. |
-| **Poslovna vrijednost** | Omogućava upravi uvid u korištenje biblioteke i pomaže u planiranju resursa i strategija. |
+| **Naziv storyja** | Obavještavanje bibliotekara o novoj rezervaciji |
+| **Opis** | Kao bibliotekar, želim da dobijem email obavijest svaki put kada član kreira rezervaciju, kako bih bio informisan o novim rezervacijama. |
+| **Poslovna vrijednost** | Poboljšava upravljanje rezervacijama, smanjuje rizik da se rezervisane knjige ne pripreme na vrijeme i poboljšava korisničko iskustvo. |
 | **Prioritet** | Nizak |
-| **Acceptance Criteria** | Administrator može generisati izvještaj za bilo koji mjesec. <br> Izvještaj sadrži broj i listu zaduženja, aktivnih rezervacija i članova. <br> Izvještaj se može pregledati i preuzeti u PDF formatu. |
-| **Pretpostavke / Otvorena pitanja** | Podaci o zaduživanjima, rezervacijama i članstvu su tačni i ažurirani. |
-| **Veze i zavisnosti** | Domain Model o zaduženjima, rezervacijama i korisnima biblioteke. |
+| **Acceptance Criteria** | Kada član kreira novu rezervaciju, sistem automatski šalje email bibliotekaru. <br> Email sadrži ime i prezime člana, naslov rezervisane knjige, datum rezervacije. |
+| **Pretpostavke / Otvorena pitanja** | Rezervacije su pravilno evidentirane. |
+| **Veze i zavisnosti** | US-22: Knjiga je rezervisana. |
 
 ---
 
-## US-22: Kazne za kasno vraćanje knjiga
+## US-29: Mjesečni izvještaji za upravu
 
-| **ID storyja** | US-22 |
+| **ID storyja** | US-29 |
+|---------------|-------|
+| **Naziv storyja** | Mjesečni izvještaji za upravu |
+| **Opis** | Kao administrator biblioteke, želim generisati mjesečne izvještaje o zaduživanjima, rezervacijama i članstvu, kako bih mogao pratiti stanje biblioteke i donositi odluke. |
+| **Poslovna vrijednost** | Omogućava uvid u korištenje bibliotečkog fonda i pomaže u planiranju resursa i strategija. |
+| **Prioritet** | Nizak |
+| **Acceptance Criteria** | Administrator može generisati izvještaj za bilo koji mjesec. <br> Izvještaj sadrži broj i listu zaduženja, aktivnih rezervacija i članova. <br> Izvještaj se može pregledati i preuzeti u PDF formatu. |
+| **Pretpostavke / Otvorena pitanja** | Podaci o zaduživanjima, rezervacijama i članstvu su tačni i ažurirani. |
+| **Veze i zavisnosti** | US-01 i US-02: Korisnik je registrovan i prijavljen kao administrator. <br> Domain Model o zaduženjima, rezervacijama i korisnima biblioteke. |
+
+---
+
+## US-30: Audit log promjena
+
+| **ID storyja** | US-30 |
+|---------------|-------|
+| **Naziv storyja** | Audit log promjena |
+| **Opis** | ao član osoblja, želim da sistem evidentira važne promjene u sistemu, kako bi se omogućilo praćenje aktivnosti i povećala sigurnost sistema.|
+| **Poslovna vrijednost** | Omogućava reviziju i praćenje promjena u sistemu, pomaže u rješavanju problema i  praćenju grešaka. |
+| **Prioritet** | Nizak |
+| **Acceptance Criteria** | Sistem evidentira sve važnije akcije korisnika: dodavanje, uređivajne i brisanje knjiga, dodavanje, uređivanje i deaktivaciju korisnika, kreiranje rezervacija. <br> Svaka promjena sadrži datum i vrijeme, ime i prezime korisnika. <br> Log se čuva u skladu s politikom podataka definisanom u sistemu. |
+| **Pretpostavke / Otvorena pitanja** | Treba li log biti dostupan samo administratorima ili i bibliotekarima? |
+| **Veze i zavisnosti** | Log prati sve važnije funkcionalnosti sistema. |
+
+---
+
+## US-31: Kazne za kasno vraćanje knjiga
+
+| **ID storyja** | US-31 |
 |---------------|-------|
 | **Naziv storyja** | Kazne za kasno vraćanje knjiga |
 | **Opis** | Kao sistem, želim evidentirati i obračunavati kazne kada član prekorači rok vraćanja knjige, kako bi članovi bili odgovorni i fond biblioteke bio zaštićen. |
 | **Poslovna vrijednost** | Pomaže u smanjenju kašnjenja, osigurava poštovanje pravila i poboljšava upravljanje fondom. |
 | **Prioritet** | Nizak |
-| **Acceptance Criteria** | Sistem automatski obračunava kaznu za svaku knjigu koja nije vraćena na vrijeme. <br> Član može vidjeti iznos kazne u svom profilu. |
+| **Acceptance Criteria** | Sistem automatski obračunava kaznu po danu za svaku knjigu koja nije vraćena na vrijeme. <br> Član može vidjeti iznos kazne u svom profilu. |
 | **Pretpostavke / Otvorena pitanja** | Utvrđen plan po kojem će se računati kazne. |
 | **Veze i zavisnosti** | Knjiga je zadužena i poslan je mail upozorenja. |
+
+---
+
+## US-32: Online produžetak članarine
+
+| **ID storyja** | US-32 |
+|---------------|-------|
+| **Naziv storyja** | |
+| **Opis** | |
+| **Poslovna vrijednost** | |
+| **Prioritet** |  |
+| **Acceptance Criteria** | |
+| **Pretpostavke / Otvorena pitanja** | |
+| **Veze i zavisnosti** | |
+
+---
+
+## US-33: Integracija sa distributerom knjiga
+
+| **ID storyja** | US-33 |
+|---------------|-------|
+| **Naziv storyja** | |
+| **Opis** | |
+| **Poslovna vrijednost** | |
+| **Prioritet** | |
+| **Acceptance Criteria** | |
+| **Pretpostavke / Otvorena pitanja** | |
+| **Veze i zavisnosti** | |
 
 <br>
 
 # Sprint 11
 
 
-## US-23: Sistematsko testiranje i bug fixing
+## US-34: Sistematsko testiranje i bug fixing
 
-| **ID storyja** | US-23 |
+| **ID storyja** | US-34 |
 |---------------|-------|
 | **Naziv storyja** | Sistematsko testiranje i bug fixing |
 | **Opis** | Kao tim, želimo provesti sistematsko testiranje svih implementiranih funkcionalnosti i otkloniti kritične greške, kako bi sistem bio stabilan za demonstraciju. |
@@ -339,14 +494,14 @@ Ovaj dokument sadrži sve User Stories za projekat Bibliotečkog informacionog s
 | **Prioritet** | Visok |
 | **Acceptance Criteria** | Svi test scenariji za funkcionalnosti su definirani i izvršeni. <br> Svi bugovi su identifikovani i otklonjeni. <br> Test evidencija je pohranjena u repozitoriju. |
 | **Pretpostavke / Otvorena pitanja** | |
-| **Veze i zavisnosti** | US-01 - US-22: Implementirane sve funkcionalnosti. |
+| **Veze i zavisnosti** | US-01 - US-33: Implementirane sve funkcionalnosti. |
 
 
 ---
 
-## US-24: Izrada liste poznatih ograničenja i tehničkog duga
+## US-35: Izrada liste poznatih ograničenja i tehničkog duga
 
-| **ID storyja** | US-24 |
+| **ID storyja** | US-35 |
 |---------------|-------|
 | **Naziv storyja** | Izrada liste poznatih ograničenja i tehničkog duga |
 | **Opis** | Kao tim, želimo napraviti listu stvari koje ograničavaju sistem i nedovršene tehničke dijelove, kako bismo znali šta još treba uraditi i mogli jasno obavijestiti druge o stanju projekta. |
@@ -360,9 +515,9 @@ Ovaj dokument sadrži sve User Stories za projekat Bibliotečkog informacionog s
 
 # Sprint 12
 
-## US-25: Izrada Release Notes
+## US-36: Izrada Release Notes
 
-| **ID storyja** | US-25 |
+| **ID storyja** | US-36 |
 |---------------|-------|
 | **Naziv storyja** | Izrada Release Notes |
 | **Opis** | Kao tim, želimo kreirati Release Notes koji opisuju sve implementirane funkcionalnosti, poznata ograničenja i upute za instalaciju, kako bi finalna verzija bila profesionalno dokumentovana. |
@@ -370,13 +525,13 @@ Ovaj dokument sadrži sve User Stories za projekat Bibliotečkog informacionog s
 | **Prioritet** | Visok |
 | **Acceptance Criteria** | Release Notes sadrže listu svih implementiranih funkcionalnosti. <br> Navedena su poznata ograničenja i poznati bugovi. <br> Uključene su upute za instalaciju i pokretanje sistema. <br> Dokument je pohranjen u repozitoriju. |
 | **Pretpostavke / Otvorena pitanja** | |
-| **Veze i zavisnosti** | US-23: Sistematsko testiranje i bug fixing. <br> US-24: Izrada liste poznatih ograničenja i tehničkog duga. |
+| **Veze i zavisnosti** | US-34: Sistematsko testiranje i bug fixing. <br> US-35: Izrada liste poznatih ograničenja i tehničkog duga. |
 
 ---
 
-## US-26: Izrada korisničke dokumentacije
+## US-37: Izrada korisničke dokumentacije
 
-| **ID storyja** | US-26 |
+| **ID storyja** | US-37 |
 |---------------|-------|
 | **Naziv storyja** | Izrada korisničke dokumentacije |
 | **Opis** | Kao tim, želimo kreirati korisničku dokumentaciju koja objašnjava kako koristiti sistem, kako bi krajnji korisnici i ocjenjivači mogli razumjeti sistem bez tehničkog predznanja. |
@@ -384,13 +539,13 @@ Ovaj dokument sadrži sve User Stories za projekat Bibliotečkog informacionog s
 | **Prioritet** | Visok |
 | **Acceptance Criteria** | Dokumentovane su upute za sve korisničke uloge (Član, Bibliotekar, Administrator). <br> Uključeni su screenshot-ovi ili opisi ključnih ekrana. <br> Objašnjen je tok rada za najčešće scenarije (zaduživanje, pretraga, rezervacija). <br> Dokument je pohranjen u repozitoriju. |
 | **Pretpostavke / Otvorena pitanja** | |
-| **Veze i zavisnosti** | US-01 - US-22: Implementirane sve funkcionalnosti. |
+| **Veze i zavisnosti** | US-01 - US-33: Implementirane sve funkcionalnosti. |
 
 ---
 
-## US-27: Izrada tehničke dokumentacije
+## US-38: Izrada tehničke dokumentacije
 
-| **ID storyja** | US-27 |
+| **ID storyja** | US-38 |
 |---------------|-------|
 | **Naziv storyja** | Izrada tehničke dokumentacije |
 | **Opis** | Kao tim, želimo kreirati tehničku dokumentaciju koja opisuje arhitekturu, API- je i razvojno okruženje, kako bi sistem bio razumljiv drugom developeru.|
@@ -398,16 +553,16 @@ Ovaj dokument sadrži sve User Stories za projekat Bibliotečkog informacionog s
 | **Prioritet** | Visok |
 | **Acceptance Criteria** | Dokumentovana je arhitektura sistema. <br> Naveden je postupak postavljanja razvojnog okruženja. <br> Ažurirani su svi obavezni logovi (AI Usage Log, Decision Log). |
 | **Pretpostavke / Otvorena pitanja** | |
-| **Veze i zavisnosti** | US-01 - US-22: Implementirane sve funkcionalnosti. |
+| **Veze i zavisnosti** | US-01 - US-33: Implementirane sve funkcionalnosti. |
 
 
 <br>
 
 # Sprint 13
 
-## US-28: Priprema i izvođenje završne demonstracije
+## US-39: Priprema i izvođenje završne demonstracije
 
-| **ID storyja** | US-28 |
+| **ID storyja** | US-39 |
 |---------------|-------|
 | **Naziv storyja** | Priprema i izvođenje završne demonstracije |
 | **Opis** | Kao tim, želimo pripremiti i izvesti završnu demonstraciju sistema, kako bismo prikazali sve implementirane funkcionalnosti i pokazali da sistem radi ispravno.|
@@ -415,4 +570,4 @@ Ovaj dokument sadrži sve User Stories za projekat Bibliotečkog informacionog s
 | **Prioritet** | Visok |
 | **Acceptance Criteria** | Svaki član tima je u stanju objasniti dijelove sistema za koje je odgovoran. <br> Sistem radi stabilno tokom demonstracije. |
 | **Pretpostavke / Otvorena pitanja** | |
-| **Veze i zavisnosti** | US-01 - US-22: Implementirane sve funkcionalnosti. <br> US-26: Izrađena korisnička dokumentacija. <br> US-27: Izrađena tehička dokumentacija. |
+| **Veze i zavisnosti** | US-01 - US-33: Implementirane sve funkcionalnosti. <br> US-37: Izrađena korisnička dokumentacija. <br> US-38: Izrađena tehička dokumentacija. |
