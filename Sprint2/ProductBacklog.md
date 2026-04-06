@@ -3,7 +3,7 @@
 
 ## Opis dokumenta
 
-Ovaj dokument predstavlja početni Product Backlog projekta **Bibliotečki informacioni sistem**. Backlog sadrži stavke koje su trenutno poznate timu. Njegova svrha je da omogući pregled planiranog obima sistema, 
+Ovaj dokument predstavlja Product Backlog projekta **Bibliotečki informacioni sistem**. Backlog sadrži stavke koje su trenutno poznate timu. Njegova svrha je da omogući pregled planiranog obima sistema, 
 olakša prioritizaciju rada po sprintovima i služi kao osnova za dalju razradu.
 
 
