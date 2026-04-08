@@ -430,7 +430,7 @@ Ovaj dokument sadrži sve User Stories za projekat Bibliotečkog informacionog s
 | **ID storyja** | US-28 |
 |---------------|-------|
 | **Naziv storyja** | Slanje email podsjetnika |
-| **Opis** | Kao sistem, želim automatski slati podsjetnike članovima za rok vraćanja knjiga, kako bi članovi pravovremeno vratili posuđene knjige. |
+| **Opis** | Kao korisnik, želim da dobijem automatski email podsjetnik prije isteka roka za vraćanje knjige, kako bih je mogao pravovremeno vratiti. |
 | **Poslovna vrijednost** | Smanjuje broj kasnih vraćanja i poboljšava efikasnost biblioteke u praćenju posudbi. |
 | **Prioritet** | Nizak |
 | **Acceptance Criteria** | Sistem šalje podsjetnik članovima 2 dana prije roka vraćanja. <br> Email sadrži naziv knjige i datum roka vraćanja. |
