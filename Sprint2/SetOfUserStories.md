@@ -17,7 +17,8 @@ Ovaj dokument sadrži sve User Stories za projekat Bibliotečkog informacionog s
 | **Prioritet** | Visok |
 | **Acceptance Criteria** | Bibliotekar ili administrator je unio podatke: ime, prezime, email i lozinku.<br>Email mora biti jedinstven. <br>Lozinka mora imati minimalno 8 znakova. <br> Ako je neki podatak neispravan ili nedostaje, sistem prikazuje odgovarajuću poruku o grešci. <br>Nakon uspješnog unosa, kreira se nalog sa ulogom 'Član'.|
 | **Pretpostavke / Otvorena pitanja** | Član fizički dolazi u biblioteku i daje svoje podatke osoblju. |
-| **Veze i zavisnosti** | Domain Model (entitet Korisnik) |
+| **Veze i zavisnosti** | Postojanje entiteta Korisnik u bazi podataka. |
+| **Veza sa Product Backlog-om** | PB-12 |
 
 ---
 
@@ -31,7 +32,8 @@ Ovaj dokument sadrži sve User Stories za projekat Bibliotečkog informacionog s
 | **Prioritet** | Visok |
 | **Acceptance Criteria** | Korisnik se može prijaviti sa email-om i lozinkom.<br>Ako su podaci ispravni, korisnik je preusmjeren na odgovarajući dashboard prema ulozi. <br> Ako nisu, sistem prikazuje poruku o grešci. |
 | **Pretpostavke / Otvorena pitanja** | Korisnici imaju definisane uloge: Član, Bibliotekar ili Administrator. |
-| **Veze i zavisnosti** | US-01: registracija korisnika |
+| **Veze i zavisnosti** | US-01: korisnik je registrovan. |
+| **Veza sa Product Backlog-om** | PB-11 |
 
 ---
 
@@ -46,6 +48,7 @@ Ovaj dokument sadrži sve User Stories za projekat Bibliotečkog informacionog s
 | **Acceptance Criteria** | Dugme za odjavu je dostupno u navigaciji na svim stranicama.<br>Korisnik je preusmjeren na stranicu za prijavu. |
 | **Pretpostavke / Otvorena pitanja** |  |
 | **Veze i zavisnosti** | US-02: korisnik je prijavljen u sistem. |
+| **Veza sa Product Backlog-om** | PB-11 |
 
 ---
 
@@ -60,6 +63,7 @@ Ovaj dokument sadrži sve User Stories za projekat Bibliotečkog informacionog s
 | **Acceptance Criteria** | AI Usage Log je kreiran u repozitoriju sa definisanom strukturom unosa.<br>Decision Log je kreiran sa definisanom strukturom.<br>Interni dogovor tima o procesu ažuriranja logova. |
 | **Pretpostavke / Otvorena pitanja** |  |
 | **Veze i zavisnosti** | Definisana struktura projektne dokumentacije. |
+| **Veza sa Product Backlog-om** | PB-13 |
 
 <br>
 
@@ -76,6 +80,7 @@ Ovaj dokument sadrži sve User Stories za projekat Bibliotečkog informacionog s
 | **Acceptance Criteria** | Bibliotekar ili administrator je unio podatke o knjizi: naslov, autor, ISBN, godina izdanja, kategorija, broj primjeraka. <br>Knjiga je odmah vidljiva u katalogu nakon dodavanja. <br> Samo bibliotekar i administrator imaju pristup ovoj funkcionalnosti. <br> Svi obavezni podaci moraju biti uneseni prije spremanja, u suprotnom izbacuje grešku upozorenja. <br>  |
 | **Pretpostavke / Otvorena pitanja** | Sistem ima kreirane uloge Bibliotekar i Administrator. <br> ISBN svake knjige je jedinstven u sistemu. |
 | **Veze i zavisnosti** | Korisnik prijavljen kao biblioteka ili administrator. <br> Domain Model (entitet Knjiga). |
+| **Veza sa Product Backlog-om** | PB-16 |
 
 ---
 
@@ -90,6 +95,7 @@ Ovaj dokument sadrži sve User Stories za projekat Bibliotečkog informacionog s
 | **Acceptance Criteria** | Moguće je izmijeniti podatke: naslov, autor, godina izdavanja, kategorija. <br> Ako je unos neispravan, sistem prikazuje poruku o grešci. <br>  Promjene su odmah vidljive svim korisnicima. <br> Samo bibliotekar i administrator imaju pristup ovoj funkcionalnosti. |
 | **Pretpostavke / Otvorena pitanja** | Knjiga koju uređujemo postoji u sistemu. |
 | **Veze i zavisnosti** | US-05: Implementirano dodavanje knjiga |
+| **Veza sa Product Backlog-om** | PB-17 |
 
 ---
 
@@ -104,6 +110,7 @@ Ovaj dokument sadrži sve User Stories za projekat Bibliotečkog informacionog s
 | **Acceptance Criteria** | Katalog prikazuje sve knjige u obliku kartica. <br> Za svaku knjigu prikazuje se njen naslov, autor, kategorija i status dostupnosti. <br> Podržana je navigacija kroz stranice.|
 | **Pretpostavke / Otvorena pitanja** | |
 | **Veze i zavisnosti** | US-05: Implementirano dodavanje knjiga |
+| **Veza sa Product Backlog-om** | PB-22 |
 
 ---
 
@@ -118,6 +125,7 @@ Ovaj dokument sadrži sve User Stories za projekat Bibliotečkog informacionog s
 | **Acceptance Criteria** | Moguće je dodati jedan ili više primjeraka za svaku knjigu. <br> Svaki primjerak ima jedinstven inventarni broj. <br> Nije moguće obrisati primjerak koji je trenutno zadužen. <br> Nije moguće dodati primjerak ako knjiga ne postoji u sistemu. <br> Nakon uspješnog dodavanja ili izmjene, promjene su odmah vidljive u sistemu. |
 | **Pretpostavke / Otvorena pitanja** | |
 | **Veze i zavisnosti** | US-05: Implementirano dodavanje knjige. <br> Domain Model (entitet Primjerak). |
+| **Veza sa Product Backlog-om** | PB-20 |
 
 ---
 
@@ -132,6 +140,7 @@ Ovaj dokument sadrži sve User Stories za projekat Bibliotečkog informacionog s
 | **Acceptance Criteria** | Sistem ne dozvoljava brisanje knjige ako postoji aktivno zaduženje korisnika. <br> Nakon brisanja, promjene su odmah vidljive u katalogu. <br> Samo korisnici sa ulogom Bibliotekar ili Administrator imaju pristup ovoj funkcionalnosti. |
 | **Pretpostavke / Otvorena pitanja** | |
 | **Veze i zavisnosti** | US-05: Knjiga je dodana u sistem. |
+| **Veza sa Product Backlog-om** | PB-21 |
 
 ---
 
@@ -146,6 +155,7 @@ Ovaj dokument sadrži sve User Stories za projekat Bibliotečkog informacionog s
 | **Acceptance Criteria** | Bibliotekar ili administrator može dodati novu kategoriju, urediti postojeću ili obrisati kategoriju. <br> Sve promjene su odmah vidljive u sistemu. |
 | **Pretpostavke / Otvorena pitanja** | Samo bibliotekar i administrator imaju pristup ovoj funkcionalnosti. |
 | **Veze i zavisnosti** | US-05: Knjiga je dodana u sistem. |
+| **Veza sa Product Backlog-om** | PB-19 |
 
 <br>
 
@@ -162,6 +172,7 @@ Ovaj dokument sadrži sve User Stories za projekat Bibliotečkog informacionog s
 | **Acceptance Criteria** | Polje za pretragu je vidljivo na vrhu kataloga. <br> Pretraga radi po naslovu ili autoru. <br> Pretraga nije case-sensitive. <br> Prikazuje se broj pronađenih rezultata. <br> Ako nema rezultata, prikazuje se jasna poruka. <br> Rezultati pretrage su prikazani u istom formatu kao katalog. |
 | **Pretpostavke / Otvorena pitanja** | Da li rezultati pretrage trebaju biti sortirani po nekom kriterijumu? |
 | **Veze i zavisnosti** | US-07: Implementiran katalog knjiga |
+| **Veza sa Product Backlog-om** | PB-23 |
 
 ---
 
@@ -176,6 +187,7 @@ Ovaj dokument sadrži sve User Stories za projekat Bibliotečkog informacionog s
 | **Acceptance Criteria** | Korisnik može otvoriti stranicu s detaljima klikom na knjigu iz kataloga. <br> Stranica prikazuje osnovne informacije o knjizi. <br> Vidljiv je ukupan broj primjeraka, kao i broj dostupnih. |
 | **Pretpostavke / Otvorena pitanja** | |
 | **Veze i zavisnosti** | US-05: Knjige su već unesene u sistem. |
+| **Veza sa Product Backlog-om** | PB-18 |
 
 ---
 
@@ -190,6 +202,7 @@ Ovaj dokument sadrži sve User Stories za projekat Bibliotečkog informacionog s
 | **Acceptance Criteria** | Na detaljima knjige jasno je prikazan status: Dostupno/Zaduženo/Rezervisano. <br> Prikazuje se tačan broj slobodnih primjeraka. <br> Status se automatski ažurira pri zaduživanju ili vraćanju. |
 | **Pretpostavke / Otvorena pitanja** | |
 | **Veze i zavisnosti** | US-14: Implementirano zaduživanje knjiga. |
+| **Veza sa Product Backlog-om** | PB-24 |
 
 <br>
 
@@ -206,6 +219,7 @@ Ovaj dokument sadrži sve User Stories za projekat Bibliotečkog informacionog s
 | **Acceptance Criteria** | Bibliotekar može odabrati člana koji zadužuje knjigu. <br> Bibliotekar može odabrati knjigu i konkretan fizički primjerak koji se zadužuje. <br> Ako je primjerak dostupan, sistem evidentira zaduživanje i označava primjerak kao "zadužen". <br> Ako primjerak nije dostupan, sistem prikazuje odgovarajuću poruku i ne dozvoljava zaduživanje. <br> Nakon uspješnog zaduživanja, evidencija je vidljiva u sistemu (u listi zaduženja člana ili knjige). |
 | **Pretpostavke / Otvorena pitanja** | |
 | **Veze i zavisnosti** | US-01 i US-02: Implementirana registracija i prijava korisnika. <br> US-08: Implementirano upravljanja primjercima knjige.|
+| **Veza sa Product Backlog-om** | PB-25 |
 
 ---
 
@@ -220,6 +234,7 @@ Ovaj dokument sadrži sve User Stories za projekat Bibliotečkog informacionog s
 | **Acceptance Criteria** | Bibliotekar može pronaći zaduženje po članu. <br> Sistem prikazuje detalje zaduženja: naziv knjige, primjerak, datum zaduživanja, rok vraćanja i ime člana koji je zadužio knjigu. <br> Bibliotekar može evidentirati vraćanje klikom na dugme. <br> Nakon potvrde, primjerak knjige mijenja status u 'Dostupan'. <br> Promjene su odmah vidljive svim korisnicima sistema. |
 | **Pretpostavke / Otvorena pitanja** | |
 | **Veze i zavisnosti** | US-14: Implementirano zaduživanje knjiga. |
+| **Veza sa Product Backlog-om** | PB-25 |
 
 ---
 
@@ -234,6 +249,7 @@ Ovaj dokument sadrži sve User Stories za projekat Bibliotečkog informacionog s
 | **Acceptance Criteria** | Sistem prikazuje osnovne podatke člana: ime, prezime, email. <br> Sistem prikazuje trenutno posuđene knjige i status zaduženja. <br> Knjige s rokovima koji uskoro ističu su vizualno istaknute. |
 | **Pretpostavke / Otvorena pitanja** | Član ili osoblje prijavljeno u sistem. |
 | **Veze i zavisnosti** | US-01: Registracija korisnika.<br> Domain Model (entitet o korisnicima i zaduženjima). |
+| **Veza sa Product Backlog-om** | PB-14 |
 
 
 ---
@@ -249,6 +265,7 @@ Ovaj dokument sadrži sve User Stories za projekat Bibliotečkog informacionog s
 | **Acceptance Criteria** | Administrator može vidjeti listu svih korisnika sistema sa osnovnim informacijama: ime i prezime, email, uloga. <br> Administrator može promijeniti ulogu korisnika. <br> Administrator može deaktivirati nalog, čime korisnik gubi pristup sistemu. <br> Promjene se odmah primjenjuju u sistemu i ažuriraju pristup korisnika. |
 | **Pretpostavke / Otvorena pitanja** | Samo administrator ima pristup ovoj funkcionalnosti.  |
 | **Veze i zavisnosti** | US-01: Korisnici su registrovani u sistem. |
+| **Veza sa Product Backlog-om** | PB-26 |
 
 ---
 
@@ -263,6 +280,7 @@ Ovaj dokument sadrži sve User Stories za projekat Bibliotečkog informacionog s
 | **Acceptance Criteria** | Bibliotekar ili administrator može pretraživati člana po imenu i prezimenu. <br> Sistem prikazuje listu svih zaduženja člana: naziv knjige, primjerak, datum zaduživanja, datum vraćanja. <br> Lista historije je sortirana po datumu zaduživanja (najnovije prvo). |
 | **Pretpostavke / Otvorena pitanja** | Bibliotekar ili administrator je prijavljen u sistem. |
 | **Veze i zavisnosti** | US-14: Evidencija kad je knjiga zadužena. <br> US-15: Evidencija kad je knjiga vraćena. |
+| **Veza sa Product Backlog-om** | PB-31 |
 
 ---
 
@@ -277,6 +295,7 @@ Ovaj dokument sadrži sve User Stories za projekat Bibliotečkog informacionog s
 | **Acceptance Criteria** | Sistem prikazuje trenutni status članarine člana.<br>Moguće je evidentirati datum početka i datum isteka članarine.<br>Moguće je ažurirati status članarine.<br>Promjene su odmah vidljive u sistemu. |
 | **Pretpostavke / Otvorena pitanja** | Bibliotekar ili administrator je prijavljen u sistem i član već postoji u evidenciji. |
 | **Veze i zavisnosti** | US-01: Registracija korisnika.<br>US-17 Upravljanje korisnicima |
+| **Veza sa Product Backlog-om** | PB-27 |
 
 ---
 
@@ -291,6 +310,7 @@ Ovaj dokument sadrži sve User Stories za projekat Bibliotečkog informacionog s
 | **Acceptance Criteria** | Član može vidjeti trenutni status članarine.<br>Član može vidjeti datum isteka članarine.<br>Ako članarina uskoro ističe ili je istekla, sistem to jasno prikazuje. |
 | **Pretpostavke / Otvorena pitanja** | Član je prijavljen u sistem i njegova članarina je evidentirana u bazi podataka. |
 | **Veze i zavisnosti** | US-02: Prijava korisnika.<br>US-19: Upravljanje statusom članarine |
+| **Veza sa Product Backlog-om** | PB-28 |
 
 
 ---
@@ -304,8 +324,9 @@ Ovaj dokument sadrži sve User Stories za projekat Bibliotečkog informacionog s
 | **Poslovna vrijednost** | Otkriva osnovne bugove i nedosljednosti u ranim fazama, smanjuje rizik od problema u kasnijim sprintovima i povećava kvalitet sistema. |
 | **Prioritet** | Nizak |
 | **Acceptance Criteria** | Testiranje pokriva sve osnovne funkcionalnosti implementirane do sada. <br> Testiranje uključuje provjeru integracije između povezanih funkcionalnosti. <br> Dokumentirani su svi pronađeni bugovi i anomalije. <br>  |
-| **Pretpostavke / Otvorena pitanja** | Svi prethodni user storyji implementirani do datog sprinta su spremni za testiranje. |
-| **Veze i zavisnosti** | Zavisi od implementacije svih user storyja do sprinta 9. |
+| **Pretpostavke / Otvorena pitanja** | Svi prethodni user storiji implementirani do datog sprinta su spremni za testiranje. |
+| **Veze i zavisnosti** | Zavisi od implementacije svih user storija do sprinta 9. |
+| **Veza sa Product Backlog-om** | PB-32 |
 
 <br>
 
@@ -322,6 +343,7 @@ Ovaj dokument sadrži sve User Stories za projekat Bibliotečkog informacionog s
 | **Acceptance Criteria** | Prikazana je lista svih aktivnih zaduženja prijavljenog člana. <br> Za svako zaduženje prikazuje se: naslov knjige, datum zaduživanja, rok vraćanja. <br> Ako član nema aktivnih zaduženja, prikazuje se jasna poruka. <br> Član može vidjeti samo svoja vlastita zaduženja. <br> Lista se automatski ažurira kada se knjiga vrati. |
 | **Pretpostavke / Otvorena pitanja** | Treba li uključiti informacije o eventualnim kašnjenjima ili kaznama? |
 | **Veze i zavisnosti** | US-01 i US-02: Implementirana registracija i prijava korisnika <br> US-14: Implementirano zaduživanje knjiga. |
+| **Veza sa Product Backlog-om** | PB-29 |
 
 ---
 
@@ -335,7 +357,8 @@ Ovaj dokument sadrži sve User Stories za projekat Bibliotečkog informacionog s
 | **Prioritet** | Visok |
 | **Acceptance Criteria** | Lista prikazuje sva aktivna zaduženja svih članova. <br> Prikazano je: ime člana, email člana, naslov knjige, datum zaduživanja, rok vraćanja. <br> Lista je sortirana po roku vraćanja. <br> Sistem prikazuje jasnu poruku ako nema aktivnih zaduženja. <br> Lista se automatski ažurira kada se knjige zaduže ili vrate. |
 | **Pretpostavke / Otvorena pitanja** | |
-| **Veze i zavisnosti** | US-02: Korisnik je prijavljen kao bibliotekar. <br> US-13: Implementirano zaduživanje knjiga. |
+| **Veze i zavisnosti** | US-02: Korisnik je prijavljen kao bibliotekar. <br> US-14: Implementirano zaduživanje knjiga. |
+| **Veza sa Product Backlog-om** | PB-30 |
 
 ---
 
@@ -350,6 +373,7 @@ Ovaj dokument sadrži sve User Stories za projekat Bibliotečkog informacionog s
 | **Acceptance Criteria** | Član može rezervisati samo knjigu koja nema dostupnih primjeraka. <br> Član može otkazati aktivnu rezervaciju. <br> Kada knjiga postane dostupna, sistem šalje email obavijest članovima koji su je rezervisali. |
 | **Pretpostavke / Otvorena pitanja** | Koliko dugo rezervacija vrijedi nakon što knjiga postane dostupna? |
 | **Veze i zavisnosti** | Implementirano slanje maila. |
+| **Veza sa Product Backlog-om** | PB-33 |
 
 ---
 
@@ -363,7 +387,8 @@ Ovaj dokument sadrži sve User Stories za projekat Bibliotečkog informacionog s
 | **Prioritet** | Srednji |
 | **Acceptance Criteria** | Bibliotekar ili administrator može vidjeti listu svih aktivnih rezervacija. <br> Za svaku rezervaciju prikazuje se ime i prezime člana, email člana, naslov knjige i datum rezervacije. <br> Sistem prikazuje jasnu poruku ako trenutno nema aktivnih rezervacija. <br> Lista se ažurira kada se rezervacija realizuje ili otkaže. |
 | **Pretpostavke / Otvorena pitanja** | Prikaz rezervacija je dostupan samo bibliotekarima i administratorima. <br> Da li će se moći filtrirati rezervacije po knjizi ili članu? |
-| **Veze i zavisnosti** | US-17: Implementirana rezervacija knjiga. |
+| **Veze i zavisnosti** | US-24: Implementirana rezervacija knjiga. |
+| **Veza sa Product Backlog-om** | PB-34 |
 
 ---
 
@@ -378,6 +403,7 @@ Ovaj dokument sadrži sve User Stories za projekat Bibliotečkog informacionog s
 | **Acceptance Criteria** | Sistem omogućava filtriranje po kategoriji, izdavaču, godini izdavanja. <br> Filteri se mogu kombinovati. <br> Rezultati pretrage se ažuriraju nakon primjene filtera. <br> Sistem prikazuje broj rezultata koji odgovaraju pretrazi. <br> Ako nema rezultata, prikazuje se jasna poruka. |
 | **Pretpostavke / Otvorena pitanja** | Da li filteri uključuju i knjige koje su rezervisane? |
 | **Veze i zavisnosti** | US-07: Implementiran katalog knjiga. <br> US-11: Pretraga knjiga - proširenje osnovne funkcionalnosti pretrage. |
+| **Veza sa Product Backlog-om** | PB-38 |
 
 ---
 
@@ -386,12 +412,13 @@ Ovaj dokument sadrži sve User Stories za projekat Bibliotečkog informacionog s
 | **ID storyja** | US-27 |
 |---------------|-------|
 | **Naziv storyja** | Automatsko otkazivanje rezervacije|
-| **Opis** | Kao sistem, želim automatski otkazi rezervaciju ako član ne preuzme knjigu u predviđenom roku, kako bi knjiga postala dostupna drugim članovima i smanjila broj neiskorištenih rezervacija. |
+| **Opis** | Kao sistem, želim automatski otkazati rezervaciju ako član ne preuzme knjigu u predviđenom roku, kako bi knjiga postala dostupna drugim članovima i smanjila broj neiskorištenih rezervacija. |
 | **Poslovna vrijednost** | Poboljšava upravljanje fondom, povećava dostupnost knjiga i smanjuje administrativni posao osoblja biblioteke. |
 | **Prioritet** | Nizak |
 | **Acceptance Criteria** | Sistem automatski prati sve aktivne rezervacije. <br> Ako član ne preuzme knjigu u definisanom roku, rezervacija se automatski otkazuje. <br> Nakon otkazivanja, knjiga postaje dostupna za nove rezervacije ili zaduživanje. <br> Automatsko otkazivanje se izvršava periodično. |
 | **Pretpostavke / Otvorena pitanja** | Tim je postigao interni dogovor o broju dana nakon kojih rezervacija prestaje važiti. |
 | **Veze i zavisnosti** | US-24: Knjiga je rezervisana. |
+| **Veza sa Product Backlog-om** | PB-37 |
 
 <br>
 
@@ -409,6 +436,7 @@ Ovaj dokument sadrži sve User Stories za projekat Bibliotečkog informacionog s
 | **Acceptance Criteria** | Sistem šalje podsjetnik članovima 2 dana prije roka vraćanja. <br> Email sadrži naziv knjige i datum roka vraćanja. |
 | **Pretpostavke / Otvorena pitanja** | Pretpostavlja se da su email adrese članova validne. |
 | **Veze i zavisnosti** | Implementirano zaduživanje knjiga. |
+| **Veza sa Product Backlog-om** | PB-35 |
 
 ---
 
@@ -417,12 +445,13 @@ Ovaj dokument sadrži sve User Stories za projekat Bibliotečkog informacionog s
 | **ID storyja** | US-29 |
 |---------------|-------|
 | **Naziv storyja** | Slanje email upozorenja |
-| **Opis** | Kao član biblioteke, želim primiti automatsko upozorenje kada mi istekne rok vraćanja knjige, kako bih znao da kasnim sa vraćanjem. Kao sistem, želim automatski slati upozorenja članovima kada im istekne rok vraćanja knjiga, kako bi bili obaviješteni o kašnjenju. |
+| **Opis** | Kao član biblioteke, želim primiti automatsko upozorenje kada mi istekne rok vraćanja knjige, kako bih znao da kasnim sa vraćanjem. |
 | **Poslovna vrijednost** | Pomaže u smanjenju izgubljenih ili zakašnjelih knjiga i olakšava bibliotekaru kontrolu nad fondom. |
 | **Prioritet** | Nizak |
 | **Acceptance Criteria** | Sistem šalje upozorenje članovima istog dana kada im istekne rok vraćanja. <br> Email sadrži naziv knjige i datum kada je rok istekao. |
 | **Pretpostavke / Otvorena pitanja** | Pretpostavlja se da su email adrese članova validne. |
 | **Veze i zavisnosti** | Implementirano zaduživanje knjiga. |
+| **Veza sa Product Backlog-om** | PB-35 |
 
 ---
 
@@ -437,6 +466,7 @@ Ovaj dokument sadrži sve User Stories za projekat Bibliotečkog informacionog s
 | **Acceptance Criteria** | Kada član kreira novu rezervaciju, sistem automatski šalje email bibliotekaru. <br> Email sadrži ime i prezime člana, naslov rezervisane knjige, datum rezervacije. |
 | **Pretpostavke / Otvorena pitanja** | Rezervacije su pravilno evidentirane. |
 | **Veze i zavisnosti** | US-24: Knjiga je rezervisana. |
+| **Veza sa Product Backlog-om** | PB-36 |
 
 ---
 
@@ -451,6 +481,7 @@ Ovaj dokument sadrži sve User Stories za projekat Bibliotečkog informacionog s
 | **Acceptance Criteria** | Administrator može generisati izvještaj za bilo koji mjesec. <br> Izvještaj sadrži broj i listu zaduženja, aktivnih rezervacija i članova. <br> Izvještaj se može pregledati i preuzeti u PDF formatu. |
 | **Pretpostavke / Otvorena pitanja** | Podaci o zaduživanjima, rezervacijama i članstvu su tačni i ažurirani. |
 | **Veze i zavisnosti** | US-01 i US-02: Korisnik je registrovan i prijavljen kao administrator. <br> Domain Model o zaduženjima, rezervacijama i korisnima biblioteke. |
+| **Veza sa Product Backlog-om** | PB-39 |
 
 ---
 
@@ -459,12 +490,13 @@ Ovaj dokument sadrži sve User Stories za projekat Bibliotečkog informacionog s
 | **ID storyja** | US-32 |
 |---------------|-------|
 | **Naziv storyja** | Audit log promjena |
-| **Opis** | ao član osoblja, želim da sistem evidentira važne promjene u sistemu, kako bi se omogućilo praćenje aktivnosti i povećala sigurnost sistema.|
+| **Opis** | Kao član osoblja, želim da sistem evidentira važne promjene u sistemu, kako bi se omogućilo praćenje aktivnosti i povećala sigurnost sistema.|
 | **Poslovna vrijednost** | Omogućava reviziju i praćenje promjena u sistemu, pomaže u rješavanju problema i  praćenju grešaka. |
 | **Prioritet** | Nizak |
 | **Acceptance Criteria** | Sistem evidentira sve važnije akcije korisnika: dodavanje, uređivajne i brisanje knjiga, dodavanje, uređivanje i deaktivaciju korisnika, kreiranje rezervacija. <br> Svaka promjena sadrži datum i vrijeme, ime i prezime korisnika. <br> Log se čuva u skladu s politikom podataka definisanom u sistemu. |
 | **Pretpostavke / Otvorena pitanja** | Treba li log biti dostupan samo administratorima ili i bibliotekarima? |
 | **Veze i zavisnosti** | Log prati sve važnije funkcionalnosti sistema. |
+| **Veza sa Product Backlog-om** | PB-40 |
 
 ---
 
@@ -479,6 +511,7 @@ Ovaj dokument sadrži sve User Stories za projekat Bibliotečkog informacionog s
 | **Acceptance Criteria** | Sistem automatski obračunava kaznu po danu za svaku knjigu koja nije vraćena na vrijeme. <br> Član može vidjeti iznos kazne u svom profilu. |
 | **Pretpostavke / Otvorena pitanja** | Utvrđen plan po kojem će se računati kazne. |
 | **Veze i zavisnosti** | Knjiga je zadužena i poslan je mail upozorenja. |
+| **Veza sa Product Backlog-om** | PB-41 |
 
 ---
 
@@ -493,6 +526,7 @@ Ovaj dokument sadrži sve User Stories za projekat Bibliotečkog informacionog s
 | **Acceptance Criteria** | Član može pokrenuti produženje članarine putem sistema.<br>Sistem omogućava izbor trajanja produženja (npr. 1, 3, 6 ili 12 mjeseci).<br>Nakon uspješnog produženja, datum isteka članarine se ažurira.<br>Status članarine se automatski postavlja na "Aktivna".<br>Sistem prikazuje potvrdu o uspješnom produženju. |
 | **Pretpostavke / Otvorena pitanja** | Na koji način simulirati sistem online naplate članarine? |
 | **Veze i zavisnosti** | US-19: Upravljanje statusom članarine<br>US-20: Pregled statusa članarine |
+| **Veza sa Product Backlog-om** | PB-42 |
 
 ---
 
@@ -500,13 +534,14 @@ Ovaj dokument sadrži sve User Stories za projekat Bibliotečkog informacionog s
 
 | **ID storyja** | US-35 |
 |---------------|-------|
-| **Naziv storyja** | |
-| **Opis** | |
-| **Poslovna vrijednost** | |
-| **Prioritet** | |
-| **Acceptance Criteria** | |
-| **Pretpostavke / Otvorena pitanja** | |
-| **Veze i zavisnosti** | |
+| **Naziv storyja** | Integracija sa distributerom knjiga |
+| **Opis** | Kao bibliotekar ili administrator, želim poslati zahtjev distributeru knjiga putem sistema, kako bih mogao naručiti nove knjige za biblioteku. |
+| **Poslovna vrijednost** | Olakšava proces nabavke novih knjiga i unapređuje upravljanje bibliotečkim fondom. |
+| **Prioritet** | Nizak |
+| **Acceptance Criteria** | Bibliotekar može unijeti podatke o knjizi koju želi naručiti. <br> Sistem generiše i šalje email zahtjev distributeru knjiga. <br> Sistem prikazuje potvrdu da je zahtjev poslan. |
+| **Pretpostavke / Otvorena pitanja** | Email adresa distributera je poznata i dostupna sistemu. |
+| **Veze i zavisnosti** | Implementirano slanje maila.|
+| **Veza sa Product Backlog-om** | PB-43 |
 
 <br>
 
@@ -524,6 +559,7 @@ Ovaj dokument sadrži sve User Stories za projekat Bibliotečkog informacionog s
 | **Acceptance Criteria** | Svi test scenariji za funkcionalnosti su definirani i izvršeni. <br> Svi bugovi su identifikovani i otklonjeni. <br> Test evidencija je pohranjena u repozitoriju. |
 | **Pretpostavke / Otvorena pitanja** | |
 | **Veze i zavisnosti** | US-01 - US-35: Implementirane sve funkcionalnosti. |
+| **Veza sa Product Backlog-om** | PB-44 |
 
 
 ---
@@ -534,11 +570,12 @@ Ovaj dokument sadrži sve User Stories za projekat Bibliotečkog informacionog s
 |---------------|-------|
 | **Naziv storyja** | Izrada liste poznatih ograničenja i tehničkog duga |
 | **Opis** | Kao tim, želimo napraviti listu stvari koje ograničavaju sistem i nedovršene tehničke dijelove, kako bismo znali šta još treba uraditi i mogli jasno obavijestiti druge o stanju projekta. |
-| **Poslovna vrijednost** | Omogućava timu i stakeholderima da jasno vide postojeća ograničenja i nedovršene dijelove sistema, što pomaže u realnom planiranju rada, donošenju odluka i toj transparentnoj komunikaciji o napretku projekta. |
+| **Poslovna vrijednost** | Omogućava timu i stakeholderima da jasno vide postojeća ograničenja i nedovršene dijelove sistema, što pomaže u realnom planiranju rada, donošenju odluka i transparentnoj komunikaciji o napretku projekta. |
 | **Prioritet** | Srednji |
 | **Acceptance Criteria** | Lista svih poznatih ograničenja sistema je dokumentovana. <br> Lista svih elemenata tehničkog duga je dokumentovana. <br> Svaka stavka na listi sadrži kratak opis i utjecaj na projekat. |
 | **Pretpostavke / Otvorena pitanja** | |
 | **Veze i zavisnosti** | Sprovedeno testiranje sistema. |
+| **Veza sa Product Backlog-om** | PB-45 |
 
 <br>
 
@@ -555,6 +592,7 @@ Ovaj dokument sadrži sve User Stories za projekat Bibliotečkog informacionog s
 | **Acceptance Criteria** | Release Notes sadrže listu svih implementiranih funkcionalnosti. <br> Navedena su poznata ograničenja i poznati bugovi. <br> Uključene su upute za instalaciju i pokretanje sistema. <br> Dokument je pohranjen u repozitoriju. |
 | **Pretpostavke / Otvorena pitanja** | |
 | **Veze i zavisnosti** | US-36: Sistematsko testiranje i bug fixing. <br> US-36: Izrada liste poznatih ograničenja i tehničkog duga. |
+| **Veza sa Product Backlog-om** | PB-46 |
 
 ---
 
@@ -569,6 +607,7 @@ Ovaj dokument sadrži sve User Stories za projekat Bibliotečkog informacionog s
 | **Acceptance Criteria** | Dokumentovane su upute za sve korisničke uloge (Član, Bibliotekar, Administrator). <br> Uključeni su screenshotovi ili opisi ključnih ekrana. <br> Objašnjen je tok rada za najčešće scenarije (zaduživanje, pretraga, rezervacija). <br> Dokument je pohranjen u repozitoriju. |
 | **Pretpostavke / Otvorena pitanja** | |
 | **Veze i zavisnosti** | US-01 - US-35: Implementirane sve funkcionalnosti. |
+| **Veza sa Product Backlog-om** | PB-47 |
 
 ---
 
@@ -583,6 +622,7 @@ Ovaj dokument sadrži sve User Stories za projekat Bibliotečkog informacionog s
 | **Acceptance Criteria** | Dokumentovana je arhitektura sistema. <br> Naveden je postupak postavljanja razvojnog okruženja. <br> Ažurirani su svi obavezni logovi (AI Usage Log, Decision Log). |
 | **Pretpostavke / Otvorena pitanja** | |
 | **Veze i zavisnosti** | US-01 - US-35: Implementirane sve funkcionalnosti. |
+| **Veza sa Product Backlog-om** | PB-48 |
 
 
 <br>
@@ -600,3 +640,4 @@ Ovaj dokument sadrži sve User Stories za projekat Bibliotečkog informacionog s
 | **Acceptance Criteria** | Svaki član tima je u stanju objasniti dijelove sistema za koje je odgovoran. <br> Sistem radi stabilno tokom demonstracije. |
 | **Pretpostavke / Otvorena pitanja** | |
 | **Veze i zavisnosti** | US-01 - US-35: Implementirane sve funkcionalnosti. <br> US-37: Izrađena korisnička dokumentacija. <br> US-40: Izrađena tehička dokumentacija. |
+| **Veza sa Product Backlog-om** | PB-49 |
