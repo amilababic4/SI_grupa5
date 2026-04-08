@@ -12,7 +12,9 @@
 | NFR-6 | Sigurnost | Lozinke korisnika se pohranjuju u hashiranom obliku, sistem nikada ne spašava lozinke u čitljivom tekstualnom obliku | Pregled baze podataka uz provjeru developer alata, provjeriti da lozinke nisu vidljive ni u odgovorima servera ni u bazi podataka | Visok | Koristiti standardni algoritam za hashiranje lozinki, lozinke se ne smiju pojavljivati ni u kakvim sistemskim zapisima |
 | NFR-7 | Pouzdanost | Sistem mora čuvati konzistentnost podataka o pozajmicama, knjiga ne smije biti označena kao dostupna dok postoji aktivna pozajmica za tu knjigu | Manualno testiranje, kreirati pozajmicu i provjeriti da je status knjige promijenjen, pokušati kreirati drugu pozajmicu za istu knjigu | Visok | Ovo pravilo mora biti primijenjeno na nivou poslovne logike ili baze podataka, a ne samo na nivou korisničkog interfejsa, uz to postoji mogućnost duplikata knjige, više primjeraka iste |
 | NFR-8 | Internacionalizacija | Sistem podržava prikaz sadržaja na bosanskom jeziku kao primarnom jeziku, uz mogućnost proširenja na dodatne jezike u budućim verzijama. | Manualno testiranje, pregled svih ekrana i provjera da su svi tekstovi prikazani na bosanskom jeziku | Srednji | Podrška za dodatne jezike nije planirana u MVP verziji |
-
+| NFR-9 | Održavanje | Kod sistema treba biti organizovan u jasno odvojene module kako bi dalji razvoj i ispravke bili jednostavniji | Pregled strukture projekta i repozitorija | Srednji | Modularna arhitektura olakšava proširenje sistema |
+| NFR-10 | Dostupnost | Sistem mora biti dostupan korisnicima tokom radnog vremena biblioteke osim u unaprijed najavljenim terminima održavanja | Evidencija testiranja i praćenje rada aplikacije | Srednji | Planirani downtime mora biti unaprijed komuniciran |
+| NFR-11 | Sigurnost / Praćenje | Važne administratorske akcije trebaju biti evidentirane radi kasnijeg praćenja promjena | Pregled audit log zapisa nakon izmjene korisnika ili knjige | Srednji | Omogućava praćenje promjena i odgovornost administratora |
 ---
 
 ## Legenda
