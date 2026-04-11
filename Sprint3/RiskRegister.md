@@ -17,7 +17,8 @@ Risk Register služi kao pregled identificiranih rizika koji mogu negativno utic
 
 ## 3. Risk Register tabela
 <div style="font-size: 8px;">
-
+  
+> **Napomena:** Tabela risk registra sadrži veći broj kolona zbog razrađenih planova mitigacije, koji uključuju preventivne mjere, reakciju ako se rizik desi, te mogućnost eliminacije ili prenosa rizika. Zbog toga je za njen pregled potreban horizontalni scroll.
   
 | ID | Opis rizika | Uzrok | Vjero-<br>vatnoća | Uticaj | Posljedica za projekat | Prioritet | Preventivna mitigacija (da ne dođe do rizika) | Korektivna mitigacija (kako smanjiti posljedicu) | Eliminacija / prenos rizika | Odgovorna osoba / uloga | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|
