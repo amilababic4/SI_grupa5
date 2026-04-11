@@ -1,17 +1,15 @@
 # Risk Register
-## Projekat: Bibliotečki informacioni sistem
 
 ## 1. Svrha dokumenta
 
-Ovaj dokument predstavlja rezultat analize rizika za projekat **Bibliotečki informacioni sistem**.  
-Risk Register služi kao pregled identificiranih rizika koji mogu negativno uticati na:
+Ovaj dokument predstavlja rezultat analize rizika za projekat **Bibliotečki informacioni sistem**. Risk Register služi kao pregled identificiranih rizika koji mogu uticati na:
 
 - kvalitet projektnih artefakata
 - realizaciju sprint ciljeva
 - kontinuitet rada tima
 - implementaciju sistema u narednim sprintovima
 - kvalitet završnog rješenja
-- ocjenu projekta i gubitak bodova
+- ocjenu projekta
 
 ---
 
