@@ -1,10 +1,10 @@
-# 📚 Use Case Model
+#  Use Case Model
 
 **Projekt:** Bibliotečki informacioni sistem
 
 ---
 
-## 🎭 Pregled aktera
+##  Pregled aktera
 
 * **Član biblioteke** – koristi sistem za pregled, rezervaciju i posudbu knjiga
 * **Bibliotekar** – upravlja knjigama, članovima i zaduženjima
@@ -13,7 +13,7 @@
 
 ---
 
-# 📌 Use Case 1: Registracija člana
+#  Use Case 1: Registracija člana
 
 * **Akter:** Bibliotekar
 * **Opis:** Bibliotekar unosi podatke novog člana u sistem
@@ -40,7 +40,7 @@
 
 ---
 
-# 📌 Use Case 2: Prijava u sistem
+#  Use Case 2: Prijava u sistem
 
 * **Akter:** Korisnik
 * **Opis:** Korisnik se prijavljuje u sistem
@@ -65,7 +65,7 @@
 
 ---
 
-# 📌 Use Case 3: Pregled kataloga knjiga
+#  Use Case 3: Pregled kataloga knjiga
 
 * **Akter:** Član biblioteke
 * **Opis:** Korisnik pregleda dostupne knjige
@@ -86,7 +86,7 @@
 
 ---
 
-# 📌 Use Case 4: Pretraga knjiga
+#  Use Case 4: Pretraga knjiga
 
 * **Akter:** Član biblioteke
 * **Opis:** Korisnik pretražuje knjige po naslovu ili autoru
@@ -107,7 +107,7 @@
 
 ---
 
-# 📌 Use Case 5: Dodavanje knjige
+#  Use Case 5: Dodavanje knjige
 
 * **Akter:** Bibliotekar
 * **Opis:** Bibliotekar dodaje novu knjigu u sistem
@@ -133,7 +133,7 @@
 
 ---
 
-# 📌 Use Case 6: Uređivanje knjige
+#  Use Case 6: Uređivanje knjige
 
 * **Akter:** Bibliotekar
 
@@ -149,7 +149,7 @@
 
 ---
 
-# 📌 Use Case 7: Brisanje knjige
+#  Use Case 7: Brisanje knjige
 
 * **Akter:** Bibliotekar
 
@@ -169,7 +169,7 @@
 
 ---
 
-# 📌 Use Case 8: Evidencija zaduživanja
+#  Use Case 8: Evidencija zaduživanja
 
 * **Akter:** Bibliotekar
 
@@ -186,7 +186,7 @@
 
 ---
 
-# 📌 Use Case 9: Evidencija vraćanja
+#  Use Case 9: Evidencija vraćanja
 
 * **Akter:** Bibliotekar
 
@@ -202,7 +202,7 @@
 
 ---
 
-# 📌 Use Case 10: Rezervacija knjige
+#  Use Case 10: Rezervacija knjige
 
 * **Akter:** Član biblioteke
 
@@ -222,7 +222,7 @@
 
 ---
 
-# 📌 Use Case 11: Upravljanje korisnicima
+#  Use Case 11: Upravljanje korisnicima
 
 * **Akter:** Administrator
 
@@ -237,7 +237,7 @@
 
 ---
 
-# 📌 Use Case 12: Pregled profila
+#  Use Case 12: Pregled profila
 
 * **Akter:** Korisnik
 
@@ -252,7 +252,7 @@
 
 ---
 
-# 📌 Use Case 13: Slanje email notifikacija
+#  Use Case 13: Slanje email notifikacija
 
 * **Akter:** Sistem
 
@@ -267,7 +267,7 @@
 
 ---
 
-# 📌 Use Case 14: Generisanje izvještaja
+#  Use Case 14: Generisanje izvještaja
 
 * **Akter:** Administrator
 
@@ -282,7 +282,7 @@
 
 ---
 
-# 🏁 Zaključak
+#  Zaključak
 
 Use case model jasno prikazuje interakciju između aktera i sistema kroz ključne funkcionalnosti. Model je izveden direktno iz user storyja i acceptance criteria, čime se osigurava konzistentnost između zahtjeva i implementacije sistema.
 
