@@ -2,18 +2,36 @@
 
 ## 1. Cilj testiranja
 
-Cilj testiranja Bibliotečkog informacionog sistema je osigurati da sve implementirane funkcionalnosti rade ispravno i u skladu sa prethodno definisanim zahtjevima i acceptance kriterijima.
+Testiranje Bibliotečkog informacionog sistema provodi se s jasnom namjerom: osigurati da svaka implementirana funkcionalnost — od registracije člana do rezervacije knjige — radi ispravno, sigurno i u skladu s definisanim zahtjevima.
 
-Konkretno, testiranjem se nastoji:
+---
 
-- **Potvrditi ispravnost osnovnih funkcionalnosti** – registracija i prijava korisnika, upravljanje knjigama i primjercima, zaduživanje i vraćanje, upravljanje kategorijama, članarinama i rezervacijama.
-- **Osigurati tačnost i konzistentnost podataka** – knjiga ne smije biti označena kao dostupna dok ima aktivno zaduženje; primjerak se ne smije deaktivirati dok je zadužen; brisanje kategorije nije dozvoljeno ako su s njom povezane knjige.
-- **Provjeriti ispravnost kontrole pristupa** – svaka uloga (Član, Bibliotekar, Administrator) smije vidjeti i koristiti samo funkcionalnosti koje su joj dozvoljene.
-- **Verificirati integraciju modula** – moduli moraju ispravno međusobno komunicirati.
-- **Identificirati i evidentirati greške** prije puštanja sistema u upotrebu, kako bi se smanjio rizik od kvarova u produkciji.
-- **Provjeriti usklađenost s nefunkcionalnim zahtjevima** – performanse, sigurnost, upotrebljivost, pouzdanost i internacionalizacija.
+### 1.1 Šta testiranjem želimo postići
 
-Krajnji cilj je stabilan, pouzdan i funkcionalan sistem spreman za korištenje od strane krajnjih korisnika – članova, bibliotekara i administratora.
+ Cilj | Zašto je važan | Pokriveni zahtjevi |
+|------|---------------|-------------------|
+| **Ispravnost poslovne logike** | Knjiga se ne smije označiti kao dostupna dok postoji aktivno zaduženje. Primjerak se ne smije deaktivirati dok je zadužen. Rezervacija nije dozvoljena bez dostupnih primjeraka. | US-57 – US-65, US-90 – US-94, NFR-7 |
+| **Tačnost upravljanja katalogom** | Dodavanje, uređivanje i brisanje knjiga, primjeraka i kategorija mora biti konzistentno. | US-12 – US-34, NFR-7 |
+| **Kontrola pristupa po ulogama** | Svaka uloga smije vidjeti isključivo funkcionalnosti koje su joj dozvoljene — provjera mora biti i na UI i na API nivou. | US-08, US-09, NFR-5 |
+| **Sigurnost korisničkih podataka** | Lozinke se pohranjuju isključivo u hashiranom obliku. Nijedan API poziv ne smije propustiti neautorizovani zahtjev. | NFR-5, NFR-6 |
+| **Pouzdanost upravljanja članarinama** | Status članarine direktno blokira zaduživanje — sistem mora u svakom trenutku prikazivati tačan status (Aktivna / Istekla). | US-73 – US-78, NFR-7 |
+| **Integritet rezervacionog toka** | Rezervacija se automatski otkazuje po isteku roka; preuzimanje rezervisane knjige kreira validno zaduženje. | US-90 – US-94 |
+| **Validacija korisničkog unosa** | Sve forme (registracija, dodavanje knjige, članarina) moraju odbiti neispravne podatke s jasnom porukom uz polje koje sadrži grešku. | US-01 – US-03, US-12 – US-14, US-73, NFR-2, NFR-4 |
+| **Performanse i odziv sistema** | Svaka stranica mora se učitati unutar 2 sekunde na stabilnoj konekciji — uključujući katalog s knjigama. | NFR-1 |
+| **Auditabilnost administratorskih akcija** | Sve važne promjene (izmjena korisnika, knjige, zaduženje, vraćanje) moraju biti evidentirane u audit logu. | NFR-11, US-101 – US-103 |
+| **Upotrebljivost i internacionalizacija** | Poruke grešaka su jasne, destruktivne akcije traže potvrdu, svi tekstovi prikazani su na bosanskom jeziku. | NFR-2, NFR-3, NFR-4, NFR-8 |
+
+---
+
+### 1.2 Definicija uspjeha
+
+Testiranje se smatra uspješnim kada su ispunjeni sljedeći uvjeti:
+
+- Svi **kritični i visoko prioritetni test slučajevi** (unit, integracioni, sistemski) imaju status `Prošao`
+- Ne postoji niti jedan otvoreni bug s oznakom **Kritično** ili **Visoko** pred završnu demonstraciju
+- UAT scenariji su prošli iz perspektive sva tri tipa korisnika (Član, Bibliotekar, Administrator)
+- Nefunkcionalni zahtjevi **NFR-1 do NFR-8 i NFR-11** su verificirani u sistemskom testiranju (Sprint 8 – Sprint 11)
+- Svi pronađeni bugovi su evidentirani prema propisanom formatu (Bug ID, koraci reprodukcije, ozbiljnost, status)
 
 ---
 
