@@ -2,9 +2,9 @@
 
 ## 1. Cilj testiranja
 
-Testiranje Bibliotečkog informacionog sistema provodi se s jasnom namjerom: osigurati da svaka implementirana funkcionalnost — od registracije člana do rezervacije knjige — radi ispravno, sigurno i u skladu s definisanim zahtjevima.
+Testiranje Bibliotečkog informacionog sistema ima za cilj provjeriti da sve funkcionalnosti sistema rade kako treba, od registracije članova do rezervacije knjiga, u skladu sa definisanim zahtjevima i pravilima sistema.
 
-| Cilj | Zašto je važan |
+| Cilj | Šta se time provjerava |
 |------|-------------------|
 | **Ispravnost poslovne logike** | Knjiga se ne smije označiti kao dostupna dok postoji aktivno zaduženje (NFR-7). Primjerak se ne smije deaktivirati dok je zadužen (US-24). Rezervacija nije dozvoljena sa dostupnim primjercima knjige (US-769). |
 | **Tačnost upravljanja katalogom** | Dodavanje, uređivanje i brisanje knjiga, primjeraka i kategorija mora biti konzistentno (US-12, US-17, US-25). |
@@ -18,14 +18,6 @@ Testiranje Bibliotečkog informacionog sistema provodi se s jasnom namjerom: osi
 | **Upotrebljivost i internacionalizacija** | Poruke grešaka su jasne i razumljive (NFR-2), destruktivne akcije traže potvrdu (NFR-3), svi tekstovi prikazani su na bosanskom jeziku (NFR-8). |
 
 ---
-###  Definicija uspjeha
-
-Testiranje se smatra uspješnim kada su ispunjeni sljedeći uvjeti:
-
-- Svi ključni poslovni procesi sistema funkcionišu ispravno i bez blokirajućih grešaka
-- Ne postoji niti jedan otvoreni bug s oznakom **Kritično** ili **Visoko** pred završnu demonstraciju
-- UAT scenariji su prošli iz perspektive sva tri tipa korisnika (Član, Bibliotekar, Administrator)
-- Sistem zadovoljava definisane nefunkcionalne zahtjeve (performanse, sigurnost, dostupnost i validacija unosa)
 
 <br>
 
@@ -42,7 +34,7 @@ Različiti nivoi testiranja omogućavaju provjeru sistema od pojedinačnih funkc
 Provjera pojedinačnih funkcija i komponenti: validacija forme (registracija, prijava), provjera unosa (email, lozinka), logika autentifikacije, upravljanje statusom knjiga i primjeraka.
 
 **Alati:**  
-xUnit (.NET), Visual Studio Test Explorer.
+xUnit (.NET) - pisanje i automatsko pokretanje unit testova, Visual Studio Test Explorer - pokretanje, pregled rezultata i praćenje uspješnost.
 
 **Izlazni kriteriji (kriterij prihvatanja):**  
 Svi testovi prolaze, osnovna logika ispravna.
@@ -59,7 +51,7 @@ Ne može otkriti probleme koji nastaju u komunikaciji između modula, servisa il
 Provjera komunikacije između komponenti: frontend – backend, API – baza podataka, autentifikacija i autorizacija, operacije nad knjigama i korisnicima.
 
 **Alati:**  
-Postman, Mailtrap.
+Postman, Mailtrap - testiranje slanja email notifikacija u sigurnom testnom okruženju bez slanja stvarnih emailova korisnicima.
 
 
 **Izlazni kriteriji:**  
@@ -77,7 +69,7 @@ Uzrok grešaka može biti teže izolirati jer uključuje više komponenti.
 Testiranje kompletnog sistema kroz end-to-end tokove: registracija, prijava, pregled kataloga, dodavanje i brisanje knjiga, zaduživanje i vraćanje. Obuhvatiti funkcionalne i nefunkcionalne aspekte (performanse, sigurnost, upotrebljivost).  
 
 **Alati:**  
-Ručno testiranje u pretraživaču, Developer Tools.
+Ručno testiranje u pretraživaču, Developer Tools - praćenje mrežnih zahtjeva, grešaka u konzoli i performansi tokom testiranja.
 
 **Izlazni kriteriji:**  
 Svi ključni tokovi funkcionišu ispravno.
@@ -109,7 +101,7 @@ Zavisi od subjektivne procjene korisnika i obično pokriva samo glavne funkciona
 Provjera da postojeće funkcionalnosti (prijava, registracija, katalog, upravljanje knjigama i korisnicima) i dalje rade ispravno nakon izmjena ili dodavanja novih funkcionalnosti.
 
 **Alati:**  
-Ručno testiranje / automatizovani testovi – NUnit.
+Ručno testiranje, automatizovani testovi (xUnit) - automatsko pokretanje postojećih testova.
 
 **Izlazni kriteriji:**  
 Nema regresija u postojećim funkcionalnostima.
@@ -125,7 +117,7 @@ Može biti vremenski zahtjevno jer je potrebno ponovo testirati veći broj posto
 Provjera korisničkog interfejsa: ispravnost prikaza formi, poruka grešaka uz odgovarajuće polje, navigacija po ulogama, responsivnost na različitim rezolucijama, konzistentnost elemenata kroz pretraživače (Chrome, Firefox, Edge).
 
 **Alati:**  
-Ručno testiranje u pretraživaču, Browser DevTools, Selenium.
+Ručno testiranje u pretraživaču, Browser DevTools, Selenium - simuliranje ponašanja korisnika.
 
 **Izlazni kriteriji:**  
 UI je konzistentan na svim ciljnim pretraživačima; responzivan prikaz funkcioniše na mobilnim i desktop rezolucijama.
@@ -149,13 +141,7 @@ OWASP ZAP (automatsko skeniranje), Postman (manualni API napadi), pregled baze p
 Nema kritičnih sigurnosnih ranjivosti; svi neautorizirani API pozivi vraćaju 401/403; lozinke nisu čitljive u bazi; XSS i SQL injection pokušaji su odbijeni.
 
 **Ograničenja:**  
-Moguć velik broj lažne pozitivne rezultate (false positives) koje je potrebno ručno verifikovati, što produžava vrijeme analize.
-
----
-<br>
-Kombinacija svih navedenih nivoa testiranja osigurava visok kvalitet softvera, smanjuje rizik od otkrivanja ozbiljnih grešaka u produkciji i povećava povjerenje krajnjih korisnika u ispravnost sistema.
-
-<br>
+Moguć je veliki broj lažnih pozitivnih rezultata (false positives) koje je potrebno ručno verifikovati, što produžava vrijeme analize.
 
 ---
 <br> 
@@ -166,20 +152,20 @@ Tabela ispod povezuje ključne funkcionalnosti bibliotečkog sistema sa nivoima 
 
 | Funkcionalnost/zahtjev | Unit | Integracijsko | Sistemsko | Prihvatno (UAT) | Regresiono | UI | Penetracijsko |
 |------------------------|------|---------------|-----------|----------------|------------|----|----------------|
-| **Registracija i prijava korisnika** (US-01, US-02, US-03, US-04, US-05) | DA - validacija emaila, lozinke i obaveznih polja | DA - auth API + sesija + baza | DA - kompletan tok prijave i registracije | DA - korisnik potvrđuje uspješan login | DA - provjera nakon izmjena | DA - prikaz formi i grešaka | DA - SQL injection, XSS na login poljima |
-| **Upravljanje sesijom i RBAC** (US-06, US-07, US-08, US-09) | NE | DA - kreiranje/brisanje sesije i zaštita ruta | DA - kontrola pristupa po ulogama | DA - potvrda ograničenja pristupa | DA - nakon dodavanja novih uloga | NE | DA - testiranje pristupa bez tokena, promjene role kroz zahtjev |
-| **Upravljanje knjigama** (US-12, US-17, US-25) | DA - validacija unosa i poslovna pravila | DA - API + baza konzistentnost | DA - dodavanje, izmjena i brisanje kroz UI | DA - bibliotekar potvrđuje tok | DA - nakon svake CRUD izmjene | DA - prikaz forme, dugmad, poruke | DA - neovlašteni korisnik ne može mijenjati knjige |
-| **Upravljanje primjercima** (US-21, US-23, US-24) | DA - statusi i validacija | DA - promjena statusa ↔ baza | DA - prikaz statusa kroz sistem | DA - potvrda tačnosti statusa | DA - nakon izmjene statusa | DA - vizuelni prikaz statusa | DA - zabrana nedozvoljenih akcija preko API |
-| **Katalog i pretraga** (US-19, US-20, US-35, US-36) | DA - logika pretrage i filtera | DA - dohvat podataka iz baze | DA - pregled kataloga i paginacija | DA - korisnik potvrđuje preglednost | DA - nakon izmjene indeksa pretrage | DA - responzivnost tabele, filteri | DA - korisnik vidi samo dozvoljene podatke (ne osjetljive) |
-| **Zaduživanje i vraćanje knjiga** (US-43, US-44, US-45, US-47) | DA - poslovna pravila (npr. dostupnost) | DA - inventar + zaduženje + audit log | DA - end-to-end tok zaduživanja | DA - bibliotekar potvrđuje tok | DA - nakon promjene pravila zaduživanja | DA - prikaz dugmadi samo za prijavljene | DA - testiranje višestrukog zaduživanja istog primjerka |
-| **Upravljanje članarinom** (US-56, US-57, US-58, US-59) | DA - validacija datuma i statusa | DA - veza korisnik ↔ članarina | DA - blokiranje zaduživanja | DA - korisnik vidi tačan status | DA - nakon produženja članarine | DA - prikaz statusa u profilu | NE |
-| **Rezervacije** (US-69, US-72, US-79, US-80) | DA - pravila rezervacije | DA - rezervacije ↔ katalog | DA - tok rezervacije i otkazivanja | DA - korisnik potvrđuje tok | DA - nakon izmjene logike rezervacija | DA - prikaz liste rezervacija | DA - zabrana rezervacije bez aktivne članarine |
-| **Upravljanje kategorijama** (US-30, US-33, US-34) | DA - validacija naziva i pravila | DA - baza + knjige | DA - prikaz i upravljanje | DA - bibliotekar potvrđuje | DA - nakon dodavanja nove kategorije | DA - prikaz u padajućem meniju | NE |
-| **Upravljanje korisnicima (admin)** (US-49, US-50, US-51, US-52, US-53) | NE | DA - API + promjene uloga | DA - tok upravljanja korisnicima | DA - admin potvrđuje | DA - nakon dodavanja novog admina | DA - tabela korisnika, dugmad za akcije | DA - testiranje eskalacije privilegija |
-| **Email notifikacije** (US-81, US-82, US-83, US-84) | NE | DA - email servis + događaji | DA - slanje u realnim scenarijima | DA - korisnik prima obavijesti | DA - nakon izmjene template-a | NE | NE |
-| **Audit log** (NFR-11) | NE | DA - zapis akcija u bazu | DA - provjera kroz scenarije | DA - admin potvrđuje zapis | DA - nakon svake akcije | NE | DA - log se ne može brisati od strane običnog korisnika |
-| **Validacija unosa i UX** (NFR-2, NFR-3, NFR-4) | DA - validacione funkcije | DA - validacija kroz API | DA - prikaz grešaka u UI | DA - korisnik razumije poruke | DA - nakon izmjene frontenda | DA - poruke tačno uz polja | NE |
-| **Sigurnost sistema** (NFR-5, NFR-6) | DA - hashiranje lozinki | DA - zaštita endpointa | DA - provjera kroz tokove | DA - nema sigurnosnih propusta | DA - nakon dodavanja novih ruta | NE | DA - puni pentest: SQLi, XSS, CSRF, JWT, RBAC bypass |
+| **Registracija i prijava korisnika** (US-01, US-02, US-03, US-04, US-05) | DA – validacija emaila, formata lozinke i obaveznih polja | DA – provjera auth servisa, kreiranja sesije i upisa u bazu | DA – kompletan tok: unos podataka, validacija, prijava i preusmjeravanje na dashboard | DA – korisnik potvrđuje uspješan login i razumljive poruke o grešci | DA – provjera nakon izmjena auth logike ili formi | DA – prikaz formi, poruke o grešci, redirect na odgovarajući dashboard | DA – SQL injection i XSS na login i registracijskim poljima |
+| **Upravljanje sesijom i RBAC** (US-06, US-07, US-08, US-09) | NE | DA – provjera kreiranja i brisanja sesije, te zaštite ruta po ulozi | DA – kontrola pristupa po ulogama: član ne može otvoriti bibliotekarsku sekciju i sl. | DA – admin potvrđuje da korisnici s nižim pravima ne mogu pristupiti zaštićenim sekcijama | DA – provjera nakon dodavanja novih ruta ili izmjene uloga | NE | DA – pokušaj promjene uloge manipulacijom zahtjeva |
+| **Upravljanje knjigama** (US-12, US-17, US-25) | DA – validacija ISBN-a, obaveznih polja i poslovnih pravila (npr. brisanje nije moguće uz aktivno zaduženje) | DA – konzistentnost između API-ja i baze pri dodavanju, izmjeni i brisanju | DA – kompletan CRUD tok kroz korisničko sučelje | DA – bibliotekar prolazi kroz dodavanje i izmjenu knjige te potvrđuje ispravan tok | DA – provjera nakon svake izmjene CRUD logike | DA – forma za unos, dugmad, poruke o grešci i dijaloški prozori za potvrdu | DA – neovlašteni korisnik ne smije moći mijenjati knjige direktnim pozivom API-ja |
+| **Upravljanje primjercima** (US-21, US-23, US-24) | DA – tranzicije statusa primjerka i validacija pri deaktivaciji | DA – promjena statusa primjerka ispravno se reflektuje u bazi | DA – prikaz statusa kroz cijeli sistem: katalog, detalji knjige, zaduživanje | DA – bibliotekar potvrđuje tačnost prikaza statusa za svaki primjerak | DA – provjera nakon izmjene logike statusa | DA – vizuelni prikaz statusa Dostupan / Posuđen / Deaktiviran | NE |
+| **Katalog i pretraga** (US-19, US-20, US-35, US-36) | DA – logika filtriranja po naslovu, autoru i ključnoj riječi | DA – dohvat i filtriranje podataka iz baze | DA – pregled kataloga, pretraga i prikaz rezultata | DA – korisnik potvrđuje preglednost kataloga i relevantnost rezultata pretrage | DA – provjera nakon izmjene logike pretrage | DA – responzivnost tabele, rad filtera, prikaz broja rezultata | NE |
+| **Zaduživanje i vraćanje knjiga** (US-43, US-44, US-45, US-47) | DA – provjera dostupnosti primjerka, roka vraćanja | DA – ažuriranje statusa primjerka i evidencija zaduženja u bazi | DA – kompletan tok: odabir člana, odabir knjige, potvrda i evidencija | DA – bibliotekar prolazi kroz cijeli proces zaduživanja i vraćanja | DA – provjera nakon izmjene poslovnih pravila zaduživanja | DA – prikaz forme, odabir člana i knjige, potvrda akcije | DA – pokušaj višestrukog zaduživanja istog primjerka direktnim pozivom API-ja |
+| **Upravljanje članarinom** (US-56, US-57, US-58, US-59) | DA – validacija datuma: datum isteka ne smije biti prije datuma početka | DA – veza između korisnika i članarine i njen uticaj na dozvolu zaduživanja | DA – blokiranje zaduživanja kada je članarina istekla ili ne postoji | DA – korisnik vidi tačan status i datum isteka u svom profilu | DA – provjera nakon produženja ili izmjene datuma članarine | DA – prikaz statusa članarine u profilu člana | NE |
+| **Rezervacije** (US-69, US-72, US-79, US-80) | DA – provjera pravila: knjiga mora biti nedostupna, jedan član može imati jednu aktivnu rezervaciju | DA – rezervacija se ispravno vezuje za knjigu i reflektuje u katalogu | DA – tok kreiranja, pregleda i otkazivanja rezervacije | DA – korisnik prolazi kroz rezervaciju i potvrđuje prikaz u profilu | DA – provjera nakon izmjene logike rezervacija | DA – prikaz liste aktivnih rezervacija i dugme za otkazivanje | DA – pokušaj rezervacije bez aktivne članarine direktnim pozivom API-ja |
+| **Upravljanje kategorijama** (US-30, US-33, US-34) | DA – validacija naziva: prazno polje i duplikati se odbijaju | DA – provjera da brisanje kategorije s povezanim knjigama nije dozvoljeno | DA – pregled, dodavanje, izmjena i brisanje kategorija kroz korisničko sučelje | DA – bibliotekar prolazi kroz upravljanje kategorijama | DA – provjera nakon dodavanja novih kategorija ili izmjene logike | DA – prikaz kategorija u padajućem meniju pri dodavanju knjige | NE |
+| **Upravljanje korisnicima (admin)** (US-49, US-50, US-51, US-52, US-53) | NE | DA – promjena uloge i deaktivacija ispravno se reflektuju kroz cijeli sistem | DA – kompletan tok: pregled korisnika, promjena uloge i deaktivacija naloga | DA – admin potvrđuje da se promjene odmah primjenjuju | DA – provjera nakon dodavanja novih uloga ili izmjene admin logike | DA – tabela korisnika, dugmad za izmjenu uloge i deaktivaciju | DA – korisnik s nižim pravima pokušava izvršiti admin akciju direktnim pozivom API-ja |
+| **Email notifikacije** (US-81, US-82, US-83, US-84) | NE | DA – email servis se aktivira pri odgovarajućim događajima (istek roka vraćanja, nova rezervacija) | DA – notifikacije se šalju u realnim scenarijima zaduživanja i rezervacije | DA – korisnik prima obavijest na pravu adresu u testnom okruženju | DA – provjera nakon izmjene email predložaka | NE | NE |
+| **Audit log** (NFR-11) | NE | DA – administratorske akcije evidentiraju se pri svakoj izvršenoj promjeni | DA – provjera da se log popunjava tokom realnih admin scenarija | DA – admin potvrđuje da zapis sadrži tačne podatke o akciji i korisniku | DA – provjera nakon svake nove admin funkcionalnosti | NE | DA – obični korisnik ne smije moći brisati niti mijenjati audit zapise |
+| **Validacija unosa i UX poruke** (NFR-2, NFR-3, NFR-4) | DA – validacione funkcije za svako polje u sistemu | DA – validacija se jednako provodi na nivou API-ja, a ne samo na frontendu | DA – poruke o grešci prikazuju se uz ispravna polja u svim formama | DA – korisnik razumije poruku i zna šta treba ispraviti | DA – provjera nakon izmjene frontenda ili validacijske logike | DA – vizuelna pozicija i sadržaj poruke direktno uz polje s greškom | NE |
+| **Sigurnost i kontrola pristupa** (NFR-5, NFR-6) | DA – hashiranje lozinki, lozinka se ne pojavljuje ni u jednom logu ni odgovoru servera | DA – zaštita svih endpointa: neautorizovani zahtjev vraća odgovarajuću grešku | DA – provjera kontrole pristupa kroz realne tokove sistema | DA – nema sigurnosnih propusta uočljivih u standardnom korištenju | DA – provjera nakon dodavanja novih ruta ili izmjene auth logike | NE | DA – SQLi, XSS, CSRF, manipulacija JWT-om i zaobilaženje RBAC-a |
 
 <br>
 
@@ -187,106 +173,120 @@ Tabela ispod povezuje ključne funkcionalnosti bibliotečkog sistema sa nivoima 
 
 Ova sekcija prikazuje kako se acceptance kriteriji iz dokumenta *Set of User Stories* mapiraju na nivoe testiranja i koje artefakte koristimo kao dokaz njihovog ispunjenja. 
 
-| Referenca | Ključni acceptance kriterij | Nivoi verifikacije | Dokaz ispunjenja |
-|-----------|---------------------------|-------------------|------------------|
-| US-01, US-02, US-03 | Registracija korisnika uspješna uz validne podatke; neispravan unos se odbija uz jasnu poruku | Unit, Integracijsko, Sistemsko, Prihvatno | Validacija forme (unit), API odgovor (Postman), demo registracije |
-| US-04, US-05 | Prijava uspješna uz tačne kredencijale; pogrešni podaci vraćaju generičku poruku | Unit, Integracijsko, Sistemsko, Sigurnosno, Prihvatno | CI testovi za login, API provjera autentifikacije, demo login toka |
-| US-08, US-09 | Korisnik vidi samo funkcionalnosti dozvoljene njegovoj ulozi (RBAC) | Integracijsko, Sistemsko, Sigurnosno, Prihvatno | API testovi (403), provjera UI prikaza po ulozi, demo |
-| US-12, US-13 | Knjiga se može dodati samo uz validne podatke; ISBN mora biti ispravan i jedinstven | Unit, Integracijsko, Sistemsko, Prihvatno | Unit validacija, API zapis dodavanja knjige, demo u UI |
-| US-21, US-23, US-24 | Status primjerka ispravno se mijenja; zadužen primjerak se ne može deaktivirati | Unit, Integracijsko, Sistemsko, Prihvatno | Testovi poslovne logike, zapis promjene statusa, audit log |
-| US-24, US-25, US-28 | Knjiga se ne može obrisati ako ima aktivna zaduženja | Unit, Integracijsko, Sistemsko, Prihvatno | Validacija pravila, API odgovor, demo brisanja |
-| US-30, US-33 | Kategorija mora imati jedinstven naziv; ne može se obrisati ako sadrži knjige | Unit, Integracijsko, Sistemsko, Prihvatno | Unit testovi validacije, API zapis, UI provjera |
-| US-35, US-36, US-40 | Katalog prikazuje tačne podatke i omogućava pretragu i filtriranje | Unit, Integracijsko, Sistemsko, Performansno, Prihvatno | Testovi filtera, API pretraga, mjerenje vremena odziva |
-| US-43, US-44, US-45 | Zaduživanje moguće samo uz aktivnu članarinu; status knjige se ažurira | Integracijsko, Sistemsko, Prihvatno | API zapis zaduživanja, promjena statusa primjerka, demo |
-| US-47 | Vraćanje knjige ažurira status i uklanja aktivno zaduženje | Integracijsko, Sistemsko, Prihvatno | Evidencija vraćanja, promjena statusa u bazi |
-| US-56, US-57, US-58 | Status članarine (Aktivna/Istekla) tačno se prikazuje i utiče na zaduživanje | Unit, Integracijsko, Sistemsko, Prihvatno | Validacija datuma, API odgovor, UI prikaz statusa |
-| US-62, US-63, US-64 | Korisnik vidi svoja zaduženja i historiju bez pristupa tuđim podacima | Integracijsko, Sistemsko, Sigurnosno, Prihvatno | API filtriranje po korisniku, UI prikaz, demo |
-| US-69, US-72, US-80 | Rezervacija moguća samo kad nema dostupnih primjeraka; automatsko otkazivanje po isteku | Unit, Integracijsko, Sistemsko, Prihvatno | Testovi pravila rezervacije, API zapis, simulacija isteka |
-| US-81, US-82, US-83, US-84 | Email notifikacije se šalju u odgovarajućim situacijama | Integracijsko, Sistemsko, Prihvatno | Mailtrap evidencija, log slanja, demo |
-| US-49, US-50, US-51, US-52 | Administrator može upravljati korisnicima uz poštivanje RBAC pravila | Integracijsko, Sistemsko, Sigurnosno, Prihvatno | API zapis izmjena, provjera privilegija, demo |
-| NFR-1 | Sistem odgovara unutar 2 sekunde za ključne operacije | Performansno, Sistemsko, Prihvatno | JMeter izvještaj, mjerenje odziva |
-| NFR-2, NFR-4 | Poruke grešaka i validacije su jasne i prikazane uz odgovarajuće polje | Unit, Sistemsko, Prihvatno | UI provjera, validacija forme |
-| NFR-5 | Neovlašten pristup je blokiran na API nivou | Integracijsko, Sigurnosno, Sistemsko, Prihvatno | API testovi (401/403), sigurnosni logovi |
-| NFR-6 | Lozinke su hashirane i nisu dostupne u plain-text obliku | Unit, Integracijsko, Sigurnosno | Pregled baze, test hashiranja |
-| NFR-7 | Sistem održava konzistentnost podataka (status knjiga, zaduženja) | Unit, Integracijsko, Sistemsko | Testovi poslovne logike, audit log |
-| NFR-8 | Sistem je u potpunosti na bosanskom jeziku | Sistemsko, Prihvatno | UI provjera |
-| NFR-11 | Sve ključne akcije su evidentirane u audit logu | Integracijsko, Sistemsko, Sigurnosno | Audit log zapis i provjera |
+<br>
+
+| Veza | Ključni acceptance kriterij | Nivoi testiranja | Dokaz ispunjenja |
+|-----------|----------------------------|-------------------|-----------------|
+| Kreiranje naloga člana (**US-01, US-02, US-03**) | Forma prikazuje obavezna polja; sistem odbija unos bez popunjenih polja, s neispravnim emailom, s lozinkom kraćom od 8 znakova ili s već registrovanim emailom; nakon uspješne registracije novi član se pojavljuje u listi i automatski dobiva ulogu Član | Unit, Integracijsko, Sistemsko, Prihvatno | Testovi validacije forme (unit), API odgovor pri registraciji, provjera baze da je korisnik kreiran s ulogom Član |
+| Prijava i obavijest o neuspjehu (**US-04, US-05**) | Ispravni kredencijali vode na odgovarajući dashboard prema ulozi; neispravni podaci vraćaju generičku poruku bez otkrivanja da li greška leži u emailu ili lozinci; korisnik može ponoviti pokušaj | Unit, Integracijsko, Sistemsko, Sigurnosno, Prihvatno | Unit testovi validacije, API provjera autentifikacije, provjera da odgovor servera ne otkriva detalje greške |
+| Odjava i čuvanje sesije (**US-06, US-07**) | Nakon odjave sistem preusmjerava na prijavu i ne dozvoljava pristup zaštićenim stranicama bez ponovne prijave; sesija ostaje aktivna pri kretanju između stranica i briše se pri odjavi | Integracijsko, Sistemsko, Prihvatno | Provjera brisanja sesije u bazi, pokušaj pristupa zaštićenoj stranici nakon odjave |
+| Zaštita ruta i deaktivirani korisnik (**US-08, US-09**) | Neprijavljeni korisnik se preusmjerava na prijavu čak i pri direktnom unosu URL-a; deaktivirani korisnik ne može pristupiti sistemu ni putem stare sesije; prikazuje se generička poruka bez otkrivanja razloga blokade | Integracijsko, Sistemsko, Sigurnosno, Prihvatno | API testovi (401/403), provjera da stara sesija deaktiviranog korisnika ne prolazi, UI provjera prikaza poruke |
+| Dodavanje knjige (**US-12, US-13, US-14, US-15, US-16**) | Forma obuhvata sva obavezna polja (naslov, autor, ISBN, godina, kategorija, primjerci); ISBN se validira po formatu i jedinstvenosti; broj primjeraka mora biti nenegativan cijeli broj; knjiga se odmah pojavljuje u katalogu | Unit, Integracijsko, Sistemsko, Prihvatno | Unit testovi validacije ISBN-a i broja primjeraka, API zapis dodavanja knjige, provjera prikaza u katalogu |
+| Uređivanje knjige (**US-17, US-18**) | Forma prikazuje postojeće podatke; dozvoljena je izmjena naslova, autora, godine i kategorije; ažurirani podaci se odmah prikazuju u katalogu; samo bibliotekar ima pristup izmjeni | Integracijsko, Sistemsko, Prihvatno | API provjera izmjene, provjera da član ne može pristupiti ruti za izmjenu, provjera ažuriranog prikaza u katalogu |
+| Katalog knjiga (**US-19, US-20**) | Katalog prikazuje sve aktivne knjige učitane iz baze; neaktivne i obrisane knjige se ne prikazuju; pri većem broju knjiga radi paginacija | Integracijsko, Sistemsko, Prihvatno | API provjera da obrisane knjige nisu u odgovoru, UI provjera paginacije |
+| Upravljanje primjercima (**US-21, US-22, US-23, US-24**) | Svaki primjerak je zaseban zapis s jedinstvenim ID-em i vidljivim statusom; status se ažurira pri promjenama; deaktivacija nije moguća za primjerak koji je trenutno zadužen | Unit, Integracijsko, Sistemsko, Prihvatno | Unit testovi tranzicija statusa, API provjera zabrane deaktivacije zaduženog primjerka, UI prikaz statusa svakog primjerka |
+| Brisanje knjige i deaktivacija primjerka (**US-25, US-26, US-27, US-28**) | Brisanje nije dozvoljeno ako postoji aktivno zaduženje; sistem traži potvrdu prije brisanja; deaktivirani primjerak ne ulazi u broj dostupnih primjeraka | Unit, Integracijsko, Sistemsko, Prihvatno | Unit test poslovnog pravila, API provjera odbijanja brisanja uz aktivno zaduženje, UI provjera dijaloga za potvrdu |
+| Upravljanje kategorijama (**US-29 – US-34**) | Naziv kategorije mora biti jedinstven i neprazan; izmjena se odbija ako naziv već postoji; brisanje nije dozvoljeno ako kategorija sadrži knjige; kategorija je odmah vidljiva u padajućem meniju pri dodavanju knjige | Unit, Integracijsko, Sistemsko, Prihvatno | Unit testovi validacije naziva, API provjera zabrane brisanja kategorije s knjigama, UI provjera padajućeg menija |
+| Pretraga knjiga (**US-35, US-36**) | Pretraga filtrira po naslovu, autoru i ključnoj riječi; klik na "Očisti" vraća punu listu; ako nema rezultata prikazuje se odgovarajuća poruka | Unit, Integracijsko, Sistemsko, Prihvatno | Unit testovi logike pretrage, API provjera filtriranja, UI provjera prikaza rezultata i poruke pri praznom skupu |
+| Dostupnost knjige (**US-40, US-41, US-42**) | Status Dostupno / Zaduženo tačno odražava broj slobodnih primjeraka; zaduženi i deaktivirani primjerci se ne računaju; broj se ažurira odmah nakon zaduživanja i vraćanja | Unit, Integracijsko, Sistemsko, Prihvatno | Unit test izračuna broja primjeraka, API provjera ažuriranog broja nakon transakcije, UI provjera prikaza na stranici detalja |
+| Zaduživanje i vraćanje (**US-43, US-44, US-45, US-46, US-47**) | Zaduživanje nije moguće bez aktivne članarine; nedostupan primjerak se ne može zadužiti; status primjerka se odmah ažurira; rok vraćanja se automatski kreira; vraćanje ažurira status primjerka u Dostupan; isti primjerak ne može biti zadužen dva puta istovremeno | Integracijsko, Sistemsko, Sigurnosno, Prihvatno | API provjera svih poslovnih pravila, provjera promjene statusa primjerka u bazi |
+| Pregled profila (**US-48**) | Profil prikazuje ime, prezime, email i trenutno posuđene knjige; član vidi samo vlastiti profil | Integracijsko, Sistemsko, Sigurnosno, Prihvatno | API provjera da član ne može dohvatiti profil drugog korisnika, UI provjera prikaza podataka |
+| Upravljanje korisnicima (admin) (**US-49, US-50, US-51, US-52, US-53**) | Administrator vidi listu svih korisnika s osnovnim podacima i može pretraživati po imenu ili emailu; promjena uloge se odmah primjenjuje; deaktivirani korisnik ne može pristupiti sistemu; administrator ne može deaktivirati vlastiti nalog | Integracijsko, Sistemsko, Sigurnosno, Prihvatno | API zapis izmjena uloge i deaktivacije, provjera da deaktivirani korisnik ne prolazi auth, API provjera zabrane samodeaktivacije |
+| Historija zaduženja (**US-54**) | Bibliotekar vidi listu svih ranijih zaduženja člana s nazivom knjige, primjerkom, datumom zaduženja i datumom vraćanja; prikazuju se samo završena zaduženja | Integracijsko, Sistemsko, Prihvatno | API provjera da aktivna zaduženja nisu u historiji, UI provjera prikaza podataka historije |
+| Upravljanje članarinom (bibliotekar) (**US-55, US-56, US-57**) | Forma sadrži datum početka i datum isteka; datum isteka ne smije biti prije datuma početka; izmjene su odmah vidljive na profilu; ako memberina ne postoji prikazuje se jasna poruka | Unit, Integracijsko, Sistemsko, Prihvatno | Unit test validacije datuma, API provjera odbijanja neispravnih datuma, UI provjera prikaza statusa na profilu |
+| Pregled članarine (član) (**US-58, US-59**) | Član vidi status Aktivna ili Istekla i datum isteka u formatu DD-MM-YYYY; ako članarina ne postoji prikazuje se odgovarajuća poruka | Integracijsko, Sistemsko, Prihvatno | UI provjera prikaza statusa i datuma, provjera poruke kada članarina ne postoji |
+| Pregled vlastitih zaduženja (**US-62, US-63, US-64**) | Član vidi samo vlastita aktivna zaduženja s rokom vraćanja; zakašnjela zaduženja su vizualno označena; vraćene knjige se ne prikazuju u aktivnim zaduženjima | Integracijsko, Sistemsko, Sigurnosno, Prihvatno | API provjera da odgovor sadrži samo zaduženja prijavljenog korisnika, UI provjera vizualnog isticanja zakašnjelih, provjera da vraćene knjige nestaju iz liste |
+| Aktivna zaduženja (bibliotekar) (**US-65, US-66, US-67, US-68**) | Lista prikazuje sva aktivna zaduženja sortirana po roku vraćanja (najbliži rok prvi); filtriranje po članu ispravno sužava rezultate; detalji prikazuju člana, knjigu, primjerak i datume | Integracijsko, Sistemsko, Prihvatno | API provjera sortiranja i filtriranja, UI provjera prikaza detalja |
+| Rezervacije (član) (**US-69, US-70, US-71, US-72**) | Rezervacija je moguća samo kada knjiga nema dostupnih primjeraka; isti član ne može kreirati dvije aktivne rezervacije iste knjige; svaka rezervacija ima zabilježen datum i vidljiva je u sekciji "Moje rezervacije"; otkazivanje odmah uklanja rezervaciju iz liste | Unit, Integracijsko, Sistemsko, Prihvatno | Unit testovi pravila rezervacije, API provjera odbijanja rezervacije dostupne knjige i duplikta, UI provjera prikaza i otkazivanja |
+| Pregled rezervacija (bibliotekar) (**US-73**) | Lista prikazuje sve aktivne rezervacije s imenom i emailom člana, naslovom knjige i datumom; otkazane i realizovane rezervacije se ne prikazuju | Integracijsko, Sistemsko, Prihvatno | API provjera filtriranja statusa, UI provjera prikaza podataka |
+| Napredna pretraga i filteri (**US-74, US-75, US-76, US-78**) | Filtriranje po kategoriji, izdavaču i godini prikazuje samo odgovarajuće knjige; kombinovanje više filtera ispravno sužava rezultate; pri praznom skupu prikazuje se poruka "Nema rezultata" | Unit, Integracijsko, Sistemsko, Prihvatno | Unit testovi logike kombinovanih filtera, API provjera rezultata za svaki filter, UI provjera ažuriranja liste |
+| Automatsko otkazivanje rezervacije (**US-79, US-80**) | Svaka rezervacija ima definisan datum isteka; po isteku status prelazi u Otkazana i rezervacija se ne računa kao aktivna; knjiga postaje dostupna za novu rezervaciju ili zaduživanje | Integracijsko, Sistemsko, Prihvatno | Simulacija isteka u testnom okruženju, API provjera promjene statusa, provjera dostupnosti knjige nakon otkazivanja |
+| Email notifikacije (član) (**US-81, US-82, US-83, US-84, US-85**) | Podsjetnik se šalje 2 dana prije isteka roka; upozorenje se šalje na dan isteka; email sadrži naziv knjige i datum roka; podsjetnici se zaustavljaju nakon vraćanja; email se ne šalje ako adresa nije evidentirana | Integracijsko, Sistemsko, Prihvatno | Mailtrap evidencija primljenih emailova, log slanja u sistemu, simulacija isteka roka u testnom okruženju |
+| Email notifikacija bibliotekara  (**US-86**)| Kada član kreira rezervaciju, sistem automatski šalje email bibliotekaru s imenom člana, naslovom knjige i datumom; šalje se samo jednom po rezervaciji | Integracijsko, Sistemsko, Prihvatno | Mailtrap evidencija, provjera da se email ne šalje duplo pri istoj rezervaciji |
+| Mjesečni izvještaji (**US-88, US-89, US-90**) | Administrator može odabrati tip izvještaja (zaduženja, rezervacije, članovi) i period (mjesec i godina); izvještaj prikazuje tačne podatke za odabrani period; ako nema podataka prikazuje se odgovarajuća poruka | Integracijsko, Sistemsko, Prihvatno | API provjera tačnosti podataka u izvještaju, UI provjera generisanja za različite periode i tipove |
+| Audit log (**US-91, US-92**) | Svako dodavanje, izmjena ili brisanje knjige kreira audit zapis s akcijom, datumom, vremenom i korisnikom; promjene nad korisničkim nalozima se bilježe na isti način; zapisi nisu dostupni za izmjenu | Integracijsko, Sistemsko, Sigurnosno, Prihvatno | Provjera baze da je zapis kreiran nakon svake admin akcije, API provjera da obični korisnik ne može mijenjati audit zapise |
+| Kazne za kasno vraćanje (**US-93, US-94**) | Sistem obračunava kaznu po danu kašnjenja i veže je za konkretno zaduženje i člana; član vidi ukupan iznos kazni na profilu; ako nema kazni prikazuje se poruka da nema dugovanja | Unit, Integracijsko, Sistemsko, Prihvatno | Unit test obračuna kazne, API provjera iznosa nakon vraćanja s kašnjenjem, UI provjera prikaza na profilu |
 
 <br>
 
 ## 5. Način evidentiranja rezultata testiranja
 
-### 5.1 Evidencija bug prijava
+Rezultati testiranja evidentiraju se kroz strukturisane test zapise koji nastaju tokom izvršavanja test aktivnosti. Svaki test ima jasno definisan ishod:
 
-Svaka pronađena greška evidentira se kao bug izvještaj koji sadrži sljedeće informacije:
+- **USPJEH** – funkcionalnost radi ispravno i u skladu sa acceptance kriterijima
+- **GREŠKA** – uočeno odstupanje od očekivanog ponašanja sistema
+- **NEIZVRŠENO** – test nije mogao biti sproveden zbog tehničkih ili eksternih ograničenja
 
-| Polje | Opis |
-|-------|------|
-| **Bug ID** | Jedinstveni identifikator (npr. BUG-001) |
-| **Naziv** | Kratak opisni naslov greške |
-| **Test Case** | ID test slučaja koji je otkrio grešku |
-| **User Story** | Povezani US (npr. US-02) |
-| **Opis** | Detaljan opis pronađene greške |
-| **Koraci za reprodukciju** | Precizni koraci kojima se greška može reproducirati |
-| **Očekivano ponašanje** | Šta bi sistem trebao uraditi |
-| **Stvarno ponašanje** | Šta sistem zapravo radi |
-| **Ozbiljnost** | Kritično / Visoko / Srednje / Nisko |
-| **Prioritet popravke** | Visok / Srednji / Nizak |
-| **Status** | Otvoreno / U rješavanju / Riješeno / Zatvoreno |
-| **Datum prijave** | Datum kada je bug evidentiran |
-| **Datum rješavanja** | Datum kada je bug ispravljen |
+---
+
+### Podaci koji se evidentiraju
+
+Za svaki test zapis bilježe se sljedeće informacije:
+
+- **Datum izvršavanja** – kada je test proveden  
+- **User Story ili NFR referenca** – na šta se test odnosi 
+- **Nivo testiranja** – unit, integracijsko, sistemsko, regresiono ili prihvatno testiranje  
+- **Testni scenario** – šta se tačno provjerava u okviru testa  
+- **Očekivani rezultat** – kako bi sistem trebao reagovati  
+- **Stvarni rezultat** – šta se desilo tokom izvršavanja testa  
+- **Okruženje** – development, test ili staging okruženje  
+- **Status testa** – USPJEH / GREŠKA / NEIZVRŠENO  
+- **Dokaz izvršenja** – log, API odgovor, screenshot ili drugi oblik evidencije  
+
+---
+
+### Evidencija grešaka
+
+U slučaju da test ima status **GREŠKA**, uz test zapis se vodi i evidencija defekta koja omogućava kasniju analizu i ispravku problema. Svaka greška mora biti dovoljno opisana da se može ponoviti i razumjeti bez dodatnih informacija. Greške se označavaju jednostavnom internom oznakom u formatu: **BG-XX** gdje je XX redni broj greške u okviru projekta.
+
 
 <br>
 
 ## 6. Glavni rizici kvaliteta
-U nastavku, navedeni su neki od potencijalnih rizika i podijeljeni su u četiri kategorije: funkcionalni, sigurnosni, UI/UX i procesni. Svaki rizik sadrži i preporučene mjere mitigacije.
+U nastavku, navedeni su neki od potencijalnih rizika kvaliteta, koji su podijeljeni u četiri kategorije: funkcionalni, sigurnosni, UI/UX i procesni. Svaki rizik sadrži i preporučene mjere prevencije i ublažavanja.
 ### 6.1 Funkcionalni rizici
 Funkcionalni rizici se odnose na ispravnost rada sistema u skladu sa definisanim poslovnim zahtjevima. Fokus ove kategorije je na preciznosti obrade podataka, pokrivanju specifičnih "rubnih" slučajeva i održavanju stabilnosti sistema kroz regresiono testiranje.
 
-| Rizik | Mjere mitigacije |
+| Rizik | Mjere prevencije i ublažavanja |
 |-------|-------------------|
-| **Nekonzistentnost podataka pri paralelnim zahtjevima** – dva korisnika istovremeno zadužuju isti primjerak knjige | Transakcije i zaključavanje na nivou baze podataka (IT-15); testirati scenarij s dva paralelna zahtjeva |
-| **Pogrešan prikaz statusa članarine** – status prikazan kao aktivan iako je istekao, što omogućava zaduživanje | Unit testovi za granične datume (dan isteka, dan poslije); integracijsko testiranje s realnim datumima |
-| **Regresione greške** – ispravka jedne greške uzrokuje novu u drugom dijelu sistema | Smoke testiranje nakon svakog deploya; regresioni test slučajevi za sve ključne tokove |
+| **Nekonzistentnost podataka pri paralelnim zahtjevima** – dva korisnika istovremeno zadužuju isti primjerak knjige | Osigurati zaključavanje podataka na nivou baze kako bi se spriječili konflikti pri istovremenim operacijama |
+| **Pogrešan prikaz statusa članarine** – status prikazan kao aktivan iako je istekao, što omogućava zaduživanje | Implementirati validaciju statusa članarine u svim relevantnim poslovnim operacijama, posebno prije zaduživanja knjige |
+| **Regresione greške** – ispravka jedne greške uzrokuje novu u drugom dijelu sistema | Regresiono testiranje ključnih funkcionalnosti nakon svake izmjene sistema |
 
 ---
 
 ### 6.2 Sigurnosni rizici
 Sigurnosni rizici obuhvataju potencijalne prijetnje integritetu podataka i privatnosti korisnika. Identifikacija ovih rizika osigurava zaštitu od zlonamjernih napada, neovlaštenog pristupa osjetljivim informacijama i osigurava stabilnost autorizacijskih mehanizama.
 
-| Rizik | Mjere mitigacije |
+| Rizik | Mjere prevencije i ublažavanja |
 |-------|-------------------|
 | **Propusti u kontroli pristupa (RBAC)** – korisnik s nižim privilegijama direktnim API pozivom pristupa zabranjenim resursima | RBAC testiranje i na UI i na API nivou; penetracijsko testiranje autorizacijskih ruta |
-| **SQL Injection** – zlonamjerni unos u polja za pretragu prosljeđuje se direktno u SQL upit | Penetracijsko testiranje i parametrizovani SQL upiti 
-| **Brute force napad na prijavu** – automatizovano pogađanje lozinki bez zaštite | Testirati odgovor sistema na 50+ uzastopnih neuspjelih pokušaja; postaviti limit uzastopnih pokušaja prijave |
-| **Neispravno upravljanje sesijom** – sesija ostaje aktivna nakon odjave ili token ne ističe | Testirati odjavu i provjeru da token više ne funkcioniše; testirati pristup zaštićenoj ruti sa starim tokenom |
+| **SQL Injection** – zlonamjerni unos u polja za pretragu prosljeđuje se direktno u SQL upit |Koristiti parametrizovane upite i validaciju ulaznih podataka
+| **Brute force napad na prijavu** – automatizovano pogađanje lozinki bez zaštite | Uvesti ograničenje broja pokušaja prijave i mehanizme zaštite od prekomjernih zahtjeva |
+| **Neispravno upravljanje sesijom** – sesija ostaje aktivna nakon odjave | Osigurati pravilno invalidiranje sesije nakon odjave |
 
 ---
 
 ### 6.3 UI/UX rizici
 UI/UX rizici su fokusirani na interakciju korisnika sa sistemom. Cilj je osigurati intuitivno iskustvo, vizuelnu konzistentnost na različitim uređajima i preglednicima, te spriječiti korisničke greške kroz jasne povratne informacije.
 
-| Rizik | Mjere mitigacije |
+| Rizik | Mjere prevencije i ublažavanja|
 |-------|-------------------|
 | **Nekonzistentan prikaz u pretraživačima** – razlike u prikazu između Chrome, Firefox i Edge pretraživača | UI testiranje u Chrome, Firefox i Edge pretraživačima za sve ključne ekrane |
-| **Destruktivne akcije bez potvrde** – slučajno brisanje korisnika ili knjige bez dijaloga za potvrdu | UI provjera svih akcija brisanja; testirati da se dijalog prikazuje i da otkazivanje zaustavlja akciju |
+| **Destruktivne akcije bez potvrde** – slučajno brisanje korisnika ili knjige bez dijaloga za potvrdu | Uvesti potvrdu za sve kritične akcije koje mijenjaju ili brišu podatke |
 | **RBAC nije reflektovan u UI** – korisnik vidi opcije koje nema pravo izvršiti, što vodi do tehničkih grešaka | UI testiranje za svaku ulogu (Član, Bibliotekar, Administrator); provjera da nedozvoljeni elementi nisu vidljivi |
-| **Responsivnost nije zadovoljena** – stranica se ne prikazuje ispravno na mobilnim uređajima ili tabletima | Provjera ključnih ekrana u DevTools Responsive Modu (375px, 768px, 1280px) |
+| **Responsivnost nije zadovoljena** – stranica se ne prikazuje ispravno na mobilnim uređajima ili tabletima | Osigurati prilagodljiv dizajn za različite veličine ekrana |
 
 ---
 
 ### 6.4 Procesni rizici
 Procesni rizici se bave samom metodologijom rada, tokom testiranja i dokumentovanjem problema. Oni identifikuju uska grla u komunikaciji i organizaciji koja mogu dovesti do kašnjenja ili isporuke softvera koji ne ispunjava očekivanja korisnika.
 
-| Rizik | Mjere mitigacije |
+| Rizik | Mjere prevencije i ublažavanja |
 |-------|-------------------|
 | **Kašnjenje u otkrivanju grešaka** – greške otkrivene prekasno u razvojnom ciklusu | Obavezno unit testiranje pri implementaciji; integracioni testovi odmah po spajanju modula |
 | **Nedovoljna provjera NFR-ova** – performanse i sigurnost se testiraju samo u kasnim fazama | Uključiti NFR testove u sistemsko testiranje od ranijih sprintova; ne odlagati sigurnost za kraj |
-| **Neadekvatna dokumentacija grešaka** – bug nije dovoljno opisan za brzu reprodukciju | Obavezan format bug prijave; ne zatvarati bug bez priloženog dokaza o ispravci |
-| **Preskakanje prihvatnog testiranja** – sistem je tehnički ispravan, ali ne odgovara potrebama korisnika | UAT scenariji planirani unaprijed uz uključivanje finalnih korisnika za sve uloge |
-<br>
-
-*Ovaj dokument predstavlja Test Strategy za Sprint 3. Detalji implementacije test slučajeva, kao i rezultati testiranja, bit će razrađeni i evidentirani u sklopu kasnijih sprintova (Sprint 8 – Sprint 11) kako sistem bude implementiran.*
-
+| **Neadekvatna dokumentacija grešaka** – bug nije dovoljno opisan za brzu reprodukciju | Definisati standardizovan način opisivanja grešaka radi lakše reprodukcije i ispravke |
+| **Preskakanje prihvatnog testiranja** – sistem je tehnički ispravan, ali ne odgovara potrebama korisnika | Planirati prihvatno testiranje sa definisanim scenarijima za sve ključne uloge |
 
 ---
