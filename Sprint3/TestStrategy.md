@@ -33,40 +33,153 @@ Testiranje se smatra uspješnim kada su ispunjeni sljedeći uvjeti:
 
 Različiti nivoi testiranja omogućavaju provjeru sistema od pojedinačnih funkcija i komponenti, preko njihove međusobne integracije, pa sve do provjere cjelokupnog rada sistema iz perspektive krajnjeg korisnika. Na ovaj način se osigurava da implementirane funkcionalnosti zadovoljavaju definisane zahtjeve i da sistem radi očekivano u realnim scenarijima korištenja.
 
-| Nivo testiranja | Cilj | Alati | Frekvencija | Izlazni kriteriji (kriterij prihvatanja) | Ograničenja |
-|-----------------|------|-------|-------------|-------------------|-------------|
-| Unit testiranje | Provjera pojedinačnih funkcija i komponenti: validacija forme (registracija, prijava), provjera unosa (email, lozinka), logika autentifikacije, upravljanje statusom knjiga i primjeraka | xUnit (.NET), Visual Studio Test Explorer | Pri svakoj izmjeni koda | Svi testovi prolaze, osnovna logika ispravna | Ne može otkriti probleme koji nastaju u komunikaciji između modula, servisa ili baze podataka |
-| Integraciono testiranje | Provjera komunikacije između komponenti: frontend - backend, API - baza podataka, autentifikacija i autorizacija, operacije nad knjigama i korisnicima | Postman, Mailtrap | Nakon integracije modula | API vraća ispravne odgovore, podaci konzistentni | Uzrok grešaka može biti teže izolirati jer uključuje više komponenti. |
-| Sistemsko testiranje | Testiranje kompletnog sistema kroz end-to-end tokove: registracija, prijava, pregled kataloga, dodavanje i brisanje knjiga, zaduživanje i vraćanje | Ručno testiranje u pretraživaču, Developer Tools | Nakon integracionog testiranja | Svi ključni tokovi funkcionišu ispravno | Sistemsko testiranje je vremenski najzahtjevnije. Uzrok grešaka teže je izolirati jer uključuje cijeli sistem. |
-| Prihvatno testiranje (UAT) | Provjera da sistem zadovoljava acceptance kriterije iz User Story-ja: validacija unosa, uspješna registracija, pravilno upravljanje knjigama i korisnicima| Ručno testiranje u pretraživaču | Prije produckije | Korisnici potvrđuju ispravnost sistema, nema kritičnih grešaka, sistem odobren za isporuku | Zavisi od subjektivne procjene korisnika i obično pokriva samo glavne funkcionalne scenarije, pa neke tehničke greške mogu ostati neotkrivene. |
-| Regresiono testiranje | Provjera da postojeće funkcionalnosti (prijava, registracija, katalog, upravljanje knjigama i korisnicima) i dalje rade ispravno nakon izmjena ili dodavanja novih funkcionalnosti | Ručno testiranje / automatizovani testovi - NUnit | Nakon svake izmjene ili dodavanja nove funkcionalnosti | Nema regresija u postojećim funkcionalnostima | Može biti vremenski zahtjevno jer je potrebno ponovo testirati veći broj postojećih funkcionalnosti nakon svake izmjene. |
 
 ---
 
+### 2.1 Unit testiranje
+
+**Cilj:**  
+Provjera pojedinačnih funkcija i komponenti: validacija forme (registracija, prijava), provjera unosa (email, lozinka), logika autentifikacije, upravljanje statusom knjiga i primjeraka.
+
+**Alati:**  
+xUnit (.NET), Visual Studio Test Explorer.
+
+**Izlazni kriteriji (kriterij prihvatanja):**  
+Svi testovi prolaze, osnovna logika ispravna.
+
+**Ograničenja:**  
+Ne može otkriti probleme koji nastaju u komunikaciji između modula, servisa ili baze podataka.
+
+
+---
+
+### 2.2 Integracijsko testiranje
+
+**Cilj:**  
+Provjera komunikacije između komponenti: frontend – backend, API – baza podataka, autentifikacija i autorizacija, operacije nad knjigama i korisnicima.
+
+**Alati:**  
+Postman, Mailtrap.
+
+
+**Izlazni kriteriji:**  
+API vraća ispravne odgovore, podaci konzistentni.
+
+**Ograničenja:**  
+Uzrok grešaka može biti teže izolirati jer uključuje više komponenti.
+
+
+---
+
+### 2.3 Sistemsko testiranje
+
+**Cilj:**  
+Testiranje kompletnog sistema kroz end-to-end tokove: registracija, prijava, pregled kataloga, dodavanje i brisanje knjiga, zaduživanje i vraćanje. Obuhvatiti funkcionalne i nefunkcionalne aspekte (performanse, sigurnost, upotrebljivost).  
+
+**Alati:**  
+Ručno testiranje u pretraživaču, Developer Tools.
+
+**Izlazni kriteriji:**  
+Svi ključni tokovi funkcionišu ispravno.
+
+**Ograničenja:**  
+Sistemsko testiranje je vremenski najzahtjevnije. Uzrok grešaka teže je izolirati jer uključuje cijeli sistem.
+
+---
+
+### 2.4 Prihvatno testiranje (UAT – User Acceptance Testing)
+
+**Cilj:**  
+Provjera da sistem zadovoljava acceptance kriterije iz User Story-ja: validacija unosa, uspješna registracija, pravilno upravljanje knjigama i korisnicima.
+
+**Alati:**  
+Ručno testiranje u pretraživaču.
+
+**Izlazni kriteriji:**  
+Korisnici potvrđuju ispravnost sistema, nema kritičnih grešaka, sistem odobren za isporuku.
+
+**Ograničenja:**  
+Zavisi od subjektivne procjene korisnika i obično pokriva samo glavne funkcionalne scenarije, pa neke tehničke greške mogu ostati neotkrivene.
+
+---
+
+### 2.5 Regresiono testiranje
+
+**Cilj:**  
+Provjera da postojeće funkcionalnosti (prijava, registracija, katalog, upravljanje knjigama i korisnicima) i dalje rade ispravno nakon izmjena ili dodavanja novih funkcionalnosti.
+
+**Alati:**  
+Ručno testiranje / automatizovani testovi – NUnit.
+
+**Izlazni kriteriji:**  
+Nema regresija u postojećim funkcionalnostima.
+
+**Ograničenja:**  
+Može biti vremenski zahtjevno jer je potrebno ponovo testirati veći broj postojećih funkcionalnosti nakon svake izmjene.
+
+---
+
+### 2.6 UI testiranje
+
+**Cilj:**  
+Provjera korisničkog interfejsa: ispravnost prikaza formi, poruka grešaka uz odgovarajuće polje, navigacija po ulogama, responsivnost na različitim rezolucijama, konzistentnost elemenata kroz pretraživače (Chrome, Firefox, Edge).
+
+**Alati:**  
+Ručno testiranje u pretraživaču, Browser DevTools, Selenium.
+
+**Izlazni kriteriji:**  
+UI je konzistentan na svim ciljnim pretraživačima; responzivan prikaz funkcioniše na mobilnim i desktop rezolucijama.
+
+**Ograničenja:**  
+Vizualne razlike između pretraživača teško je u potpunosti eliminisati; ne otkriva logičke greške na backendu.
+
+
+---
+
+
+### 2.7 Penetracijsko / sigurnosno testiranje
+
+**Cilj:**  
+Aktivna provjera sigurnosnih propusta: SQL injection, XSS, CSRF, neispravno upravljanje sesijom, izloženost osjetljivih podataka, testiranje RBAC zaštite direktnim API pozivima bez autentifikacije, provjera hashiranja lozinki.
+
+**Alati:**  
+OWASP ZAP (automatsko skeniranje), Postman (manualni API napadi), pregled baze podataka.
+
+**Izlazni kriteriji:**  
+Nema kritičnih sigurnosnih ranjivosti; svi neautorizirani API pozivi vraćaju 401/403; lozinke nisu čitljive u bazi; XSS i SQL injection pokušaji su odbijeni.
+
+**Ograničenja:**  
+Moguć velik broj lažne pozitivne rezultate (false positives) koje je potrebno ručno verifikovati, što produžava vrijeme analize.
+
+---
+<br>
+Kombinacija svih navedenih nivoa testiranja osigurava visok kvalitet softvera, smanjuje rizik od otkrivanja ozbiljnih grešaka u produkciji i povećava povjerenje krajnjih korisnika u ispravnost sistema.
+
+<br>
+
+---
 <br> 
 
 ## 3. Šta se testira u kojem nivou
 
 Tabela ispod povezuje ključne funkcionalnosti bibliotečkog sistema sa nivoima testiranja. Fokus je na tome šta se provjerava na kojem nivou.
 
-| Funkcionalnost/zahtjev | Unit | Integracijsko | Sistemsko | Sigurnosno | Performansno | Prihvatno |
-|------------------------|------|---------------|-----------|------------|--------------|-----------|
-| Registracija i prijava korisnika (US-01, US-02, US-03, US-04, US-05) | DA - validacija emaila, lozinke i obaveznih polja | DA - auth API + sesija + baza | DA - kompletan tok prijave i registracije | DA - zaštita ruta i generičke greške | DA - login < 2s (NFR-1) | DA - korisnik potvrđuje uspješan login |
-| Upravljanje sesijom i RBAC (US-06, US-07, US-08, US-09) | NE | DA - kreiranje/brisanje sesije i zaštita ruta | DA - kontrola pristupa po ulogama | DA - neovlašten pristup blokiran (NFR-5) | NE | DA - potvrda ograničenja pristupa |
-| Upravljanje knjigama (US-12, US-17, US-25) | DA - validacija unosa i poslovna pravila | DA - API + baza konzistentnost | DA - dodavanje, izmjena i brisanje kroz UI | DA - zabrana neovlaštenih akcija | NE | DA - bibliotekar potvrđuje tok |
-| Upravljanje primjercima (US-21, US-23, US-24) | DA - statusi i validacija | DA - promjena statusa ↔ baza | DA - prikaz statusa kroz sistem | DA - zabrana nedozvoljenih akcija | NE | DA - potvrda tačnosti statusa |
-| Katalog i pretraga (US-19, US-20, US-35, US-36) | DA - logika pretrage i filtera | DA - dohvat podataka iz baze | DA - pregled kataloga i paginacija | DA - korisnik vidi samo dozvoljene podatke | DA - učitavanje < 2s (NFR-1) | DA - korisnik potvrđuje preglednost |
-| Zaduživanje i vraćanje knjiga (US-43, US-44, US-45, US-47) | DA - poslovna pravila (npr. dostupnost) | DA - inventar + zaduženje + audit log | DA - end-to-end tok zaduživanja | DA - zaštita pristupa operacijama | NE | DA - bibliotekar potvrđuje tok |
-| Upravljanje članarinom (US-56, US-57, US-58, US-59) | DA - validacija datuma i statusa | DA - veza korisnik ↔ članarina | DA - blokiranje zaduživanja | NE | NE | DA - korisnik vidi tačan status |
-| Rezervacije (US-69, US-72, US-79, US-80) | DA - pravila rezervacije | DA - rezervacije ↔ katalog | DA - tok rezervacije i otkazivanja | DA - zabrana nedozvoljenih akcija | NE | DA - korisnik potvrđuje tok |
-| Upravljanje kategorijama (US-30, US-33, US-34) | DA - validacija naziva i pravila | DA - baza + knjige | DA - prikaz i upravljanje | NE | NE | DA - bibliotekar potvrđuje |
-| Upravljanje korisnicima (admin) (US-49, US-50, US-51, US-52, US-53) | NE | DA - API + promjene uloga | DA - tok upravljanja korisnicima | DA - RBAC pravila (NFR-5) | NE | DA - admin potvrđuje |
-| Email notifikacije (US-81, US-82, US-83, US-84) | NE | DA - email servis + događaji | DA - slanje u realnim scenarijima | NE | NE | DA - korisnik prima obavijesti |
-| Audit log (NFR-11) | NE | DA - zapis akcija u bazu | DA - provjera kroz scenarije | DA - evidencija sigurnosnih akcija | NE | DA - admin potvrđuje zapis |
-| Validacija unosa i UX (NFR-2, NFR-3, NFR-4) | DA - validacione funkcije | DA - validacija kroz API | DA - prikaz grešaka u UI | NE | NE | DA - korisnik razumije poruke |
-| Sigurnost sistema (NFR-5, NFR-6) | DA - hashiranje lozinki | DA - zaštita endpointa | DA - provjera kroz tokove | DA - potpuna sigurnosna provjera | NE | DA - nema sigurnosnih propusta |
-| Performanse sistema (NFR-1) | NE | DA - odziv API-ja | DA - brzina sistema u scenarijima | NE | DA - mjerenje performansi | DA - zadovoljeni NFR |
-| Internacionalizacija i upotrebljivost (NFR-8) | NE | NE | DA - prikaz jezika kroz UI | NE | NE | DA - korisnik potvrđuje razumljivost |
+| Funkcionalnost/zahtjev | Unit | Integracijsko | Sistemsko | Prihvatno (UAT) | Regresiono | UI | Penetracijsko |
+|------------------------|------|---------------|-----------|----------------|------------|----|----------------|
+| **Registracija i prijava korisnika** (US-01, US-02, US-03, US-04, US-05) | DA - validacija emaila, lozinke i obaveznih polja | DA - auth API + sesija + baza | DA - kompletan tok prijave i registracije | DA - korisnik potvrđuje uspješan login | DA - provjera nakon izmjena | DA - prikaz formi i grešaka | DA - SQL injection, XSS na login poljima |
+| **Upravljanje sesijom i RBAC** (US-06, US-07, US-08, US-09) | NE | DA - kreiranje/brisanje sesije i zaštita ruta | DA - kontrola pristupa po ulogama | DA - potvrda ograničenja pristupa | DA - nakon dodavanja novih uloga | NE | DA - testiranje pristupa bez tokena, promjene role kroz zahtjev |
+| **Upravljanje knjigama** (US-12, US-17, US-25) | DA - validacija unosa i poslovna pravila | DA - API + baza konzistentnost | DA - dodavanje, izmjena i brisanje kroz UI | DA - bibliotekar potvrđuje tok | DA - nakon svake CRUD izmjene | DA - prikaz forme, dugmad, poruke | DA - neovlašteni korisnik ne može mijenjati knjige |
+| **Upravljanje primjercima** (US-21, US-23, US-24) | DA - statusi i validacija | DA - promjena statusa ↔ baza | DA - prikaz statusa kroz sistem | DA - potvrda tačnosti statusa | DA - nakon izmjene statusa | DA - vizuelni prikaz statusa | DA - zabrana nedozvoljenih akcija preko API |
+| **Katalog i pretraga** (US-19, US-20, US-35, US-36) | DA - logika pretrage i filtera | DA - dohvat podataka iz baze | DA - pregled kataloga i paginacija | DA - korisnik potvrđuje preglednost | DA - nakon izmjene indeksa pretrage | DA - responzivnost tabele, filteri | DA - korisnik vidi samo dozvoljene podatke (ne osjetljive) |
+| **Zaduživanje i vraćanje knjiga** (US-43, US-44, US-45, US-47) | DA - poslovna pravila (npr. dostupnost) | DA - inventar + zaduženje + audit log | DA - end-to-end tok zaduživanja | DA - bibliotekar potvrđuje tok | DA - nakon promjene pravila zaduživanja | DA - prikaz dugmadi samo za prijavljene | DA - testiranje višestrukog zaduživanja istog primjerka |
+| **Upravljanje članarinom** (US-56, US-57, US-58, US-59) | DA - validacija datuma i statusa | DA - veza korisnik ↔ članarina | DA - blokiranje zaduživanja | DA - korisnik vidi tačan status | DA - nakon produženja članarine | DA - prikaz statusa u profilu | NE |
+| **Rezervacije** (US-69, US-72, US-79, US-80) | DA - pravila rezervacije | DA - rezervacije ↔ katalog | DA - tok rezervacije i otkazivanja | DA - korisnik potvrđuje tok | DA - nakon izmjene logike rezervacija | DA - prikaz liste rezervacija | DA - zabrana rezervacije bez aktivne članarine |
+| **Upravljanje kategorijama** (US-30, US-33, US-34) | DA - validacija naziva i pravila | DA - baza + knjige | DA - prikaz i upravljanje | DA - bibliotekar potvrđuje | DA - nakon dodavanja nove kategorije | DA - prikaz u padajućem meniju | NE |
+| **Upravljanje korisnicima (admin)** (US-49, US-50, US-51, US-52, US-53) | NE | DA - API + promjene uloga | DA - tok upravljanja korisnicima | DA - admin potvrđuje | DA - nakon dodavanja novog admina | DA - tabela korisnika, dugmad za akcije | DA - testiranje eskalacije privilegija |
+| **Email notifikacije** (US-81, US-82, US-83, US-84) | NE | DA - email servis + događaji | DA - slanje u realnim scenarijima | DA - korisnik prima obavijesti | DA - nakon izmjene template-a | NE | NE |
+| **Audit log** (NFR-11) | NE | DA - zapis akcija u bazu | DA - provjera kroz scenarije | DA - admin potvrđuje zapis | DA - nakon svake akcije | NE | DA - log se ne može brisati od strane običnog korisnika |
+| **Validacija unosa i UX** (NFR-2, NFR-3, NFR-4) | DA - validacione funkcije | DA - validacija kroz API | DA - prikaz grešaka u UI | DA - korisnik razumije poruke | DA - nakon izmjene frontenda | DA - poruke tačno uz polja | NE |
+| **Sigurnost sistema** (NFR-5, NFR-6) | DA - hashiranje lozinki | DA - zaštita endpointa | DA - provjera kroz tokove | DA - nema sigurnosnih propusta | DA - nakon dodavanja novih ruta | NE | DA - puni pentest: SQLi, XSS, CSRF, JWT, RBAC bypass |
 
 <br>
 
