@@ -126,18 +126,54 @@ Svaka pronađena greška evidentira se kao bug izvještaj koji sadrži sljedeće
 <br>
 
 ## 6. Glavni rizici kvaliteta
+U nastavku, navedeni su neki od potencijalnih rizika i podijeljeni su u četiri kategorije: funkcionalni, sigurnosni, UI/UX i procesni. Svaki rizik sadrži i preporučene mjere mitigacije.
+### 6.1 Funkcionalni rizici
+Funkcionalni rizici se odnose na ispravnost rada sistema u skladu sa definisanim poslovnim zahtjevima. Fokus ove kategorije je na preciznosti obrade podataka, pokrivanju specifičnih "rubnih" slučajeva i održavanju stabilnosti sistema kroz regresiono testiranje.
 
-| Rizik | Vjerovatnoća | Utjecaj | Mjere ublažavanja |
-|-------|:------------:|:-------:|-------------------|
-| **Nedovoljna pokrivenost testovima** – nisu obuhvaćeni svi rubni scenariji funkcionalnosti | Srednja | Visok | Redovni pregled test slučajeva pri svakom sprintu; review acceptance kriterija |
-| **Kašnjenje u otkrivanju grešaka** – greške otkrivene tek u sistemskom testiranju | Srednja | Visok | Obavezno unit testiranje pri implementaciji svake komponente |
-| **Nekonzistentnost podataka pri paralelnim zahtjevima** – dva korisnika istovremeno zadužuju isti primjerak | Niska | Kritičan | Transakcije i zaključavanje na nivou baze podataka (IT-15) |
-| **Propusti u kontroli pristupa** – korisnik s nižim privilegijama pristupa zabranjenim funkcijama | Niska | Kritičan | RBAC testiranje i na UI i na API nivou (IT-19 do IT-22); sigurnosni review koda |
-| **Nestabilno testno okruženje** – rezultati testiranja ne odgovaraju produkcijskom okruženju | Srednja | Srednji | Što je moguće više uskladiti konfiguraciju testnog i produkcijskog okruženja |
-| **Regresione greške** – ispravka jedne greške uzrokuje novu u drugom dijelu sistema | Srednja | Visok | Ponavljanje ključnih test slučajeva pri svakoj novoj verziji |
-| **Nedovoljna provjera nefunkcionalnih zahtjeva** – performanse i sigurnost se ne testiraju do kasnih sprintova | Visoka | Srednji | Uključiti NFR testove (ST-NF-01 do ST-NF-09) u sistemsko testiranje od Sprinta 8 |
-| **Tehnički dug koji otežava testiranje** – kod koji nije modularan teško je testirati izolovano | Srednja | Srednji | Modularna arhitektura (NFR-9); redovni code review |
-| **Neadekvatna dokumentacija grešaka** – bug nije dovoljno opisan za reprodukciju | Srednja | Srednji | Obavezan format bug prijave (Bug ID, koraci, očekivano/stvarno ponašanje) |
-| **Preskakanje prihvatnog testiranja** – sistem prolazi tehničke testove ali ne zadovoljava korisnička očekivanja | Niska | Visok | UAT scenariji planirani od Sprinta 11 uz uključivanje finalnih korisnika |
+| Rizik | Mjere mitigacije |
+|-------|-------------------|
+| **Nekonzistentnost podataka pri paralelnim zahtjevima** – dva korisnika istovremeno zadužuju isti primjerak knjige | Transakcije i zaključavanje na nivou baze podataka (IT-15); testirati scenarij s dva paralelna zahtjeva |
+| **Pogrešan prikaz statusa članarine** – status prikazan kao aktivan iako je istekao, što omogućava zaduživanje | Unit testovi za granične datume (dan isteka, dan poslije); integracijsko testiranje s realnim datumima |
+| **Regresione greške** – ispravka jedne greške uzrokuje novu u drugom dijelu sistema | Smoke testiranje nakon svakog deploya; regresioni test slučajevi za sve ključne tokove |
+
+---
+
+### 6.2 Sigurnosni rizici
+Sigurnosni rizici obuhvataju potencijalne prijetnje integritetu podataka i privatnosti korisnika. Identifikacija ovih rizika osigurava zaštitu od zlonamjernih napada, neovlaštenog pristupa osjetljivim informacijama i osigurava stabilnost autorizacijskih mehanizama.
+
+| Rizik | Mjere mitigacije |
+|-------|-------------------|
+| **Propusti u kontroli pristupa (RBAC)** – korisnik s nižim privilegijama direktnim API pozivom pristupa zabranjenim resursima | RBAC testiranje i na UI i na API nivou; penetracijsko testiranje autorizacijskih ruta |
+| **SQL Injection** – zlonamjerni unos u polja za pretragu prosljeđuje se direktno u SQL upit | Penetracijsko testiranje i parametrizovani SQL upiti 
+| **Brute force napad na prijavu** – automatizovano pogađanje lozinki bez zaštite | Testirati odgovor sistema na 50+ uzastopnih neuspjelih pokušaja; postaviti limit uzastopnih pokušaja prijave |
+| **Neispravno upravljanje sesijom** – sesija ostaje aktivna nakon odjave ili token ne ističe | Testirati odjavu i provjeru da token više ne funkcioniše; testirati pristup zaštićenoj ruti sa starim tokenom |
+
+---
+
+### 6.3 UI/UX rizici
+UI/UX rizici su fokusirani na interakciju korisnika sa sistemom. Cilj je osigurati intuitivno iskustvo, vizuelnu konzistentnost na različitim uređajima i preglednicima, te spriječiti korisničke greške kroz jasne povratne informacije.
+
+| Rizik | Mjere mitigacije |
+|-------|-------------------|
+| **Nekonzistentan prikaz u pretraživačima** – razlike u prikazu između Chrome, Firefox i Edge pretraživača | UI testiranje u Chrome, Firefox i Edge pretraživačima za sve ključne ekrane |
+| **Destruktivne akcije bez potvrde** – slučajno brisanje korisnika ili knjige bez dijaloga za potvrdu | UI provjera svih akcija brisanja; testirati da se dijalog prikazuje i da otkazivanje zaustavlja akciju |
+| **RBAC nije reflektovan u UI** – korisnik vidi opcije koje nema pravo izvršiti, što vodi do tehničkih grešaka | UI testiranje za svaku ulogu (Član, Bibliotekar, Administrator); provjera da nedozvoljeni elementi nisu vidljivi |
+| **Responsivnost nije zadovoljena** – stranica se ne prikazuje ispravno na mobilnim uređajima ili tabletima | Provjera ključnih ekrana u DevTools Responsive Modu (375px, 768px, 1280px) |
+
+---
+
+### 6.4 Procesni rizici
+Procesni rizici se bave samom metodologijom rada, tokom testiranja i dokumentovanjem problema. Oni identifikuju uska grla u komunikaciji i organizaciji koja mogu dovesti do kašnjenja ili isporuke softvera koji ne ispunjava očekivanja korisnika.
+
+| Rizik | Mjere mitigacije |
+|-------|-------------------|
+| **Kašnjenje u otkrivanju grešaka** – greške otkrivene prekasno u razvojnom ciklusu | Obavezno unit testiranje pri implementaciji; integracioni testovi odmah po spajanju modula |
+| **Nedovoljna provjera NFR-ova** – performanse i sigurnost se testiraju samo u kasnim fazama | Uključiti NFR testove u sistemsko testiranje od ranijih sprintova; ne odlagati sigurnost za kraj |
+| **Neadekvatna dokumentacija grešaka** – bug nije dovoljno opisan za brzu reprodukciju | Obavezan format bug prijave; ne zatvarati bug bez priloženog dokaza o ispravci |
+| **Preskakanje prihvatnog testiranja** – sistem je tehnički ispravan, ali ne odgovara potrebama korisnika | UAT scenariji planirani unaprijed uz uključivanje finalnih korisnika za sve uloge |
+<br>
+
+*Ovaj dokument predstavlja Test Strategy za Sprint 3. Detalji implementacije test slučajeva, kao i rezultati testiranja, bit će razrađeni i evidentirani u sklopu kasnijih sprintova (Sprint 8 – Sprint 11) kako sistem bude implementiran.*
+
 
 ---
