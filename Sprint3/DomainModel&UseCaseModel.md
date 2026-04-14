@@ -1,3 +1,240 @@
+# Domain Model
+
+## 1. Glavni entiteti
+
+Ova sekcija definiše osnovne domenske objekte sistema. Entiteti predstavljaju ključne koncepte u poslovnoj domeni bibliotečkog sistema i direktno odgovaraju tabelama u bazi podataka.
+
+| Entitet | Opis |
+|--------|------|
+| **Korisnik** | Predstavlja registrovanog korisnika sistema |
+| **Uloga** | Definiše tip korisnika i nivo pristupa sistemu |
+| **Knjiga** | Bibliografski zapis knjige |
+| **Kategorija** | Klasifikacija knjiga po tematici |
+| **Primjerak** | Fizički primjerak knjige u biblioteci |
+| **Zaduženje** | Evidencija posudbe knjige od strane korisnika |
+| **Članarina** | Evidencija članstva korisnika |
+| **Rezervacija** | Evidencija rezervacije knjige |
+| **AuditLog** | Evidencija svih kritičnih akcija u sistemu |
+
+---
+
+## 2. Ključni atributi
+
+Ova sekcija opisuje najvažnije atribute svakog entiteta. Atributi definišu strukturu podataka, njihove tipove i osnovna ograničenja koja osiguravaju integritet sistema.
+
+### Korisnik
+
+| Atribut | Tip | Napomena |
+|--------|-----|---------|
+| id | INT | Primarni ključ |
+| ime | VARCHAR | Obavezno |
+| prezime | VARCHAR | Obavezno |
+| email | VARCHAR | Jedinstven |
+| lozinka_hash | VARCHAR | Hashirana lozinka |
+| status | ENUM | aktivan / deaktiviran |
+| datum_kreiranja | TIMESTAMP | Automatski |
+| uloga_id | FK | Referenca na Uloga |
+
+---
+
+### Uloga
+
+| Atribut | Tip | Napomena |
+|--------|-----|---------|
+| id | INT | Primarni ključ |
+| naziv | VARCHAR | Jedinstven (Član, Bibliotekar, Administrator) |
+| opis | TEXT | Opcionalno |
+
+---
+
+### Knjiga
+
+| Atribut | Tip | Napomena |
+|--------|-----|---------|
+| id | INT | Primarni ključ |
+| naslov | VARCHAR | Obavezno |
+| autor | VARCHAR | Obavezno |
+| isbn | VARCHAR | Jedinstven |
+| izdavač | VARCHAR | Opcionalno |
+| godina_izdanja | INT | Validacija godine |
+| kategorija_id | FK | Referenca na Kategorija |
+
+---
+
+### Kategorija
+
+| Atribut | Tip | Napomena |
+|--------|-----|---------|
+| id | INT | Primarni ključ |
+| naziv | VARCHAR | Jedinstven |
+| opis | TEXT | Opcionalno |
+
+---
+
+### Primjerak
+
+| Atribut | Tip | Napomena |
+|--------|-----|---------|
+| id | INT | Primarni ključ |
+| knjiga_id | FK | Referenca na Knjiga |
+| inventarni_broj | VARCHAR | Jedinstven |
+| status | ENUM | dostupan / zadužen |
+| datum_nabave | DATE | Opcionalno |
+
+---
+
+### Zaduženje
+
+| Atribut | Tip | Napomena |
+|--------|-----|---------|
+| id | INT | Primarni ključ |
+| korisnik_id | FK | Referenca na Korisnik |
+| primjerak_id | FK | Referenca na Primjerak |
+| datum_zaduživanja | DATE | Obavezno |
+| datum_planiranog_vraćanja | DATE | Obavezno |
+| datum_stvarnog_vraćanja | DATE | Nullable |
+| status | ENUM | aktivno / zatvoreno / zakašnjelo |
+
+---
+
+### Članarina
+
+| Atribut | Tip | Napomena |
+|--------|-----|---------|
+| id | INT | Primarni ključ |
+| korisnik_id | FK | Referenca na Korisnik |
+| datum_početka | DATE | Obavezno |
+| datum_isteka | DATE | Obavezno |
+| status | ENUM | aktivna / istekla |
+
+---
+
+### Rezervacija
+
+| Atribut | Tip | Napomena |
+|--------|-----|---------|
+| id | INT | Primarni ključ |
+| korisnik_id | FK | Referenca na Korisnik |
+| knjiga_id | FK | Referenca na Knjiga |
+| datum_rezervacije | DATE | Obavezno |
+| datum_isteka | DATE | Obavezno |
+| status | ENUM | aktivna / realizovana / otkazana / istekla |
+
+---
+
+### AuditLog
+
+| Atribut | Tip | Napomena |
+|--------|-----|---------|
+| id |  INT | Primarni ključ |
+| korisnik_id | FK | Opcionalno |
+| akcija | VARCHAR | Tip akcije |
+| entitet_tip | VARCHAR | Npr. knjiga, korisnik |
+| entitet_id |  INT | ID entiteta |
+| vrijednosti_prije | JSONB | Staro stanje |
+| vrijednosti_nakon | JSONB | Novo stanje |
+| datum_akcije | TIMESTAMP | Automatski |
+
+---
+
+## 3. Veze između entiteta
+
+Ova sekcija opisuje kako su entiteti međusobno povezani. Relacije definišu strukturu baze podataka i način na koji se podaci povezuju i koriste u poslovnoj logici.
+
+- **Korisnik → Uloga (N:1)**  
+  Više korisnika može imati istu ulogu, ali svaki korisnik ima tačno jednu ulogu. Ova veza definiše prava pristupa u sistemu.
+
+- **Knjiga → Kategorija (N:1)**  
+  Više knjiga može pripadati jednoj kategoriji, dok svaka knjiga mora biti svrstana u tačno jednu kategoriju.
+
+- **Primjerak → Knjiga (1:N)**  
+  Jedna knjiga može imati više fizičkih primjeraka. Svaki primjerak predstavlja konkretnu kopiju knjige u biblioteci.
+
+- **Zaduženje → Korisnik (1:N)**  
+  Jedan korisnik može imati više zaduženja kroz vrijeme. Ova veza prati historiju posudbi.
+
+- **Zaduženje → Primjerak (N:1)**  
+  Svako zaduženje se odnosi na tačno jedan primjerak knjige.
+
+- **Članarina → Korisnik (1:N)**  
+  Korisnik može imati više članarina kroz vrijeme.
+
+- **Rezervacija → Korisnik (1:N)**  
+  Korisnik može imati više rezervacija uz određena ograničenja.
+
+- **Rezervacija → Knjiga (N:1)**  
+  Rezervacija se odnosi na knjigu kao naslov, a ne na konkretan primjerak.
+
+- **AuditLog → Korisnik (N:1, opciono)**  
+  Evidentira korisnika koji je izvršio akciju (ili sistem).
+
+---
+
+## 4. Poslovna pravila važna za model
+
+Ova sekcija definiše ključna pravila poslovne logike koja sistem mora poštovati. Pravila osiguravaju ispravno ponašanje sistema i konzistentnost podataka.
+
+### Korisnici
+- Svaki korisnik mora imati jedinstvenu email adresu.
+- Korisnik mora imati tačno jednu ulogu.
+- Deaktivirani korisnici ne mogu pristupiti sistemu.
+- Lozinke se čuvaju isključivo kao hash vrijednosti.
+
+---
+
+### Knjige i primjerci
+- ISBN jedinstveno identifikuje knjigu.
+- Knjiga može imati više primjeraka.
+- Svaki primjerak ima jedinstven inventarni broj.
+- Primjerak mora biti vezan za knjigu.
+- Status određuje dostupnost primjerka.
+
+---
+
+### Zaduživanje
+- Dozvoljeno samo za dostupne primjerke.
+- Potrebna aktivna članarina.
+- Nema duplog zaduživanja.
+- Automatsko praćenje rokova i kašnjenja.
+
+---
+
+### Članarina
+- Mora imati validne datume.
+- Status se određuje automatski.
+- Neaktivna članarina blokira zaduživanje.
+
+---
+
+### Rezervacije
+- Dozvoljene samo ako nema dostupnih primjeraka.
+- Jedna aktivna rezervacija po knjizi.
+- FIFO red čekanja.
+- Automatsko istecanje rezervacija.
+
+---
+
+### Integritet podataka
+- Zabranjeno brisanje povezanih podataka.
+- Soft delete se koristi.
+- Historija se čuva.
+
+---
+
+### Audit log
+- Sve kritične akcije se bilježe.
+- Čuvaju se stare i nove vrijednosti.
+- Dostupno samo administratorima.
+
+---
+
+### Transakcije
+- Operacije moraju biti atomske.
+- Sprječava se nekonzistentno stanje.
+- Podržava se konkurentni pristup podacima.
+
+---
+
 #  Use Case Model
 
 **Projekt:** Bibliotečki informacioni sistem
@@ -581,241 +818,6 @@ Prikazana zaduženja
 
 * Korisnik je uspješno odjavljen iz sistema
   
----
-# Domain Model
-
-## 1. Glavni entiteti
-
-Ova sekcija definiše osnovne domenske objekte sistema. Entiteti predstavljaju ključne koncepte u poslovnoj domeni bibliotečkog sistema i direktno odgovaraju tabelama u bazi podataka.
-
-| Entitet | Opis |
-|--------|------|
-| **Korisnik** | Predstavlja registrovanog korisnika sistema |
-| **Uloga** | Definiše tip korisnika i nivo pristupa sistemu |
-| **Knjiga** | Bibliografski zapis knjige |
-| **Kategorija** | Klasifikacija knjiga po tematici |
-| **Primjerak** | Fizički primjerak knjige u biblioteci |
-| **Zaduženje** | Evidencija posudbe knjige od strane korisnika |
-| **Članarina** | Evidencija članstva korisnika |
-| **Rezervacija** | Evidencija rezervacije knjige |
-| **AuditLog** | Evidencija svih kritičnih akcija u sistemu |
-
----
-
-## 2. Ključni atributi
-
-Ova sekcija opisuje najvažnije atribute svakog entiteta. Atributi definišu strukturu podataka, njihove tipove i osnovna ograničenja koja osiguravaju integritet sistema.
-
-### Korisnik
-
-| Atribut | Tip | Napomena |
-|--------|-----|---------|
-| id | INT | Primarni ključ |
-| ime | VARCHAR | Obavezno |
-| prezime | VARCHAR | Obavezno |
-| email | VARCHAR | Jedinstven |
-| lozinka_hash | VARCHAR | Hashirana lozinka |
-| status | ENUM | aktivan / deaktiviran |
-| datum_kreiranja | TIMESTAMP | Automatski |
-| uloga_id | FK | Referenca na Uloga |
-
----
-
-### Uloga
-
-| Atribut | Tip | Napomena |
-|--------|-----|---------|
-| id | INT | Primarni ključ |
-| naziv | VARCHAR | Jedinstven (Član, Bibliotekar, Administrator) |
-| opis | TEXT | Opcionalno |
-
----
-
-### Knjiga
-
-| Atribut | Tip | Napomena |
-|--------|-----|---------|
-| id | INT | Primarni ključ |
-| naslov | VARCHAR | Obavezno |
-| autor | VARCHAR | Obavezno |
-| isbn | VARCHAR | Jedinstven |
-| izdavač | VARCHAR | Opcionalno |
-| godina_izdanja | INT | Validacija godine |
-| kategorija_id | FK | Referenca na Kategorija |
-
----
-
-### Kategorija
-
-| Atribut | Tip | Napomena |
-|--------|-----|---------|
-| id | INT | Primarni ključ |
-| naziv | VARCHAR | Jedinstven |
-| opis | TEXT | Opcionalno |
-
----
-
-### Primjerak
-
-| Atribut | Tip | Napomena |
-|--------|-----|---------|
-| id | INT | Primarni ključ |
-| knjiga_id | FK | Referenca na Knjiga |
-| inventarni_broj | VARCHAR | Jedinstven |
-| status | ENUM | dostupan / zadužen |
-| datum_nabave | DATE | Opcionalno |
-
----
-
-### Zaduženje
-
-| Atribut | Tip | Napomena |
-|--------|-----|---------|
-| id | INT | Primarni ključ |
-| korisnik_id | FK | Referenca na Korisnik |
-| primjerak_id | FK | Referenca na Primjerak |
-| datum_zaduživanja | DATE | Obavezno |
-| datum_planiranog_vraćanja | DATE | Obavezno |
-| datum_stvarnog_vraćanja | DATE | Nullable |
-| status | ENUM | aktivno / zatvoreno / zakašnjelo |
-
----
-
-### Članarina
-
-| Atribut | Tip | Napomena |
-|--------|-----|---------|
-| id | INT | Primarni ključ |
-| korisnik_id | FK | Referenca na Korisnik |
-| datum_početka | DATE | Obavezno |
-| datum_isteka | DATE | Obavezno |
-| status | ENUM | aktivna / istekla |
-
----
-
-### Rezervacija
-
-| Atribut | Tip | Napomena |
-|--------|-----|---------|
-| id | INT | Primarni ključ |
-| korisnik_id | FK | Referenca na Korisnik |
-| knjiga_id | FK | Referenca na Knjiga |
-| datum_rezervacije | DATE | Obavezno |
-| datum_isteka | DATE | Obavezno |
-| status | ENUM | aktivna / realizovana / otkazana / istekla |
-
----
-
-### AuditLog
-
-| Atribut | Tip | Napomena |
-|--------|-----|---------|
-| id |  INT | Primarni ključ |
-| korisnik_id | FK | Opcionalno |
-| akcija | VARCHAR | Tip akcije |
-| entitet_tip | VARCHAR | Npr. knjiga, korisnik |
-| entitet_id |  INT | ID entiteta |
-| vrijednosti_prije | JSONB | Staro stanje |
-| vrijednosti_nakon | JSONB | Novo stanje |
-| datum_akcije | TIMESTAMP | Automatski |
-
----
-
-## 3. Veze između entiteta
-
-Ova sekcija opisuje kako su entiteti međusobno povezani. Relacije definišu strukturu baze podataka i način na koji se podaci povezuju i koriste u poslovnoj logici.
-
-- **Korisnik → Uloga (N:1)**  
-  Više korisnika može imati istu ulogu, ali svaki korisnik ima tačno jednu ulogu. Ova veza definiše prava pristupa u sistemu.
-
-- **Knjiga → Kategorija (N:1)**  
-  Više knjiga može pripadati jednoj kategoriji, dok svaka knjiga mora biti svrstana u tačno jednu kategoriju.
-
-- **Primjerak → Knjiga (1:N)**  
-  Jedna knjiga može imati više fizičkih primjeraka. Svaki primjerak predstavlja konkretnu kopiju knjige u biblioteci.
-
-- **Zaduženje → Korisnik (1:N)**  
-  Jedan korisnik može imati više zaduženja kroz vrijeme. Ova veza prati historiju posudbi.
-
-- **Zaduženje → Primjerak (N:1)**  
-  Svako zaduženje se odnosi na tačno jedan primjerak knjige.
-
-- **Članarina → Korisnik (1:N)**  
-  Korisnik može imati više članarina kroz vrijeme.
-
-- **Rezervacija → Korisnik (1:N)**  
-  Korisnik može imati više rezervacija uz određena ograničenja.
-
-- **Rezervacija → Knjiga (N:1)**  
-  Rezervacija se odnosi na knjigu kao naslov, a ne na konkretan primjerak.
-
-- **AuditLog → Korisnik (N:1, opciono)**  
-  Evidentira korisnika koji je izvršio akciju (ili sistem).
-
----
-
-## 4. Poslovna pravila važna za model
-
-Ova sekcija definiše ključna pravila poslovne logike koja sistem mora poštovati. Pravila osiguravaju ispravno ponašanje sistema i konzistentnost podataka.
-
-### Korisnici
-- Svaki korisnik mora imati jedinstvenu email adresu.
-- Korisnik mora imati tačno jednu ulogu.
-- Deaktivirani korisnici ne mogu pristupiti sistemu.
-- Lozinke se čuvaju isključivo kao hash vrijednosti.
-
----
-
-### Knjige i primjerci
-- ISBN jedinstveno identifikuje knjigu.
-- Knjiga može imati više primjeraka.
-- Svaki primjerak ima jedinstven inventarni broj.
-- Primjerak mora biti vezan za knjigu.
-- Status određuje dostupnost primjerka.
-
----
-
-### Zaduživanje
-- Dozvoljeno samo za dostupne primjerke.
-- Potrebna aktivna članarina.
-- Nema duplog zaduživanja.
-- Automatsko praćenje rokova i kašnjenja.
-
----
-
-### Članarina
-- Mora imati validne datume.
-- Status se određuje automatski.
-- Neaktivna članarina blokira zaduživanje.
-
----
-
-### Rezervacije
-- Dozvoljene samo ako nema dostupnih primjeraka.
-- Jedna aktivna rezervacija po knjizi.
-- FIFO red čekanja.
-- Automatsko istecanje rezervacija.
-
----
-
-### Integritet podataka
-- Zabranjeno brisanje povezanih podataka.
-- Soft delete se koristi.
-- Historija se čuva.
-
----
-
-### Audit log
-- Sve kritične akcije se bilježe.
-- Čuvaju se stare i nove vrijednosti.
-- Dostupno samo administratorima.
-
----
-
-### Transakcije
-- Operacije moraju biti atomske.
-- Sprječava se nekonzistentno stanje.
-- Podržava se konkurentni pristup podacima.
 ---
 
 # Zaključak
