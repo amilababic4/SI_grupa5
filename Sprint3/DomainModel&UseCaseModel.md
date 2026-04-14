@@ -179,6 +179,9 @@ Ova sekcija definiše ključna pravila poslovne logike koja sistem mora poštova
 - Korisnik mora imati tačno jednu ulogu.
 - Deaktivirani korisnici ne mogu pristupiti sistemu.
 - Lozinke se čuvaju isključivo kao hash vrijednosti.
+- Nije dozvoljena ponovna registracija sa istim email-om čak i ako je nalog deaktiviran.
+- Promjena uloge korisnika dozvoljena je samo administratoru.
+- Korisnik ne može deaktivirati vlastiti nalog.
 
 ---
 
@@ -188,50 +191,70 @@ Ova sekcija definiše ključna pravila poslovne logike koja sistem mora poštova
 - Svaki primjerak ima jedinstven inventarni broj.
 - Primjerak mora biti vezan za knjigu.
 - Status određuje dostupnost primjerka.
+- Brisanje knjige nije dozvoljeno ako postoje povezani primjerci ili aktivna zaduženja.
+- Kategorija knjige mora postojati prije kreiranja knjige.
+- Promjena ISBN-a nakon kreiranja knjige nije dozvoljena.
 
 ---
 
 ### Zaduživanje
 - Dozvoljeno samo za dostupne primjerke.
 - Potrebna aktivna članarina.
-- Nema duplog zaduživanja.
-- Automatsko praćenje rokova i kašnjenja.
+- Nema duplog zaduživanja istog primjerka.
+- Jedan korisnik može imati ograničen broj aktivnih zaduženja (konfigurabilno pravilo sistema).
+- Rok vraćanja se automatski izračunava pri kreiranju zaduženja.
+- Kašnjenje se računa na osnovu trenutnog datuma u odnosu na planirani rok.
+- Zaduženje se ne može kreirati ako korisnik ima zakašnjela zaduženja.
+- Vraćanje knjige automatski ažurira status primjerka na „dostupan“.
 
 ---
 
 ### Članarina
-- Mora imati validne datume.
-- Status se određuje automatski.
+- Mora imati validne datume (datum isteka mora biti nakon datuma početka).
+- Status se određuje automatski na osnovu trenutnog datuma.
 - Neaktivna članarina blokira zaduživanje.
+- Korisnik ne može imati dvije aktivne članarine u isto vrijeme.
+- Produženje članarine ne smije kreirati vremenske preklapajuće periode.
 
 ---
 
 ### Rezervacije
 - Dozvoljene samo ako nema dostupnih primjeraka.
-- Jedna aktivna rezervacija po knjizi.
-- FIFO red čekanja.
-- Automatsko istecanje rezervacija.
+- Jedna aktivna rezervacija po knjizi po korisniku.
+- FIFO red čekanja određuje redoslijed realizacije.
+- Rezervacija automatski ističe nakon definisanog vremenskog perioda.
+- Korisnik ne može rezervisati knjigu koju trenutno ima zaduženu.
+- Kada knjiga postane dostupna, samo prvi u redu može realizovati rezervaciju.
+- Istekla rezervacija se automatski uklanja iz reda čekanja.
 
 ---
 
 ### Integritet podataka
 - Zabranjeno brisanje povezanih podataka.
-- Soft delete se koristi.
-- Historija se čuva.
+- Historija se čuva za sve entitete (audit + zaduženja + rezervacije).
+- Svi strani ključevi moraju biti validni u trenutku transakcije.
 
 ---
 
 ### Audit log
-- Sve kritične akcije se bilježe.
+- Sve kritične akcije se bilježe (CRUD nad ključnim entitetima).
 - Čuvaju se stare i nove vrijednosti.
-- Dostupno samo administratorima.
+- Audit log se ne može mijenjati niti brisati nakon upisa.
+- Samo administrator ima pravo pregleda audit logova.
+- Sistemske akcije (npr. automatsko istecanje rezervacija) također se bilježe.
 
 ---
 
 ### Transakcije
 - Operacije moraju biti atomske.
-- Sprječava se nekonzistentno stanje.
-- Podržava se konkurentni pristup podacima.
+- Sprječava se nekonzistentno stanje podataka.
+- Podržava se konkurentni pristup uz zaključavanje ili provjeru verzija.
+- Kritične operacije uključuju:
+  - zaduživanje knjige
+  - vraćanje knjige
+  - kreiranje rezervacije
+  - promjenu statusa primjerka
+- U slučaju greške, sistem mora izvršiti rollback svih promjena.
 
 ---
 
