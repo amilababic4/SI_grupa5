@@ -25,7 +25,7 @@ Release plan je napravljen na osnovu tri ključna ulaza:
 2. **Detaljno razrađeni User Storyji**, koji preciznije pokazuju šta je stvarna funkcionalna vrijednost svakog backlog itema i koje zavisnosti između modula postoje. 
 3. **Dogovor tima da se release pravi nakon svakog drugog sprinta**, odnosno nakon Sprinta **6, 8 i 10**.
 
-Takva odluka je logična jer se sprintovi 6-10 po uputama PO-a posmatraju kao period **kontinuiranog razvoja inkremenata, testiranja, refaktorisanja, proširenja funkcionalnosti i upravljanja tehničkim dugom**, a od tima se očekuje da u svakom sprintu pokaže realizovani inkrement ili značajan napredak. Release nakon svaka dva sprinta daje dovoljno vremena da se funkcionalnosti ne isporučuju previše sitno i fragmentirano, nego kao **zaokružene korisničke cjeline**. 
+Takva odluka je logična jer se sprintovi 6-10 posmatraju kao period **kontinuiranog razvoja inkremenata, testiranja, refaktorisanja, proširenja funkcionalnosti i upravljanja tehničkim dugom**, a od tima se očekuje da u svakom sprintu pokaže realizovani inkrement ili značajan napredak. Release nakon svaka dva sprinta daje dovoljno vremena da se funkcionalnosti ne isporučuju previše sitno i fragmentirano, nego kao **zaokružene korisničke cjeline**. 
 
 ---
 
@@ -35,7 +35,7 @@ Pri planiranju release cjelina tim se vodio sljedećim principima:
 
 ### 3.1. Release mora imati poslovni smisao
 
-PO je naglasio da release ne znači samo “nešto završeno”, nego inkrement koji donosi **dovoljno vrijednosti korisniku** da bi ga Product Owner mogao smatrati kandidatom za isporuku. Zato release nije planiran nakon svakog sprinta, nego nakon svakog drugog sprinta, kada se može pokazati veća i korisnija funkcionalna cjelina.
+Release ne znači samo "nešto završeno", nego inkrement koji donosi **dovoljno vrijednosti korisniku** kao kandidat za isporuku. Zato release nije planiran nakon svakog sprinta, nego nakon svakog drugog sprinta, kada se može pokazati veća i korisnija funkcionalna cjelina.
 
 ### 3.2. Release mora pratiti zavisnosti između funkcionalnosti
 
@@ -64,7 +64,7 @@ Dogovor o release-u nakon svakog drugog sprinta omogućava timu da:
 - u drugom sprintu doradi, integriše, testira i zaokruži funkcionalnosti
 - na kraju drugog sprinta isporuči smisleniji i stabilniji inkrement
 
-To je posebno važno jer PO za sprintove 6–10 traži ne samo razvoj, nego i **testiranje, refaktorisanje, upravljanje promjenama i tehničkim dugom**. Zato release na svaka dva sprinta bolje odgovara stvarnom tempu ozbiljnog timskog rada nego release nakon svakog sprinta. 
+To je posebno važno jer se za sprintove 6–10 traži ne samo razvoj, nego i **testiranje, refaktorisanje, upravljanje promjenama i tehničkim dugom**. Zato release na svaka dva sprinta bolje odgovara stvarnom tempu ozbiljnog timskog rada nego release nakon svakog sprinta. 
 
 ---
 
@@ -90,10 +90,10 @@ Drugim riječima, release cadence je namjerno podešen tako da se **ne isporuču
 
 ## 5. Planirani inkrementi / release cjeline
 
-## Release 1 — Osnovni rad sistema i katalog fonda
+## Release 1 - Osnovni rad sistema i katalog fonda
 
 ### Naziv inkrementa
-**Release 1 – Autentifikacija, članovi i osnovni katalog**
+**Release 1 - Autentifikacija, članovi i osnovni katalog**
 
 ### Cilj inkrementa
 Cilj prvog release-a je da sistem dobije **prvu stvarno upotrebljivu verziju**. Nakon ovog release-a biblioteka treba imati mogućnost da:
@@ -126,6 +126,28 @@ U ovaj release ulaze backlog stavke iz Sprinta 5 i Sprinta 6 koje čine osnovu s
 
 - **PB-28 Pregled kataloga knjiga**  
   Prikaz svih knjiga u sistemu i osnovna paginacija. 
+
+### Ključni User Storyji koji grade Release 1
+
+#### Sprint 5 - osnova pristupa i korisnika
+- **US-01, US-02, US-03**  
+  kreiranje člana kroz formu, validacija unosa i potvrda uspješnog kreiranja naloga. Ove priče su bitne jer obezbjeđuju da biblioteka može evidentirati nove članove kao osnovne korisnike sistema. 
+
+- **US-04, US-05, US-06, US-07, US-08, US-09**  
+  prijava, neuspješna prijava, odjava, sesija, zaštita ruta i zabrana pristupa deaktiviranim korisnicima. Ove priče grade sigurnosnu i pristupnu osnovu bez koje nijedna druga funkcionalnost ne može biti pouzdano korištena. 
+
+- **US-10, US-11**  
+  AI Usage Log i Decision Log. Ove priče nisu krajnje korisničke, ali jesu važne za transparentnost rada tima i validaciju AI-enabled faze koju PO posebno traži u Sprintu 5. 
+
+#### Sprint 6 - osnova rada sa knjigama i katalogom
+- **US-12, US-13, US-14, US-15, US-16**  
+  unos knjige, validacija ISBN-a, broj primjeraka, kategorija i automatsko dodavanje u katalog. Ovaj skup priča čini jezgro fonda, jer bez njih katalog ne bi imao stvarni sadržaj. 
+
+- **US-17, US-18**  
+  uređivanje postojećih knjiga i čuvanje ažuriranih podataka. To povećava tačnost i održivost fonda od samog početka. 
+
+- **US-19, US-20**  
+  prikaz knjiga u katalogu i paginacija. Ove priče omogućavaju da korisnik stvarno koristi ono što je uneseno u sistem, pa zato zaokružuju prvi release u funkcionalnu cjelinu. 
 
 ### Zašto su ove funkcionalnosti grupisane u Release 1
 
@@ -160,17 +182,17 @@ Dodatno:
 - nesinhronizovanost između modula za dodavanje knjige i prikaza kataloga može umanjiti vrijednost prvog release-a
 
 ### Okvirni sprintovi u kojima se očekuje realizacija
-**Sprint 5 – Sprint 6**
+**Sprint 5 - Sprint 6**
 
 ### Planirani trenutak release-a
 **Nakon Sprinta 6**
 
 ---
 
-## Release 2 — Operativni bibliotečki rad
+## Release 2 - Operativni bibliotečki rad
 
 ### Naziv inkrementa
-**Release 2 – Upravljanje fondom, članovima i zaduživanjem**
+**Release 2 - Upravljanje fondom, članovima i zaduživanjem**
 
 ### Cilj inkrementa
 Cilj drugog release-a je da sistem preraste iz osnovnog kataloga u **operativni bibliotečki alat**. Nakon ovog release-a bibliotekar treba moći raditi sa stvarnim fondom i članovima kroz:
@@ -226,6 +248,50 @@ U ovaj release ulaze prioritetne funkcionalnosti iz Sprinta 7 i 8:
 - **PB-38 Početno testiranje sistema**  
   Testiranje prve integrisane verzije sistema. 
 
+### Ključni User Storyji koji grade Release 2
+
+#### Sprint 7 - proširenje kataloga u pametan i upravljiv fond
+- **US-21, US-22, US-23, US-24**  
+  dodavanje primjeraka, pregled primjeraka, status primjerka i deaktivacija. Ove priče su ključne jer pretvaraju knjigu iz apstraktnog zapisa u stvarni bibliotečki fond kojim se može upravljati.
+
+- **US-25, US-26, US-27, US-28, US-29**  
+  brisanje knjige, potvrda, logičko uklanjanje i zabrana brisanja uz aktivno zaduženje. Time se uvodi kontrolisano održavanje fonda i sprečava narušavanje podataka. 
+
+- **US-30, US-31, US-32, US-33, US-34**  
+  dodavanje, pregled, uređivanje i brisanje kategorija. Ove priče su važne jer omogućavaju da katalog bude organizovan i konzistentan. 
+
+- **US-35, US-36, US-37**  
+  pretraga po naslovu i autoru te reset pretrage. Ovaj dio direktno poboljšava korisničko iskustvo i čini katalog stvarno upotrebljivim. 
+
+- **US-38, US-39**  
+  prikaz detalja knjige i obrada slučaja nepostojeće knjige. Ove priče proširuju katalog na nivo detaljnijeg pregleda. 
+
+- **US-40, US-41, US-42**  
+  indikator dostupnosti, broj slobodnih primjeraka i prikaz broja dostupnih primjeraka. Ove priče su ključni most između kataloga i budućeg zaduživanja. 
+
+#### Sprint 8 - centralni operativni proces biblioteke
+- **US-43, US-44, US-45, US-46, US-47**  
+  validacija članarine, novo zaduživanje, vraćanje, automatski rok vraćanja i zaštita od duplog zaduženja. Ovo su najvažnije user priče cijelog sistema jer realizuju glavni poslovni proces biblioteke. 
+
+- **US-48**  
+  pregled profila člana sa osnovnim podacima i trenutnim zaduženjima. Time se zaduživanje povezuje sa konkretnim članovima i njihovim pregledom. 
+
+- **US-49, US-50, US-51, US-52, US-53**  
+  pregled korisnika, pretraga, promjena uloga, deaktivacija i zaštita od deaktivacije vlastitog admin naloga. Ove priče uvode administrativnu kontrolu sistema. 
+
+- **US-54**  
+  pregled historije zaduženja člana. Ovo je logična nadogradnja operativnog modula zaduživanja. 
+- **US-55, US-56, US-57**  
+  pregled, evidentiranje i ažuriranje članarine. Ove priče su direktno povezane sa pravilima biblioteke i pravom člana na zaduživanje. 
+
+- **US-58, US-59**  
+  član vidi svoj status članarine i datum isteka. Time član dobija transparentnost, a modul članarine postaje korisnički vidljiv. 
+
+- **US-60, US-61**  
+  funkcionalno i integracijsko testiranje prve veće verzije sistema. Ove priče su važne jer Release 2 integriše najveći broj međuzavisnih funkcionalnosti do tada. 
+
+
+
 ### Zašto su ove funkcionalnosti grupisane u Release 2
 
 Ove funkcionalnosti su grupisane zajedno zato što Release 2 treba da bude trenutak kada sistem počinje podržavati **stvarni svakodnevni rad biblioteke**.
@@ -258,17 +324,17 @@ Zato release nakon Sprinta 8 ima mnogo više smisla nego release nakon Sprinta 7
 - integracija većeg broja modula u ovoj fazi povećava potrebu za ozbiljnijim testiranjem
 
 ### Okvirni sprintovi u kojima se očekuje realizacija
-**Sprint 7 – Sprint 8**
+**Sprint 7 - Sprint 8**
 
 ### Planirani trenutak release-a
 **Nakon Sprinta 8**
 
 ---
 
-## Release 3 — Napredne korisničke i administrativne funkcionalnosti
+## Release 3 - Napredne korisničke i administrativne funkcionalnosti
 
 ### Naziv inkrementa
-**Release 3 – Rezervacije, notifikacije i napredna podrška korisnicima**
+**Release 3 - Rezervacije, notifikacije i napredna podrška korisnicima**
 
 ### Cilj inkrementa
 Cilj trećeg release-a je da se sistem nadogradi funkcionalnostima koje poboljšavaju korisničko iskustvo, unapređuju organizaciju rada bibliotekara i uvode veću automatizaciju procesa. Nakon ovog release-a sistem treba podržavati:
@@ -323,6 +389,51 @@ U ovaj release ulaze funkcionalnosti iz Sprinta 9 i 10:
 - **PB-49 Integracija sa distributerom knjiga**  
   Slanje zahtjeva za nabavku knjiga distributeru. 
 
+### Ključni User Storyji koji grade Release 3
+
+#### Sprint 9 - korisnički komfor i rezervacije
+- **US-62, US-63, US-64**  
+  član vidi aktivna zaduženja, rok vraćanja i jasno označena zakašnjenja. Ove priče povećavaju samouslužnost sistema i smanjuju oslanjanje člana na bibliotekara za osnovne informacije. 
+
+- **US-65, US-66, US-67, US-68**  
+  bibliotekar vidi aktivna zaduženja, može ih filtrirati, otvoriti detalje i pratiti ih po roku vraćanja. Ovaj skup priča povećava operativnu preglednost i efikasnost rada bibliotekara. 
+
+- **US-69, US-70, US-71, US-72**  
+  rezervacija knjige, čuvanje vremena rezervacije, pregled vlastitih rezervacija i otkazivanje rezervacije. Ove priče uvode potpuno novu funkcionalnu oblast koja ima smisla tek kada je sistem već savladao dostupnost i zaduživanje. 
+
+- **US-73**  
+  pregled aktivnih rezervacija za bibliotekara. Ova priča zaokružuje modul rezervacija sa strane osoblja biblioteke. 
+- **US-74, US-75, US-76, US-78**  
+  napredni filteri po kategoriji, izdavaču, godini i kombinacija filtera. Ovo je UX nadogradnja kataloga koja ima smisla tek kad katalog i fond već imaju dovoljnu širinu. 
+
+- **US-79, US-80**  
+  rok važenja rezervacije i automatsko otkazivanje po isteku. Time rezervacije dobijaju potpuni životni ciklus. 
+
+#### Sprint 10 - automatizacija i upravljačke funkcije
+- **US-81, US-82, US-83, US-84, US-85**  
+  email podsjetnici i upozorenja za rok vraćanja i kašnjenje. Ove priče uvode proaktivnu komunikaciju sistema sa članovima. 
+
+- **US-86**  
+  email obavijest bibliotekaru o novoj rezervaciji. Ova priča dopunjuje rezervacijski tok i unapređuje operativni odgovor osoblja. 
+
+- **US-87, US-88, US-89, US-90**  
+  mjesečni izvještaji o zaduživanjima, rezervacijama i članovima. Ove priče dižu sistem na nivo upravljačkog alata za biblioteku. 
+
+- **US-91, US-92**  
+  audit log promjena nad knjigama i korisnicima. Ovo povećava kontrolu, sigurnost i revizibilnost sistema.
+
+- **US-93, US-94**  
+  obračun kazni i pregled ukupnog duga člana. Ove priče proširuju modul zaduživanja prema pravilima i disciplini korištenja fonda. 
+
+- **US-95, US-96, US-97**  
+  online produženje članarine. Ove priče povećavaju samostalnost člana i smanjuju potrebu za fizičkim dolaskom u biblioteku. 
+
+- **US-98, US-99, US-100**  
+  zahtjev za nabavku knjige i slanje distributeru. Ove priče šire sistem prema vanjskim procesima biblioteke. 
+
+
+
+
 ### Zašto su ove funkcionalnosti grupisane u Release 3
 
 Ovaj release je planiran kao **nadogradnja na stabilan operativni sistem** iz Release-a 2.
@@ -355,7 +466,7 @@ Release 3 je zamišljen kao inkrement koji ne gradi jezgro sistema, nego ga **š
 - integracija više naprednih funkcionalnosti u isto vrijeme može tražiti dodatno refaktorisanje
 
 ### Okvirni sprintovi u kojima se očekuje realizacija
-**Sprint 9 – Sprint 10**
+**Sprint 9 - Sprint 10**
 
 ### Planirani trenutak release-a
 **Nakon Sprinta 10**
@@ -388,9 +499,9 @@ Zato Sprint 11 i 12 treba posmatrati kao **finalization / hardening fazu**, a ne
 
 | Release | Naziv | Sprintovi | Glavni fokus | Planirani trenutak release-a |
 |---|---|---:|---|---|
-| Release 1 | Autentifikacija, članovi i osnovni katalog | 5–6 | login, članovi, knjige, katalog | nakon Sprinta 6 |
-| Release 2 | Upravljanje fondom, članovima i zaduživanjem | 7–8 | primjerci, dostupnost, zaduživanje, članarine, administracija | nakon Sprinta 8 |
-| Release 3 | Rezervacije, notifikacije i napredna podrška korisnicima | 9–10 | rezervacije, pregledi zaduženja, emailovi, napredne funkcije | nakon Sprinta 10 |
+| Release 1 | Autentifikacija, članovi i osnovni katalog | 5-6 | login, članovi, knjige, katalog | nakon Sprinta 6 |
+| Release 2 | Upravljanje fondom, članovima i zaduživanjem | 7-8 | primjerci, dostupnost, zaduživanje, članarine, administracija | nakon Sprinta 8 |
+| Release 3 | Rezervacije, notifikacije i napredna podrška korisnicima | 9-10 | rezervacije, pregledi zaduženja, emailovi, napredne funkcije | nakon Sprinta 10 |
 
 ---
 
