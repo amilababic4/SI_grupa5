@@ -1,0 +1,18 @@
+@{
+    ViewData["Title"] = "Članovi";
+}
+
+<h2>Članovi biblioteke</h2>
+
+<a asp-controller="Korisnik" asp-action="Create" class="btn btn-primary" style="margin-bottom: 1rem;">+ Novi član</a>
+
+<div class="card">
+    <table>
+        <thead>
+            <tr><th>Ime</th><th>Prezime</th><th>Email</th><th>Status</th><th>Članarina</th><th>Akcije</th></tr>
+        </thead>
+        <tbody>
+            @* TODO: foreach (var clan in Model) { ... } *@
+        </tbody>
+    </table>
+</div>

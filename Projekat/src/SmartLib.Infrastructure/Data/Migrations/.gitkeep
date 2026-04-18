@@ -1,0 +1,6 @@
+// Ovaj folder sadrži EF Core migracije.
+// Migracije se generišu komandom:
+//   dotnet ef migrations add <NazivMigracije> --project src/SmartLib.Infrastructure --startup-project src/SmartLib.API
+//
+// Primjena migracija:
+//   dotnet ef database update --project src/SmartLib.Infrastructure --startup-project src/SmartLib.API

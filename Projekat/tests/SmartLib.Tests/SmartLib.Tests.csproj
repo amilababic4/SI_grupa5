@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\SmartLib.Core\SmartLib.Core.csproj" />
+    <ProjectReference Include="..\..\src\SmartLib.API\SmartLib.API.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- TODO: Dodati test framework pakete -->
+    <!-- <PackageReference Include="xunit" Version="2.*" /> -->
+    <!-- <PackageReference Include="xunit.runner.visualstudio" Version="2.*" /> -->
+    <!-- <PackageReference Include="Moq" Version="4.*" /> -->
+  </ItemGroup>
+
+</Project>

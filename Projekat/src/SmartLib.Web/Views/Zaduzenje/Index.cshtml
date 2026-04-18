@@ -1,0 +1,28 @@
+@{
+    ViewData["Title"] = "Zaduženja";
+}
+
+<h2>Zaduženja</h2>
+
+@* TODO: Forma za zaduživanje (samo bibliotekar) *@
+
+<div class="card" style="margin-top: 1rem;">
+    <h3>Aktivna zaduženja</h3>
+    <table>
+        <thead>
+            <tr><th>Knjiga</th><th>Inv. br.</th><th>Član</th><th>Zaduženo</th><th>Rok</th><th>Status</th><th>Akcije</th></tr>
+        </thead>
+        <tbody>
+            @* TODO: foreach (var z in Model) { ... } *@
+            <tr>
+                <td>Placeholder</td><td>INV-001</td><td>Ime Prezime</td>
+                <td>01.01.2026</td><td>15.01.2026</td><td>Aktivno</td>
+                <td>
+                    <form asp-controller="Zaduzenje" asp-action="Vrati" asp-route-id="1" method="post" style="display:inline;">
+                        <button type="submit" class="btn btn-primary">Vrati</button>
+                    </form>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

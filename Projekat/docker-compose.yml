@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  smartlib-db:
+    image: postgres:16-alpine
+    container_name: smartlib-db
+    environment:
+      POSTGRES_DB: smartlib
+      POSTGRES_USER: smartlib_user
+      POSTGRES_PASSWORD: smartlib_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  smartlib-api:
+    build:
+      context: .
+      dockerfile: src/SmartLib.API/Dockerfile
+    container_name: smartlib-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Host=smartlib-db;Port=5432;Database=smartlib;Username=smartlib_user;Password=smartlib_pass
+    ports:
+      - "5000:8080"
+    depends_on:
+      - smartlib-db
+
+  smartlib-web:
+    image: nginx:alpine
+    container_name: smartlib-web
+    ports:
+      - "80:80"
+    volumes:
+      - ./src/SmartLib.Web:/usr/share/nginx/html:ro
+    depends_on:
+      - smartlib-api
+
+volumes:
+  postgres_data:

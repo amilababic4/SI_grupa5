@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="bs">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] — SmartLib</title>
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+    <!-- Navigacija -->
+    <nav id="main-nav">
+        <div class="nav-brand">
+            <a asp-controller="Home" asp-action="Index">📚 SmartLib</a>
+        </div>
+        <ul class="nav-links">
+            <li><a asp-controller="Knjiga" asp-action="Index">Katalog</a></li>
+
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <li><a asp-controller="Zaduzenje" asp-action="Index">Zaduženja</a></li>
+                <li><a asp-controller="Korisnik" asp-action="Profil">Profil</a></li>
+
+                @* TODO: Prikazati prema ulozi korisnika *@
+                @* if (User.IsInRole("Bibliotekar") || User.IsInRole("Administrator")) *@
+                @* { *@
+                <li><a asp-controller="Korisnik" asp-action="Index">Članovi</a></li>
+                <li><a asp-controller="Kategorija" asp-action="Index">Kategorije</a></li>
+                @* } *@
+
+                @* if (User.IsInRole("Administrator")) *@
+                @* { *@
+                <li><a asp-controller="Admin" asp-action="Korisnici">Korisnici</a></li>
+                <li><a asp-controller="Admin" asp-action="AuditLog">Audit Log</a></li>
+                @* } *@
+
+                <li>
+                    <form asp-controller="Auth" asp-action="Logout" method="post" style="display:inline;">
+                        <button type="submit" class="nav-link-btn">Odjava</button>
+                    </form>
+                </li>
+            }
+            else
+            {
+                <li><a asp-controller="Auth" asp-action="Login">Prijava</a></li>
+            }
+        </ul>
+    </nav>
+
+    <!-- Glavni sadržaj -->
+    <main class="container">
+        @RenderBody()
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 SmartLib — SI Grupa 5, ETF Sarajevo</p>
+    </footer>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

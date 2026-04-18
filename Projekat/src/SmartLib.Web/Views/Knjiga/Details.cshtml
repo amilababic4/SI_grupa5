@@ -1,0 +1,46 @@
+@* TODO: @model KnjigaDetailsViewModel *@
+@{
+    ViewData["Title"] = "Detalji knjige";
+}
+
+<a asp-controller="Knjiga" asp-action="Index">← Nazad na katalog</a>
+
+<div class="card" style="margin-top: 1rem;">
+    <h2 id="knjiga-naslov">TODO: Naslov knjige</h2>
+    <p><strong>Autor:</strong> <span>TODO</span></p>
+    <p><strong>ISBN:</strong> <span>TODO</span></p>
+    <p><strong>Kategorija:</strong> <span>TODO</span></p>
+    <p><strong>Izdavač:</strong> <span>TODO</span></p>
+    <p><strong>Godina izdanja:</strong> <span>TODO</span></p>
+
+    @* TODO: Dugmad za uređivanje/brisanje (bibliotekar/admin) *@
+    @* @if (User.IsInRole("Bibliotekar") || User.IsInRole("Administrator"))
+    {
+        <div style="margin-top: 1rem;">
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Uredi</a>
+            <form asp-action="Delete" asp-route-id="@Model.Id" method="post" style="display:inline;"
+                  onsubmit="return confirm('Jeste li sigurni?')">
+                <button type="submit" class="btn btn-danger">Obriši</button>
+            </form>
+        </div>
+    } *@
+
+    <hr style="margin: 1.5rem 0;" />
+
+    <h3>Primjerci</h3>
+    <table>
+        <thead>
+            <tr><th>Inventarni broj</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+            @* TODO: foreach (var p in Model.Primjerci)
+            {
+                <tr>
+                    <td>@p.InventarniBroj</td>
+                    <td>@p.Status</td>
+                </tr>
+            } *@
+            <tr><td>INV-001</td><td>Dostupan</td></tr>
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,46 @@
+@* TODO: @model IEnumerable<KnjigaDto> *@
+@{
+    ViewData["Title"] = "Katalog";
+}
+
+<h2>Katalog knjiga</h2>
+
+<!-- Pretraga -->
+<div class="card" style="margin-top: 1rem;">
+    <form asp-controller="Knjiga" asp-action="Index" method="get" style="display: flex; gap: 1rem; flex-wrap: wrap;">
+        <input type="text" name="naslov" placeholder="Pretraga po naslovu..." style="flex: 1; padding: 0.5rem;" />
+        <input type="text" name="autor" placeholder="Pretraga po autoru..." style="flex: 1; padding: 0.5rem;" />
+        <button type="submit" class="btn btn-primary">Traži</button>
+        <a asp-controller="Knjiga" asp-action="Index" class="btn btn-secondary">Reset</a>
+    </form>
+</div>
+
+<!-- TODO: Dugme za dodavanje (samo bibliotekar/admin) -->
+@* @if (User.IsInRole("Bibliotekar") || User.IsInRole("Administrator"))
+{
+    <a asp-action="Create" class="btn btn-primary" style="margin-top: 1rem;">+ Nova knjiga</a>
+} *@
+
+<!-- Lista knjiga -->
+<div class="grid" style="margin-top: 2rem;">
+    @* TODO: foreach (var knjiga in Model)
+    {
+        <div class="card">
+            <h3>@knjiga.Naslov</h3>
+            <p><strong>Autor:</strong> @knjiga.Autor</p>
+            <p><strong>ISBN:</strong> @knjiga.Isbn</p>
+            <p><strong>Kategorija:</strong> @knjiga.Kategorija</p>
+            <p><strong>Dostupno:</strong> @knjiga.BrojDostupnih / @knjiga.BrojPrimjeraka</p>
+            <a asp-action="Details" asp-route-id="@knjiga.Id" class="btn btn-primary">Detalji</a>
+        </div>
+    } *@
+
+    <!-- Placeholder -->
+    <div class="card">
+        <h3>Placeholder — Naslov knjige</h3>
+        <p><strong>Autor:</strong> Ime Autora</p>
+        <p><strong>ISBN:</strong> 978-0-000-00000-0</p>
+        <p><strong>Dostupno:</strong> 0 / 0</p>
+        <a asp-action="Details" asp-route-id="1" class="btn btn-primary">Detalji</a>
+    </div>
+</div>
