@@ -137,7 +137,7 @@ U ovaj release ulaze backlog stavke iz Sprinta 5 i Sprinta 6 koje čine osnovu s
   prijava, neuspješna prijava, odjava, sesija, zaštita ruta i zabrana pristupa deaktiviranim korisnicima. Ove priče grade sigurnosnu i pristupnu osnovu bez koje nijedna druga funkcionalnost ne može biti pouzdano korištena. 
 
 - **US-10, US-11**  
-  AI Usage Log i Decision Log. Ove priče nisu krajnje korisničke, ali jesu važne za transparentnost rada tima i validaciju AI-enabled faze koju PO posebno traži u Sprintu 5. 
+  AI Usage Log i Decision Log. Ove priče nisu krajnje korisničke, ali jesu važne za transparentnost rada tima. 
 
 #### Sprint 6 - osnova rada sa knjigama i katalogom
 - **US-12, US-13, US-14, US-15, US-16**  
