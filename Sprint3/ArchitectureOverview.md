@@ -2,7 +2,7 @@
 
 ## 1. Kratak opis arhitektonskog pristupa
 
-SmartLib je projektovan kao **web aplikacija** zasnovana na **klijent-server arhitekturi** sa **modularnim monolitnim backendom**. Frontend i backend su odvojene aplikacije koje komuniciraju putem REST API-ja, dok backend interno koristi modularnu organizaciju po funkcionalnim cjelinama.
+SmartLib je projektovan kao **web aplikacija** sa **modularnim monolitnim backendom**. Frontend i backend su odvojene aplikacije koje komuniciraju putem REST API-ja, dok backend interno koristi modularnu organizaciju po funkcionalnim cjelinama.
 
 Arhitektura se sastoji od tri fundamentalna nivoa:
 
@@ -338,7 +338,7 @@ Pregled dozvola po ulogama:
 
 ## 5. Ključne tehničke odluke
 
-### Odluka 1: Klijent-server arhitektura sa centralizovanim backendom
+### Odluka 1: Troslojna arhitektura sa centralizovanim backendom
 
 - **Razlog:** Sistem koristi tri korisničke uloge sa različitim nivoima pristupa i centralizovana poslovna pravila. Potrebno je jedinstveno mjesto za autorizaciju, validaciju i konzistentnost podataka koje nije zavisno od klijenta.
 - **Prednosti:** Sigurnost pravila nezavisna od frontend implementacije; jedna tačka za sve validacije; lakša kontrola pristupa.
@@ -359,7 +359,7 @@ Pregled dozvola po ulogama:
 
 ### Odluka 4: JWT autentifikacija sa kratkotrajnim tokenima
 
-- **Razlog:** S obzirom na klijent-server arhitekturu sa odvojenim frontendom i backend API-jem, JWT je industrijski standard za ovaj tip komunikacije. Stateless pristup eliminira potrebu za server-side pohranom sesija.
+- **Razlog:** S obzirom na troslojnu arhitekturu sa odvojenim frontendom i backend API-jem, JWT je industrijski standard za ovaj tip komunikacije. Stateless pristup eliminira potrebu za server-side pohranom sesija.
 - **Prednosti:** Stateless autentifikacija, jednostavna integracija sa REST API-jem, mogućnost prenosa podataka o ulozi unutar tokena.
 - **Potencijalni nedostaci:** Otežana invalidacija tokena prije isteka (npr. pri deaktivaciji korisnika). Ublažava se kratkotrajnim tokenima (npr. 30 minuta) i opcionalnom listom poništenih tokena za kritične slučajeve.
 
@@ -394,7 +394,7 @@ Pregled dozvola po ulogama:
 - **Potencijalni nedostaci:** Svi upiti moraju filtrirati neaktivne zapise, što dodaje mali overhead. Ublažava se korištenjem database view-ova ili aplikacionih filtera.
 - **Implementacija:** Korištenje postojeće `status` kolone (npr. `deaktiviran` za korisnike) kao mehanizma logičkog brisanja.
 
-### Odluka 10: Validacija na dva nivoa (klijent + server)
+### Odluka 10: Validacija na dva nivoa
 
 - **Razlog:** Klijentska validacija poboljšava korisničko iskustvo (brze poruke greške uz polje sa greškom), ali nije dovoljna za sigurnost. Server-side validacija je obavezna.
 - **Prednosti:** UX poboljšanje bez kompromisa u sigurnosti, smanjenje nepotrebnih API poziva.
