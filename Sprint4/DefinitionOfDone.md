@@ -38,9 +38,9 @@ User Story se smatra *Done* isključivo ako su ispunjeni svi sljedeći kriteriji
 
 ---
 
-### 6. Spremnost za demonstraciju
-- Funkcionalnost se može uspješno pokrenuti lokalno iz repozitorija i dostupna je za testiranje svim članovima tima.  
-- Spremna je za demonstraciju u okviru sprint review-a bez poznatih kritičnih problema   
+### 6. Demonstracija kroz sprint review
+- Funkcionalnost je pokrenuta i stabilna u testnom okruženju dostupnom svim članovima tima, bez poznatih kritičnih problema
+- Relevantna tehnička dokumentacija je prethodno ažurirana (README, komentari) ako je funkcionalnost uvela promjene u interfejsu ili ponašanju sistema
 
 ---
 
