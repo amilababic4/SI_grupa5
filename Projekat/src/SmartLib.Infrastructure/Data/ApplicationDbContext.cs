@@ -1,14 +1,22 @@
 // TODO: Dodati using Microsoft.EntityFrameworkCore;
 using SmartLib.Core.Models;
 
+
 namespace SmartLib.Infrastructure.Data
 {
     /// <summary>
     /// Entity Framework Core DbContext za SmartLib.
     /// Konfiguriše sve entitete, relacije i ograničenja.
     /// </summary>
-    public class ApplicationDbContext // TODO: : DbContext
-    {
+    using Microsoft.EntityFrameworkCore;
+
+public class ApplicationDbContext : DbContext
+{
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+        : base(options) { }
+
+    public DbSet<Knjiga> Knjige { get; set; }
+}
         // TODO: Dodati DbSet svojstva za sve entitete
         // public DbSet<Uloga> Uloge { get; set; }
         // public DbSet<Korisnik> Korisnici { get; set; }
@@ -41,5 +49,5 @@ namespace SmartLib.Infrastructure.Data
         //     //     new Uloga { Id = 3, Naziv = "Administrator", Opis = "Sistem administrator" }
         //     // );
         // }
-    }
+    
 }
