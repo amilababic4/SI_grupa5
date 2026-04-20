@@ -130,24 +130,20 @@ U ovaj release ulaze backlog stavke iz Sprinta 5 i Sprinta 6 koje čine osnovu s
 ### Ključni User Storyji koji grade Release 1
 
 #### Sprint 5 - osnova pristupa i korisnika
-- **US-01, US-02, US-03**  
-  kreiranje člana kroz formu, validacija unosa i potvrda uspješnog kreiranja naloga. Ove priče su bitne jer obezbjeđuju da biblioteka može evidentirati nove članove kao osnovne korisnike sistema. 
 
-- **US-04, US-05, US-06, US-07, US-08, US-09**  
-  prijava, neuspješna prijava, odjava, sesija, zaštita ruta i zabrana pristupa deaktiviranim korisnicima. Ove priče grade sigurnosnu i pristupnu osnovu bez koje nijedna druga funkcionalnost ne može biti pouzdano korištena. 
+ | User Storyji | Opis / doprinos release-u |
+|---|---|
+ | **US-01, US-02, US-03** | Kreiranje člana kroz formu, validacija unosa i potvrda uspješnog kreiranja naloga. Ove priče su bitne jer obezbjeđuju da biblioteka može evidentirati nove članove kao osnovne korisnike sistema. |
+ | **US-04, US-05, US-06, US-07, US-08, US-09** | Prijava, neuspješna prijava, odjava, sesija, zaštita ruta i zabrana pristupa deaktiviranim korisnicima. Ove priče grade sigurnosnu i pristupnu osnovu bez koje nijedna druga funkcionalnost ne može biti pouzdano korištena. |
+| **US-10, US-11** | AI Usage Log i Decision Log. Ove priče nisu krajnje korisničke, ali jesu važne za transparentnost rada tima. |
 
-- **US-10, US-11**  
-  AI Usage Log i Decision Log. Ove priče nisu krajnje korisničke, ali jesu važne za transparentnost rada tima. 
 
 #### Sprint 6 - osnova rada sa knjigama i katalogom
-- **US-12, US-13, US-14, US-15, US-16**  
-  unos knjige, validacija ISBN-a, broj primjeraka, kategorija i automatsko dodavanje u katalog. Ovaj skup priča čini jezgro fonda, jer bez njih katalog ne bi imao stvarni sadržaj. 
-
-- **US-17, US-18**  
-  uređivanje postojećih knjiga i čuvanje ažuriranih podataka. To povećava tačnost i održivost fonda od samog početka. 
-
-- **US-19, US-20**  
-  prikaz knjiga u katalogu i paginacija. Ove priče omogućavaju da korisnik stvarno koristi ono što je uneseno u sistem, pa zato zaokružuju prvi release u funkcionalnu cjelinu. 
+ | User Storyji | Opis / doprinos release-u |
+|---|---|
+ | **US-12, US-13, US-14, US-15, US-16** | Unos knjige, validacija ISBN-a, broj primjeraka, kategorija i automatsko dodavanje u katalog. Ovaj skup priča čini jezgro fonda, jer bez njih katalog ne bi imao stvarni sadržaj. |
+ | **US-17, US-18** | Uređivanje postojećih knjiga i čuvanje ažuriranih podataka. To povećava tačnost i održivost fonda od samog početka. |
+| **US-19, US-20** | Prikaz knjiga u katalogu i paginacija. Ove priče omogućavaju da korisnik stvarno koristi ono što je uneseno u sistem, pa zato zaokružuju prvi release u funkcionalnu cjelinu. | 
 
 ### Zašto su ove funkcionalnosti grupisane u Release 1
 
@@ -251,44 +247,26 @@ U ovaj release ulaze prioritetne funkcionalnosti iz Sprinta 7 i 8:
 ### Ključni User Storyji koji grade Release 2
 
 #### Sprint 7 - proširenje kataloga u pametan i upravljiv fond
-- **US-21, US-22, US-23, US-24**  
-  dodavanje primjeraka, pregled primjeraka, status primjerka i deaktivacija. Ove priče su ključne jer pretvaraju knjigu iz apstraktnog zapisa u stvarni bibliotečki fond kojim se može upravljati.
+ | User Storyji | Opis / doprinos release-u |
+|---|---|
+ | **US-21, US-22, US-23, US-24** | Dodavanje primjeraka, pregled primjeraka, status primjerka i deaktivacija. Ove priče su ključne jer pretvaraju knjigu iz apstraktnog zapisa u stvarni bibliotečki fond kojim se može upravljati. |
+ | **US-25, US-26, US-27, US-28, US-29** | Brisanje knjige, potvrda, logičko uklanjanje i zabrana brisanja uz aktivno zaduženje. Time se uvodi kontrolisano održavanje fonda i sprečava narušavanje podataka. |
+ | **US-30, US-31, US-32, US-33, US-34** | Dodavanje, pregled, uređivanje i brisanje kategorija. Ove priče su važne jer omogućavaju da katalog bude organizovan i konzistentan. |
+ | **US-35, US-36, US-37** | Pretraga po naslovu i autoru te reset pretrage. Ovaj dio direktno poboljšava korisničko iskustvo i čini katalog stvarno upotrebljivim. |
+ | **US-38, US-39** | Prikaz detalja knjige i obrada slučaja nepostojeće knjige. Ove priče proširuju katalog na nivo detaljnijeg pregleda. |
+ | **US-40, US-41, US-42** | Indikator dostupnosti, broj slobodnih primjeraka i prikaz broja dostupnih primjeraka. Ove priče su ključni most između kataloga i budućeg zaduživanja. |
 
-- **US-25, US-26, US-27, US-28, US-29**  
-  brisanje knjige, potvrda, logičko uklanjanje i zabrana brisanja uz aktivno zaduženje. Time se uvodi kontrolisano održavanje fonda i sprečava narušavanje podataka. 
-
-- **US-30, US-31, US-32, US-33, US-34**  
-  dodavanje, pregled, uređivanje i brisanje kategorija. Ove priče su važne jer omogućavaju da katalog bude organizovan i konzistentan. 
-
-- **US-35, US-36, US-37**  
-  pretraga po naslovu i autoru te reset pretrage. Ovaj dio direktno poboljšava korisničko iskustvo i čini katalog stvarno upotrebljivim. 
-
-- **US-38, US-39**  
-  prikaz detalja knjige i obrada slučaja nepostojeće knjige. Ove priče proširuju katalog na nivo detaljnijeg pregleda. 
-
-- **US-40, US-41, US-42**  
-  indikator dostupnosti, broj slobodnih primjeraka i prikaz broja dostupnih primjeraka. Ove priče su ključni most između kataloga i budućeg zaduživanja. 
 
 #### Sprint 8 - centralni operativni proces biblioteke
-- **US-43, US-44, US-45, US-46, US-47**  
-  validacija članarine, novo zaduživanje, vraćanje, automatski rok vraćanja i zaštita od duplog zaduženja. Ovo su najvažnije user priče cijelog sistema jer realizuju glavni poslovni proces biblioteke. 
-
-- **US-48**  
-  pregled profila člana sa osnovnim podacima i trenutnim zaduženjima. Time se zaduživanje povezuje sa konkretnim članovima i njihovim pregledom. 
-
-- **US-49, US-50, US-51, US-52, US-53**  
-  pregled korisnika, pretraga, promjena uloga, deaktivacija i zaštita od deaktivacije vlastitog admin naloga. Ove priče uvode administrativnu kontrolu sistema. 
-
-- **US-54**  
-  pregled historije zaduženja člana. Ovo je logična nadogradnja operativnog modula zaduživanja. 
-- **US-55, US-56, US-57**  
-  pregled, evidentiranje i ažuriranje članarine. Ove priče su direktno povezane sa pravilima biblioteke i pravom člana na zaduživanje. 
-
-- **US-58, US-59**  
-  član vidi svoj status članarine i datum isteka. Time član dobija transparentnost, a modul članarine postaje korisnički vidljiv. 
-
-- **US-60, US-61**  
-  funkcionalno i integracijsko testiranje prve veće verzije sistema. Ove priče su važne jer Release 2 integriše najveći broj međuzavisnih funkcionalnosti do tada. 
+| User Storyji | Opis / doprinos release-u |
+|---|---|
+ | **US-43, US-44, US-45, US-46, US-47** | Validacija članarine, novo zaduživanje, vraćanje, automatski rok vraćanja i zaštita od duplog zaduženja. Ovo su najvažnije user priče cijelog sistema jer realizuju glavni poslovni proces biblioteke. |
+| **US-48** | Pregled profila člana sa osnovnim podacima i trenutnim zaduženjima. Time se zaduživanje povezuje sa konkretnim članovima i njihovim pregledom. |
+ | **US-49, US-50, US-51, US-52, US-53** | Pregled korisnika, pretraga, promjena uloga, deaktivacija i zaštita od deaktivacije vlastitog admin naloga. Ove priče uvode administrativnu kontrolu sistema. |
+ | **US-54** | Pregled historije zaduženja člana. Ovo je logična nadogradnja operativnog modula zaduživanja. |
+ | **US-55, US-56, US-57** | Pregled, evidentiranje i ažuriranje članarine. Ove priče su direktno povezane sa pravilima biblioteke i pravom člana na zaduživanje. |
+ | **US-58, US-59** | Član vidi svoj status članarine i datum isteka. Time član dobija transparentnost, a modul članarine postaje korisnički vidljiv. |
+ | **US-60, US-61** | Funkcionalno i integracijsko testiranje prve veće verzije sistema. Ove priče su važne jer Release 2 integriše najveći broj međuzavisnih funkcionalnosti do tada. |
 
 
 
@@ -392,44 +370,26 @@ U ovaj release ulaze funkcionalnosti iz Sprinta 9 i 10:
 ### Ključni User Storyji koji grade Release 3
 
 #### Sprint 9 - korisnički komfor i rezervacije
-- **US-62, US-63, US-64**  
-  član vidi aktivna zaduženja, rok vraćanja i jasno označena zakašnjenja. Ove priče povećavaju samouslužnost sistema i smanjuju oslanjanje člana na bibliotekara za osnovne informacije. 
+| User Storyji | Opis / doprinos release-u |
+|---|---|
+ | **US-62, US-63, US-64** | Član vidi aktivna zaduženja, rok vraćanja i jasno označena zakašnjenja. Ove priče povećavaju samouslužnost sistema i smanjuju oslanjanje člana na bibliotekara za osnovne informacije. |
+ | **US-65, US-66, US-67, US-68** | Bibliotekar vidi aktivna zaduženja, može ih filtrirati, otvoriti detalje i pratiti ih po roku vraćanja. Ovaj skup priča povećava operativnu preglednost i efikasnost rada bibliotekara. |
+ | **US-69, US-70, US-71, US-72** | Rezervacija knjige, čuvanje vremena rezervacije, pregled vlastitih rezervacija i otkazivanje rezervacije. Ove priče uvode potpuno novu funkcionalnu oblast koja ima smisla tek kada je sistem već savladao dostupnost i zaduživanje. |
+ | **US-73** | Pregled aktivnih rezervacija za bibliotekara. Ova priča zaokružuje modul rezervacija sa strane osoblja biblioteke. |
+| **US-74, US-75, US-76, US-78** | Napredni filteri po kategoriji, izdavaču, godini i kombinacija filtera. Ovo je UX nadogradnja kataloga koja ima smisla tek kad katalog i fond već imaju dovoljnu širinu. |
+| **US-79, US-80** | Rok važenja rezervacije i automatsko otkazivanje po isteku. Time rezervacije dobijaju potpuni životni ciklus. |
 
-- **US-65, US-66, US-67, US-68**  
-  bibliotekar vidi aktivna zaduženja, može ih filtrirati, otvoriti detalje i pratiti ih po roku vraćanja. Ovaj skup priča povećava operativnu preglednost i efikasnost rada bibliotekara. 
-
-- **US-69, US-70, US-71, US-72**  
-  rezervacija knjige, čuvanje vremena rezervacije, pregled vlastitih rezervacija i otkazivanje rezervacije. Ove priče uvode potpuno novu funkcionalnu oblast koja ima smisla tek kada je sistem već savladao dostupnost i zaduživanje. 
-
-- **US-73**  
-  pregled aktivnih rezervacija za bibliotekara. Ova priča zaokružuje modul rezervacija sa strane osoblja biblioteke. 
-- **US-74, US-75, US-76, US-78**  
-  napredni filteri po kategoriji, izdavaču, godini i kombinacija filtera. Ovo je UX nadogradnja kataloga koja ima smisla tek kad katalog i fond već imaju dovoljnu širinu. 
-
-- **US-79, US-80**  
-  rok važenja rezervacije i automatsko otkazivanje po isteku. Time rezervacije dobijaju potpuni životni ciklus. 
 
 #### Sprint 10 - automatizacija i upravljačke funkcije
-- **US-81, US-82, US-83, US-84, US-85**  
-  email podsjetnici i upozorenja za rok vraćanja i kašnjenje. Ove priče uvode proaktivnu komunikaciju sistema sa članovima. 
-
-- **US-86**  
-  email obavijest bibliotekaru o novoj rezervaciji. Ova priča dopunjuje rezervacijski tok i unapređuje operativni odgovor osoblja. 
-
-- **US-87, US-88, US-89, US-90**  
-  mjesečni izvještaji o zaduživanjima, rezervacijama i članovima. Ove priče dižu sistem na nivo upravljačkog alata za biblioteku. 
-
-- **US-91, US-92**  
-  audit log promjena nad knjigama i korisnicima. Ovo povećava kontrolu, sigurnost i revizibilnost sistema.
-
-- **US-93, US-94**  
-  obračun kazni i pregled ukupnog duga člana. Ove priče proširuju modul zaduživanja prema pravilima i disciplini korištenja fonda. 
-
-- **US-95, US-96, US-97**  
-  online produženje članarine. Ove priče povećavaju samostalnost člana i smanjuju potrebu za fizičkim dolaskom u biblioteku. 
-
-- **US-98, US-99, US-100**  
-  zahtjev za nabavku knjige i slanje distributeru. Ove priče šire sistem prema vanjskim procesima biblioteke. 
+| User Storyji | Opis / doprinos release-u |
+|---|---|
+| **US-81, US-82, US-83, US-84, US-85** | Email podsjetnici i upozorenja za rok vraćanja i kašnjenje. Ove priče uvode proaktivnu komunikaciju sistema sa članovima. |
+| **US-86** | Email obavijest bibliotekaru o novoj rezervaciji. Ova priča dopunjuje rezervacijski tok i unapređuje operativni odgovor osoblja. |
+| **US-87, US-88, US-89, US-90** | Mjesečni izvještaji o zaduživanjima, rezervacijama i članovima. Ove priče dižu sistem na nivo upravljačkog alata za biblioteku. |
+| **US-91, US-92** | Audit log promjena nad knjigama i korisnicima. Ovo povećava kontrolu, sigurnost i revizibilnost sistema. |
+ | **US-93, US-94** | Obračun kazni i pregled ukupnog duga člana. Ove priče proširuju modul zaduživanja prema pravilima i disciplini korištenja fonda. |
+ | **US-95, US-96, US-97** | Online produženje članarine. Ove priče povećavaju samostalnost člana i smanjuju potrebu za fizičkim dolaskom u biblioteku. |
+ | **US-98, US-99, US-100** | Zahtjev za nabavku knjige i slanje distributeru. Ove priče šire sistem prema vanjskim procesima biblioteke. |
 
 
 
