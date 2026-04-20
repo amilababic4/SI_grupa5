@@ -3,18 +3,17 @@
 
 ## Opis dokumenta
 
-Ovaj dokument predstavlja ažurirani Product Backlog projekta **Bibliotečki informacioni sistem** u sklopu Sprint 3. Backlog sadrži stavke koje su trenutno poznate timu. Njegova svrha je da omogući pregled planiranog obima sistema, 
+Ovaj dokument predstavlja ažurirani Product Backlog projekta **Bibliotečki informacioni sistem** u sklopu Sprint 4. Backlog sadrži stavke koje su trenutno poznate timu. Njegova svrha je da omogući pregled planiranog obima sistema, 
 olakša prioritizaciju rada po sprintovima i služi kao osnova za dalju razradu.
 
 > **Napomena o ažuriranju Product Backloga:**  
-> U Product Backlog su ažurirani statusi stavki koje odgovaraju obaveznim deliverable-ima iz **Sprinta 3**.  
+> U Product Backlog su ažurirani statusi stavki koje odgovaraju obaveznim deliverable-ima iz **Sprinta 4**.  
 > Konkretno, sljedeće stavke:
-> - **Risk Register**
-> - **Domain Model i Use Case Model**
-> - **Architecture Overview**
-> - **Test Strategy**
+> - **Definition of Done**
+> - **Initial Release Plan**
+> - **Početna struktura projekta - tehnički setup**
 >
-> Ove stavke su označene kao **završene u Sprintu 3**, jer predstavljaju artefakte koji su u ovom sprintu izrađeni.
+> Ove stavke su označene kao **završene u Sprintu 4**, jer predstavljaju artefakte koji su u ovom sprintu izrađeni.
 
 ## Tabela 
 
