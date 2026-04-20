@@ -2,7 +2,7 @@
 
 ## 1. Kratak opis arhitektonskog pristupa
 
-SmartLib je projektovan kao **web aplikacija** sa **modularnim monolitnim backendom** koristeći **ASP.NET Core MVC** arhitektonski obrazac. Prezentacioni sloj (Razor Views) i aplikaciona logika (kontroleri i servisi) su dio iste aplikacije — server generira HTML stranice koje se isporučuju korisnicima putem standardnog HTTP zahtjev-odgovor ciklusa, dok backend interno koristi modularnu organizaciju po funkcionalnim cjelinama.
+SmartLib je projektovan kao **web aplikacija** sa **modularnim monolitnim backendom** koristeći **ASP.NET Core MVC** arhitektonski obrazac. Prezentacioni sloj (Razor Views) i aplikaciona logika (kontroleri i servisi) su dio iste aplikacije, server generira HTML stranice koje se isporučuju korisnicima putem standardnog HTTP zahtjev-odgovor ciklusa, dok backend interno koristi modularnu organizaciju po funkcionalnim cjelinama.
 
 Arhitektura se sastoji od tri fundamentalna nivoa:
 

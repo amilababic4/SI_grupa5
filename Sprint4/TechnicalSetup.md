@@ -129,37 +129,7 @@ Korisnik → Nginx (:80/443) → Kestrel (:5000) → PostgreSQL (:5432)
 
 ---
 
-## 6. Struktura projekta (Clean Architecture)
-
-```
-Projekat/
-├── SmartLib.sln                           # Solution fajl
-├── docker-compose.yml                     # Kontejnerizacija
-├── src/
-│   ├── SmartLib.Web/                      # ASP.NET Core MVC (Frontend + Entry Point)
-│   │   ├── Controllers/                   # MVC kontroleri (vraćaju Views)
-│   │   ├── Views/                         # Razor Views (.cshtml)
-│   │   ├── wwwroot/                       # Statički fajlovi (CSS)
-│   │   ├── Models/                        # ViewModeli za forme
-│   │   └── Program.cs                     # Entry point
-│   ├── SmartLib.API/                      # REST API (opciono, za buduće klijente)
-│   │   ├── Controllers/                   # API kontroleri (vraćaju JSON)
-│   │   └── Middleware/                    # JWT middleware
-│   ├── SmartLib.Core/                     # Domain sloj (čist C#, bez zavisnosti)
-│   │   ├── Models/                        # Domain modeli (Knjiga, Korisnik...)
-│   │   ├── Interfaces/                    # Repository interfejsi
-│   │   └── DTOs/                          # Data Transfer Objekti
-│   └── SmartLib.Infrastructure/           # Data access sloj
-│       ├── Data/ApplicationDbContext.cs   # EF Core DbContext
-│       ├── Data/Migrations/              # EF Core migracije
-│       └── Repositories/                 # Implementacije repozitorija
-└── tests/
-    └── SmartLib.Tests/                    # xUnit testovi
-```
-
----
-
-## 7. Rezime tehničkih odluka
+## 6. Rezime tehničkih odluka
 
 | Odluka | Odabrano | Obrazloženje |
 |---|---|---|
