@@ -2,17 +2,17 @@
 
 ## 1. Kratak opis arhitektonskog pristupa
 
-SmartLib je projektovan kao **web aplikacija** sa **modularnim monolitnim backendom**. Frontend i backend su odvojene aplikacije koje komuniciraju putem REST API-ja, dok backend interno koristi modularnu organizaciju po funkcionalnim cjelinama.
+SmartLib je projektovan kao **web aplikacija** sa **modularnim monolitnim backendom** koristeći **ASP.NET Core MVC** arhitektonski obrazac. Prezentacioni sloj (Razor Views) i aplikaciona logika (kontroleri i servisi) su dio iste aplikacije — server generira HTML stranice koje se isporučuju korisnicima putem standardnog HTTP zahtjev-odgovor ciklusa, dok backend interno koristi modularnu organizaciju po funkcionalnim cjelinama.
 
 Arhitektura se sastoji od tri fundamentalna nivoa:
 
-- **Prezentacioni sloj (Web klijent)** je zasebna web aplikacija koja služi kao jedini interfejs za interakciju korisnika sa sistemom. Klijent komunicira isključivo sa backend API-jem putem HTTP(S) poziva i nikada direktno ne pristupa bazi podataka. Odgovoran je za renderovanje korisničkog interfejsa, klijentsku validaciju formi i prilagođavanje prikaza prema ulozi prijavljenog korisnika (Član, Bibliotekar, Administrator).
+- **Prezentacioni sloj (Razor Views)** je skup server-side renderovanih stranica (.cshtml) koje služe kao jedini interfejs za interakciju korisnika sa sistemom. Razor Views se generiraju na serveru od strane MVC kontrolera i nikada direktno ne pristupaju bazi podataka. Prezentacioni sloj je odgovoran za renderovanje korisničkog interfejsa, klijentsku validaciju formi i prilagođavanje prikaza prema ulozi prijavljenog korisnika (Član, Bibliotekar, Administrator).
 
-- **Aplikacioni sloj (API server, modularni monolit)** je centralna backend aplikacija koja implementira kompletnu poslovnu logiku sistema. Organizovana je po funkcionalnim modulima (Auth, Korisnici, Katalog, Inventar, Zaduženja, Članarina, Rezervacije, Audit/Log), pri čemu svaki modul ima jasno definisanu odgovornost i interni interfejs.
+- **Aplikacioni sloj (MVC kontroleri i servisi, modularni monolit)** je centralni dio aplikacije koji implementira kompletnu poslovnu logiku sistema. Organizovan je po funkcionalnim modulima (Auth, Korisnici, Katalog, Inventar, Zaduženja, Članarina, Rezervacije, Audit/Log), pri čemu svaki modul ima jasno definisanu odgovornost i interni interfejs.
 
 - **Sloj podataka (Relacijska baza podataka)** je centralizovana trajna pohrana svih podataka sistema. Baza provodi integritetna ograničenja, referencijalne veze i jedinstvene vrijednosti, čime se osigurava konzistentnost podataka nezavisno od aplikacione logike.
 
-Važno je naglasiti da je ovo **web aplikacija sa razdvojenim frontend i backend dijelom**. Pojam „monolit" odnosi se isključivo na backend: umjesto da se backend razbija na mnogo zasebnih servisa, sva poslovna logika živi unutar jedne backend aplikacije koja je interno organizovana po modulima. Frontend je zasebna web aplikacija i ne zavisi od toga kako je backend interno strukturiran.
+Važno je naglasiti da je ovo **monolitna web aplikacija sa MVC arhitektonskim obrascem**. Pojam „monolit" znači da prezentacioni sloj (Razor Views), aplikaciona logika (kontroleri i servisi) i pristup podacima (repozitoriji) žive unutar jedne aplikacije koja je interno organizovana po funkcionalnim modulima. Umjesto da se aplikacija razbija na mnogo zasebnih servisa, sva poslovna logika je centralizovana što omogućava jednostavniji razvoj, deployment i debugging.
 
 ### Akteri sistema
 
@@ -45,15 +45,15 @@ Sistem je organizovan u tri primarne infrastrukturne komponente i osam funkciona
 
 | Komponenta | Opis |
 |---|---|
-| **Web klijent (Frontend)** | Zasebna web aplikacija za sve korisničke uloge. Pruža responsivni interfejs prilagođen za desktop i mobilne uređaje. Komunicira sa backendom putem REST API poziva. |
-| **API server (Backend monolit)** | Centralna backend aplikacija sa modularnom internom organizacijom. Jedina ulazna tačka za sve poslovne operacije. Izlaže REST API koji koristi frontend. |
+| **Prezentacioni sloj (Razor Views)** | Server-side renderovane stranice (.cshtml) za sve korisničke uloge. Pruža responsivni interfejs prilagođen za desktop i mobilne uređaje. Generirane od strane MVC kontrolera. |
+| **Aplikacioni sloj (MVC kontroleri i servisi)** | Centralni dio aplikacije sa modularnom internom organizacijom. MVC kontroleri primaju HTTP zahtjeve, pozivaju servisni sloj i vraćaju renderovane Razor View stranice. |
 | **Relacijska baza podataka (PostgreSQL)** | Trajna pohrana svih podataka sistema. Provodi integritetna ograničenja i referencijalne veze. |
 
 ### 2.2 Funkcionalni moduli backend aplikacije
 
 | Modul | Kratki opis |
 |---|---|
-| **Auth modul** | Autentifikacija, upravljanje JWT tokenima, hashiranje lozinki |
+| **Auth modul** | Autentifikacija, upravljanje sesijama (cookies), hashiranje lozinki |
 | **Korisnici modul** | Registracija članova, upravljanje nalozima, pregled i pretraga korisnika |
 | **Katalog modul** | Upravljanje knjigama i kategorijama, pretraga i filtriranje |
 | **Inventar modul** | Upravljanje fizičkim primjercima knjiga i njihovim statusima |
@@ -76,7 +76,7 @@ Sistem je organizovan u tri primarne infrastrukturne komponente i osam funkciona
 
 ### 3.1 Web klijent (Frontend)
 
-Web klijent je prezentaciona komponenta koja služi kao jedini interfejs između korisnika i sistema. Njegova odgovornost je strogo ograničena na prikaz podataka i prikupljanje korisničkog unosa, dok se sva poslovna logika izvršava na backendu.
+Prezentacioni sloj (Razor Views) je komponenta koja služi kao jedini interfejs između korisnika i sistema. Njegova odgovornost je strogo ograničena na prikaz podataka i prikupljanje korisničkog unosa, dok se sva poslovna logika izvršava u kontrolerima i servisnom sloju.
 
 **Odgovornosti prema ulogama:**
 
@@ -117,18 +117,18 @@ Web klijent je prezentaciona komponenta koja služi kao jedini interfejs između
 
 **Jako važno!** Frontend prilagođava korisnički interfejs prema ulozi prijavljenog korisnika (skrivanje/prikazivanje navigacijskih stavki i formi), ali ovo nikada ne smije biti jedini mehanizam kontrole pristupa. Svaka restrikcija mora biti provjerena i na backendu.
 
-### 3.2 API server (Backend monolit)
+### 3.2 Aplikacioni sloj (MVC kontroleri i servisi)
 
-Backend je centralna tačka sistema i jedini izvor istine za sva poslovna pravila. Organizovan je po modulima koji međusobno sarađuju unutar istog procesa kroz jasno definirane interne interfejse.
+Aplikacioni sloj je centralna tačka sistema i jedini izvor istine za sva poslovna pravila. Organizovan je po modulima koji međusobno sarađuju unutar istog procesa kroz jasno definirane interne interfejse.
 
 #### Auth modul
 
 Odgovoran za kompletnu autentifikaciju korisnika i upravljanje pristupom sistemu.
 
 - Prijava korisnika putem email-a i lozinke sa verifikacijom hash vrijednosti
-- Izdavanje JWT tokena pri uspješnoj prijavi sa kratkotrajnim rokom važenja
-- Invalidacija tokena pri odjavi
-- Blokiranje pristupa zaštićenim rutama bez validnog tokena
+- Kreiranje autentifikacione sesije (cookie) pri uspješnoj prijavi
+- Invalidacija sesije pri odjavi
+- Blokiranje pristupa zaštićenim rutama bez validne sesije
 - Odbijanje prijave deaktiviranim korisnicima
 - Pohranjivanje lozinki isključivo u hashiranom obliku, bez čuvanja ili vraćanja u čitljivom formatu
 - Generička poruka pri neuspješnoj prijavi, jer sistem nikada ne otkriva koji od unesenih podataka (email ili lozinka) je neispravan
@@ -292,9 +292,9 @@ Sljedeće operacije su atomske, što znači da se izvršavaju u jednoj transakci
 
 Sistem se sastoji od tri komponente koje komuniciraju na sljedeći način:
 
-**Web klijent (Frontend)** komunicira isključivo sa **API serverom (Backend)** putem HTTP(S) REST poziva. Frontend nikada ne pristupa bazi podataka direktno. Svaki zahtjev prema backendu sadrži JWT token za identifikaciju i autorizaciju korisnika.
+**Korisnik (Browser)** šalje HTTP zahtjeve ka **MVC kontrolerima** koji obrađuju zahtjev, pozivaju servisni sloj i vraćaju renderovanu Razor View stranicu. Prezentacioni sloj nikada direktno ne pristupa bazi podataka. Autentifikacija se vrši putem cookie-based sesija koje server automatski provjerava pri svakom zahtjevu.
 
-**API server (Backend)** je jedina tačka pristupa bazi podataka. Interno, backend je organizovan po modulima (Auth, Korisnici, Katalog, Inventar, Zaduženja, Članarina, Rezervacije, Audit/Log) koji sarađuju unutar istog procesa bez mrežne komunikacije. Audit/Log modul je pomoćna komponenta koja se aktivira iz ostalih modula pri kritičnim akcijama.
+**Aplikacioni sloj** je jedina tačka pristupa bazi podataka. Interno je organizovan po modulima (Auth, Korisnici, Katalog, Inventar, Zaduženja, Članarina, Rezervacije, Audit/Log) koji sarađuju unutar istog procesa bez mrežne komunikacije. Audit/Log modul je pomoćna komponenta koja se aktivira iz ostalih modula pri kritičnim akcijama.
 
 **Relacijska baza podataka (PostgreSQL)** prima SQL upite isključivo od backend aplikacije i provodi integritetna ograničenja na nivou baze.
 
@@ -305,7 +305,7 @@ Kontrola pristupa je implementirana na dva nivoa:
 | Nivo | Mehanizam | Svrha |
 |---|---|---|
 | **Frontend (UI)** | Dinamičko skrivanje/prikazivanje navigacijskih stavki, formi i akcija prema ulozi | Poboljšanje korisničkog iskustva, korisnik ne vidi opcije za koje nema dozvolu |
-| **Backend (API)** | Server-side autorizacija na svakom API endpoint-u, provjera uloge iz JWT tokena | Sigurnosni mehanizam, čak i ako klijent pošalje neovlašten zahtjev, backend ga blokira |
+| **Backend (Kontroleri)** | Server-side autorizacija na svakom controller action-u, provjera uloge iz autentifikacione sesije | Sigurnosni mehanizam, čak i ako klijent pošalje neovlašten zahtjev, server ga blokira |
 
 **Backend je izvor istine za autorizaciju.** Frontend restrikcije postoje samo radi boljeg UX-a.
 
@@ -357,11 +357,11 @@ Pregled dozvola po ulogama:
 - **Prednosti:** Transakcije (ACID), referencijalni integritet, unique constraints, stroga tipizacija, zrelost, pouzdanost i napredna podrška za JSONB.
 - **Potencijalni nedostaci:** Nešto složenija inicijalna konfiguracija u odnosu na SQLite ili MySQL. Ublažava se standardizovanim razvojnim okruženjem.
 
-### Odluka 4: JWT autentifikacija sa kratkotrajnim tokenima
+### Odluka 4: Cookie-based autentifikacija sa server-side sesijama
 
-- **Razlog:** S obzirom na troslojnu arhitekturu sa odvojenim frontendom i backend API-jem, JWT je industrijski standard za ovaj tip komunikacije. Stateless pristup eliminira potrebu za server-side pohranom sesija.
-- **Prednosti:** Stateless autentifikacija, jednostavna integracija sa REST API-jem, mogućnost prenosa podataka o ulozi unutar tokena.
-- **Potencijalni nedostaci:** Otežana invalidacija tokena prije isteka (npr. pri deaktivaciji korisnika). Ublažava se kratkotrajnim tokenima (npr. 30 minuta) i opcionalnom listom poništenih tokena za kritične slučajeve.
+- **Razlog:** S obzirom na MVC arhitekturu sa server-side renderovanjem Razor View stranica, cookie-based autentifikacija je prirodan izbor. ASP.NET Core Identity pruža ugrađenu podršku za cookie autentifikaciju koja se automatski integrira sa MVC middleware pipeline-om.
+- **Prednosti:** Automatsko upravljanje sesijama od strane framework-a, jednostavna implementacija sa `[Authorize]` atributima, nativna integracija sa Razor Views za prikaz podataka prijavljenog korisnika, server-side kontrola sesija omogućava trenutnu invalidaciju pri deaktivaciji korisnika.
+- **Potencijalni nedostaci:** Sesije zahtijevaju server-side pohranu stanja. Ublažava se korištenjem encrypted cookies koji sadrže claim-ove korisnika (uloga, ID), čime se smanjuje potreba za stalnim pristupom bazi pri svakom zahtjevu.
 
 ### Odluka 5: Razdvajanje entiteta „knjiga" i „primjerak"
 
