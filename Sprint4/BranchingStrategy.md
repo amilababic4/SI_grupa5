@@ -63,12 +63,11 @@ GitHub Flow se temelji na sljedećim principima:
 
 | Kriterij | GitFlow | GitLab Flow | GitHub Flow | Trunk-Based |
 |---|---|---|---|---|
-| Kompleksnost za početnike | ❌ Visoka | ⚠️ Srednja | ✅ Niska | ⚠️ Zahtijeva disciplinu |
-| Potreba za više okruženja | ✅ Da | ✅ Da | ❌ Ne | ❌ Ne |
-| Više verzija u produkciji | ✅ Da | ⚠️ Djelomično | ❌ Ne | ❌ Ne |
-| GitHub nativna podrška | ⚠️ Djelomično | ❌ Optimiziran za GitLab | ✅ Potpuna | ⚠️ Djelomično |
-| CI/CD infrastruktura potrebna | ⚠️ Poželjna | ✅ Obavezna | ❌ Opciona | ✅ Obavezna |
-| **Pogodnost za SmartLib** | ❌ | ⚠️ | ✅ | ❌ |
+| Kompleksnost za početnike | Visoka | Srednja | Niska | Zahtijeva disciplinu |
+| Potreba za više okruženja | Da | Da | Ne | Ne |
+| Više verzija u produkciji | Da | Djelomično | Ne | Ne |
+| GitHub nativna podrška | Djelomično | Optimiziran za GitLab | Potpuna | Djelomično |
+| CI/CD infrastruktura potrebna | Poželjna | Obavezna | Opciona | Obavezna |
 
 **Konkretno obrazloženje izbora za SmartLib:**
 
