@@ -103,7 +103,6 @@ Cilj prvog release-a je da sistem dobije **prvu stvarno upotrebljivu verziju**. 
 - evidentira knjige u fond
 - prikaže osnovni katalog knjiga
 
-Ovo je prvi trenutak kada sistem prestaje biti samo tehnički prototip i postaje **funkcionalna osnova bibliotečkog informacionog sistema**.
 
 ### Glavne funkcionalnosti
 
