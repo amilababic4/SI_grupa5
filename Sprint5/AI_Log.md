@@ -1,0 +1,5 @@
+# AI Log
+
+
+## Opis dokumenta
+
