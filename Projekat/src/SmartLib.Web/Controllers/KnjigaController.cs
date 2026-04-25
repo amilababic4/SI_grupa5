@@ -28,25 +28,11 @@ namespace SmartLib.Web.Controllers
             return View();
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Create(/* TODO: KnjigaCreateViewModel model */)
-        {
-            // TODO: Dodavanje knjige sa validacijom
-            return View();
-        }
-
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
             // TODO: Forma za uređivanje knjige
             return View();
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Edit(int id /*, TODO: KnjigaEditViewModel model */)
-        {
-            // TODO: Ažuriranje knjige
-            return RedirectToAction("Details", new { id });
         }
 
         [HttpPost]

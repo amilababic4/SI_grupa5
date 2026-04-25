@@ -1,4 +1,4 @@
-@* TODO: @model LoginViewModel *@
+@model SmartLib.Core.DTOs.LoginRequest
 @{
     ViewData["Title"] = "Prijava";
 }
@@ -7,23 +7,23 @@
     <h2>Prijava u sistem</h2>
 
     <form asp-controller="Auth" asp-action="Login" method="post">
-        <div class="form-group">
-            <label asp-for="@("Email")">Email</label>
-            <input type="email" name="Email" required placeholder="vas@email.com" />
-            @* <span asp-validation-for="Email" class="validation-message"></span> *@
-        </div>
-        <div class="form-group">
-            <label asp-for="@("Lozinka")">Lozinka</label>
-            <input type="password" name="Lozinka" required />
-            @* <span asp-validation-for="Lozinka" class="validation-message"></span> *@
-        </div>
-
-        @if (ViewData["ErrorMessage"] != null)
+        @if (ViewData["ReturnUrl"] is string returnUrl && !string.IsNullOrWhiteSpace(returnUrl))
         {
-            <div class="validation-message" style="margin-bottom: 1rem;">
-                @ViewData["ErrorMessage"]
-            </div>
+            <input type="hidden" name="returnUrl" value="@returnUrl" />
         }
+
+        <div asp-validation-summary="ModelOnly" class="validation-message" style="margin-bottom: 1rem;"></div>
+
+        <div class="form-group">
+            <label asp-for="Email">Email</label>
+            <input asp-for="Email" type="email" placeholder="vas@email.com" />
+            <span asp-validation-for="Email" class="validation-message"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Lozinka">Lozinka</label>
+            <input asp-for="Lozinka" type="password" />
+            <span asp-validation-for="Lozinka" class="validation-message"></span>
+        </div>
 
         <button type="submit" class="btn btn-primary" style="width: 100%;">Prijavi se</button>
     </form>

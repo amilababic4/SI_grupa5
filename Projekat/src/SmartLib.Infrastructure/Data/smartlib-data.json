@@ -1,0 +1,52 @@
+{
+  "NextKorisnikId": 4,
+  "Uloge": [
+    {
+      "Id": 1,
+      "Naziv": "\u010Clan",
+      "Opis": "\u010Clan biblioteke"
+    },
+    {
+      "Id": 2,
+      "Naziv": "Bibliotekar",
+      "Opis": "Bibliote\u010Dko osoblje"
+    },
+    {
+      "Id": 3,
+      "Naziv": "Administrator",
+      "Opis": "Sistem administrator"
+    }
+  ],
+  "Korisnici": [
+    {
+      "Id": 1,
+      "Ime": "Admin",
+      "Prezime": "SmartLib",
+      "Email": "admin@smartlib.ba",
+      "LozinkaHash": "R\u002BQQe1m/6nmEN3ZEN4gXFw==:X5nJN7Js0COVp4hLI8OT/IXLK1GT8EBHa9QqNQNalh0=",
+      "UlogaId": 3,
+      "Status": "aktivan",
+      "DatumKreiranja": "2026-04-25T09:18:44.907912Z"
+    },
+    {
+      "Id": 2,
+      "Ime": "Bibliotekar",
+      "Prezime": "SmartLib",
+      "Email": "bibliotekar@smartlib.ba",
+      "LozinkaHash": "R\u002BQQe1m/6nmEN3ZEN4gXFw==:X5nJN7Js0COVp4hLI8OT/IXLK1GT8EBHa9QqNQNalh0=",
+      "UlogaId": 2,
+      "Status": "aktivan",
+      "DatumKreiranja": "2026-04-25T09:18:44.9079287Z"
+    },
+    {
+      "Id": 3,
+      "Ime": "Test",
+      "Prezime": "Clan",
+      "Email": "clan@smartlib.ba",
+      "LozinkaHash": "R\u002BQQe1m/6nmEN3ZEN4gXFw==:X5nJN7Js0COVp4hLI8OT/IXLK1GT8EBHa9QqNQNalh0=",
+      "UlogaId": 1,
+      "Status": "aktivan",
+      "DatumKreiranja": "2026-04-25T09:18:44.9079289Z"
+    }
+  ]
+}

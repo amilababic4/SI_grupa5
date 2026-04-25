@@ -1,4 +1,10 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
+using SmartLib.Core.DTOs;
+using SmartLib.Core.Interfaces;
+using SmartLib.Infrastructure.Security;
 
 namespace SmartLib.Web.Controllers
 {
@@ -7,30 +13,82 @@ namespace SmartLib.Web.Controllers
     /// </summary>
     public class AuthController : Controller
     {
-        // TODO: Inject IKorisnikRepository i auth servis
+        private readonly IKorisnikRepository _korisnikRepository;
+
+        public AuthController(IKorisnikRepository korisnikRepository)
+        {
+            _korisnikRepository = korisnikRepository;
+        }
 
         [HttpGet]
-        public IActionResult Login()
+        public IActionResult Login(string? returnUrl = null)
         {
+            ViewData["ReturnUrl"] = returnUrl;
             return View();
         }
 
         [HttpPost]
-        public async Task<IActionResult> Login(/* TODO: LoginViewModel model */)
+        public async Task<IActionResult> Login(LoginRequest model, string? returnUrl = null)
         {
-            // TODO: Implementirati prijavu
-            // 1. Validirati model
-            // 2. Provjeriti email i lozinku
-            // 3. Kreirati authentication cookie
-            // 4. Redirect na Dashboard
-            return View();
+            ViewData["ReturnUrl"] = returnUrl;
+
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var korisnik = await _korisnikRepository.GetByEmailAsync(model.Email);
+            if (korisnik is null || !string.Equals(korisnik.Status, "aktivan", StringComparison.OrdinalIgnoreCase))
+            {
+                ModelState.AddModelError(string.Empty, "Prijava nije uspjela.");
+                return View(model);
+            }
+
+            var isPasswordValid = PasswordHasher.VerifyPassword(model.Lozinka, korisnik.LozinkaHash);
+            if (!isPasswordValid)
+            {
+                ModelState.AddModelError(string.Empty, "Prijava nije uspjela.");
+                return View(model);
+            }
+
+            var claims = new List<Claim>
+            {
+                new(ClaimTypes.NameIdentifier, korisnik.Id.ToString()),
+                new(ClaimTypes.Name, $"{korisnik.Ime} {korisnik.Prezime}"),
+                new(ClaimTypes.Email, korisnik.Email),
+                new(ClaimTypes.Role, korisnik.Uloga?.Naziv ?? string.Empty)
+            };
+
+            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var principal = new ClaimsPrincipal(identity);
+
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                principal,
+                new AuthenticationProperties
+                {
+                    IsPersistent = true,
+                    ExpiresUtc = DateTimeOffset.UtcNow.AddHours(8)
+                });
+
+            if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
+            {
+                return Redirect(returnUrl);
+            }
+
+            if (string.Equals(korisnik.Uloga?.Naziv, "Bibliotekar", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(korisnik.Uloga?.Naziv, "Administrator", StringComparison.OrdinalIgnoreCase))
+            {
+                return RedirectToAction("Index", "Korisnik");
+            }
+
+            return RedirectToAction("Index", "Home");
         }
 
         [HttpPost]
         public async Task<IActionResult> Logout()
         {
-            // TODO: Implementirati odjavu
-            // await HttpContext.SignOutAsync();
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Index", "Home");
         }
     }

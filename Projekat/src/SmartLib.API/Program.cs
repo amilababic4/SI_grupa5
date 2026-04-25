@@ -1,24 +1,18 @@
 // SmartLib API — Entry Point
 // TODO: Konfiguracija servisa, middleware-a, autentifikacije i ruta
 
-using Microsoft.EntityFrameworkCore;
-using SmartLib.Infrastructure.Data;
+using SmartLib.Core.Interfaces;
+using SmartLib.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // --- Registracija servisa ---
 
-// TODO: Dodati DbContext (PostgreSQL)
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseInMemoryDatabase("SmartLibDb"));
-
 // TODO: Dodati JWT autentifikaciju
 // builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 //     .AddJwtBearer(options => { ... });
 
-// TODO: Registrovati repozitorije i servise
-// builder.Services.AddScoped<IKorisnikRepository, KorisnikRepository>();
-// builder.Services.AddScoped<IKnjigaRepository, KnjigaRepository>();
+builder.Services.AddScoped<IKorisnikRepository, KorisnikRepository>();
 
 builder.Services.AddControllers();
 

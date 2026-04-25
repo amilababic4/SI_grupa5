@@ -1,0 +1,39 @@
+@model SmartLib.Core.DTOs.KorisnikCreateDto
+@{
+    ViewData["Title"] = "Kreiranje člana";
+}
+
+<h2>Kreiranje naloga člana</h2>
+
+<div class="card" style="max-width: 650px;">
+    <form asp-controller="Korisnik" asp-action="Create" method="post">
+        <div asp-validation-summary="ModelOnly" class="validation-message" style="margin-bottom: 1rem;"></div>
+
+        <div class="form-group">
+            <label asp-for="Ime">Ime</label>
+            <input asp-for="Ime" />
+            <span asp-validation-for="Ime" class="validation-message"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Prezime">Prezime</label>
+            <input asp-for="Prezime" />
+            <span asp-validation-for="Prezime" class="validation-message"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Email">Email adresa</label>
+            <input asp-for="Email" type="email" placeholder="ime.prezime@email.com" />
+            <span asp-validation-for="Email" class="validation-message"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Lozinka">Lozinka</label>
+            <input asp-for="Lozinka" type="password" />
+            <span asp-validation-for="Lozinka" class="validation-message"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Kreiraj nalog</button>
+        <a asp-action="Index" class="btn btn-secondary">Nazad na listu</a>
+    </form>
+</div>

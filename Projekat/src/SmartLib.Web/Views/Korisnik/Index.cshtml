@@ -1,18 +1,45 @@
+@model IEnumerable<SmartLib.Core.DTOs.KorisnikDto>
 @{
-    ViewData["Title"] = "Članovi";
+    ViewData["Title"] = "Članovi biblioteke";
 }
 
-<h2>Članovi biblioteke</h2>
+<div style="display:flex; justify-content:space-between; align-items:center; gap:1rem; margin-bottom:1rem;">
+    <h2>Članovi biblioteke</h2>
+    <a asp-action="Create" class="btn btn-primary">Kreiraj nalog člana</a>
+</div>
 
-<a asp-controller="Korisnik" asp-action="Create" class="btn btn-primary" style="margin-bottom: 1rem;">+ Novi član</a>
+@if (TempData["SuccessMessage"] is string successMessage)
+{
+    <div class="validation-message" style="margin-bottom: 1rem;">@successMessage</div>
+}
 
 <div class="card">
-    <table>
-        <thead>
-            <tr><th>Ime</th><th>Prezime</th><th>Email</th><th>Status</th><th>Članarina</th><th>Akcije</th></tr>
-        </thead>
-        <tbody>
-            @* TODO: foreach (var clan in Model) { ... } *@
-        </tbody>
-    </table>
+    @if (!Model.Any())
+    {
+        <p>Trenutno nema registrovanih članova.</p>
+    }
+    else
+    {
+        <table style="width:100%; border-collapse: collapse;">
+            <thead>
+                <tr>
+                    <th style="text-align:left; padding: 0.75rem 0;">Ime i prezime</th>
+                    <th style="text-align:left; padding: 0.75rem 0;">Email</th>
+                    <th style="text-align:left; padding: 0.75rem 0;">Status</th>
+                    <th style="text-align:left; padding: 0.75rem 0;">Kreiran</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var clan in Model)
+                {
+                    <tr>
+                        <td style="padding: 0.5rem 0;">@clan.Ime @clan.Prezime</td>
+                        <td style="padding: 0.5rem 0;">@clan.Email</td>
+                        <td style="padding: 0.5rem 0;">@clan.Status</td>
+                        <td style="padding: 0.5rem 0;">@clan.DatumKreiranja.ToString("dd.MM.yyyy HH:mm")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
 </div>

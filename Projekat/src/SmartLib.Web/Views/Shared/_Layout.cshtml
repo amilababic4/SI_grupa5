@@ -20,18 +20,18 @@
                 <li><a asp-controller="Zaduzenje" asp-action="Index">Zaduženja</a></li>
                 <li><a asp-controller="Korisnik" asp-action="Profil">Profil</a></li>
 
-                @* TODO: Prikazati prema ulozi korisnika *@
-                @* if (User.IsInRole("Bibliotekar") || User.IsInRole("Administrator")) *@
-                @* { *@
-                <li><a asp-controller="Korisnik" asp-action="Index">Članovi</a></li>
-                <li><a asp-controller="Kategorija" asp-action="Index">Kategorije</a></li>
-                @* } *@
+                @if (User.IsInRole("Bibliotekar") || User.IsInRole("Administrator"))
+                {
+                    <li><a asp-controller="Korisnik" asp-action="Index">Članovi</a></li>
+                    <li><a asp-controller="Korisnik" asp-action="Create">Kreiraj člana</a></li>
+                    <li><a asp-controller="Kategorija" asp-action="Index">Kategorije</a></li>
+                }
 
-                @* if (User.IsInRole("Administrator")) *@
-                @* { *@
-                <li><a asp-controller="Admin" asp-action="Korisnici">Korisnici</a></li>
-                <li><a asp-controller="Admin" asp-action="AuditLog">Audit Log</a></li>
-                @* } *@
+                @if (User.IsInRole("Administrator"))
+                {
+                    <li><a asp-controller="Admin" asp-action="Korisnici">Korisnici</a></li>
+                    <li><a asp-controller="Admin" asp-action="AuditLog">Audit Log</a></li>
+                }
 
                 <li>
                     <form asp-controller="Auth" asp-action="Logout" method="post" style="display:inline;">

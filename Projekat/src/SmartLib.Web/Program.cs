@@ -1,31 +1,21 @@
-// SmartLib Web — ASP.NET Core MVC Entry Point
-// TODO: Konfiguracija servisa, middleware-a, autentifikacije
+using Microsoft.AspNetCore.Authentication.Cookies;
+using SmartLib.Core.Interfaces;
+using SmartLib.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // --- Registracija servisa ---
 
-// TODO: Dodati DbContext (PostgreSQL)
-// builder.Services.AddDbContext<ApplicationDbContext>(options =>
-//     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddScoped<IKorisnikRepository, KorisnikRepository>();
 
-// TODO: Registrovati repozitorije i servise (Dependency Injection)
-// builder.Services.AddScoped<IKorisnikRepository, KorisnikRepository>();
-// builder.Services.AddScoped<IKnjigaRepository, KnjigaRepository>();
-// builder.Services.AddScoped<IKategorijaRepository, KategorijaRepository>();
-// builder.Services.AddScoped<IPrimjerakRepository, PrimjerakRepository>();
-// builder.Services.AddScoped<IZaduzenjeRepository, ZaduzenjeRepository>();
-// builder.Services.AddScoped<IClanarinaRepository, ClanarinaRepository>();
-// builder.Services.AddScoped<IRezervacijaRepository, RezervacijaRepository>();
-// builder.Services.AddScoped<IAuditLogRepository, AuditLogRepository>();
-
-// TODO: Konfiguracija autentifikacije (Cookie-based za MVC)
-// builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-//     .AddCookie(options =>
-//     {
-//         options.LoginPath = "/Auth/Login";
-//         options.AccessDeniedPath = "/Auth/AccessDenied";
-//     });
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Auth/Login";
+        options.AccessDeniedPath = "/Auth/Login";
+        options.ExpireTimeSpan = TimeSpan.FromHours(8);
+        options.SlidingExpiration = true;
+    });
 
 builder.Services.AddControllersWithViews();
 
@@ -43,9 +33,8 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
-// TODO: Aktivirati autentifikaciju i autorizaciju
-// app.UseAuthentication();
-// app.UseAuthorization();
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
