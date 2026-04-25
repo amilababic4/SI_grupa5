@@ -1,20 +1,21 @@
 # AI Usage Log
 
-
 ## Opis dokumenta
+Ovaj dokument evidentira korištenje AI alata tokom razvoja projekta, uključujući svrhu korištenja, rezultate i način primjene.
 
-## Amar
-Korišten je GitHub Copilot.
+---
 
-AI prompt: U prilogu vidiš Sprint 5 Backlog, ja radim u C# PB-18 i sve njegove User Storye. U folderu Projekat imas sav source code koji treba da napraviš ili edituješ tako da budu ispunjeni ovu User Story
-
-### AI-01
+## AI-01
 
 Datum: 25.04.2026  
 Sprint: 6  
 Alat: ChatGPT  
-Svrha: Implementacija autentifikacije  
-Opis zadatka: Login, logout, JWT, zaštita ruta  
+
+Svrha korištenja:
+Implementacija autentifikacije (PB-17)
+
+Opis zadatka:
+Implementacija login sistema, logout funkcionalnosti, JWT autentifikacije i zaštite ruta
 
 Šta je AI predložio:
 - Kod za AuthController
@@ -28,10 +29,42 @@ Opis zadatka: Login, logout, JWT, zaštita ruta
 - Prilagođeni role-based pristup
 
 Šta je tim odbacio:
-- Neke dijelove koji nisu odgovarali strukturi projekta
+- Dijelove koji nisu odgovarali strukturi projekta
 
 Rizici i problemi:
-- Potrebno razumijevanje generisanog koda
+- Potrebno razumjeti generisani kod
 
 Ko je koristio alat:
 - Amila
+
+---
+
+## AI-02
+
+Datum: 25.04.2026  
+Sprint: 6  
+Alat: GitHub Copilot  
+
+Svrha korištenja:
+Pomoć pri implementaciji PB-18
+
+Opis zadatka:
+Generisanje i dopuna C# koda za user storyje vezane za kreiranje korisnika
+
+Šta je AI predložio:
+- Dijelove implementacije kontrolera i validacije
+
+Šta je tim prihvatio:
+- Dio generisanog koda
+
+Šta je tim izmijenio:
+- Prilagođeno postojećoj arhitekturi
+
+Šta je tim odbacio:
+- Neodgovarajuće prijedloge
+
+Rizici i problemi:
+- Moguća nekonzistentnost koda
+
+Ko je koristio alat:
+- Amar

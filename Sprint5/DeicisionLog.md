@@ -1,39 +1,86 @@
-## Decision Log
+# Decision Log
 
-### DL-01
+## DL-01
 Datum: 25.04.2026  
 Naziv odluke: Korištenje Cookie autentifikacije za Web  
-Opis problema: Potrebno upravljati sesijom korisnika  
-Razmatrane opcije: JWT, Cookie  
-Odabrana opcija: Cookie  
-Razlog izbora: Jednostavnija implementacija za MVC aplikaciju  
-Posljedice: Lakše upravljanje sesijom  
-Status: Aktivna  
-Povezani PB: PB-17
+
+Opis problema:
+Potrebno upravljati korisničkom sesijom u Web aplikaciji  
+
+Razmatrane opcije:
+- JWT autentifikacija  
+- Cookie autentifikacija  
+
+Odabrana opcija:
+Cookie autentifikacija  
+
+Razlog izbora:
+Jednostavnija implementacija u MVC aplikaciji i prirodna podrška za sesije  
+
+Posljedice odluke:
+- Lakše upravljanje sesijom  
+- Manja kompleksnost implementacije  
+
+Status:
+Aktivna  
+
+Povezani PB:
+PB-17  
 
 ---
 
-### DL-02
+## DL-02
 Datum: 25.04.2026  
 Naziv odluke: Korištenje JWT za API  
-Opis problema: Potrebna autentifikacija API poziva  
-Razmatrane opcije: Cookie, JWT  
-Odabrana opcija: JWT  
-Razlog izbora: Standard za API sigurnost  
-Posljedice: Potrebna konfiguracija tokena  
-Status: Aktivna  
-Povezani PB: PB-17
+
+Opis problema:
+Potrebna autentifikacija i zaštita API endpointa  
+
+Razmatrane opcije:
+- Cookie autentifikacija  
+- JWT autentifikacija  
+
+Odabrana opcija:
+JWT autentifikacija  
+
+Razlog izbora:
+Standardno rješenje za sigurnu komunikaciju između klijenta i servera  
+
+Posljedice:
+- Potrebna konfiguracija tokena  
+- Dodatna kompleksnost u odnosu na cookie  
+
+Status:
+Aktivna  
+
+Povezani PB:
+PB-17  
 
 ---
 
-### DL-03
+## DL-03
 Datum: 25.04.2026  
-Naziv odluke: Generička poruka greške  
-Opis problema: Sigurnost login sistema  
-Razmatrane opcije: Specifične poruke vs generička  
-Odabrana opcija: Generička  
-Razlog izbora: Sprječava otkrivanje informacija  
-Posljedice: Manje informacija korisniku  
-Status: Aktivna 
-Povezani PB: PB-17 
+Naziv odluke: Korištenje generičke poruke greške pri loginu  
 
+Opis problema:
+Potrebno spriječiti otkrivanje informacija o korisničkim podacima  
+
+Razmatrane opcije:
+- Specifične poruke (email ne postoji / lozinka pogrešna)  
+- Generička poruka  
+
+Odabrana opcija:
+Generička poruka  
+
+Razlog izbora:
+Povećava sigurnost sistema i sprječava napade  
+
+Posljedice:
+- Manje informacija korisniku  
+- Veća sigurnost sistema  
+
+Status:
+Aktivna  
+
+Povezani PB:
+PB-17  
