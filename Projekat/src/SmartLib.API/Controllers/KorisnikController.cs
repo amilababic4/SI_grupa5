@@ -3,6 +3,7 @@ using SmartLib.Core.DTOs;
 using SmartLib.Core.Interfaces;
 using SmartLib.Core.Models;
 using SmartLib.Infrastructure.Security;
+using Microsoft.AspNetCore.Authorization;
 
 namespace SmartLib.API.Controllers
 {
@@ -11,6 +12,7 @@ namespace SmartLib.API.Controllers
     /// </summary>
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Roles = "Bibliotekar,Administrator")]
     public class KorisnikController : ControllerBase
     {
         private readonly IKorisnikRepository _korisnikRepository;

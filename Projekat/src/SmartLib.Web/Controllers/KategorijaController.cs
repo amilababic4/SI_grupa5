@@ -1,10 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using SmartLib.Core.Models;
 
 namespace SmartLib.Web.Controllers
 {
     /// <summary>
     /// Kategorije modul — CRUD kategorija (MVC)
     /// </summary>
+     [Authorize(Roles = RoleNames.Bibliotekar + "," + RoleNames.Administrator)]
     public class KategorijaController : Controller
     {
         // TODO: Inject IKategorijaRepository

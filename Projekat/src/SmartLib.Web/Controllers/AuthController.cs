@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using SmartLib.Core.DTOs;
 using SmartLib.Core.Interfaces;
 using SmartLib.Infrastructure.Security;
+using Microsoft.AspNetCore.Authorization;
 
 namespace SmartLib.Web.Controllers
 {
@@ -85,11 +86,12 @@ namespace SmartLib.Web.Controllers
             return RedirectToAction("Index", "Home");
         }
 
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Login", "Auth");
         }
     }
 }

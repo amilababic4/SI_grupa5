@@ -1,5 +1,5 @@
 {
-  "NextKorisnikId": 4,
+  "NextKorisnikId": 5,
   "Uloge": [
     {
       "Id": 1,
@@ -47,6 +47,16 @@
       "UlogaId": 1,
       "Status": "aktivan",
       "DatumKreiranja": "2026-04-25T09:18:44.9079289Z"
+    },
+    {
+      "Id": 4,
+      "Ime": "Amila",
+      "Prezime": "Babic",
+      "Email": "proba@smartlib",
+      "LozinkaHash": "RXc8HNFmlRF\u002B0H6XsJGvjg==:\u002BFi3Qst3q84y5t6TNlJd9zltFZgqyYHErKm\u002BCbKRTXY=",
+      "UlogaId": 1,
+      "Status": "aktivan",
+      "DatumKreiranja": "2026-04-25T20:47:00.000965Z"
     }
   ]
 }

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace SmartLib.API.Controllers
 {
@@ -6,9 +7,10 @@ namespace SmartLib.API.Controllers
     /// Katalog modul — Upravljanje knjigama (CRUD, pretraga, filtriranje)
     /// </summary>
     [ApiController]
-    [Route("api/[controller]")]
-    public class KnjigaController : ControllerBase
-    {
+[Route("api/[controller]")]
+[Authorize(Roles = "Bibliotekar,Administrator")]
+public class KnjigaController : ControllerBase
+{
         // TODO: Inject IKnjigaRepository
 
         [HttpGet]

@@ -4,24 +4,36 @@ using SmartLib.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// --- Registracija servisa ---
+// --------------------
+// SERVISI
+// --------------------
 
+builder.Services.AddControllersWithViews();
+
+// Repository
 builder.Services.AddScoped<IKorisnikRepository, KorisnikRepository>();
 
+// Authentication (COOKIE - za Web)
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
         options.LoginPath = "/Auth/Login";
+        options.LogoutPath = "/Auth/Logout";
         options.AccessDeniedPath = "/Auth/Login";
+
+        // US-07 (sesija)
         options.ExpireTimeSpan = TimeSpan.FromHours(8);
         options.SlidingExpiration = true;
     });
 
-builder.Services.AddControllersWithViews();
+// Authorization (US-08)
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
-// --- Middleware pipeline ---
+// --------------------
+// MIDDLEWARE
+// --------------------
 
 if (!app.Environment.IsDevelopment())
 {
@@ -31,11 +43,13 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
 app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
+// ROUTING
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");

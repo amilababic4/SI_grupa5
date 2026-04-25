@@ -1,48 +1,54 @@
 // SmartLib API — Entry Point
-// TODO: Konfiguracija servisa, middleware-a, autentifikacije i ruta
 
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using SmartLib.Core.Interfaces;
 using SmartLib.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// --- Registracija servisa ---
-
-// TODO: Dodati JWT autentifikaciju
-// builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-//     .AddJwtBearer(options => { ... });
-
-builder.Services.AddScoped<IKorisnikRepository, KorisnikRepository>();
+// --------------------
+// SERVISI
+// --------------------
 
 builder.Services.AddControllers();
 
-// TODO: Dodati Swagger za API dokumentaciju
-// builder.Services.AddEndpointsApiExplorer();
-// builder.Services.AddSwaggerGen();
+builder.Services.AddScoped<IKorisnikRepository, KorisnikRepository>();
 
-// TODO: Dodati CORS politiku za frontend
-// builder.Services.AddCors(options => { ... });
+// JWT Authentication - US-07, US-08
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        var jwt = builder.Configuration.GetSection("Jwt");
+
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateIssuerSigningKey = true,
+            ValidateLifetime = true,
+
+            ValidIssuer = jwt["Issuer"],
+            ValidAudience = jwt["Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(jwt["Key"]!)
+            )
+        };
+    });
+
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
-// --- Middleware pipeline ---
+// --------------------
+// MIDDLEWARE
+// --------------------
 
-// TODO: Swagger UI (samo za Development)
-// if (app.Environment.IsDevelopment())
-// {
-//     app.UseSwagger();
-//     app.UseSwaggerUI();
-// }
+app.UseHttpsRedirection();
 
-// TODO: HTTPS redirekcija
-// app.UseHttpsRedirection();
-
-// TODO: CORS
-// app.UseCors("AllowFrontend");
-
-// TODO: Autentifikacija i autorizacija
-// app.UseAuthentication();
-// app.UseAuthorization();
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 

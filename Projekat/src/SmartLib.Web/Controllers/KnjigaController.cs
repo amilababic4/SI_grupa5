@@ -1,44 +1,40 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SmartLib.Core.Models;
 
 namespace SmartLib.Web.Controllers
 {
-    /// <summary>
-    /// Katalog modul — Pregled, pretraga, CRUD knjiga (MVC)
-    /// </summary>
+    [Authorize]
     public class KnjigaController : Controller
     {
-        // TODO: Inject IKnjigaRepository, IKategorijaRepository, IPrimjerakRepository
-
         public async Task<IActionResult> Index(string? naslov, string? autor, int page = 1)
         {
-            // TODO: Pregled kataloga sa pretragom i paginacijom
             return View();
         }
 
         public async Task<IActionResult> Details(int id)
         {
-            // TODO: Detalji knjige sa primjercima
             return View();
         }
 
+        [Authorize(Roles = RoleNames.Bibliotekar + "," + RoleNames.Administrator)]
         [HttpGet]
         public IActionResult Create()
         {
-            // TODO: Forma za dodavanje knjige (bibliotekar/admin)
             return View();
         }
 
+        [Authorize(Roles = RoleNames.Bibliotekar + "," + RoleNames.Administrator)]
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
-            // TODO: Forma za uređivanje knjige
             return View();
         }
 
+        [Authorize(Roles = RoleNames.Bibliotekar + "," + RoleNames.Administrator)]
         [HttpPost]
         public async Task<IActionResult> Delete(int id)
         {
-            // TODO: Brisanje knjige (provjera aktivnih zaduženja)
             return RedirectToAction("Index");
         }
     }

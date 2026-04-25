@@ -1,10 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using SmartLib.Core.Models;
 
 namespace SmartLib.Web.Controllers
 {
     /// <summary>
     /// Članarina, Rezervacije, Admin panel (MVC)
     /// </summary>
+    [Authorize(Roles = RoleNames.Administrator)]
     public class AdminController : Controller
     {
         // TODO: Inject potrebne repozitorije

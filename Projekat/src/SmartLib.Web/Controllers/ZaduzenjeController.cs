@@ -1,43 +1,40 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SmartLib.Core.Models;
 
 namespace SmartLib.Web.Controllers
 {
-    /// <summary>
-    /// Zaduženja modul — Zaduživanje, vraćanje, pregled (MVC)
-    /// </summary>
+    [Authorize]
     public class ZaduzenjeController : Controller
     {
-        // TODO: Inject IZaduzenjeRepository, IPrimjerakRepository, IClanarinaRepository
-
+        [Authorize(Roles = RoleNames.Bibliotekar + "," + RoleNames.Administrator)]
         public async Task<IActionResult> Index()
         {
-            // TODO: Pregled aktivnih zaduženja
             return View();
         }
 
         public async Task<IActionResult> Moja()
         {
-            // TODO: Pregled vlastitih zaduženja (član)
             return View();
         }
 
+        [Authorize(Roles = RoleNames.Bibliotekar + "," + RoleNames.Administrator)]
         public async Task<IActionResult> Historija(int korisnikId)
         {
-            // TODO: Historija zaduženja člana
             return View();
         }
 
+        [Authorize(Roles = RoleNames.Bibliotekar + "," + RoleNames.Administrator)]
         [HttpPost]
-        public async Task<IActionResult> Zaduzi(/* TODO: ZaduzenjeCreateViewModel */)
+        public async Task<IActionResult> Zaduzi()
         {
-            // TODO: Kreiranje zaduženja (atomska transakcija)
             return RedirectToAction("Index");
         }
 
+        [Authorize(Roles = RoleNames.Bibliotekar + "," + RoleNames.Administrator)]
         [HttpPost]
         public async Task<IActionResult> Vrati(int id)
         {
-            // TODO: Vraćanje knjige (atomska transakcija)
             return RedirectToAction("Index");
         }
     }

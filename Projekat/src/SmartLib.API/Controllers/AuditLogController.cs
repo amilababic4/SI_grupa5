@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace SmartLib.API.Controllers
 {
@@ -7,6 +8,7 @@ namespace SmartLib.API.Controllers
     /// </summary>
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Roles = "Administrator")]
     public class AuditLogController : ControllerBase
     {
         [HttpGet]
