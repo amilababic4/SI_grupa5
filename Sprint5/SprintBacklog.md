@@ -1,39 +1,46 @@
-# Set of User Stories - ažurirana verzija
+# Sprint Backlog – Sprint 5
 
-## Opis dokumenta
+## Opis sprinta
 
-Ovaj dokument predstavlja ažuriranu i detaljnije razrađenu verziju User Storyja za projekat Bibliotečkog informacionog sistema. Stavke iz Product Backloga su razrađene u više jasno definisanih User Story jedinica, pri čemu svaki User Story precizno opisuje korisničke zahtjeve, prihvatne kriterije i očekivano ponašanje sistema. Dokument je organizovan prema planiranom sprintu 5 radi bolje preglednosti i praćenja implementacije.
+Sprint 5 fokusira se na implementaciju osnovnih funkcionalnosti sistema autentifikacije i registracije članova biblioteke, kao i uspostavu dokumentacionih logova za praćenje korištenja AI alata i tehničkih odluka tokom razvoja projekta.
 
+Tokom ovog sprinta implementiraju se funkcionalnosti vezane za:
 
-# Sprint 5
+- registraciju novih članova biblioteke  
+- prijavu i odjavu korisnika  
+- zaštitu ruta u aplikaciji  
+- dokumentovanje razvoja kroz AI Usage Log i Decision Log 
+
+<br>
+
+## Sprint Backlog stavke:
 
 ## PB-18: Kreiranje naloga člana
 
 ### Naziv: Prikaz forme za kreiranje člana
-### US-01: Kao bibliotekar, želim unijeti osnovne podatke novog člana kroz formu za registraciju, kako bi član bio evidentiran u sistemu biblioteke.
+### US-01: Kao član osoblja biblioteke, želim unijeti osnovne podatke novog člana kroz formu za registraciju, kako bi član bio evidentiran u sistemu biblioteke.
 **Acceptance Criteria:**
-- Kada bibliotekar pristupi stranici za registraciju člana, tada sistem mora prikazati formu za unos podataka 
+- Kada član osoblja pristupi stranici za registraciju člana, tada sistem mora prikazati formu za unos podataka 
 - Sistem mora omogućiti unos imena, prezimena, email adrese i lozinke
-- Kada bibliotekar popuni sva obavezna polja i klikne na dugme "Kreiraj nalog", tada sistem nastavlja proces registracije
+- Kada član osoblja popuni sva obavezna polja i klikne na dugme "Kreiraj nalog", tada sistem nastavlja proces registracije
 - Sistem ne smije dozvoliti nastavak registracije bez unosa obaveznih podataka
 
 ---
 ### Naziv: Unos ispravnih podataka
-### US-02: Kao bibliotekar, želim provjeriti ispravnost unesenih podataka prilikom registracije člana, kako bi se spriječio unos pogrešnih ili nepotpunih informacija.
+### US-02: Kao član osoblja biblioteke, želim provjeriti ispravnost unesenih podataka prilikom registracije člana, kako bi se spriječio unos pogrešnih ili nepotpunih informacija.
 **Acceptance Criteria:**
-- Kada bibliotekar unese podatke u formu za registraciju, tada se provjerava da li su sva obavezna polja popunjena
+- Kada član osoblja unese podatke u formu za registraciju, tada se provjerava da li su sva obavezna polja popunjena
 - Kada email adresa nije u ispravnom formatu, tada se prikazuje poruka o grešci
 - Kada unesena lozinka ima manje od 8 znakova, tada se prikazuje poruka da lozinka nije dovoljno duga
 - Kada email adresa već postoji u sistemu, tada se prikazuje poruka da je ta email adresa već registrovana
 ---
 
 ### Naziv: Potvrda uspješnog kreiranja člana
-### US-03: Kao bibliotekar, želim da se nakon unosa ispravnih podataka novi član registruje u sistemu, kako bi mogao koristiti usluge biblioteke
+### US-03: Kao član osoblja biblioteke, želim da se nakon unosa ispravnih podataka novi član registruje u sistemu, kako bi mogao koristiti usluge biblioteke
 **Acceptance Criteria:**
 - Kada su svi podaci ispravno uneseni, tada se novi član uspješno registruje u sistemu
 - Nakon uspješne registracije, sistem mora prikazati potvrdu da je nalog kreiran
 - Novi član se pojavljuje u listi članova biblioteke
-- Novom korisniku se automatski dodjeljuje uloga Član
 
 <br>
 
@@ -41,7 +48,7 @@ Ovaj dokument predstavlja ažuriranu i detaljnije razrađenu verziju User Storyj
 | **Prioritet** | Visok |
 |---------------|-------|
 | **Poslovna vrijednost** | Omogućava evidentiranje novih članova u sistemu biblioteke i predstavlja osnovu za korištenje svih bibliotečkih usluga. |
-| **Pretpostavke / Otvorena pitanja** | Član fizički dolazi u biblioteku i daje svoje podatke osoblju. <br> Bibliotekar unosi podatke u sistem. <br> Email je jedinstveni identifikator naloga.  |
+| **Pretpostavke / Otvorena pitanja** | Član fizički dolazi u biblioteku i daje svoje podatke osoblju. <br> Bibliotekar ili administrator unosi podatke u sistem. <br> Email je jedinstveni identifikator naloga.  |
 | **Veze i zavisnosti** | Postojanje entiteta Korisnik u bazi podataka. <br> PB-17 Sistem prijave korisnika. <br> PB-21 Pregled i pretraga članova biblioteke.  |
 ---
 <br>
@@ -143,6 +150,3 @@ Ovaj dokument predstavlja ažuriranu i detaljnije razrađenu verziju User Storyj
 | **Veze i zavisnosti** | Definisana struktura projektne dokumentacije.  |
 ---
 
-<br>
-
----

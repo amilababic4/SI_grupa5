@@ -21,12 +21,12 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.LogoutPath = "/Auth/Logout";
         options.AccessDeniedPath = "/Auth/Login";
 
-        // US-07 (sesija)
+        // (sesija)
         options.ExpireTimeSpan = TimeSpan.FromHours(8);
         options.SlidingExpiration = true;
     });
 
-// Authorization (US-08)
+// Authorization 
 builder.Services.AddAuthorization();
 
 var app = builder.Build();

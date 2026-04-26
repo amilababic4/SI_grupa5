@@ -12,6 +12,31 @@
         <div class="nav-brand">
             <a asp-controller="Home" asp-action="Index">📚 SmartLib</a>
         </div>
+
+        <!-- Ovaj ul je dodan za sprint 5-->
+        <ul class="nav-links">
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                @if (User.IsInRole("Bibliotekar") || User.IsInRole("Administrator"))
+                {
+                    <li><a asp-controller="Korisnik" asp-action="Index">Članovi</a></li>
+                    <li><a asp-controller="Korisnik" asp-action="Create">Kreiraj člana</a></li>
+                }
+
+                <li>
+                    <form asp-controller="Auth" asp-action="Logout" method="post" style="display:inline;">
+                        <button type="submit" class="nav-link-btn">Odjava</button>
+                    </form>
+                </li>
+            }
+            else
+            {
+                <li><a asp-controller="Auth" asp-action="Login">Prijava</a></li>
+            }
+        </ul>
+
+
+        @* Ne ulazi u okvir sprinta 5
         <ul class="nav-links">
             <li><a asp-controller="Knjiga" asp-action="Index">Katalog</a></li>
 
@@ -44,6 +69,8 @@
                 <li><a asp-controller="Auth" asp-action="Login">Prijava</a></li>
             }
         </ul>
+        *@
+
     </nav>
 
     <!-- Glavni sadržaj -->

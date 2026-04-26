@@ -1,5 +1,5 @@
 {
-  "NextKorisnikId": 5,
+  "NextKorisnikId": 6,
   "Uloge": [
     {
       "Id": 1,
@@ -57,6 +57,16 @@
       "UlogaId": 1,
       "Status": "aktivan",
       "DatumKreiranja": "2026-04-25T20:47:00.000965Z"
+    },
+    {
+      "Id": 5,
+      "Ime": "Ime",
+      "Prezime": "Prezime",
+      "Email": "imeprezime@gmail.com",
+      "LozinkaHash": "eyWukOsw1/s1sYE7WkYNVg==:fdqafu1WAN62dAwt9lyR/GSSq05y9h7PaTebwSsK4Tc=",
+      "UlogaId": 1,
+      "Status": "aktivan",
+      "DatumKreiranja": "2026-04-26T15:04:48.1378772Z"
     }
   ]
 }

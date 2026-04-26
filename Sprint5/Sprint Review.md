@@ -1,5 +1,0 @@
-# Sprint Review
-
-
-## Opis dokumenta
-
