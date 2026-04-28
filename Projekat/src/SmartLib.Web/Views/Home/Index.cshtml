@@ -1,11 +1,17 @@
 @{
-    ViewData["Title"] = "Početna";
+    ViewData["Title"] = "SmartLib";
 }
 
-<section class="hero">
-    <h2>Dobrodošli u SmartLib</h2>
-    <p>Bibliotečki informacioni sistem za upravljanje fondom, članovima i zaduženjima.</p>  
-    @*
-     <a asp-controller="Knjiga" asp-action="Index" class="btn btn-primary">Pregled kataloga</a>
-    *@ 
+<section class="home-hero" aria-labelledby="smartlib-title">
+    <img class="home-hero-image" src="~/images/smartlib-hero-books.png" alt="" aria-hidden="true" />
+    <div class="home-hero-shine" aria-hidden="true"></div>
+
+    <div class="home-hero-content">
+        <p class="home-eyebrow">Informacioni sistem za biblioteku</p>
+        <h1 id="smartlib-title">SmartLib</h1>
+        <p class="home-lead">
+            Moderna platforma za biblioteku koja knjige, clanove i zaduzenja drzi pod jednom elegantnom kontrolom.
+        </p>
+        <a asp-controller="Auth" asp-action="Login" class="btn btn-primary btn-hero">Prijava u sistem</a>
+    </div>
 </section>
