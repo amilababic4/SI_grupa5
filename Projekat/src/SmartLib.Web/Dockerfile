@@ -11,7 +11,7 @@ RUN dotnet restore src/SmartLib.Web/SmartLib.Web.csproj
 
 # Kopiranje kompletnog source koda i build
 COPY src/ src/
-RUN dotnet publish src/SmartLib.Web/SmartLib.Web.csproj -c Release -o /app/publish --no-restore
+RUN dotnet publish src/SmartLib.Web/SmartLib.Web.csproj -c Release -o /app/publish
 
 # Runtime stage
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
