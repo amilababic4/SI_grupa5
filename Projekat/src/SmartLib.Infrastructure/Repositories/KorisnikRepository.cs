@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using SmartLib.Core.Interfaces;
 using SmartLib.Core.Models;
 using SmartLib.Infrastructure.Data;
@@ -6,35 +7,47 @@ namespace SmartLib.Infrastructure.Repositories
 {
     public class KorisnikRepository : IKorisnikRepository
     {
-        public Task<IEnumerable<Korisnik>> GetAllAsync()
-        {
-            var korisnici = SmartLibDataStore.GetKorisnici()
-                .Where(k => string.Equals(k.Status, "aktivan", StringComparison.OrdinalIgnoreCase))
-                .ToList();
+        private readonly ApplicationDbContext _db;
 
-            return Task.FromResult<IEnumerable<Korisnik>>(korisnici);
+        public KorisnikRepository(ApplicationDbContext db)
+        {
+            _db = db;
         }
 
-        public Task<Korisnik?> GetByIdAsync(int id)
+        public async Task<IEnumerable<Korisnik>> GetAllAsync()
         {
-            return Task.FromResult(SmartLibDataStore.GetKorisnikById(id));
+            return await _db.Korisnici
+                .Include(k => k.Uloga)
+                .Where(k => k.Status == "aktivan")
+                .ToListAsync();
         }
 
-        public Task<Korisnik?> GetByEmailAsync(string email)
+        public async Task<Korisnik?> GetByIdAsync(int id)
         {
-            return Task.FromResult(SmartLibDataStore.GetKorisnikByEmail(email));
+            return await _db.Korisnici
+                .Include(k => k.Uloga)
+                .FirstOrDefaultAsync(k => k.Id == id);
         }
 
-        public Task<Korisnik> CreateAsync(Korisnik korisnik)
+        public async Task<Korisnik?> GetByEmailAsync(string email)
         {
-            var created = SmartLibDataStore.AddKorisnik(korisnik);
-            return Task.FromResult(created);
+            var normalized = email.Trim().ToLowerInvariant();
+            return await _db.Korisnici
+                .Include(k => k.Uloga)
+                .FirstOrDefaultAsync(k => k.Email == normalized);
         }
 
-        public Task UpdateAsync(Korisnik korisnik)
+        public async Task<Korisnik> CreateAsync(Korisnik korisnik)
         {
-            SmartLibDataStore.UpdateKorisnik(korisnik);
-            return Task.CompletedTask;
+            _db.Korisnici.Add(korisnik);
+            await _db.SaveChangesAsync();
+            return korisnik;
+        }
+
+        public async Task UpdateAsync(Korisnik korisnik)
+        {
+            _db.Korisnici.Update(korisnik);
+            await _db.SaveChangesAsync();
         }
     }
 }

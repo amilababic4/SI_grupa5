@@ -1,5 +1,5 @@
 {
-  "NextKorisnikId": 6,
+  "NextKorisnikId": 7,
   "Uloge": [
     {
       "Id": 1,
@@ -67,6 +67,16 @@
       "UlogaId": 1,
       "Status": "aktivan",
       "DatumKreiranja": "2026-04-26T15:04:48.1378772Z"
+    },
+    {
+      "Id": 6,
+      "Ime": "Imran",
+      "Prezime": "Vlajcic",
+      "Email": "ivlajcic1@etf.unsa.ba",
+      "LozinkaHash": "v1OSV7uzmOkIb4n89gxqVQ==:ghU7xePMJ4TLW/UIySZEozPekQ\u002BBnAyfoUgUXzU3l0k=",
+      "UlogaId": 1,
+      "Status": "aktivan",
+      "DatumKreiranja": "2026-04-26T21:54:08.2280453Z"
     }
   ]
 }

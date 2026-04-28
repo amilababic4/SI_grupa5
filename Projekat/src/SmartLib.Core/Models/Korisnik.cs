@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace SmartLib.Core.Models
 {
     /// <summary>
@@ -17,8 +19,9 @@ namespace SmartLib.Core.Models
 
         // Navigaciona svojstva
         public Uloga? Uloga { get; set; }
-        public Clanarina? Clanarina { get; set; }
         public ICollection<Zaduzenje> Zaduzenja { get; set; } = new List<Zaduzenje>();
         public ICollection<Rezervacija> Rezervacije { get; set; } = new List<Rezervacija>();
+
+        public ICollection<Clanarina> Clanarine { get; set; } = new List<Clanarina>();
     }
 }
