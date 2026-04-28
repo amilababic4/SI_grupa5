@@ -6,7 +6,7 @@
     <title>@ViewData["Title"] — SmartLib</title>
     <link rel="stylesheet" href="~/css/site.css" />
 </head>
-<body>
+<body class="@(ViewData["BodyClass"] as string)">
     <!-- Navigacija -->
     <nav id="main-nav">
         <div class="nav-brand">
@@ -74,7 +74,7 @@
     </nav>
 
     <!-- Glavni sadržaj -->
-    <main class="container">
+    <main class="@(ViewData["MainClass"] as string ?? "page-shell")">
         @RenderBody()
     </main>
 
