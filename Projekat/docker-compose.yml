@@ -12,19 +12,26 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U smartlib_user -d smartlib"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   smartlib-web:
     build:
       context: .
       dockerfile: src/SmartLib.Web/Dockerfile
     container_name: smartlib-web
+    restart: always
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ConnectionStrings__DefaultConnection=Host=smartlib-db;Port=5432;Database=smartlib;Username=smartlib_user;Password=smartlib_pass
     ports:
       - "5000:8080"
     depends_on:
-      - smartlib-db
+      smartlib-db:
+        condition: service_healthy
 
   # Nginx reverse proxy (opciono, za produkciju)
   # nginx:
