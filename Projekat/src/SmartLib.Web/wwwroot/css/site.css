@@ -79,6 +79,78 @@ table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
 th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid #eee; }
 th { background-color: #f0f0f0; font-weight: 600; }
 
+/* ===== Članovi ===== */
+.members-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.members-feedback {
+    display: inline-block;
+    margin-bottom: 1rem;
+}
+
+.members-card {
+    overflow: hidden;
+}
+
+.members-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.members-table {
+    margin-top: 0;
+    table-layout: fixed;
+}
+
+.members-table th,
+.members-table td {
+    padding: 1rem 0.75rem;
+    vertical-align: top;
+}
+
+.members-table th:nth-child(1),
+.members-table td:nth-child(1) {
+    width: 24%;
+}
+
+.members-table th:nth-child(2),
+.members-table td:nth-child(2) {
+    width: 34%;
+}
+
+.members-table th:nth-child(3),
+.members-table td:nth-child(3) {
+    width: 16%;
+}
+
+.members-table th:nth-child(4),
+.members-table td:nth-child(4) {
+    width: 26%;
+}
+
+.members-email {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+.members-status {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    background: #eef3ff;
+    color: #1a237e;
+    font-size: 0.92rem;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
 /* ===== Hero ===== */
 .hero { text-align: center; padding: 4rem 2rem; }
 .hero h2 { font-size: 2rem; margin-bottom: 1rem; }
@@ -234,6 +306,63 @@ body.home-page footer {
 @media (max-width: 768px) {
     #main-nav { flex-direction: column; gap: 1rem; }
     .page-shell { padding: 1.25rem; }
+    .members-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .members-header .btn {
+        width: 100%;
+        text-align: center;
+    }
+    .members-card {
+        padding: 1rem;
+    }
+    .members-table thead {
+        display: none;
+    }
+    .members-table,
+    .members-table tbody,
+    .members-table tr,
+    .members-table td {
+        display: block;
+        width: 100%;
+    }
+    .members-table tr {
+        padding: 0.25rem 0;
+        border-bottom: 1px solid #e7e9ef;
+    }
+    .members-table tr:last-child {
+        border-bottom: none;
+    }
+    .members-table td {
+        display: grid;
+        grid-template-columns: minmax(110px, 42%) 1fr;
+        gap: 0.75rem;
+        padding: 0.55rem 0;
+        border-bottom: none;
+        align-items: start;
+    }
+    .members-table td::before {
+        content: attr(data-label);
+        color: #5f677a;
+        font-size: 0.82rem;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+    }
+    .members-table td:last-child {
+        padding-bottom: 0.2rem;
+    }
+    .members-table th:nth-child(1),
+    .members-table td:nth-child(1),
+    .members-table th:nth-child(2),
+    .members-table td:nth-child(2),
+    .members-table th:nth-child(3),
+    .members-table td:nth-child(3),
+    .members-table th:nth-child(4),
+    .members-table td:nth-child(4) {
+        width: 100%;
+    }
     body.home-page #main-nav { padding: 1rem 1.25rem; }
     .home-hero {
         min-height: calc(100vh - 4.5rem);
@@ -264,10 +393,22 @@ body.home-page footer {
 
 @media (max-width: 480px) {
     #main-nav { padding: 1rem; }
+    .page-shell { padding: 1rem; }
     .nav-links {
         gap: 1rem;
         flex-wrap: wrap;
         justify-content: center;
+    }
+    .members-card {
+        padding: 0.9rem;
+        border-radius: 18px;
+    }
+    .members-table td {
+        grid-template-columns: 1fr;
+        gap: 0.2rem;
+    }
+    .members-table td::before {
+        margin-bottom: 0.15rem;
     }
     .home-hero {
         min-height: calc(100vh - 5.5rem);

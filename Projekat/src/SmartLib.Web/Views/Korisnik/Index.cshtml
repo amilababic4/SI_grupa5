@@ -3,43 +3,47 @@
     ViewData["Title"] = "Članovi biblioteke";
 }
 
-<div style="display:flex; justify-content:space-between; align-items:center; gap:1rem; margin-bottom:1rem;">
+<div class="members-header">
     <h2>Članovi biblioteke</h2>
     <a asp-action="Create" class="btn btn-primary">Kreiraj nalog člana</a>
 </div>
 
 @if (TempData["SuccessMessage"] is string successMessage)
 {
-    <div class="validation-message" style="margin-bottom: 1rem;">@successMessage</div>
+    <div class="validation-message members-feedback">@successMessage</div>
 }
 
-<div class="card">
+<div class="card members-card">
     @if (!Model.Any())
     {
         <p>Trenutno nema registrovanih članova.</p>
     }
     else
     {
-        <table style="width:100%; border-collapse: collapse;">
-            <thead>
+        <div class="members-table-wrap">
+            <table class="members-table">
+                <thead>
                 <tr>
-                    <th style="text-align:left; padding: 0.75rem 0;">Ime i prezime</th>
-                    <th style="text-align:left; padding: 0.75rem 0;">Email</th>
-                    <th style="text-align:left; padding: 0.75rem 0;">Status</th>
-                    <th style="text-align:left; padding: 0.75rem 0;">Kreiran</th>
+                    <th>Ime i prezime</th>
+                    <th>Email</th>
+                    <th>Status</th>
+                    <th>Kreiran</th>
                 </tr>
-            </thead>
-            <tbody>
+                </thead>
+                <tbody>
                 @foreach (var clan in Model)
                 {
                     <tr>
-                        <td style="padding: 0.5rem 0;">@clan.Ime @clan.Prezime</td>
-                        <td style="padding: 0.5rem 0;">@clan.Email</td>
-                        <td style="padding: 0.5rem 0;">@clan.Status</td>
-                        <td style="padding: 0.5rem 0;">@clan.DatumKreiranja.ToString("dd.MM.yyyy HH:mm")</td>
+                        <td data-label="Ime i prezime">@clan.Ime @clan.Prezime</td>
+                        <td data-label="Email" class="members-email">@clan.Email</td>
+                        <td data-label="Status">
+                            <span class="members-status">@clan.Status</span>
+                        </td>
+                        <td data-label="Kreiran">@clan.DatumKreiranja.ToString("dd.MM.yyyy HH:mm")</td>
                     </tr>
                 }
-            </tbody>
-        </table>
+                </tbody>
+            </table>
+        </div>
     }
 </div>
