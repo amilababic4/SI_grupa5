@@ -40,8 +40,8 @@ olakša prioritizaciju rada po sprintovima i služi kao osnova za dalju razradu.
 | PB-16 | Initial Release Plan | Planiranje inkremenata, glavnih funkcionalnosti, zavisnosti i okvirnih sprintova realizacije | Documentation | Visok | M |  Završeno u Sprintu 4 | Sprint 4 | Obavezni artefakt |
 | PB-17 | Sistem prijave korisnika | Registrovani korisnici se prijavljuju i odjavljuju iz sistema u skladu sa svojom ulogom | Feature | Visok | M | Završeno u Sprintu 5 | Sprint 5 | Osnova za sve dalje |
 | PB-18 | Kreiranje naloga člana | Bibliotekar ili administrator kreira nalog novog člana biblioteke unosom njegovih osnovnih podataka | Feature | Visok | S | Završeno u Sprintu 5 | Sprint 5 | Zamjenjuje samostalnu registraciju člana |
-| PB-19 | AI i Decision Log | Uspostava za praćenje rada na projektu | Technical Task | Srednji | S | U backlogu | Sprint 5 |  |
-| PB-20 | Pregled profila člana | Sistem prikazuje osnovne podatke člana i njegova zaduženja | Feature | Visok | M | Završeno u Sprintu 5 | Sprint 8 |  |
+| PB-19 | AI i Decision Log | Uspostava za praćenje rada na projektu | Technical Task | Srednji | S | Završeno u Sprintu 5   | Sprint 5 |  |
+| PB-20 | Pregled profila člana | Sistem prikazuje osnovne podatke člana i njegova zaduženja | Feature | Visok | M | U backlogu | Sprint 8 |  |
 | PB-21 | Pregled i pretraga članova biblioteke | Bibliotekar ili administrator može pregledati i pretraživati članove biblioteke | Feature | Visok | M | U backlogu | Sprint 8 | Osnova rada sa članovima |
 | PB-22 | Dodavanje nove knjige | Administrator ili bibliotekar dodaje novu knjigu u fond | Feature | Visok | M | U backlogu | Sprint 6 | Osnova kataloga |
 | PB-23 | Uređivanje podataka o knjizi | Administrator ili bibliotekar može izmijeniti osnovne podatke knjige | Feature | Srednji | S | U backlogu | Sprint 6 | Nema historiju promjena |
