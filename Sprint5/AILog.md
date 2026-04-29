@@ -8,7 +8,7 @@ Ovaj dokument evidentira korištenje AI alata tokom razvoja projekta, uključuju
 ## AI-01
 
 Datum: 25.04.2026  
-Sprint: 6  
+Sprint: 5 
 Alat: ChatGPT  
 
 Svrha korištenja:
@@ -42,7 +42,7 @@ Ko je koristio alat:
 ## AI-02
 
 Datum: 25.04.2026  
-Sprint: 6  
+Sprint: 5  
 Alat: GitHub Copilot  
 
 Svrha korištenja:
@@ -74,7 +74,7 @@ Ko je koristio alat:
 ## AI-03
 
 Datum: 28.04.2026  
-Sprint: 6  
+Sprint: 5 
 Alat: Codex 
 
 Svrha korištenja:
@@ -100,3 +100,35 @@ Rizici i problemi:
 
 Ko je koristio alat:
 - Amar
+
+---
+
+## AI-04
+
+Datum: 28.04.2026  
+Sprint: 5  
+Alat: Claude 
+
+Svrha korištenja:
+Pomoć pri implementacji baze
+
+Opis zadatka:
+Implementacija baze preko prethodno dizajniranog domain modela
+
+Šta je AI predložio:
+- Korištenje Entity Framework-a za dizajn
+
+Šta je tim prihvatio:
+- Dijelove koda ključne za implementaciju
+
+Šta je tim izmijenio:
+- Greške prilikom veza između entiteta
+
+Šta je tim odbacio:
+- Nepotrebne foreign key tagove u modelima
+
+Rizici i problemi:
+- Nema rizika niti problema nakon pregleda
+
+Ko je koristio alat:
+- Imran
