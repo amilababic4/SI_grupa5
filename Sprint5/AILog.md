@@ -71,7 +71,7 @@ Ko je koristio alat:
 
 ---
 
-## AI-02
+## AI-03
 
 Datum: 28.04.2026  
 Sprint: 6  
