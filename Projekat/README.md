@@ -27,6 +27,9 @@ Projekat/
 
 ## Pokretanje
 
+### Pristupni link
+- https://smartlib-web.onrender.com/
+
 ### Preduvjeti
 - .NET 8 SDK
 - PostgreSQL 16
