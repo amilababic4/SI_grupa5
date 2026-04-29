@@ -13,6 +13,12 @@ Tokom ovog sprinta implementiraju se funkcionalnosti vezane za:
 
 <br>
 
+| ID | Naziv stavke | Kratak opis | Tip | Prioritet | Procjena napora | Status | Napomena |
+|:--:| :----------: | :---------: | :-: | :-------: | :-------------: | :----: | :------: |
+| PB-17 | Sistem prijave korisnika | Registrovani korisnici se prijavljuju i odjavljuju iz sistema u skladu sa svojom ulogom | Feature | Visok | M | Završeno  | Osnova za sve dalje |
+| PB-18 | Kreiranje naloga člana | Bibliotekar ili administrator kreira nalog novog člana biblioteke unosom njegovih osnovnih podataka | Feature | Visok | S | Završeno  | Zamjenjuje samostalnu registraciju člana |
+| PB-19 | AI i Decision Log | Uspostava za praćenje rada na projektu | Technical Task | Srednji | S | Završeno |  |
+
 ## Sprint Backlog stavke:
 
 ## PB-18: Kreiranje naloga člana
