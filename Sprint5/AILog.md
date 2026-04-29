@@ -68,3 +68,35 @@ Rizici i problemi:
 
 Ko je koristio alat:
 - Amar
+
+---
+
+## AI-02
+
+Datum: 28.04.2026  
+Sprint: 6  
+Alat: Codex 
+
+Svrha korištenja:
+Dizajn i Responzivnost stranice
+
+Opis zadatka:
+Redizajniranje naslovne stranice u dogovoru sa timom da bi bila modernija, privlačnija i responzivnija.
+
+Šta je AI predložio:
+- Dva dizajna na odabir
+
+Šta je tim prihvatio:
+- Prihvaćen je trenutni dizajn stranice
+
+Šta je tim izmijenio:
+- Trenutni defaultni dizajn
+
+Šta je tim odbacio:
+- Drugi dizajn stranice
+
+Rizici i problemi:
+- Nema rizika niti problema
+
+Ko je koristio alat:
+- Amar
