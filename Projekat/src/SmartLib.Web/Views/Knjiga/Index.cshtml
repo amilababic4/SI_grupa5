@@ -1,46 +1,149 @@
-@* TODO: @model IEnumerable<KnjigaDto> *@
+@model SmartLib.Core.DTOs.KatalogViewModel
 @{
-    ViewData["Title"] = "Katalog";
+    ViewData["Title"] = "Katalog knjiga";
 }
 
-<h2>Katalog knjiga</h2>
+<div class="katalog-header">
+    <h2>Katalog knjiga</h2>
+    @if (User.IsInRole("Bibliotekar") || User.IsInRole("Administrator"))
+    {
+        <a asp-action="Create" class="btn btn-primary">+ Nova knjiga</a>
+    }
+</div>
+
+@if (TempData["SuccessMessage"] is string successMsg)
+{
+    <div class="alert alert-success">@successMsg</div>
+}
+@if (TempData["ErrorMessage"] is string errorMsg)
+{
+    <div class="alert alert-error">@errorMsg</div>
+}
 
 <!-- Pretraga -->
-<div class="card" style="margin-top: 1rem;">
-    <form asp-controller="Knjiga" asp-action="Index" method="get" style="display: flex; gap: 1rem; flex-wrap: wrap;">
-        <input type="text" name="naslov" placeholder="Pretraga po naslovu..." style="flex: 1; padding: 0.5rem;" />
-        <input type="text" name="autor" placeholder="Pretraga po autoru..." style="flex: 1; padding: 0.5rem;" />
-        <button type="submit" class="btn btn-primary">Traži</button>
-        <a asp-controller="Knjiga" asp-action="Index" class="btn btn-secondary">Reset</a>
+<div class="card katalog-search">
+    <form asp-controller="Knjiga" asp-action="Index" method="get">
+        <div class="search-row">
+            <div class="form-group" style="flex:1; margin-bottom:0;">
+                <input type="text" name="naslov" value="@Model.Naslov" placeholder="Pretraga po naslovu..." />
+            </div>
+            <div class="form-group" style="flex:1; margin-bottom:0;">
+                <input type="text" name="autor" value="@Model.Autor" placeholder="Pretraga po autoru..." />
+            </div>
+            <div style="display:flex; gap:0.5rem; align-items:flex-end;">
+                <button type="submit" class="btn btn-primary">Traži</button>
+                <a asp-controller="Knjiga" asp-action="Index" class="btn btn-secondary">Reset</a>
+            </div>
+        </div>
     </form>
 </div>
 
-<!-- TODO: Dugme za dodavanje (samo bibliotekar/admin) -->
-@* @if (User.IsInRole("Bibliotekar") || User.IsInRole("Administrator"))
-{
-    <a asp-action="Create" class="btn btn-primary" style="margin-top: 1rem;">+ Nova knjiga</a>
-} *@
-
-<!-- Lista knjiga -->
-<div class="grid" style="margin-top: 2rem;">
-    @* TODO: foreach (var knjiga in Model)
+<!-- Rezultati -->
+<div class="katalog-meta">
+    @if (!string.IsNullOrWhiteSpace(Model.Naslov) || !string.IsNullOrWhiteSpace(Model.Autor))
     {
-        <div class="card">
-            <h3>@knjiga.Naslov</h3>
-            <p><strong>Autor:</strong> @knjiga.Autor</p>
-            <p><strong>ISBN:</strong> @knjiga.Isbn</p>
-            <p><strong>Kategorija:</strong> @knjiga.Kategorija</p>
-            <p><strong>Dostupno:</strong> @knjiga.BrojDostupnih / @knjiga.BrojPrimjeraka</p>
-            <a asp-action="Details" asp-route-id="@knjiga.Id" class="btn btn-primary">Detalji</a>
-        </div>
-    } *@
-
-    <!-- Placeholder -->
-    <div class="card">
-        <h3>Placeholder — Naslov knjige</h3>
-        <p><strong>Autor:</strong> Ime Autora</p>
-        <p><strong>ISBN:</strong> 978-0-000-00000-0</p>
-        <p><strong>Dostupno:</strong> 0 / 0</p>
-        <a asp-action="Details" asp-route-id="1" class="btn btn-primary">Detalji</a>
-    </div>
+        <span>Pronađeno: <strong>@Model.UkupnoStavki</strong> @(Model.UkupnoStavki == 1 ? "knjiga" : "knjiga")</span>
+    }
+    else
+    {
+        <span>Ukupno knjiga u katalogu: <strong>@Model.UkupnoStavki</strong></span>
+    }
 </div>
+
+@if (!Model.Knjige.Any())
+{
+    <div class="card katalog-empty">
+        <p>📚 Katalog je trenutno prazan.</p>
+        @if (User.IsInRole("Bibliotekar") || User.IsInRole("Administrator"))
+        {
+            <a asp-action="Create" class="btn btn-primary">Dodaj prvu knjigu</a>
+        }
+    </div>
+}
+else
+{
+    <div class="card katalog-card">
+        <div class="katalog-table-wrap">
+            <table class="katalog-table">
+                <thead>
+                    <tr>
+                        <th>Naslov</th>
+                        <th>Autor</th>
+                        <th>ISBN</th>
+                        <th>Kategorija</th>
+                        <th>God.</th>
+                        <th>Primjerci</th>
+                        <th>Dostupno</th>
+                        <th>Akcije</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var knjiga in Model.Knjige)
+                    {
+                        <tr>
+                            <td data-label="Naslov"><strong>@knjiga.Naslov</strong></td>
+                            <td data-label="Autor">@knjiga.Autor</td>
+                            <td data-label="ISBN" class="katalog-isbn">@knjiga.Isbn</td>
+                            <td data-label="Kategorija">
+                                @if (knjiga.Kategorija != null)
+                                {
+                                    <span class="katalog-badge">@knjiga.Kategorija</span>
+                                }
+                            </td>
+                            <td data-label="Godina">@knjiga.GodinaIzdanja</td>
+                            <td data-label="Primjerci" style="text-align:center;">@knjiga.BrojPrimjeraka</td>
+                            <td data-label="Dostupno" style="text-align:center;">
+                                <span class="@(knjiga.BrojDostupnih > 0 ? "status-dostupan" : "status-nedostupan")">
+                                    @knjiga.BrojDostupnih
+                                </span>
+                            </td>
+                            <td data-label="Akcije" class="katalog-actions">
+                                <a asp-action="Details" asp-route-id="@knjiga.Id" class="btn btn-secondary btn-sm">Detalji</a>
+                                @if (User.IsInRole("Bibliotekar") || User.IsInRole("Administrator"))
+                                {
+                                    <a asp-action="Edit" asp-route-id="@knjiga.Id" class="btn btn-primary btn-sm">Uredi</a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Paginacija -->
+    @if (Model.UkupnoStrana > 1)
+    {
+        <div class="pagination">
+            @if (Model.TrenutnaStrana > 1)
+            {
+                <a asp-action="Index"
+                   asp-route-page="@(Model.TrenutnaStrana - 1)"
+                   asp-route-naslov="@Model.Naslov"
+                   asp-route-autor="@Model.Autor"
+                   class="btn btn-secondary">← Prethodna</a>
+            }
+            else
+            {
+                <span class="btn btn-secondary pagination-disabled">← Prethodna</span>
+            }
+
+            <span class="pagination-info">
+                Strana <strong>@Model.TrenutnaStrana</strong> od <strong>@Model.UkupnoStrana</strong>
+            </span>
+
+            @if (Model.TrenutnaStrana < Model.UkupnoStrana)
+            {
+                <a asp-action="Index"
+                   asp-route-page="@(Model.TrenutnaStrana + 1)"
+                   asp-route-naslov="@Model.Naslov"
+                   asp-route-autor="@Model.Autor"
+                   class="btn btn-secondary">Sljedeća →</a>
+            }
+            else
+            {
+                <span class="btn btn-secondary pagination-disabled">Sljedeća →</span>
+            }
+        </div>
+    }
+}

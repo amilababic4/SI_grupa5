@@ -2,9 +2,6 @@ using SmartLib.Core.Models;
 
 namespace SmartLib.Core.Interfaces
 {
-    /// <summary>
-    /// Repozitorij za upravljanje knjigama (katalog)
-    /// </summary>
     public interface IKnjigaRepository
     {
         Task<IEnumerable<Knjiga>> GetAllAsync(int page, int pageSize);
@@ -14,5 +11,7 @@ namespace SmartLib.Core.Interfaces
         Task UpdateAsync(Knjiga knjiga);
         Task<bool> DeleteAsync(int id);
         Task<bool> HasActiveLoansAsync(int id);
+        Task<(IEnumerable<Knjiga> Knjige, int UkupnoBroj)> GetPagedAsync(string? naslov, string? autor, int page, int pageSize);
+        Task<Knjiga?> GetByIsbnAsync(string isbn);
     }
 }

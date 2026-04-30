@@ -1,34 +1,39 @@
-@model SmartLib.Core.DTOs.KnjigaCreateDto
+@model SmartLib.Core.DTOs.KnjigaEditDto
 @{
-    ViewData["Title"] = "Nova knjiga";
+    ViewData["Title"] = "Uredi knjigu";
+    var isbn = ViewBag.Isbn as string;
 }
 
 <div class="katalog-header">
-    <h2>Dodaj novu knjigu</h2>
+    <h2>Uredi podatke knjige</h2>
     <a asp-action="Index" class="btn btn-secondary">← Nazad na katalog</a>
 </div>
 
 <div class="card book-form-card">
-    <form asp-controller="Knjiga" asp-action="Create" method="post">
+    <form asp-controller="Knjiga" asp-action="Edit" method="post">
         <div asp-validation-summary="ModelOnly" class="validation-message" style="margin-bottom: 1rem;"></div>
+
+        <input type="hidden" asp-for="Id" />
+
+        @if (!string.IsNullOrEmpty(isbn))
+        {
+            <div class="form-group">
+                <label>ISBN</label>
+                <input type="text" value="@isbn" disabled />
+                <small class="form-help">ISBN se ne može mijenjati nakon dodavanja knjige.</small>
+            </div>
+        }
 
         <div class="form-group">
             <label asp-for="Naslov">Naslov</label>
-            <input asp-for="Naslov" placeholder="Unesite naslov knjige" />
+            <input asp-for="Naslov" />
             <span asp-validation-for="Naslov" class="validation-message"></span>
         </div>
 
         <div class="form-group">
             <label asp-for="Autor">Autor</label>
-            <input asp-for="Autor" placeholder="Ime i prezime autora" />
+            <input asp-for="Autor" />
             <span asp-validation-for="Autor" class="validation-message"></span>
-        </div>
-
-        <div class="form-group">
-            <label asp-for="Isbn">ISBN</label>
-            <input asp-for="Isbn" placeholder="npr. 9780451524935 ili 978-0-451-52493-5" />
-            <small class="form-help">Unesite 10 ili 13-cifreni ISBN (crtice su opcionalne).</small>
-            <span asp-validation-for="Isbn" class="validation-message"></span>
         </div>
 
         <div class="form-group">
@@ -41,26 +46,19 @@
 
         <div class="form-group">
             <label asp-for="Izdavac">Izdavač</label>
-            <input asp-for="Izdavac" placeholder="Naziv izdavača (opciono)" />
+            <input asp-for="Izdavac" />
             <span asp-validation-for="Izdavac" class="validation-message"></span>
         </div>
 
         <div class="form-group">
             <label asp-for="GodinaIzdanja">Godina izdanja</label>
-            <input asp-for="GodinaIzdanja" type="number" min="1000" max="2100" placeholder="npr. 2023" />
+            <input asp-for="GodinaIzdanja" type="number" min="1000" max="2100" />
             <span asp-validation-for="GodinaIzdanja" class="validation-message"></span>
         </div>
 
-        <div class="form-group">
-            <label asp-for="BrojPrimjeraka">Broj primjeraka</label>
-            <input asp-for="BrojPrimjeraka" type="number" min="0" />
-            <small class="form-help">Unesite 0 ako knjiga još nema fizičkih primjeraka.</small>
-            <span asp-validation-for="BrojPrimjeraka" class="validation-message"></span>
-        </div>
-
         <div class="form-actions">
-            <button type="submit" class="btn btn-primary">Dodaj u katalog</button>
+            <button type="submit" class="btn btn-primary">Sačuvaj izmjene</button>
             <a asp-action="Index" class="btn btn-secondary">Odustani</a>
         </div>
     </form>
-</div>
+</>
