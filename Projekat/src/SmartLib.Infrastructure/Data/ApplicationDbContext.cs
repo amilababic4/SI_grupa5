@@ -144,7 +144,7 @@ namespace SmartLib.Infrastructure.Data
                 e.Property(k => k.Isbn).HasMaxLength(20);
                 e.Property(k => k.Izdavac).HasMaxLength(200);
                 e.Property(k => k.GodinaIzdanja).IsRequired();
-                e.HasIndex(k => k.Isbn).IsUnique().HasFilter("\"Isbn\" IS NOT NULL");
+                e.HasIndex(k => k.Isbn).IsUnique();
 
                 e.HasOne(k => k.Kategorija)
                  .WithMany(kat => kat.Knjige)
@@ -227,9 +227,8 @@ namespace SmartLib.Infrastructure.Data
                 e.Property(a => a.Akcija).IsRequired().HasMaxLength(100);
                 e.Property(a => a.EntitetTip).IsRequired().HasMaxLength(100);
                 e.Property(a => a.DatumAkcije).IsRequired();
-                // JSONB kolone za PostgreSQL
-                e.Property(a => a.VrijednostiPrije).HasColumnType("jsonb");
-                e.Property(a => a.VrijednostiNakon).HasColumnType("jsonb");
+                e.Property(a => a.VrijednostiPrije).HasColumnType("longtext");
+                e.Property(a => a.VrijednostiNakon).HasColumnType("longtext");
 
                 // KorisnikId je opcionalan (nullable FK)
                 e.HasOne(a => a.Korisnik)

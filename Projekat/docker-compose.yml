@@ -2,18 +2,19 @@ version: '3.8'
 
 services:
   smartlib-db:
-    image: postgres:16-alpine
+    image: mysql:8.0
     container_name: smartlib-db
     environment:
-      POSTGRES_DB: smartlib
-      POSTGRES_USER: smartlib_user
-      POSTGRES_PASSWORD: smartlib_pass
+      MYSQL_DATABASE: smartlib
+      MYSQL_USER: smartlib_user
+      MYSQL_PASSWORD: smartlib_pass
+      MYSQL_ROOT_PASSWORD: root_pass
     ports:
-      - "5432:5432"
+      - "3306:3306"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - mysql_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U smartlib_user -d smartlib"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot_pass"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -26,7 +27,7 @@ services:
     restart: always
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - ConnectionStrings__DefaultConnection=Host=smartlib-db;Port=5432;Database=smartlib;Username=smartlib_user;Password=smartlib_pass
+      - ConnectionStrings__DefaultConnection=Server=smartlib-db;Port=3306;Database=smartlib;User=smartlib_user;Password=smartlib_pass
     ports:
       - "5000:8080"
     depends_on:
@@ -46,4 +47,4 @@ services:
   #     - smartlib-web
 
 volumes:
-  postgres_data:
+  mysql_data:
