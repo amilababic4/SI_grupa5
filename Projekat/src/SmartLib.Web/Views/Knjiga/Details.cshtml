@@ -1,46 +1,103 @@
-@* TODO: @model KnjigaDetailsViewModel *@
+@model SmartLib.Core.DTOs.KnjigaDto
+@using SmartLib.Core.Models
 @{
-    ViewData["Title"] = "Detalji knjige";
+    ViewData["Title"] = Model.Naslov;
+    var primjerci = ViewBag.Primjerci as List<Primjerak> ?? new List<Primjerak>();
 }
 
-<a asp-controller="Knjiga" asp-action="Index">← Nazad na katalog</a>
+<div class="details-topbar">
+    <a asp-controller="Knjiga" asp-action="Index" class="btn btn-secondary">← Nazad na katalog</a>
+</div>
 
-<div class="card" style="margin-top: 1rem;">
-    <h2 id="knjiga-naslov">TODO: Naslov knjige</h2>
-    <p><strong>Autor:</strong> <span>TODO</span></p>
-    <p><strong>ISBN:</strong> <span>TODO</span></p>
-    <p><strong>Kategorija:</strong> <span>TODO</span></p>
-    <p><strong>Izdavač:</strong> <span>TODO</span></p>
-    <p><strong>Godina izdanja:</strong> <span>TODO</span></p>
-
-    @* TODO: Dugmad za uređivanje/brisanje (bibliotekar/admin) *@
-    @* @if (User.IsInRole("Bibliotekar") || User.IsInRole("Administrator"))
-    {
-        <div style="margin-top: 1rem;">
-            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Uredi</a>
-            <form asp-action="Delete" asp-route-id="@Model.Id" method="post" style="display:inline;"
-                  onsubmit="return confirm('Jeste li sigurni?')">
-                <button type="submit" class="btn btn-danger">Obriši</button>
-            </form>
+<div class="card">
+    <div class="details-header">
+        <div>
+            <h2>@Model.Naslov</h2>
+            <p class="details-autor">@Model.Autor</p>
         </div>
-    } *@
+        @if (User.IsInRole("Bibliotekar") || User.IsInRole("Administrator"))
+        {
+            <div class="details-actions">
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Uredi</a>
+                <form asp-action="Delete" asp-route-id="@Model.Id" method="post"
+                      onsubmit="return confirm('Jeste li sigurni da želite obrisati ovu knjigu?');">
+                    <button type="submit" class="btn btn-danger">Obriši</button>
+                </form>
+            </div>
+        }
+    </div>
 
-    <hr style="margin: 1.5rem 0;" />
+    <div class="details-grid">
+        <div class="details-item">
+            <span class="details-label">ISBN</span>
+            <span>@Model.Isbn</span>
+        </div>
+        <div class="details-item">
+            <span class="details-label">Kategorija</span>
+            <span>
+                @if (Model.Kategorija != null)
+                {
+                    <span class="katalog-badge">@Model.Kategorija</span>
+                }
+                else
+                {
+                    <span>—</span>
+                }
+            </span>
+        </div>
+        <div class="details-item">
+            <span class="details-label">Izdavač</span>
+            <span>@(Model.Izdavac ?? "—")</span>
+        </div>
+        <div class="details-item">
+            <span class="details-label">Godina izdanja</span>
+            <span>@(Model.GodinaIzdanja?.ToString() ?? "—")</span>
+        </div>
+        <div class="details-item">
+            <span class="details-label">Ukupno primjeraka</span>
+            <span>@Model.BrojPrimjeraka</span>
+        </div>
+        <div class="details-item">
+            <span class="details-label">Dostupno</span>
+            <span class="@(Model.BrojDostupnih > 0 ? "status-dostupan" : "status-nedostupan")">
+                @Model.BrojDostupnih
+            </span>
+        </div>
+    </div>
+</div>
 
-    <h3>Primjerci</h3>
-    <table>
-        <thead>
-            <tr><th>Inventarni broj</th><th>Status</th></tr>
-        </thead>
-        <tbody>
-            @* TODO: foreach (var p in Model.Primjerci)
-            {
+<div class="card examples-card">
+    <h3 class="examples-title">Primjerci (@primjerci.Count)</h3>
+    @if (!primjerci.Any())
+    {
+        <p class="empty-note">Ova knjiga trenutno nema unesenih primjeraka.</p>
+    }
+    else
+    {
+        <table class="katalog-table">
+            <thead>
                 <tr>
-                    <td>@p.InventarniBroj</td>
-                    <td>@p.Status</td>
+                    <th>Inventarni broj</th>
+                    <th>Status</th>
+                    <th>Datum nabave</th>
                 </tr>
-            } *@
-            <tr><td>INV-001</td><td>Dostupan</td></tr>
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach (var p in primjerci)
+                {
+                    <tr>
+                        <td data-label="Inventarni broj">@p.InventarniBroj</td>
+                        <td data-label="Status">
+                            <span class="@(p.Status == "dostupan" ? "status-dostupan" : "status-nedostupan")">
+                                @p.Status
+                            </span>
+                        </td>
+                        <td data-label="Datum nabave">
+                            @(p.DatumNabave.HasValue ? p.DatumNabave.Value.ToString("dd.MM.yyyy") : "—")
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
 </div>

@@ -5,80 +5,89 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] — SmartLib</title>
     <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="~/css/site.css" />
 </head>
+
+@{
+        var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+        var action = ViewContext.RouteData.Values["action"]?.ToString();
+
+        var isFrontPage = controller == "Home" && action == "Index";
+}
+
 <body class="@(ViewData["BodyClass"] as string)">
-    <!-- Navigacija -->
-    <nav id="main-nav">
-        <div class="nav-brand">
-            <a asp-controller="Home" asp-action="Index">📚 SmartLib</a>
+
+    <nav id="main-nav" class="smartlib-navbar @(isFrontPage ? "smartlib-navbar-front" : "smartlib-navbar-app")">
+        <div class="smartlib-nav-inner">
+
+            <div class="nav-brand">
+                <a asp-controller="Home" asp-action="Index">
+                    <span class="brand-icon">📚</span>
+                    <span class="brand-text">SmartLib</span>
+                </a>
+            </div>
+
+            <ul class="nav-links">
+                @if (isFrontPage)
+                {
+                    if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <li>
+                            <a asp-controller="Knjiga" asp-action="Index" class="nav-login-link">Dashboard</a>
+                        </li>
+                    }
+                    else
+                    {
+                        <li>
+                            <a asp-controller="Auth" asp-action="Login" class="nav-login-link">Prijava</a>
+                        </li>
+                    }
+                }
+                else
+                {
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <li><a asp-controller="Knjiga" asp-action="Index">Katalog</a></li>
+
+                        @if (User.IsInRole("Bibliotekar") || User.IsInRole("Administrator"))
+                        {
+                            <li><a asp-controller="Knjiga" asp-action="Create">Nova knjiga</a></li>
+                            <li><a asp-controller="Korisnik" asp-action="Index">Članovi</a></li>
+                            <li><a asp-controller="Korisnik" asp-action="Create">Kreiraj člana</a></li>
+                        }
+
+                        @if (!string.IsNullOrEmpty(User.Identity?.Name))
+                        {
+                            <li>
+                                <span class="nav-user-name">@User.Identity.Name</span>
+                            </li>
+                        }
+
+                        <li>
+                            <form asp-controller="Auth" asp-action="Logout" method="post" class="nav-form">
+                                <button type="submit" class="nav-link-btn">Odjava</button>
+                            </form>
+                        </li>
+                    }
+                    else
+                    {
+                        <li>
+                            <a asp-controller="Auth" asp-action="Login" class="nav-login-link">Prijava</a>
+                        </li>
+                    }
+                }
+            </ul>
         </div>
-
-        <!-- Ovaj ul je dodan za sprint 5-->
-        <ul class="nav-links">
-            @if (User.Identity?.IsAuthenticated == true)
-            {
-                @if (User.IsInRole("Bibliotekar") || User.IsInRole("Administrator"))
-                {
-                    <li><a asp-controller="Korisnik" asp-action="Index">Članovi</a></li>
-                    <li><a asp-controller="Korisnik" asp-action="Create">Kreiraj člana</a></li>
-                }
-
-                <li>
-                    <form asp-controller="Auth" asp-action="Logout" method="post" style="display:inline;">
-                        <button type="submit" class="nav-link-btn">Odjava</button>
-                    </form>
-                </li>
-            }
-            else
-            {
-                <li><a asp-controller="Auth" asp-action="Login">Prijava</a></li>
-            }
-        </ul>
-
-
-        @* Ne ulazi u okvir sprinta 5
-        <ul class="nav-links">
-            <li><a asp-controller="Knjiga" asp-action="Index">Katalog</a></li>
-
-            @if (User.Identity?.IsAuthenticated == true)
-            {
-                <li><a asp-controller="Zaduzenje" asp-action="Index">Zaduženja</a></li>
-                <li><a asp-controller="Korisnik" asp-action="Profil">Profil</a></li>
-
-                @if (User.IsInRole("Bibliotekar") || User.IsInRole("Administrator"))
-                {
-                    <li><a asp-controller="Korisnik" asp-action="Index">Članovi</a></li>
-                    <li><a asp-controller="Korisnik" asp-action="Create">Kreiraj člana</a></li>
-                    <li><a asp-controller="Kategorija" asp-action="Index">Kategorije</a></li>
-                }
-
-                @if (User.IsInRole("Administrator"))
-                {
-                    <li><a asp-controller="Admin" asp-action="Korisnici">Korisnici</a></li>
-                    <li><a asp-controller="Admin" asp-action="AuditLog">Audit Log</a></li>
-                }
-
-                <li>
-                    <form asp-controller="Auth" asp-action="Logout" method="post" style="display:inline;">
-                        <button type="submit" class="nav-link-btn">Odjava</button>
-                    </form>
-                </li>
-            }
-            else
-            {
-                <li><a asp-controller="Auth" asp-action="Login">Prijava</a></li>
-            }
-        </ul>
-        *@
-
     </nav>
 
-    <!-- Glavni sadržaj -->
     <main class="@(ViewData["MainClass"] as string ?? "page-shell")">
         @RenderBody()
     </main>
 
-    <!-- Footer -->
     <footer>
         <p>&copy; 2026 SmartLib — SI Grupa 5, ETF Sarajevo</p>
     </footer>
