@@ -90,3 +90,34 @@ Aktivna
 
 Povezani PB:  
 PB-22, PB-28  
+
+---
+
+## DL-07
+Datum: 30.04.2026  
+Naziv odluke: Prelazak sa PostgreSQL na MySQL bazu podataka  
+
+Opis problema:  
+Projekat je inicijalno koristio PostgreSQL kao sistem za upravljanje bazom podataka. Tokom Sprint Review-a za Sprint 5, u dogovoru sa asistentom, razmatrana je mogućnost promjene baze podataka kako bi se bolje uskladila sa razvojnim okruženjem i alatima dostupnim timu.  
+
+Razmatrane opcije:  
+- Nastavak korištenja PostgreSQL  
+- Prelazak na MySQL  
+
+Odabrana opcija:  
+Prelazak na MySQL  
+
+Razlog izbora:  
+Odluka je donesena u dogovoru sa asistentom tokom Sprint Review-a. MySQL je timu poznatiji i pristupačniji, što olakšava razvoj, testiranje i lokalno postavljanje razvojnog okruženja. Također, MySQL nudi dovoljnu funkcionalnost za potrebe bibliotečkog informacionog sistema, a migracija na ovoj fazi projekta (prije implementacije kompleksnijih funkcionalnosti) minimizira rizik od problema pri prelasku.  
+
+Posljedice odluke:  
+- Potrebna migracija postojeće sheme baze podataka i migracionih skripti  
+- Prilagodba konfiguracije projekta za MySQL konekciju  
+- Provjera kompatibilnosti postojećih upita i Entity Framework konfiguracije  
+- Moguće manje razlike u ponašanju pojedinih tipova podataka između PostgreSQL i MySQL  
+
+Status:  
+Aktivna  
+
+Povezani PB:  
+PB-13  
