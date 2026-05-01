@@ -85,3 +85,28 @@ Odbačene su ideje koje bi aplikaciju učinile previše generičkom ili vizuelno
 
 **Rizici, problemi ili greške koje su uočene:**  
 Rizik je bio da AI napravi vizuelno nekonzistentan ili pretjerano stilizovan interfejs. Zbog toga je naglašeno da dizajn mora ostati jednostavan, čist, moderan i usklađen sa postojećim projektom.
+
+## AI Log 4: Unit testiranje sistema (Auth, Korisnici i Knjige)
+
+**Datum:** 01.05.2026.  
+**Sprint broj:** Sprint 6  
+**Alat koji je korišten:** Claude Code  
+**Ko je koristio alat:** Muhamed
+
+**Svrha korištenja:** Sistemska provjera backend logike i validacija svih korisničkih akcija kroz automatske unit testove (ukupno 74 testa) kako bi se osigurala stabilnost Web i API kanala.
+
+**Kratak opis zadatka ili upita:** Alatu je zadato da generiše strukturu unit testova za `AuthController`, `KorisnikController` i `KnjigaController`. Zahtjev je bio da se testovi razdvoje na **Web** (provjera redirekcija, View modela i TempData poruka) i **API** (provjera JSON odgovora i HTTP statusnih kodova poput 201, 400 i 404).
+
+**Šta je AI predložio ili generisao:** AI je generisao testne klase koristeći `Xunit` i `Moq`. Predloženi su scenariji za:
+1. **Autentifikaciju:** Prijava, odjava i zaštita ruta po ulogama.
+2. **Validaciju:** Provjera formata emaila, jačine lozinke i validnost ISBN broja.
+3. **Poslovna pravila:** Zabrana brisanja zaduženih knjiga i automatsko dodjeljivanje uloge "Član" pri registraciji.
+4. **Katalog:** Paginacija, filtriranje i mapiranje podataka u DTO objekte.
+
+**Šta je tim prihvatio:** Prihvaćena je arhitektura testova koja striktno odvaja Web i API kontrolere, čime je omogućeno nezavisno testiranje browser i mobilnog pristupa. Prihvaćena je upotreba `Mock` objekata za repozitorije kako bi se testovi izvršavali trenutno, bez zavisnosti o pravoj bazi podataka.
+
+**Šta je tim izmijenio:** Tim je modifikovao testove za brisanje knjiga kako bi uključili specifičnu provjeru `HasActiveLoansAsync`. Također, dodani su ručni testovi za granične slučajeve u paginaciji (npr. traženje stranice koja ne postoji), koje je AI inicijalno izostavio.
+
+**Šta je tim odbacio:** Odbačeni su prijedlozi za generisanje nasumičnih testnih podataka (AutoFixture) jer je bilo važno imati potpunu kontrolu nad specifičnim stringovima (npr. tačan format lozinke sa specijalnim znakovima) radi preciznije validacije.
+
+**Rizici, problemi ili greške koje su uočene:** Tokom pisanja testova otkriveno je da API kontroler za knjige nije vraćao ispravan `Conflict` status (409) kada se pokuša unijeti isti ISBN, već je bacao internu grešku. Zahvaljujući testovima, ovaj propust je ispravljen u kodu kontrolera prije integracije.
