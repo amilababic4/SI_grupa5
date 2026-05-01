@@ -1,7 +1,7 @@
 # Sprint Review – Sprint 5
 
 ## Datum održavanja
-30.04.2026.
+29.04.2026.
 
 ## Učesnici
 Tim (svi članovi grupe 5), asistent
