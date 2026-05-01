@@ -25,7 +25,6 @@
     <Folder Include="Integration\" />
     <Folder Include="UAT\" />
     <Folder Include="Security\" />
-    <Folder Include="Unit\" />
   </ItemGroup>
 
   <ItemGroup>

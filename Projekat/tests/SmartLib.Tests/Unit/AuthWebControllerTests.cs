@@ -16,12 +16,12 @@ namespace SmartLib.Tests.Unit
     /// US-05: Generička poruka pri neuspjehu, redirect po ulozi
     /// US-06: Odjava korisnika
     /// </summary>
-    public class MvcAuthControllerTests
+    public class AuthWebControllerTests
     {
         private readonly Mock<IKorisnikRepository> _repoMock;
         private readonly AuthController _controller;
 
-        public MvcAuthControllerTests()
+        public AuthWebControllerTests()
         {
             _repoMock = new Mock<IKorisnikRepository>();
 
@@ -73,7 +73,7 @@ namespace SmartLib.Tests.Unit
             Uloga       = new Uloga { Id = 1, Naziv = uloga }
         };
 
-        // ─── US-04: Clan se preusmjerava na Home ─────────────────────────────
+        // US-04: Clan se preusmjerava na Home 
 
         [Fact]
         public async Task Login_UspjesanClan_RedirectNaHomeIndex()
@@ -92,7 +92,7 @@ namespace SmartLib.Tests.Unit
             Assert.Equal("Home",  redirect.ControllerName);
         }
 
-        // ─── US-04: Bibliotekar se preusmjerava na Korisnik/Index ────────────
+        //  US-04: Bibliotekar se preusmjerava na Korisnik/Index 
 
         [Fact]
         public async Task Login_UspjesanBibliotekar_RedirectNaKorisnikIndex()
@@ -111,7 +111,7 @@ namespace SmartLib.Tests.Unit
             Assert.Equal("Korisnik", redirect.ControllerName);
         }
 
-        // ─── US-04: Administrator se preusmjerava na Korisnik/Index ─────────
+        // US-04: Administrator se preusmjerava na Korisnik/Index
 
         [Fact]
         public async Task Login_UspjesanAdministrator_RedirectNaKorisnikIndex()
@@ -129,7 +129,7 @@ namespace SmartLib.Tests.Unit
             Assert.Equal("Korisnik", redirect.ControllerName);
         }
 
-        // ─── US-05: Pogrešna lozinka vraća View (ne otkriva razlog) ──────────
+        // US-05: Pogrešna lozinka vraća View (ne otkriva razlog) 
 
         [Fact]
         public async Task Login_PogresnaLozinka_VracaViewSaGenerickomPorukom()
@@ -152,7 +152,7 @@ namespace SmartLib.Tests.Unit
             Assert.Contains(errors!, e => e.ErrorMessage == "Prijava nije uspjela.");
         }
 
-        // ─── US-05: Deaktiviran korisnik — ista generička poruka ─────────────
+        // US-05: Deaktiviran korisnik — ista generička poruka 
 
         [Fact]
         public async Task Login_DeaktiviranKorisnik_VracaGenericku()
@@ -171,7 +171,7 @@ namespace SmartLib.Tests.Unit
             Assert.False(_controller.ModelState.IsValid);
         }
 
-        // ─── US-06: Odjava briše sesiju i redirekuje na Login ────────────────
+        // US-06: Odjava briše sesiju i redirekuje na Login 
 
         [Fact]
         public async Task Logout_UvijekRedirectNaLoginStranu()
@@ -183,7 +183,7 @@ namespace SmartLib.Tests.Unit
             Assert.Equal("Auth",  redirect.ControllerName);
         }
 
-        // ─── US-04: returnUrl redirect (lokalni URL) ──────────────────────────
+        // US-04: returnUrl redirect (lokalni URL)
 
         [Fact]
         public async Task Login_ValjanReturnUrl_RedirectNaTajUrl()
@@ -204,6 +204,20 @@ namespace SmartLib.Tests.Unit
 
             var redirect = Assert.IsType<RedirectResult>(result);
             Assert.Equal("/knjige", redirect.Url);
+        }
+
+        // US-05: Nepostojeći korisnik
+
+        [Fact]
+        public async Task Login_NepostojeciKorisnik_VracaViewSaGreskom()
+        {           
+            _repoMock.Setup(r => r.GetByEmailAsync(It.IsAny<string>())).ReturnsAsync((Korisnik?)null);
+         
+            var result = await _controller.Login(new LoginRequest { Email = "nema@me.com", Lozinka = "bilo-sta" });   
+            
+            Assert.IsType<ViewResult>(result);
+            Assert.False(_controller.ModelState.IsValid);
+            Assert.Equal("Prijava nije uspjela.", _controller.ModelState[string.Empty]?.Errors[0].ErrorMessage);
         }
     }
 }
