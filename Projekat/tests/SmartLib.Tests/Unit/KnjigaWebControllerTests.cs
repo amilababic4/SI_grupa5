@@ -13,14 +13,14 @@ namespace SmartLib.Tests.Unit
     /// <summary>
     /// Sprint 6 — Upravljanje knjigama i katalog
     /// </summary>
-    public class KnjigaControllerTests
+    public class KnjigaWebControllerTests
     {
         private readonly Mock<IKnjigaRepository> _knjigaMock;
         private readonly Mock<IPrimjerakRepository> _primjerakMock;
         private readonly Mock<IKategorijaRepository> _kategorijaMock;
         private readonly KnjigaController _controller;
 
-        public KnjigaControllerTests()
+        public KnjigaWebControllerTests()
         {
             _knjigaMock = new Mock<IKnjigaRepository>();
             _primjerakMock = new Mock<IPrimjerakRepository>();
