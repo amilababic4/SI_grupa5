@@ -3,24 +3,36 @@
 @{
     ViewData["Title"] = Model.Naslov;
     var primjerci = ViewBag.Primjerci as List<Primjerak> ?? new List<Primjerak>();
+    bool jeOsoblje = User.IsInRole("Bibliotekar") || User.IsInRole("Administrator");
 }
 
 <div class="details-topbar">
     <a asp-controller="Knjiga" asp-action="Index" class="btn btn-secondary">← Nazad na katalog</a>
 </div>
 
+@if (TempData["SuccessMessage"] is string successMsg)
+{
+    <div class="alert alert-success">@successMsg</div>
+}
+@if (TempData["ErrorMessage"] is string errorMsg)
+{
+    <div class="alert alert-error">@errorMsg</div>
+}
+
+<!-- Detalji knjige -->
 <div class="card">
     <div class="details-header">
         <div>
             <h2>@Model.Naslov</h2>
             <p class="details-autor">@Model.Autor</p>
         </div>
-        @if (User.IsInRole("Bibliotekar") || User.IsInRole("Administrator"))
+        @if (jeOsoblje)
         {
             <div class="details-actions">
                 <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Uredi</a>
                 <form asp-action="Delete" asp-route-id="@Model.Id" method="post"
-                      onsubmit="return confirm('Jeste li sigurni da želite obrisati ovu knjigu?');">
+                      onsubmit="return confirm('Jeste li sigurni da želite obrisati knjigu: @Model.Naslov?');">
+                    @Html.AntiForgeryToken()
                     <button type="submit" class="btn btn-danger">Obriši</button>
                 </form>
             </div>
@@ -66,38 +78,134 @@
     </div>
 </div>
 
+<!-- US-22 + US-23 + US-24: Lista primjeraka sa statusima i akcijama -->
 <div class="card examples-card">
-    <h3 class="examples-title">Primjerci (@primjerci.Count)</h3>
+    <div class="examples-header">
+        <h3 class="examples-title">
+            Primjerci
+            <span class="primjerci-count-badge">@primjerci.Count</span>
+        </h3>
+
+        @* US-21: Dugme za dodavanje novih primjeraka *@
+        @if (jeOsoblje)
+        {
+            <button class="btn btn-primary btn-sm" id="btn-dodaj-primjerak" type="button"
+                    onclick="document.getElementById('forma-dodaj-primjerak').classList.toggle('hidden')">
+                + Dodaj primjerak
+            </button>
+        }
+    </div>
+
+    @* US-21: Inline forma za dodavanje primjeraka *@
+    @if (jeOsoblje)
+    {
+        <div id="forma-dodaj-primjerak" class="primjerak-add-form hidden">
+            <form asp-controller="Primjerak" asp-action="Dodaj" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="knjigaId" value="@Model.Id" />
+                <div class="primjerak-add-row">
+                    <div class="form-group" style="margin-bottom:0; flex:1;">
+                        <label for="brojNovih">Broj novih primjeraka</label>
+                        <input type="number" id="brojNovih" name="brojNovih"
+                               value="1" min="1" max="50"
+                               placeholder="npr. 3" />
+                        <span class="form-help">Svaki primjerak dobija jedinstveni inventarni broj automatski.</span>
+                    </div>
+                    <div class="primjerak-add-actions">
+                        <button type="submit" class="btn btn-primary">Dodaj</button>
+                        <button type="button" class="btn btn-secondary"
+                                onclick="document.getElementById('forma-dodaj-primjerak').classList.add('hidden')">
+                            Otkaži
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    }
+
     @if (!primjerci.Any())
     {
         <p class="empty-note">Ova knjiga trenutno nema unesenih primjeraka.</p>
     }
     else
     {
-        <table class="katalog-table">
-            <thead>
-                <tr>
-                    <th>Inventarni broj</th>
-                    <th>Status</th>
-                    <th>Datum nabave</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var p in primjerci)
-                {
+        <!-- US-22: Lista svih primjeraka | US-23: Status svakog primjerka | US-24: Deaktivacija -->
+        <div class="katalog-table-wrap">
+            <table class="katalog-table primjerci-table">
+                <thead>
                     <tr>
-                        <td data-label="Inventarni broj">@p.InventarniBroj</td>
-                        <td data-label="Status">
-                            <span class="@(p.Status == "dostupan" ? "status-dostupan" : "status-nedostupan")">
-                                @p.Status
-                            </span>
-                        </td>
-                        <td data-label="Datum nabave">
-                            @(p.DatumNabave.HasValue ? p.DatumNabave.Value.ToString("dd.MM.yyyy") : "—")
-                        </td>
+                        <th>Inventarni broj</th>
+                        <th>Status</th>
+                        <th>Datum nabave</th>
+                        @if (jeOsoblje)
+                        {
+                            <th>Akcije</th>
+                        }
                     </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach (var p in primjerci)
+                    {
+                        var jeDeaktiviran = p.Status == "deaktiviran";
+                        var statusKlasa = p.Status switch
+                        {
+                            "dostupan" => "status-dostupan",
+                            "zaduzen" => "status-zaduzen",
+                            "deaktiviran" => "status-deaktiviran",
+                            _ => "status-nedostupan"
+                        };
+
+                        <tr class="@(jeDeaktiviran ? "row-deaktiviran" : "")">
+                            <td data-label="Inventarni broj">
+                                <span class="inv-broj @(jeDeaktiviran ? "inv-broj--deaktiviran" : "")">
+                                    @p.InventarniBroj
+                                </span>
+                            </td>
+                            <td data-label="Status">
+                                <span class="@statusKlasa">@p.Status</span>
+                            </td>
+                            <td data-label="Datum nabave">
+                                @(p.DatumNabave.HasValue? p.DatumNabave.Value.ToString("dd.MM.yyyy") : "—")
+                            </td>
+                            @if (jeOsoblje)
+                            {
+                                <td data-label="Akcije" class="katalog-actions">
+                                    @if (!jeDeaktiviran)
+                                    {
+                                        <!-- US-24: Opcija deaktivacije za svaki aktivan primjerak -->
+                                        <form asp-controller="Primjerak" asp-action="Deaktiviraj"
+                                              method="post"
+                                              onsubmit="return confirm('Deaktivirati primjerak @p.InventarniBroj? Ova akcija ga uklanja iz fonda za zaduživanje.');">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@p.Id" />
+                                            <button type="submit" class="btn btn-danger btn-sm">
+                                                Deaktiviraj
+                                            </button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <span class="deaktiviran-label">Deaktiviran</span>
+                                    }
+                                </td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Legenda statusa -->
+        <div class="primjerci-legenda">
+            <span class="legenda-item">
+                <span class="status-dostupan">dostupan</span> = slobodan za zaduživanje
+            </span>
+            <span class="legenda-item">
+                <span class="status-zaduzen">zadužen</span> = trenutno kod člana
+            </span>
+            <span class="legenda-item">
+                <span class="status-deaktiviran">deaktiviran</span> = oštećen / izgubljen
+            </span>
+        </div>
     }
 </div>
