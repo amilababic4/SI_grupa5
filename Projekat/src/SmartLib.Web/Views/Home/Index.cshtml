@@ -14,6 +14,10 @@
         <p class="home-lead">
             Moderna platforma za biblioteku koja omogućava jednostavno upravljanje knjigama, članovima i zaduženjima na jednom mjestu.
         </p>
-        <a asp-controller="Auth" asp-action="Login" class="btn btn-primary btn-hero">Prijava u sistem</a>
+        @* Dugme se prikazuje samo ako korisnik NIJE autentifikovan *@
+        @if (!(User.Identity?.IsAuthenticated ?? false))
+        {
+            <a asp-controller="Auth" asp-action="Login" class="btn btn-primary btn-hero">Prijava u sistem</a>
+        }
     </div>
 </section>

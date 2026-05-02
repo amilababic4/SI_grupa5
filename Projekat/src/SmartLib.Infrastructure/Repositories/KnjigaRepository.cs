@@ -94,17 +94,32 @@ namespace SmartLib.Infrastructure.Repositories
 
         public async Task<bool> DeleteAsync(int id)
         {
-            var knjiga = await _db.Knjige.FindAsync(id);
+            // 1. Uèitavamo knjigu ZAJEDNO sa primjercima
+            var knjiga = await _db.Knjige
+                .Include(k => k.Primjerci)
+                .FirstOrDefaultAsync(k => k.Id == id);
+
             if (knjiga == null) return false;
+
+            // 2. Ruèno uklanjamo sve primjerke iz baze podataka           
+            if (knjiga.Primjerci != null && knjiga.Primjerci.Any())
+            {
+                _db.Primjerci.RemoveRange(knjiga.Primjerci);
+            }
+
+            // 3. Sada brišemo knjigu
             _db.Knjige.Remove(knjiga);
+
             await _db.SaveChangesAsync();
             return true;
         }
 
         public async Task<bool> HasActiveLoansAsync(int id)
         {
+            // US-28: Provjerava status svih primjeraka koji pripadaju ovoj knjizi           
             return await _db.Zaduzenja
-                .AnyAsync(z => z.Primjerak!.KnjigaId == id && z.Status == "aktivno");
+                .AnyAsync(z => z.Primjerak.KnjigaId == id &&
+                              (z.Status == "aktivno" || z.DatumPlaniranogVracanja == null));
         }
     }
 }

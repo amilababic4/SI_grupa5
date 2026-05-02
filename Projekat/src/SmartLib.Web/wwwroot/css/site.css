@@ -1472,6 +1472,172 @@ body.home-page footer {
     position: relative;
 }
 
+/* ================================
+   Primjerci — US-21, US-22, US-23, US-24
+   ================================ */
+
+/* Header sekcije primjeraka */
+.examples-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.examples-title {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+}
+
+/* Badge s brojem primjeraka pored naslova */
+.primjerci-count-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 26px;
+    height: 26px;
+    padding: 0 0.5rem;
+    border-radius: 999px;
+    background: rgba(30, 58, 95, 0.1);
+    color: var(--sl-blue);
+    font-size: 0.82rem;
+    font-weight: 800;
+}
+
+/* US-21: Forma za dodavanje primjeraka */
+.primjerak-add-form {
+    background: rgba(248, 250, 252, 0.9);
+    border: 1px solid rgba(30, 58, 95, 0.1);
+    border-radius: var(--sl-radius-md);
+    padding: 1rem 1.1rem;
+    margin-bottom: 1rem;
+    animation: smartlibFadeUp 0.25s ease both;
+}
+
+.primjerak-add-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.primjerak-add-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-shrink: 0;
+    padding-bottom: 0.05rem; /* vizuelno poravnanje s inputom */
+}
+
+/* Utility za skrivanje */
+.hidden {
+    display: none !important;
+}
+
+/* US-23: Novi statusi primjeraka */
+.status-zaduzen {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 34px;
+    min-height: 28px;
+    padding: 0.28rem 0.62rem;
+    border-radius: 999px;
+    font-size: 0.84rem;
+    font-weight: 800;
+    background: rgba(245, 158, 11, 0.12);
+    color: #92400e;
+}
+
+.status-deaktiviran {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 34px;
+    min-height: 28px;
+    padding: 0.28rem 0.62rem;
+    border-radius: 999px;
+    font-size: 0.84rem;
+    font-weight: 800;
+    background: rgba(100, 116, 139, 0.12);
+    color: var(--sl-muted);
+}
+
+/* US-24: Red deaktiviranog primjerka */
+.row-deaktiviran {
+    opacity: 0.58;
+}
+
+/* Inventarni broj deaktiviranog primjerka — precrtano */
+.inv-broj--deaktiviran {
+    text-decoration: line-through;
+    color: var(--sl-muted);
+}
+
+/* Label umjesto dugmeta za već deaktivirane */
+.deaktiviran-label {
+    display: inline-flex;
+    align-items: center;
+    min-height: 34px;
+    padding: 0.28rem 0.62rem;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--sl-muted);
+    background: rgba(100, 116, 139, 0.08);
+    border: 1px solid rgba(100, 116, 139, 0.15);
+}
+
+/* Legenda statusa ispod tabele */
+.primjerci-legenda {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.85rem 1.5rem;
+    margin-top: 0.85rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--sl-border);
+}
+
+.legenda-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.82rem;
+    color: var(--sl-muted);
+}
+
+/* Responsive za tabelu primjeraka */
+@media (max-width: 768px) {
+    .primjerak-add-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .primjerak-add-actions {
+        flex-direction: column;
+    }
+
+    .examples-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+        .examples-header .btn {
+            width: 100%;
+            text-align: center;
+        }
+
+    .primjerci-legenda {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}
+
 /* Responsive */
 @media (max-width: 900px) {
     #main-nav.smartlib-navbar.smartlib-navbar-front {

@@ -207,19 +207,37 @@ namespace SmartLib.Web.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        [Authorize(Roles = RoleNames.Bibliotekar + "," + RoleNames.Administrator)]
+        [Authorize(Roles = "Bibliotekar,Administrator")]
         [HttpPost]
+        [ValidateAntiForgeryToken] // Sigurnosna zaštita koju već imaš u View-u
         public async Task<IActionResult> Delete(int id)
         {
+            // 1. Provjera aktivnih zaduženja (US-28)
             if (await _knjigaRepository.HasActiveLoansAsync(id))
             {
                 TempData["ErrorMessage"] = "Knjiga ima aktivna zaduženja i ne može biti obrisana.";
                 return RedirectToAction(nameof(Index));
             }
 
-            await _knjigaRepository.DeleteAsync(id);
-            TempData["SuccessMessage"] = "Knjiga je obrisana iz kataloga.";
-            return RedirectToAction(nameof(Index));
+            try
+            {
+                var success = await _knjigaRepository.DeleteAsync(id);
+
+                if (success)
+                {
+                    TempData["SuccessMessage"] = "Knjiga je uspješno obrisana iz kataloga."; // US-25
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Došlo je do greške prilikom brisanja knjige.";
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Sistemska greška: " + ex.Message;
+            }
+
+            return RedirectToAction(nameof(Index)); // US-29 (Osvježavanje liste)
         }
 
         private async Task PopulateKategorije(int? selectedId = null)

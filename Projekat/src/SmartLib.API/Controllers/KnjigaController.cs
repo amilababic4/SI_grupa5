@@ -125,15 +125,21 @@ namespace SmartLib.API.Controllers
         [Authorize(Roles = "Bibliotekar,Administrator")]
         public async Task<IActionResult> Delete(int id)
         {
-            // Provjera aktivnih zaduženja (Poslovno pravilo)
+            // 1. Provjera zaduženja (US-28)
             if (await _knjigaRepository.HasActiveLoansAsync(id))
             {
-                return BadRequest("Knjiga ima aktivna zaduženja i ne može biti obrisana.");
+                return BadRequest(new { poruka = "Knjiga ima aktivna zaduženja i ne može biti obrisana." });
             }
 
+            // 2. Izvršavanje brisanja
             var success = await _knjigaRepository.DeleteAsync(id);
-            if (!success) return NotFound();
 
+            if (!success)
+            {
+                return NotFound(new { poruka = "Knjiga sa tim ID-om nije pronađena." }); // US-27
+            }
+
+            // 204 No Content je standard za uspješno brisanje u API-ju
             return NoContent();
         }
 
