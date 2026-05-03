@@ -1,16 +1,170 @@
+﻿@model IEnumerable<SmartLib.Core.Models.Kategorija>
 @{
     ViewData["Title"] = "Kategorije";
 }
 
-<h2>Kategorije knjiga</h2>
-
-@* TODO: Forma za dodavanje *@
-
-<div class="card">
-    <table>
-        <thead><tr><th>Naziv</th><th>Opis</th><th>Broj knjiga</th><th>Akcije</th></tr></thead>
-        <tbody>
-            @* TODO: foreach (var k in Model) { ... } *@
-        </tbody>
-    </table>
+<div class="katalog-header">
+    <h2>Kategorije knjiga</h2>
+    <button class="btn btn-primary" type="button"
+            onclick="document.getElementById('forma-nova-kategorija').classList.toggle('hidden')">
+        + Dodaj kategoriju
+    </button>
 </div>
+
+@if (TempData["SuccessMessage"] is string successMsg)
+{
+    <div class="alert alert-success">@successMsg</div>
+}
+@if (TempData["ErrorMessage"] is string errorMsg)
+{
+    <div class="alert alert-error">@errorMsg</div>
+}
+
+<!-- US-30: Forma za dodavanje -->
+<div id="forma-nova-kategorija" class="card kat-add-form hidden">
+    <h3 class="kat-form-title">Nova kategorija</h3>
+    <form asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+        <div class="kat-form-row">
+            <div class="form-group" style="flex:1; margin-bottom:0;">
+                <label for="naziv-novi">Naziv <span style="color:var(--sl-danger)">*</span></label>
+                <input type="text" id="naziv-novi" name="naziv"
+                       placeholder="npr. Naučna fantastika" maxlength="100" required />
+            </div>
+            <div class="form-group" style="flex:2; margin-bottom:0;">
+                <label for="opis-novi">Opis (opcionalno)</label>
+                <input type="text" id="opis-novi" name="opis"
+                       placeholder="Kratki opis kategorije..." maxlength="500" />
+            </div>
+            <div class="kat-form-actions">
+                <button type="submit" class="btn btn-primary">Sačuvaj</button>
+                <button type="button" class="btn btn-secondary"
+                        onclick="document.getElementById('forma-nova-kategorija').classList.add('hidden')">
+                    Otkaži
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="katalog-meta">
+    <span>Ukupno kategorija: <strong>@Model.Count()</strong></span>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="card katalog-empty">
+        <p>🗂️ Nema unesenih kategorija.</p>
+        <button class="btn btn-primary" type="button"
+                onclick="document.getElementById('forma-nova-kategorija').classList.remove('hidden');
+                             document.getElementById('naziv-novi').focus();">
+            Dodaj prvu kategoriju
+        </button>
+    </div>
+}
+else
+{
+    <div class="card katalog-card">
+        <div class="katalog-table-wrap">
+            <table class="katalog-table">
+                <thead>
+                    <tr>
+                        <th>Naziv</th>
+                        <th>Opis</th>
+                        <th style="text-align:center;">Knjiga</th>
+                        <th>Akcije</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var k in Model)
+                    {
+                        var brojKnjiga = k.Knjige.Count;
+                        <tr>
+                            <td data-label="Naziv"><strong>@k.Naziv</strong></td>
+                            <td data-label="Opis">
+                                <span style="color:var(--sl-muted); font-size:0.92rem;">
+                                    @(string.IsNullOrWhiteSpace(k.Opis) ? "—" : k.Opis)
+                                </span>
+                            </td>
+                            <td data-label="Knjiga" style="text-align:center;">
+                                <span class="katalog-badge">@brojKnjiga</span>
+                            </td>
+                            <td data-label="Akcije" class="katalog-actions">
+
+                                <!-- US-33: Uredi -->
+                                <button type="button" class="btn btn-primary btn-sm"
+                                        onclick="otvoriEdit(@k.Id, '@Html.Raw(k.Naziv.Replace("'", "\\'"))', '@Html.Raw((k.Opis ?? "").Replace("'", "\\'"))')">
+                                    Uredi
+                                </button>
+
+                                @if (brojKnjiga > 0)
+                                {
+                                    <!-- US-32: Ima knjige — alert poruka, bez brisanja -->
+                                    <button type="button" class="btn btn-danger btn-sm"
+                                            onclick="alert('Kategorija \'@Html.Raw(k.Naziv.Replace("'", "\\'"))\' ima @brojKnjiga @(brojKnjiga == 1 ? "knjigu" : "knjige/knjiga") i ne može biti obrisana.\n\nPremjestite sve knjige u drugu kategoriju pa pokušajte ponovo.')">
+                                        Obriši
+                                    </button>
+                                }
+                                else
+                                {
+                                    <!-- US-34: Nema knjiga — normalno brisanje -->
+                                    <form asp-action="Delete" asp-route-id="@k.Id" method="post"
+                                          onsubmit="return confirm('Obrisati kategoriju \'@Html.Raw(k.Naziv.Replace("'", "\\'"))\'?\nOva akcija je nepovratna.');">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-danger btn-sm">Obriši</button>
+                                    </form>
+                                }
+
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+<!-- US-33: Modal za uređivanje -->
+<div id="modal-edit-overlay" class="kat-modal-overlay hidden" onclick="zatvoriEdit()">
+    <div class="kat-modal-box" onclick="event.stopPropagation()">
+        <h3 class="kat-form-title">Uredi kategoriju</h3>
+        <form asp-action="Edit" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" id="edit-id" name="id" value="" />
+            <div class="form-group">
+                <label for="edit-naziv">Naziv <span style="color:var(--sl-danger)">*</span></label>
+                <input type="text" id="edit-naziv" name="naziv"
+                       placeholder="Naziv kategorije" maxlength="100" required />
+            </div>
+            <div class="form-group">
+                <label for="edit-opis">Opis (opcionalno)</label>
+                <input type="text" id="edit-opis" name="opis"
+                       placeholder="Kratki opis kategorije..." maxlength="500" />
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Sačuvaj izmjene</button>
+                <button type="button" class="btn btn-secondary" onclick="zatvoriEdit()">Otkaži</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function otvoriEdit(id, naziv, opis) {
+            document.getElementById('edit-id').value = id;
+            document.getElementById('edit-naziv').value = naziv;
+            document.getElementById('edit-opis').value = opis;
+            document.getElementById('modal-edit-overlay').classList.remove('hidden');
+            document.getElementById('edit-naziv').focus();
+        }
+
+        function zatvoriEdit() {
+            document.getElementById('modal-edit-overlay').classList.add('hidden');
+        }
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') zatvoriEdit();
+        });
+    </script>
+}
