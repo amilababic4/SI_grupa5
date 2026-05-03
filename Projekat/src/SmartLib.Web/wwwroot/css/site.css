@@ -1611,6 +1611,87 @@ body.home-page footer {
     color: var(--sl-muted);
 }
 
+/* ================================
+   Kategorije — US-30, US-31, US-32, US-33, US-34
+   ================================ */
+
+/* Forma za dodavanje nove kategorije */
+.kat-add-form {
+    animation: smartlibFadeUp 0.25s ease both;
+}
+
+.kat-form-title {
+    margin: 0 0 1rem;
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--sl-text);
+    letter-spacing: -0.02em;
+}
+
+.kat-form-row {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+.kat-form-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-shrink: 0;
+    padding-bottom: 0.05rem;
+}
+
+/* US-33: Modal za uređivanje */
+.kat-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1100;
+    background: rgba(7, 17, 31, 0.45);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.25rem;
+    animation: smartlibFadeUp 0.2s ease both;
+}
+
+.kat-modal-box {
+    width: 100%;
+    max-width: 520px;
+    background: var(--sl-card-solid);
+    border-radius: var(--sl-radius-lg);
+    box-shadow: 0 32px 80px rgba(7, 17, 31, 0.22);
+    padding: 1.75rem;
+    animation: smartlibFadeUp 0.25s ease both;
+}
+
+/* US-32: Disabled dugme za brisanje kategorije s knjigama */
+.btn-danger:disabled {
+    opacity: 0.38;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* Responsive */
+@media (max-width: 820px) {
+    .kat-form-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .kat-form-actions {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 480px) {
+    .kat-modal-box {
+        padding: 1.25rem;
+        border-radius: var(--sl-radius-md);
+    }
+}
+
 /* Responsive za tabelu primjeraka */
 @media (max-width: 768px) {
     .primjerak-add-row {

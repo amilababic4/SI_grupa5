@@ -14,16 +14,20 @@ namespace SmartLib.Infrastructure.Repositories
             _db = db;
         }
 
+        // Include(Knjige) da bi Count radio u viewu i API-ju
         public async Task<IEnumerable<Kategorija>> GetAllAsync()
         {
             return await _db.Kategorije
+                .Include(k => k.Knjige)
                 .OrderBy(k => k.Naziv)
                 .ToListAsync();
         }
 
         public async Task<Kategorija?> GetByIdAsync(int id)
         {
-            return await _db.Kategorije.FindAsync(id);
+            return await _db.Kategorije
+                .Include(k => k.Knjige)
+                .FirstOrDefaultAsync(k => k.Id == id);
         }
 
         public async Task<Kategorija> CreateAsync(Kategorija kategorija)
@@ -39,11 +43,13 @@ namespace SmartLib.Infrastructure.Repositories
             await _db.SaveChangesAsync();
         }
 
+        // US-32 + US-34: Vraæa false ako kategorija ima knjige
         public async Task<bool> DeleteAsync(int id)
         {
             var kategorija = await _db.Kategorije.FindAsync(id);
             if (kategorija == null) return false;
             if (await HasBooksAsync(id)) return false;
+
             _db.Kategorije.Remove(kategorija);
             await _db.SaveChangesAsync();
             return true;
