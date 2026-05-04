@@ -110,6 +110,10 @@ namespace SmartLib.API.Controllers
             var knjiga = await _knjigaRepository.GetByIdAsync(id);
             if (knjiga == null) return NotFound();
 
+            var kategorija = await _kategorijaRepository.GetByIdAsync(model.KategorijaId); 
+            if (kategorija == null)                                                          
+                return BadRequest("Odabrana kategorija nije validna.");                      
+
             knjiga.Naslov = model.Naslov.Trim();
             knjiga.Autor = model.Autor.Trim();
             knjiga.KategorijaId = model.KategorijaId;
