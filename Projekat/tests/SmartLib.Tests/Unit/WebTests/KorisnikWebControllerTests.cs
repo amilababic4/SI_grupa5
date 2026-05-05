@@ -7,7 +7,7 @@ using SmartLib.Core.Interfaces;
 using SmartLib.Core.Models;
 using Xunit;
 
-namespace SmartLib.Tests.Unit
+namespace SmartLib.Tests.Unit.WebTests
 {
     public class KorisnikWebControllerTests
     {

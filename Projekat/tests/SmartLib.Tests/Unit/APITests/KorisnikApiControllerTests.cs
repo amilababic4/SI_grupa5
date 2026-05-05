@@ -7,7 +7,7 @@ using SmartLib.Core.Models;
 using Xunit;
 using System.ComponentModel.DataAnnotations;
 
-namespace SmartLib.Tests.Unit
+namespace SmartLib.Tests.Unit.APITests
 {
     /// <summary>
     /// PB-18: Kreiranje naloga člana
@@ -31,7 +31,7 @@ namespace SmartLib.Tests.Unit
             _controller = new KorisnikController(_repoMock.Object);
         }
 
-        // Pomoćna metoda za DTO validaciju
+        // Pomoćna metoda
 
         private static IList<ValidationResult> ValidirajDto(object dto)
         {
@@ -263,9 +263,9 @@ namespace SmartLib.Tests.Unit
             // 7 znakova — mora biti odbijena
             var dto = new KorisnikCreateDto
             {
-                Ime = "Azra",
-                Prezime = "Kovač",
-                Email = "azra@smartlib.ba",
+                Ime = "Ime",
+                Prezime = "Prezime",
+                Email = "ime@smartlib.ba",
                 Lozinka = "Abc1!xy"             
             };
 
@@ -280,9 +280,9 @@ namespace SmartLib.Tests.Unit
             // Granični slučaj — jedna jedina cifra
             var dto = new KorisnikCreateDto
             {
-                Ime = "Azra",
-                Prezime = "Kovač",
-                Email = "azra@smartlib.ba",
+                Ime = "Ime",
+                Prezime = "Prezime",
+                Email = "ime@smartlib.ba",
                 Lozinka = "A"                   // 1 znak
             };
 
@@ -297,9 +297,9 @@ namespace SmartLib.Tests.Unit
             // Granični slučaj — tačno 8 znakova mora proći
             var dto = new KorisnikCreateDto
             {
-                Ime = "Azra",
-                Prezime = "Kovač",
-                Email = "azra@smartlib.ba",
+                Ime = "Ime",
+                Prezime = "Prezime",
+                Email = "ime@smartlib.ba",
                 Lozinka = "Abcde1!x"            // tačno 8 znakova
             };
 
@@ -316,9 +316,9 @@ namespace SmartLib.Tests.Unit
         {
             var dto = new KorisnikCreateDto
             {
-                Ime = "Azra",
-                Prezime = "Kovač",
-                Email = "azrasmartlib.ba",    
+                Ime = "Ime",
+                Prezime = "Prezime",
+                Email = "imesmartlib.ba",    
                 Lozinka = "Lozinka1!"
             };
 
@@ -332,9 +332,9 @@ namespace SmartLib.Tests.Unit
         {
             var dto = new KorisnikCreateDto
             {
-                Ime = "Azra",
-                Prezime = "Kovač",
-                Email = "azra@",              // @ postoji ali nema domene
+                Ime = "Ime",
+                Prezime = "Prezime",
+                Email = "ime@",              // @ postoji ali nema domene
                 Lozinka = "Lozinka1!"
             };
 

@@ -8,10 +8,10 @@ using SmartLib.Core.Models;
 using SmartLib.Web.Controllers;
 using Xunit;
 
-namespace SmartLib.Tests.Unit
+namespace SmartLib.Tests.Unit.WebTests
 {
     /// <summary>
-    /// Sprint 6 — Upravljanje knjigama i katalog
+    ///     Upravljanje knjigama i katalog
     /// </summary>
     public class KnjigaWebControllerTests
     {
@@ -39,7 +39,7 @@ namespace SmartLib.Tests.Unit
             _controller.TempData = new TempDataDictionary(httpContext, Mock.Of<ITempDataProvider>());
         }
 
-        // ─── Pomoćne metode ───────────────────────────────────────────────────
+        // Pomoćne metode 
 
         private static Kategorija TestKategorija(int id = 1) => new()
         {
@@ -74,7 +74,7 @@ namespace SmartLib.Tests.Unit
             BrojPrimjeraka = 2
         };
 
-        // ─── Katalog (Index) ─────────────────────────────────────────────────
+        // Katalog (Index) 
 
         [Fact]
         public async Task Index_VracaKatalogViewModel()
@@ -139,7 +139,7 @@ namespace SmartLib.Tests.Unit
             Assert.Equal(1, dto.BrojDostupnih);
         }
 
-        // ─── Dodavanje knjige (Create) ────────────────────────────────────────
+        // Dodavanje knjige (Create) 
 
         [Fact]
         public async Task Create_ValidanModel_SpremaKnjiguIRedirektuje()
@@ -251,7 +251,7 @@ namespace SmartLib.Tests.Unit
             Assert.True(_controller.ModelState.ContainsKey("KategorijaId"));
         }
 
-        // ─── Uređivanje knjige (Edit) ─────────────────────────────────────────
+        // Uređivanje knjige (Edit) 
 
         [Fact]
         public async Task Edit_Get_PostojecaKnjiga_VracaView()
@@ -332,7 +332,7 @@ namespace SmartLib.Tests.Unit
             Assert.IsType<NotFoundResult>(result);
         }
 
-        // ─── ISBN normalizacija ───────────────────────────────────────────────
+        // ISBN normalizacija 
 
         [Fact]
         public async Task Create_IsbnSacrticama_NormalizujeSeIsprePohrane()

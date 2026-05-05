@@ -23,9 +23,9 @@ builder.Services.AddControllers();
 
 builder.Services.AddScoped<IKorisnikRepository, KorisnikRepository>();
 builder.Services.AddScoped<IKorisnikRepository, KorisnikRepository>();
-builder.Services.AddScoped<IKnjigaRepository, KnjigaRepository>();         // add this
-builder.Services.AddScoped<IPrimjerakRepository, PrimjerakRepository>();   // add this
-builder.Services.AddScoped<IKategorijaRepository, KategorijaRepository>(); // add this
+builder.Services.AddScoped<IKnjigaRepository, KnjigaRepository>();        
+builder.Services.AddScoped<IPrimjerakRepository, PrimjerakRepository>();  
+builder.Services.AddScoped<IKategorijaRepository, KategorijaRepository>();
 
 // JWT Authentication - US-07, US-08
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
