@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using SmartLib.Core.Interfaces;
 using SmartLib.Core.Models;
+using System.Text.RegularExpressions;
 
 namespace SmartLib.API.Controllers
 {
@@ -62,6 +63,9 @@ namespace SmartLib.API.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
+            if (SadrziHtml(request.Naziv) || SadrziHtml(request.Opis))
+                return BadRequest(new { message = "Naziv/opis ne smije sadržavati HTML tagove." });
+
             if (string.IsNullOrWhiteSpace(request.Naziv))
                 return BadRequest(new { message = "Naziv kategorije je obavezan." });
 
@@ -93,6 +97,9 @@ namespace SmartLib.API.Controllers
         {
             if (string.IsNullOrWhiteSpace(request.Naziv))
                 return BadRequest(new { message = "Naziv kategorije ne smije biti prazan." });
+
+            if (SadrziHtml(request.Naziv) || SadrziHtml(request.Opis))
+                return BadRequest(new { message = "Naziv/opis ne smije sadržavati HTML tagove." });
 
             var kategorija = await _kategorijaRepository.GetByIdAsync(id);
             if (kategorija == null)
@@ -141,6 +148,12 @@ namespace SmartLib.API.Controllers
                 message = $"Kategorija \"{kategorija.Naziv}\" je uspješno obrisana.",
                 id = kategorija.Id
             });
+        }
+
+        private static bool SadrziHtml(string? input)
+        {
+            if (string.IsNullOrWhiteSpace(input)) return false;
+            return Regex.IsMatch(input, "<.*?>|&[a-z]+;", RegexOptions.IgnoreCase);
         }
     }
 
