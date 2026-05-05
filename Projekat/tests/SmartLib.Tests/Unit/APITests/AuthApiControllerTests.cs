@@ -7,12 +7,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Moq;
 using SmartLib.API.Controllers;
+using SmartLib.Infrastructure.Security;
 using SmartLib.Core.DTOs;
 using SmartLib.Core.Interfaces;
 using SmartLib.Core.Models;
 using Xunit;
 
-namespace SmartLib.Tests.Unit
+namespace SmartLib.Tests.Unit.APITests
 {
     /// <summary>
     /// PB-17: Sistem prijave korisnika:
@@ -451,7 +452,7 @@ namespace SmartLib.Tests.Unit
             // Provjeravamo da li je rezultat ObjectResult
             var objectResult = Assert.IsType<ObjectResult>(result.Result);
 
-            Assert.IsAssignableFrom<Microsoft.AspNetCore.Mvc.ProblemDetails>(objectResult.Value);
+            Assert.IsAssignableFrom<ProblemDetails>(objectResult.Value);
         }
 
         [Fact]

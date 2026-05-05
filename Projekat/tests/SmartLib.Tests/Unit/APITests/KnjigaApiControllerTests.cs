@@ -6,7 +6,7 @@ using SmartLib.Core.Interfaces;
 using SmartLib.Core.Models;
 using Xunit;
 
-namespace SmartLib.Tests.Unit
+namespace SmartLib.Tests.Unit.APITests
 {
     public class KnjigaApiControllerTests
     {
@@ -27,7 +27,7 @@ namespace SmartLib.Tests.Unit
                 _kategorijaMock.Object);
         }
 
-        // --- Pomoćne metode za testne podatke ---
+        // Pomoćne metode za testne podatke
         private static Knjiga TestKnjiga(int id = 1) => new()
         {
             Id = id,
@@ -36,8 +36,6 @@ namespace SmartLib.Tests.Unit
             Isbn = "1234567890",
             Primjerci = new List<Primjerak>()
         };
-
-        // --- TESTOVI ---
 
         [Fact]
         public async Task GetById_KnjigaPostoji_VracaOkIObjekt()
@@ -121,6 +119,25 @@ namespace SmartLib.Tests.Unit
             var result = await _controller.Delete(1);
 
             Assert.IsType<NoContentResult>(result);
+        }
+
+        [Fact]
+        public async Task Create_DupliIsbn_VracaConflict()
+        {           
+            var dto = new KnjigaCreateDto { Isbn = "1234567890", Naslov = "Test" };
+            _knjigaMock.Setup(r => r.GetByIsbnAsync(It.IsAny<string>())).ReturnsAsync(new Knjiga());
+           
+            var result = await _controller.Create(dto);
+
+            Assert.IsType<ConflictObjectResult>(result.Result);
+        }
+
+        [Fact]
+        public async Task Update_PogresanId_VracaBadRequest()
+        {           
+            var result = await _controller.Update(1, new KnjigaEditDto { Id = 2 });
+          
+            Assert.IsType<BadRequestObjectResult>(result);
         }
     }
 }

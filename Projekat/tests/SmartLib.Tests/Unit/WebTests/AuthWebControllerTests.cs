@@ -7,12 +7,13 @@ using SmartLib.Core.DTOs;
 using SmartLib.Core.Interfaces;
 using SmartLib.Core.Models;
 using SmartLib.Web.Controllers;
+using SmartLib.Infrastructure.Security;
 using Xunit;
 
-namespace SmartLib.Tests.Unit
+namespace SmartLib.Tests.Unit.WebTests
 {
     /// <summary>
-    /// US-04: Prijava putem MVC (cookie auth)
+    /// US-04: Prijava putem web-a
     /// US-05: Generička poruka pri neuspjehu, redirect po ulozi
     /// US-06: Odjava korisnika
     /// </summary>

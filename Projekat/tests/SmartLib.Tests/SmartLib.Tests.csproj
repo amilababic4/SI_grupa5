@@ -14,6 +14,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\SmartLib.Core\SmartLib.Core.csproj" />
     <ProjectReference Include="..\..\src\SmartLib.API\SmartLib.API.csproj" />
+    <ProjectReference Include="..\..\src\SmartLib.Infrastructure\SmartLib.Infrastructure.csproj" />
 	<ProjectReference Include="..\..\src\SmartLib.Web\SmartLib.Web.csproj" />
   </ItemGroup>
 
