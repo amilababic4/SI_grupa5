@@ -4,12 +4,10 @@ using SmartLib.Core.Interfaces;
 using SmartLib.Core.Models;
 using SmartLib.Infrastructure.Security;
 using Microsoft.AspNetCore.Authorization;
+using System.Text.RegularExpressions;
 
 namespace SmartLib.API.Controllers
 {
-    /// <summary>
-    /// Korisnici modul — Upravljanje korisničkim nalozima
-    /// </summary>
     [ApiController]
     [Route("api/[controller]")]
     [Authorize(Roles = "Bibliotekar,Administrator")]
@@ -35,9 +33,7 @@ namespace SmartLib.API.Controllers
         {
             var korisnik = await _korisnikRepository.GetByIdAsync(id);
             if (korisnik is null)
-            {
                 return NotFound();
-            }
 
             return Ok(MapToDto(korisnik));
         }
@@ -46,9 +42,11 @@ namespace SmartLib.API.Controllers
         public async Task<ActionResult<KorisnikDto>> Create([FromBody] KorisnikCreateDto model)
         {
             if (!ModelState.IsValid)
-            {
                 return ValidationProblem(ModelState);
-            }
+
+            // ✅ XSS zaštita
+            if (SadrziHtml(model.Ime) || SadrziHtml(model.Prezime))
+                return BadRequest(new { message = "Ime/prezime ne smije sadržavati HTML tagove." });
 
             var existingUser = await _korisnikRepository.GetByEmailAsync(model.Email);
             if (existingUser is not null)
@@ -73,9 +71,8 @@ namespace SmartLib.API.Controllers
         }
 
         [HttpPut("{id}/uloga")]
-        public IActionResult ChangeRole(int id /*, TODO: ChangeRoleDto */)
+        public IActionResult ChangeRole(int id)
         {
-            // TODO: Promjena uloge (samo admin)
             return Ok(new { message = "TODO" });
         }
 
@@ -84,14 +81,18 @@ namespace SmartLib.API.Controllers
         {
             var korisnik = await _korisnikRepository.GetByIdAsync(id);
             if (korisnik is null)
-            {
                 return NotFound();
-            }
 
             korisnik.Status = "deaktiviran";
             await _korisnikRepository.UpdateAsync(korisnik);
-
             return NoContent();
+        }
+
+        // XSS helper
+        private static bool SadrziHtml(string? input)
+        {
+            if (string.IsNullOrWhiteSpace(input)) return false;
+            return Regex.IsMatch(input, "<.*?>|&[a-z]+;", RegexOptions.IgnoreCase);
         }
 
         private static KorisnikDto MapToDto(Korisnik korisnik)
