@@ -33,6 +33,12 @@
             <span asp-validation-for="Lozinka" class="validation-message"></span>
         </div>
 
+        <div class="form-group">
+            <label asp-for="PotvrdaLozinke">Potvrdi lozinku</label>
+            <input asp-for="PotvrdaLozinke" type="password" />
+            <span asp-validation-for="PotvrdaLozinke" class="validation-message"></span>
+        </div>
+
         <button type="submit" class="btn btn-primary">Kreiraj nalog</button>
         <a asp-action="Index" class="btn btn-secondary">Nazad na listu</a>
     </form>

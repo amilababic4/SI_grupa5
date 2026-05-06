@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Moq;
 using SmartLib.Web.Controllers;
@@ -48,7 +48,7 @@ namespace SmartLib.Tests.Unit.WebTests
         [Fact]
         public async Task Create_Post_ValidanModel_RedirectsToIndex()
         {
-            var dto = new KorisnikCreateDto { Email = "novi@test.com", Ime = "Test", Prezime = "User", Lozinka = "12345678" };
+            var dto = new KorisnikCreateDto { Email = "novi@test.com", Ime = "Test", Prezime = "User", Lozinka = "12345678", PotvrdaLozinke = "12345678" };
             _repoMock.Setup(r => r.GetByEmailAsync(dto.Email)).ReturnsAsync((Korisnik?)null);
 
             var result = await _controller.Create(dto);

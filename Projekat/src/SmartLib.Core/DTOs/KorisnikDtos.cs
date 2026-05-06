@@ -32,5 +32,10 @@ namespace SmartLib.Core.DTOs
         [MinLength(8, ErrorMessage = "Lozinka mora imati najmanje 8 znakova.")]
         [DataType(DataType.Password)]
         public string Lozinka { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Potvrda lozinke je obavezna.")]
+        [DataType(DataType.Password)]
+        [Compare(nameof(Lozinka), ErrorMessage = "Lozinka i potvrda lozinke se ne poklapaju.")]
+        public string PotvrdaLozinke { get; set; } = string.Empty;
     }
 }
