@@ -32,7 +32,7 @@ namespace SmartLib.Web.Controllers
                     Ime = k.Ime,
                     Prezime = k.Prezime,
                     Email = k.Email,
-                    Uloga = k.Uloga?.Naziv ?? RoleNames.Clan,
+                    Uloga = k.Uloga?.Naziv,
                     Status = k.Status,
                     DatumKreiranja = k.DatumKreiranja
                 })

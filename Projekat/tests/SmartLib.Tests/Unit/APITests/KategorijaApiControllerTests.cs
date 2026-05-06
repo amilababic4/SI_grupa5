@@ -313,5 +313,37 @@ namespace SmartLib.Tests.Unit.APITests
             var conflict = Assert.IsType<ConflictObjectResult>(result);
             Assert.NotNull(conflict.Value);
         }
+
+        [Fact]
+        public async Task Create_NazivSadrziHtml_VracaBadRequest()
+        {
+            // US-30: Provjera zaštite od HTML injection-a
+            var request = new KategorijaRequest
+            {
+                Naziv = "<b>Nauka</b>",
+                Opis = "Validan opis"
+            };
+
+            var result = await _controller.Create(request);
+
+            var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+            Assert.Contains("ne smije sadržavati HTML tagove", badRequest.Value.ToString());
+        }
+
+        [Fact]
+        public async Task Update_OpisSadrziHtml_VracaBadRequest()
+        {
+            // US-33: Provjera zaštite od HTML injection-a pri ažuriranju
+            var request = new KategorijaRequest
+            {
+                Naziv = "Validan Naziv",
+                Opis = "<script>alert('xss')</script>"
+            };
+
+            var result = await _controller.Update(1, request);
+
+            var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+            Assert.Contains("ne smije sadržavati HTML tagove", badRequest.Value.ToString());
+        }
     }
 }
