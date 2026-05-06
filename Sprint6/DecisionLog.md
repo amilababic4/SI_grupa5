@@ -120,36 +120,6 @@ PB-18
 
 
 ## DL-05
-**Datum:** 30.04.2026  
-**Naziv odluke:** Implementacija funkcionalnosti za promjenu zaboravljene lozinke  
-
-**Opis problema:** 
-Korisnici koji zaborave svoju lozinku nisu imali mogućnost da je samostalno promijene. Jedini način je bio da kontaktiraju administratora ili bibliotekara, što je neefikasno i nije u skladu sa standardnim očekivanjima korisnika od web aplikacije. Potrebno je bilo odlučiti da li i na koji način omogućiti korisnicima promjenu lozinke.  
-
-**Razmatrane opcije:**  
-- Ručna promjena lozinke od strane administratora na zahtjev korisnika  
-- Implementacija dugmeta "Forgot Password / Change Password" sa mogućnošću samostalne promjene lozinke  
-
-**Odabrana opcija:** 
-Implementacija dugmeta za promjenu lozinke (Forgot / Change Password)  
-
-**Razlog izbora:** 
-Samostalna promjena lozinke smanjuje opterećenje na administrativno osoblje i omogućava korisnicima brz i siguran pristup svom nalogu bez čekanja. Ovaj pristup je u skladu sa uobičajenim standardima za upravljanje korisničkim nalozima u web aplikacijama i poboljšava ukupno korisničko iskustvo.  
-
-**Posljedice odluke:** 
-- Korisnici mogu samostalno promijeniti lozinku bez kontaktiranja administratora  
-- Potrebna implementacija korisničkog interfejsa za promjenu lozinke  
-- Potrebna backend logika za validaciju i ažuriranje lozinke u bazi podataka  
-- Smanjeno opterećenje na osoblje biblioteke  
-
-**Status:**
-Aktivna  
-
-**Povezani PB:** 
-PB-18  
-
-
-## DL-06
 **Datum:**  30.04.2026  
 **Naziv odluke:** Ciljane UI izmjene umjesto potpunog redizajna aplikacije  
 
@@ -179,7 +149,7 @@ Aktivna
 PB-22, PB-28  
 
 
-## DL-07
+## DL-06
 **Datum:** 30.04.2026  
 **Naziv odluke:** Prelazak sa PostgreSQL na MySQL bazu podataka  
 
