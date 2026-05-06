@@ -22,7 +22,6 @@
     <!-- <PackageReference Include="xunit" Version="2.*" /> -->
     <!-- <PackageReference Include="xunit.runner.visualstudio" Version="2.*" /> -->
     <!-- <PackageReference Include="Moq" Version="4.*" /> -->
-    <Folder Include="UAT\" />
     <Folder Include="Security\" />
   </ItemGroup>
 

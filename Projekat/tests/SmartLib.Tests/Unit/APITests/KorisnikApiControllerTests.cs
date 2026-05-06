@@ -134,7 +134,7 @@ namespace SmartLib.Tests.Unit.APITests
             Assert.NotNull(sacuvani);
             Assert.NotEqual(plainLozinka, sacuvani!.LozinkaHash);
             Assert.NotEmpty(sacuvani.LozinkaHash);
-        }      
+        }
 
         // US-09: Deaktivacija 
 
@@ -188,7 +188,7 @@ namespace SmartLib.Tests.Unit.APITests
 
             Assert.IsType<NotFoundResult>(result.Result);
         }
-       
+
         // US-02: VALIDACIJA OBAVEZNIH POLJA
         // Svaki test provjerava jedno polje — prazan string aktivira [Required]
         [Fact]
@@ -254,7 +254,7 @@ namespace SmartLib.Tests.Unit.APITests
 
             Assert.Contains(greske, g => g.MemberNames.Contains(nameof(dto.Lozinka)));
         }
-      
+
         // US-02: VALIDACIJA MINIMALNE DUŽINE LOZINKE (MinLength = 8)
 
         [Fact]
@@ -266,7 +266,7 @@ namespace SmartLib.Tests.Unit.APITests
                 Ime = "Ime",
                 Prezime = "Prezime",
                 Email = "ime@smartlib.ba",
-                Lozinka = "Abc1!xy"             
+                Lozinka = "Abc1!xy"
             };
 
             var greske = ValidirajDto(dto);
@@ -318,7 +318,7 @@ namespace SmartLib.Tests.Unit.APITests
             {
                 Ime = "Ime",
                 Prezime = "Prezime",
-                Email = "imesmartlib.ba",    
+                Email = "imesmartlib.ba",
                 Lozinka = "Lozinka1!"
             };
 
@@ -341,6 +341,83 @@ namespace SmartLib.Tests.Unit.APITests
             var greske = ValidirajDto(dto);
 
             Assert.Contains(greske, g => g.MemberNames.Contains(nameof(dto.Email)));
-        }     
+        }
+
+        [Fact]
+        public async Task Create_ImeSadrziHtml_VracaBadRequest()
+        {
+            var dto = new KorisnikCreateDto
+            {
+                Ime = "<b>Opasno Ime</b>",
+                Prezime = "Prezime",
+                Email = "xss@smartlib.ba",
+                Lozinka = "Lozinka1!"
+            };
+
+            var result = await _controller.Create(dto);
+
+            var badRequest = Assert.IsType<BadRequestObjectResult>(result.Result);
+            Assert.Contains("ne smije sadržavati HTML tagove", badRequest.Value.ToString());
+        }
+
+        [Fact]
+        public async Task Create_PrezimeSadrziHtml_VracaBadRequest()
+        {
+            var dto = new KorisnikCreateDto
+            {
+                Ime = "Ime",
+                Prezime = "<script>alert(1)</script>",
+                Email = "xss2@smartlib.ba",
+                Lozinka = "Lozinka1!"
+            };
+
+            var result = await _controller.Create(dto);
+
+            var badRequest = Assert.IsType<BadRequestObjectResult>(result.Result);
+            Assert.Contains("ne smije sadržavati HTML tagove", badRequest.Value.ToString());
+        }
+
+        [Fact]
+        public async Task Create_ModelStateInvalid_VracaValidationProblem()
+        {
+            _controller.ModelState.AddModelError("Email", "Neispravan email");
+
+            var result = await _controller.Create(new KorisnikCreateDto());
+
+            var objectResult = result.Result as ObjectResult;
+            Assert.NotNull(objectResult);
+
+            Assert.IsAssignableFrom<ValidationProblemDetails>(objectResult.Value);
+        }
+
+        [Fact]
+        public async Task GetById_KorisnikNemaUlogu_VracaEmptyStringZaUlogu()
+        {
+            // Scenario gdje navigacijsko svojstvo Uloga nije učitano
+            var korisnik = new Korisnik
+            {
+                Id = 1,
+                Ime = "Test",
+                Prezime = "Test",
+                Email = "test@test.com",
+                Uloga = null
+            };
+            _repoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(korisnik);
+
+            var result = await _controller.GetById(1);
+
+            var ok = Assert.IsType<OkObjectResult>(result.Result);
+            var dto = Assert.IsType<KorisnikDto>(ok.Value);
+            Assert.Equal(string.Empty, dto.Uloga);
+        }
+
+        [Fact]
+        public void ChangeRole_VracaOkSaTodoPorukom()
+        {
+            var result = _controller.ChangeRole(1);
+
+            var ok = Assert.IsType<OkObjectResult>(result);
+            Assert.Contains("TODO", ok.Value.ToString());
+        }
     }
 }

@@ -65,13 +65,13 @@ namespace SmartLib.Tests.Unit.WebTests
 
         private static Korisnik KorisnikSaUlogom(string uloga) => new()
         {
-            Id          = 1,
-            Ime         = "Test",
-            Prezime     = "User",
-            Email       = "test@smartlib.ba",
+            Id = 1,
+            Ime = "Test",
+            Prezime = "User",
+            Email = "test@smartlib.ba",
             LozinkaHash = SmartLib.Infrastructure.Security.PasswordHasher.HashPassword("Lozinka1!"),
-            Status      = "aktivan",
-            Uloga       = new Uloga { Id = 1, Naziv = uloga }
+            Status = "aktivan",
+            Uloga = new Uloga { Id = 1, Naziv = uloga }
         };
 
         // US-04: Clan se preusmjerava na Home 
@@ -84,13 +84,13 @@ namespace SmartLib.Tests.Unit.WebTests
 
             var result = await _controller.Login(new LoginRequest
             {
-                Email   = "test@smartlib.ba",
+                Email = "test@smartlib.ba",
                 Lozinka = "Lozinka1!"
             });
 
             var redirect = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal("Index", redirect.ActionName);
-            Assert.Equal("Home",  redirect.ControllerName);
+            Assert.Equal("Home", redirect.ControllerName);
         }
 
         //  US-04: Bibliotekar se preusmjerava na Korisnik/Index 
@@ -103,12 +103,12 @@ namespace SmartLib.Tests.Unit.WebTests
 
             var result = await _controller.Login(new LoginRequest
             {
-                Email   = "test@smartlib.ba",
+                Email = "test@smartlib.ba",
                 Lozinka = "Lozinka1!"
             });
 
             var redirect = Assert.IsType<RedirectToActionResult>(result);
-            Assert.Equal("Index",    redirect.ActionName);
+            Assert.Equal("Index", redirect.ActionName);
             Assert.Equal("Korisnik", redirect.ControllerName);
         }
 
@@ -122,7 +122,7 @@ namespace SmartLib.Tests.Unit.WebTests
 
             var result = await _controller.Login(new LoginRequest
             {
-                Email   = "test@smartlib.ba",
+                Email = "test@smartlib.ba",
                 Lozinka = "Lozinka1!"
             });
 
@@ -140,7 +140,7 @@ namespace SmartLib.Tests.Unit.WebTests
 
             var result = await _controller.Login(new LoginRequest
             {
-                Email   = "test@smartlib.ba",
+                Email = "test@smartlib.ba",
                 Lozinka = "PogresnaLozinka!"
             });
 
@@ -164,7 +164,7 @@ namespace SmartLib.Tests.Unit.WebTests
 
             var result = await _controller.Login(new LoginRequest
             {
-                Email   = "test@smartlib.ba",
+                Email = "test@smartlib.ba",
                 Lozinka = "Lozinka1!"
             });
 
@@ -181,7 +181,7 @@ namespace SmartLib.Tests.Unit.WebTests
 
             var redirect = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal("Login", redirect.ActionName);
-            Assert.Equal("Auth",  redirect.ControllerName);
+            Assert.Equal("Auth", redirect.ControllerName);
         }
 
         // US-04: returnUrl redirect (lokalni URL)
@@ -199,7 +199,7 @@ namespace SmartLib.Tests.Unit.WebTests
 
             var result = await _controller.Login(new LoginRequest
             {
-                Email   = "test@smartlib.ba",
+                Email = "test@smartlib.ba",
                 Lozinka = "Lozinka1!"
             }, returnUrl: "/knjige");
 
@@ -211,14 +211,82 @@ namespace SmartLib.Tests.Unit.WebTests
 
         [Fact]
         public async Task Login_NepostojeciKorisnik_VracaViewSaGreskom()
-        {           
+        {
             _repoMock.Setup(r => r.GetByEmailAsync(It.IsAny<string>())).ReturnsAsync((Korisnik?)null);
-         
-            var result = await _controller.Login(new LoginRequest { Email = "nema@me.com", Lozinka = "bilo-sta" });   
-            
+
+            var result = await _controller.Login(new LoginRequest { Email = "nema@me.com", Lozinka = "bilo-sta" });
+
             Assert.IsType<ViewResult>(result);
             Assert.False(_controller.ModelState.IsValid);
             Assert.Equal("Prijava nije uspjela.", _controller.ModelState[string.Empty]?.Errors[0].ErrorMessage);
+        }
+
+        [Fact]
+        public void Login_Get_VracaView()
+        {
+            var result = _controller.Login();
+
+            Assert.IsType<ViewResult>(result);
+        }
+
+        [Fact]
+        public void Login_Get_SaReturnUrl_PostavljaViewData()
+        {
+            var result = _controller.Login("/knjige") as ViewResult;
+
+            Assert.Equal("/knjige", _controller.ViewData["ReturnUrl"]);
+        }
+
+        [Fact]
+        public async Task Login_Post_ModelStateInvalid_VracaView()
+        {
+            _controller.ModelState.AddModelError("Email", "Obavezno");
+
+            var result = await _controller.Login(new LoginRequest());
+
+            Assert.IsType<ViewResult>(result);
+        }
+
+        [Fact]
+        public async Task Login_NelokalniReturnUrl_RedirectNaDefaultUlogu()
+        {
+            _repoMock.Setup(r => r.GetByEmailAsync("test@smartlib.ba"))
+                     .ReturnsAsync(KorisnikSaUlogom("Član"));
+
+            var urlHelperMock = new Mock<IUrlHelper>();
+            urlHelperMock.Setup(u => u.IsLocalUrl("https://evil.com")).Returns(false);
+            _controller.Url = urlHelperMock.Object;
+
+            var result = await _controller.Login(new LoginRequest
+            {
+                Email = "test@smartlib.ba",
+                Lozinka = "Lozinka1!"
+            }, returnUrl: "https://evil.com");
+
+            // Ignorira zlonamjerni URL, redirekuje na Home
+            var redirect = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal("Index", redirect.ActionName);
+            Assert.Equal("Home", redirect.ControllerName);
+        }
+
+        [Fact]
+        public async Task Login_KorisnikBezUloge_UspjesnoSeLoguje()
+        {
+            var korisnik = KorisnikSaUlogom("Član");
+            korisnik.Uloga = null; // ← null uloga
+
+            _repoMock.Setup(r => r.GetByEmailAsync("test@smartlib.ba"))
+                     .ReturnsAsync(korisnik);
+
+            var result = await _controller.Login(new LoginRequest
+            {
+                Email = "test@smartlib.ba",
+                Lozinka = "Lozinka1!"
+            });
+
+            // Ne baca exception, redirekuje na Home (nije Bibliotekar ni Administrator)
+            var redirect = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal("Home", redirect.ControllerName);
         }
     }
 }

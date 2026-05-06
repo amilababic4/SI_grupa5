@@ -323,5 +323,81 @@ namespace SmartLib.Tests.Unit.WebTests
             Assert.Equal("Index", redirect.ActionName);
             Assert.NotNull(_controller.TempData["ErrorMessage"]);
         }
+
+        [Fact]
+        public async Task GetById_PostojecaKategorija_VracaJson()
+        {
+            _kategorijaMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(TestKategorija());
+
+            var result = await _controller.GetById(1);
+
+            Assert.IsType<JsonResult>(result);
+        }
+
+        [Fact]
+        public async Task GetById_NepostojecaKategorija_VracaNotFound()
+        {
+            _kategorijaMock.Setup(r => r.GetByIdAsync(99)).ReturnsAsync((Kategorija?)null);
+
+            var result = await _controller.GetById(99);
+
+            Assert.IsType<NotFoundResult>(result);
+        }
+
+        [Fact]
+        public async Task Create_OpisSamoRazmaci_SpremaSeKaoNull()
+        {
+            _kategorijaMock.Setup(r => r.GetAllAsync()).ReturnsAsync(new List<Kategorija>());
+            _kategorijaMock.Setup(r => r.CreateAsync(It.IsAny<Kategorija>()))
+                           .ReturnsAsync((Kategorija k) => k);
+
+            await _controller.Create("NovaKategorija", "   "); // whitespace opis
+
+            _kategorijaMock.Verify(r => r.CreateAsync(
+                It.Is<Kategorija>(k => k.Opis == null)), Times.Once);
+        }
+
+        [Fact]
+        public async Task Create_ExceptionPriSprema_PrikazujeGresku()
+        {
+            _kategorijaMock.Setup(r => r.GetAllAsync()).ReturnsAsync(new List<Kategorija>());
+            _kategorijaMock.Setup(r => r.CreateAsync(It.IsAny<Kategorija>()))
+                           .ThrowsAsync(new Exception("DB greška"));
+
+            var result = await _controller.Create("NovaKategorija", null);
+
+            var redirect = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal("Index", redirect.ActionName);
+            Assert.NotNull(_controller.TempData["ErrorMessage"]);
+        }
+
+        [Fact]
+        public async Task Edit_ExceptionPriAzuriranju_PrikazujeGresku()
+        {
+            var kategorija = TestKategorija();
+            _kategorijaMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(kategorija);
+            _kategorijaMock.Setup(r => r.GetAllAsync()).ReturnsAsync(new List<Kategorija> { kategorija });
+            _kategorijaMock.Setup(r => r.UpdateAsync(It.IsAny<Kategorija>()))
+                           .ThrowsAsync(new Exception("DB greška"));
+
+            var result = await _controller.Edit(1, "Nauka", null);
+
+            var redirect = Assert.IsType<RedirectToActionResult>(result);
+            Assert.NotNull(_controller.TempData["ErrorMessage"]);
+        }
+
+        [Fact]
+        public async Task Delete_ExceptionPriBrisanju_PrikazujeGresku()
+        {
+            _kategorijaMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(TestKategorija());
+            _kategorijaMock.Setup(r => r.HasBooksAsync(1)).ReturnsAsync(false);
+            _kategorijaMock.Setup(r => r.DeleteAsync(1))
+                           .ThrowsAsync(new Exception("DB greška"));
+
+            var result = await _controller.Delete(1);
+
+            var redirect = Assert.IsType<RedirectToActionResult>(result);
+            Assert.NotNull(_controller.TempData["ErrorMessage"]);
+        }
     }
 }

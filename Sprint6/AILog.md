@@ -270,7 +270,7 @@ Glavni rizik bio je brisanje kategorija koje bi ostavilo knjige u nevalidnom sta
 
 ## AI Log 10: Unit testiranje sistema 
 
-**Datum:** 05.05.2026.  
+**Datum:** 04.05.2026.  
 **Sprint broj:** Sprint 6  
 **Alat koji je korišten:** Claude Code  
 **Ko je koristio alat:** Muhamed
@@ -295,3 +295,31 @@ Odbačeni su prijedlozi za generisanje nasumičnih testnih podataka jer je bilo 
 
 **Rizici, problemi ili greške koje su uočene:**  
  Tokom pisanja testova otkriveno je da API kontroler za knjige nije vraćao ispravan status kada se pokuša unijeti isti ISBN, već je bacao internu grešku. Također, otkriveno je i da je sistem vraćao previše detaljne poruke o grešci pri prijavi, što je korigovano na generičke poruke radi povećanja sigurnosti.
+
+ ## AI Log 11: Implementacija penetracijskih / sigurnosnih testova
+
+**Datum:** 05.05.2026.  
+**Sprint broj:** Sprint 6  
+**Alat koji je korišten:** Claude / GitHub Copilot 
+**Ko je koristio alat:** Muhamed
+
+**Svrha korištenja:**  
+Implementacija sigurnosnih / penetracijskih testova za SmartLib sistem.
+
+**Kratak opis zadatka ili upita:**  
+Od AI alata je zatražena analiza preklapanja između postojećih integracijskim testova i planiranih sigurnosnih testova, te implementacija čistih penetracijskih testova koji pokrivaju isključivo napadačke vektore.
+
+**Šta je AI predložio ili generisao:**  
+AI je predložio podjelu testova na osnovu principa "napad vs. ispravnost" — gdje integracijski testovi pokrivaju poslovnu logiku i autorizacijske politike (401/403), a sigurnosni testovi isključivo napadačke vektore. Generisani su testovi za SQL Injection u email i lozinka polju, Brute Force napad, lažni i modificirani JWT token, XSS payload u registracijskom obrascu i nazivu kategorije, te Path Traversal i Injection u ISBN polju.
+
+**Šta je tim prihvatio:**  
+Tim je prihvatio predloženu strukturu i granicu između sigurnosnih i integracijskim testova, kao i kompletnu implementaciju svih napadačkih vektora.
+
+**Šta je tim izmijenio:**  
+Zadržan je arhitekturalni dokumentacijski test za stari JWT deaktiviranog korisnika (`PT-06`) jer pokriva sigurnosni rizik koji nije pokriven nigdje drugdje u test suiti.
+
+**Šta je tim odbacio:**  
+Odbačeni su testovi koji su samo ponavljali provjere iz integracijskim testova — konkretno, provjere `401` bez tokena i `403` za eskalaciju privilegija, jer je utvrđeno da spadaju u integracijsko testiranje, a ne u penetracijsko.
+
+**Rizici, problemi ili greške koje su uočene:**  
+Uočeno je da originalna verzija sigurnosnih testova sadržavala preklapanja sa integracijskim testovima, što je moglo dovesti do lažnog osjećaja sigurnosti i nepotrebne duplikacije. 

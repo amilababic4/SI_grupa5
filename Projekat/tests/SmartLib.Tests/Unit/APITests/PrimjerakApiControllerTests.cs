@@ -121,7 +121,7 @@ namespace SmartLib.Tests.Unit.APITests
 
             var result = await _controller.Create(new PrimjerakCreateRequest
             {
-                KnjigaId = 999               
+                KnjigaId = 999
             });
 
             Assert.IsType<BadRequestObjectResult>(result);
@@ -178,7 +178,7 @@ namespace SmartLib.Tests.Unit.APITests
 
             var result = await _controller.Create(new PrimjerakCreateRequest
             {
-                KnjigaId = 1         
+                KnjigaId = 1
             });
 
             var created = Assert.IsType<CreatedAtActionResult>(result);
@@ -337,6 +337,73 @@ namespace SmartLib.Tests.Unit.APITests
             await _controller.Deaktiviraj(1);
 
             _primjerakMock.Verify(r => r.DeactivateAsync(1), Times.Once);
+        }
+
+        [Fact]
+        public async Task Create_ModelStateInvalid_VracaBadRequest()
+        {
+            _controller.ModelState.AddModelError("KnjigaId", "Obavezno polje");
+
+            var result = await _controller.Create(new PrimjerakCreateRequest());
+
+            Assert.IsType<BadRequestObjectResult>(result);
+        }
+
+        [Fact]
+        public async Task GetById_PrimjerakBezKnjige_KnjigaJeNull()
+        {
+            var primjerak = TestPrimjerak();
+            primjerak.Knjiga = null;
+            _primjerakMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(primjerak);
+
+            var result = await _controller.GetById(1);
+
+            Assert.IsType<OkObjectResult>(result);
+        }
+
+        [Fact]
+        public async Task GetById_PrimjerakBezDatuma_DatumJeNull()
+        {
+            var primjerak = TestPrimjerak();
+            primjerak.DatumNabave = null;
+            _primjerakMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(primjerak);
+
+            var result = await _controller.GetById(1);
+
+            Assert.IsType<OkObjectResult>(result);
+        }
+
+        [Fact]
+        public async Task GetByKnjiga_PrimjerakBezDatuma_DatumJeNull()
+        {
+            var primjerak = TestPrimjerak();
+            primjerak.DatumNabave = null;
+
+            _knjigaMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(TestKnjiga());
+            _primjerakMock.Setup(r => r.GetByKnjigaAsync(1))
+                          .ReturnsAsync(new List<Primjerak> { primjerak });
+
+            var result = await _controller.GetByKnjiga(1);
+
+            Assert.IsType<OkObjectResult>(result);
+        }
+
+        [Fact]
+        public async Task Create_PrimjerakBezDatuma_DatumJeNull()
+        {
+            _knjigaMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(TestKnjiga());
+            _primjerakMock.Setup(r => r.GetByKnjigaAsync(1))
+                          .ReturnsAsync(new List<Primjerak>());
+            _primjerakMock.Setup(r => r.CreateAsync(It.IsAny<Primjerak>()))
+                          .ReturnsAsync((Primjerak p) => { p.DatumNabave = null; return p; });
+
+            var result = await _controller.Create(new PrimjerakCreateRequest
+            {
+                KnjigaId = 1,
+                BrojNovih = 1
+            });
+
+            Assert.IsType<CreatedAtActionResult>(result);
         }
     }
 }
