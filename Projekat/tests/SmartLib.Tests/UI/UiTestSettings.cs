@@ -4,7 +4,7 @@ internal static class UiTestSettings
 {
     /// <summary>Running SmartLib.Web base URL (trailing slash stripped). Override with SMARTLIB_BASE_URL.</summary>
     public static string BaseUrl =>
-        (Environment.GetEnvironmentVariable("SMARTLIB_BASE_URL") ?? "https://localhost:5000").TrimEnd('/');
+        (Environment.GetEnvironmentVariable("SMARTLIB_BASE_URL") ?? "http://localhost:5000").TrimEnd('/');
 
     /// <summary>
     /// Plaintext password for accounts that share the seed hash in ApplicationDbContext / SQL dumps
