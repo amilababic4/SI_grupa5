@@ -57,7 +57,7 @@ namespace SmartLib.Tests.Unit.APITests
 
         // Pomoćna metoda — standardni aktivni korisnik
 
-        private static Korisnik PravianKorisnik(string uloga = "Član") => new()
+        private static Korisnik PraviKorisnik(string uloga = "Član") => new()
         {
             Id = 1,
             Ime = "Test",
@@ -73,14 +73,14 @@ namespace SmartLib.Tests.Unit.APITests
         {
             return new JwtSecurityTokenHandler().ReadJwtToken(tokenString);
         }
-     
+
         // US-04: USPJEŠNA PRIJAVA     
 
         [Fact]
         public async Task Login_ValidanEmailILozinka_VracaOkSaTokenom()
         {
             _repoMock.Setup(r => r.GetByEmailAsync("test@smartlib.ba"))
-                     .ReturnsAsync(PravianKorisnik());
+                     .ReturnsAsync(PraviKorisnik());
 
             var result = await _controller.Login(new LoginRequest
             {
@@ -97,7 +97,7 @@ namespace SmartLib.Tests.Unit.APITests
         public async Task Login_UspjesanLogin_ResponseSadrziIme()
         {
             _repoMock.Setup(r => r.GetByEmailAsync("test@smartlib.ba"))
-                     .ReturnsAsync(PravianKorisnik());
+                     .ReturnsAsync(PraviKorisnik());
 
             var result = await _controller.Login(new LoginRequest
             {
@@ -115,7 +115,7 @@ namespace SmartLib.Tests.Unit.APITests
         {
             // US-04: Response mora sadržavati prezime korisnika
             _repoMock.Setup(r => r.GetByEmailAsync("test@smartlib.ba"))
-                     .ReturnsAsync(PravianKorisnik());
+                     .ReturnsAsync(PraviKorisnik());
 
             var result = await _controller.Login(new LoginRequest
             {
@@ -132,7 +132,7 @@ namespace SmartLib.Tests.Unit.APITests
         public async Task Login_UspjesanLogin_ResponseSadrziUlogu()
         {
             _repoMock.Setup(r => r.GetByEmailAsync("test@smartlib.ba"))
-                     .ReturnsAsync(PravianKorisnik("Bibliotekar"));
+                     .ReturnsAsync(PraviKorisnik("Bibliotekar"));
 
             var result = await _controller.Login(new LoginRequest
             {
@@ -152,7 +152,7 @@ namespace SmartLib.Tests.Unit.APITests
         {
             // JWT token mora sadržavati email korisnika kao claim
             _repoMock.Setup(r => r.GetByEmailAsync("test@smartlib.ba"))
-                     .ReturnsAsync(PravianKorisnik());
+                     .ReturnsAsync(PraviKorisnik());
 
             var result = await _controller.Login(new LoginRequest
             {
@@ -176,7 +176,7 @@ namespace SmartLib.Tests.Unit.APITests
         {
             // JWT token mora sadržavati ulogu korisnika — koristi se za autorizaciju
             _repoMock.Setup(r => r.GetByEmailAsync("test@smartlib.ba"))
-                     .ReturnsAsync(PravianKorisnik("Administrator"));
+                     .ReturnsAsync(PraviKorisnik("Administrator"));
 
             var result = await _controller.Login(new LoginRequest
             {
@@ -200,7 +200,7 @@ namespace SmartLib.Tests.Unit.APITests
         {
             // NameIdentifier claim mora biti ID korisnika iz baze
             _repoMock.Setup(r => r.GetByEmailAsync("test@smartlib.ba"))
-                     .ReturnsAsync(PravianKorisnik());
+                     .ReturnsAsync(PraviKorisnik());
 
             var result = await _controller.Login(new LoginRequest
             {
@@ -216,7 +216,7 @@ namespace SmartLib.Tests.Unit.APITests
                 .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
 
             Assert.NotNull(idClaim);
-            Assert.Equal("1", idClaim!.Value);  // Id=1 iz PravianKorisnik()
+            Assert.Equal("1", idClaim!.Value);  // Id=1 iz PraviKorisnik()
         }
 
         // US-07: JWT token expiry 
@@ -226,7 +226,7 @@ namespace SmartLib.Tests.Unit.APITests
         {
             // US-07: Sesija mora isteći — token expiry mora biti postavljen
             _repoMock.Setup(r => r.GetByEmailAsync("test@smartlib.ba"))
-                     .ReturnsAsync(PravianKorisnik());
+                     .ReturnsAsync(PraviKorisnik());
 
             var vrijemePrije = DateTime.UtcNow.AddMinutes(JwtMinutes - 1);
             var vrijemeNakon = DateTime.UtcNow.AddMinutes(JwtMinutes + 1);
@@ -253,7 +253,7 @@ namespace SmartLib.Tests.Unit.APITests
         {
             // US-07: Token mora biti validan odmah nakon izdavanja
             _repoMock.Setup(r => r.GetByEmailAsync("test@smartlib.ba"))
-                     .ReturnsAsync(PravianKorisnik());
+                     .ReturnsAsync(PraviKorisnik());
 
             var result = await _controller.Login(new LoginRequest
             {
@@ -283,14 +283,14 @@ namespace SmartLib.Tests.Unit.APITests
 
             Assert.NotNull(principal);
         }
-        
+
         // US-05: NEUSPJEŠNA PRIJAVA — greške i poruke       
 
         [Fact]
         public async Task Login_NetacnaLozinka_VracaUnauthorized()
         {
             _repoMock.Setup(r => r.GetByEmailAsync("test@smartlib.ba"))
-                     .ReturnsAsync(PravianKorisnik());
+                     .ReturnsAsync(PraviKorisnik());
 
             var result = await _controller.Login(new LoginRequest
             {
@@ -341,7 +341,7 @@ namespace SmartLib.Tests.Unit.APITests
         {
             // US-05 + US-09: Sve greške moraju dati istu poruku — sistem ne smije
             // otkrivati razlog odbijanja (da li je korisnik deaktiviran ili lozinka pogrešna)
-            var deaktiviran = PravianKorisnik();
+            var deaktiviran = PraviKorisnik();
             deaktiviran.Status = "deaktiviran";
 
             _repoMock.Setup(r => r.GetByEmailAsync("test@smartlib.ba"))
@@ -364,19 +364,19 @@ namespace SmartLib.Tests.Unit.APITests
 
             var unauthDeaktiviran = Assert.IsType<UnauthorizedObjectResult>(rezultatDeaktiviran.Result);
             var unauthNepostoji = Assert.IsType<UnauthorizedObjectResult>(rezultatNepostoji.Result);
-           
+
             Assert.Equal(
                 unauthDeaktiviran.Value?.ToString(),
                 unauthNepostoji.Value?.ToString()
             );
         }
-      
+
         // US-09: DEAKTIVIRAN KORISNIK
 
         [Fact]
         public async Task Login_DeaktiviranKorisnik_VracaUnauthorized()
         {
-            var korisnik = PravianKorisnik();
+            var korisnik = PraviKorisnik();
             korisnik.Status = "deaktiviran";
 
             _repoMock.Setup(r => r.GetByEmailAsync("test@smartlib.ba"))
@@ -395,7 +395,7 @@ namespace SmartLib.Tests.Unit.APITests
         public async Task Login_DeaktiviranKorisnik_NeDobivaToken()
         {
             // US-09: Deaktiviran korisnik ne smije dobiti JWT token ni u kakvom obliku
-            var korisnik = PravianKorisnik();
+            var korisnik = PraviKorisnik();
             korisnik.Status = "deaktiviran";
 
             _repoMock.Setup(r => r.GetByEmailAsync("test@smartlib.ba"))
@@ -410,7 +410,7 @@ namespace SmartLib.Tests.Unit.APITests
             // Rezultat mora biti Unauthorized — ne smije biti OkObjectResult sa tokenom
             Assert.IsNotType<OkObjectResult>(result.Result);
         }
-       
+
         // US-06: ODJAVA KORISNIKA      
 
         [Fact]
@@ -432,7 +432,7 @@ namespace SmartLib.Tests.Unit.APITests
 
             Assert.NotEmpty(body);
         }
- 
+
         // US-04: VALIDACIJA MODELA — prazna i neispravna polja       
 
         [Theory]
@@ -440,9 +440,9 @@ namespace SmartLib.Tests.Unit.APITests
         [InlineData("test@smartlib.ba", "")]
         [InlineData("nijeEmail", "Lozinka1!")]
         public async Task Login_NeispravanModel_VracaBadRequest(string email, string lozinka)
-        {           
+        {
             _controller.ModelState.AddModelError("test", "Greška validacije");
-            
+
             var result = await _controller.Login(new LoginRequest
             {
                 Email = email,
@@ -481,6 +481,35 @@ namespace SmartLib.Tests.Unit.APITests
                 Email = "test@smartlib.ba",
                 Lozinka = ""
             });
+
+            _repoMock.Verify(r => r.GetByEmailAsync(It.IsAny<string>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task Login_KorisnikBezUloge_TokenSaPraznomUlogom()
+        {
+            var korisnik = PraviKorisnik();
+            korisnik.Uloga = null;
+
+            _repoMock.Setup(r => r.GetByEmailAsync("test@smartlib.ba")).ReturnsAsync(korisnik);
+
+            var result = await _controller.Login(new LoginRequest
+            {
+                Email = "test@smartlib.ba",
+                Lozinka = "Lozinka1!"
+            });
+
+            var ok = Assert.IsType<OkObjectResult>(result.Result);
+            var response = Assert.IsType<LoginResponse>(ok.Value);
+            Assert.Equal(string.Empty, response.Uloga);
+        }
+
+        [Fact]
+        public async Task Login_ModelStateInvalid_NePozivaSeBaza()
+        {
+            _controller.ModelState.AddModelError("Email", "Nevalidan");
+
+            await _controller.Login(new LoginRequest());
 
             _repoMock.Verify(r => r.GetByEmailAsync(It.IsAny<string>()), Times.Never);
         }

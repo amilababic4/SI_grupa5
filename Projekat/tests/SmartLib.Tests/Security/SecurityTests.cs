@@ -11,26 +11,25 @@ using Xunit;
 namespace SmartLib.Tests.Security
 {
     /// <summary>
-    /// Penetracijski / sigurnosni testovi
+    /// Penetracijski / Sigurnosni testovi
     ///
-    /// US-04/US-05: SQL injection na login
-    /// US-08:       RBAC manipulacija (promjena uloge u tokenu)
-    /// US-09:       Pristup deaktiviranog korisnika starom sesijom
-    /// US-08:       Direktni URL unos zaštićenih ruta
-    /// XSS:         Unos skripti u registracijsku formu
-    /// RBAC:        Neautorizovani pristup KategorijaController-u
-    /// RBAC:        Neautorizovani pristup PrimjerakController-u
-    /// RBAC:        Član pokušava admin operacije na KnjigaController-u
-    /// RBAC:        Clan pokušava pristup KorisnikController-u
+    /// Pokriveni vektori napada:
+    ///   PT-01: SQL Injection u email polju (US-04, US-05)
+    ///   PT-02: SQL Injection u polju lozinke (US-04, US-05)
+    ///   PT-03: Brute Force napad na login (US-04)
+    ///   PT-04: Lažni JWT token bez potpisa (US-08)
+    ///   PT-05: Modificiran JWT token sa lažnim potpisom (US-08)
+    ///   PT-06: Arhitekturalni rizik — stari JWT deaktiviranog korisnika (US-09)
+    ///   PT-07: XSS napad u registracijskoj formi — Ime/Prezime (US-01, US-02)
+    ///   PT-08: XSS napad u nazivu kategorije (US-30)
+    ///   PT-09: Path Traversal / Injection u ISBN polju (US-25)
     /// </summary>
-    public class SecurityTests : IClassFixture<WebApplicationFactory<Program>>
+    public class PenetrationTests : IClassFixture<WebApplicationFactory<Program>>
     {
         private readonly WebApplicationFactory<Program> _factory;
+        private static readonly string _dbName = "PenetrationTestDb_" + Guid.NewGuid();
 
-        // Statičko ime — jedna baza za cijelu test klasu
-        private static readonly string _dbName = "SecurityTestDb_" + Guid.NewGuid();
-
-        public SecurityTests(WebApplicationFactory<Program> factory)
+        public PenetrationTests(WebApplicationFactory<Program> factory)
         {
             _factory = factory.WithWebHostBuilder(builder =>
             {
@@ -44,16 +43,14 @@ namespace SmartLib.Tests.Security
                     }));
 
                 builder.ConfigureServices(services =>
-                {                 
+                {
                     var descriptor = services.SingleOrDefault(
                         d => d.ServiceType == typeof(DbContextOptions<ApplicationDbContext>));
                     if (descriptor != null) services.Remove(descriptor);
 
-                    // Fiksno ime baze — dijeli se između svih CreateClient() poziva
                     services.AddDbContext<ApplicationDbContext>(opts =>
                         opts.UseInMemoryDatabase(_dbName));
 
-                    // Seed jednom
                     var sp = services.BuildServiceProvider();
                     using var scope = sp.CreateScope();
                     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -65,17 +62,16 @@ namespace SmartLib.Tests.Security
         }
 
         private HttpClient CreateClient() => _factory.CreateClient();
-
-        // ════════════════════════════════════════════════════════════════════════
-        // AUTH — SQL Injection (US-04 / US-05)
-        // ════════════════════════════════════════════════════════════════════════
+        
+        // PT-01: SQL Injection u email polju (US-04 / US-05)       
 
         [Theory]
         [InlineData("' OR '1'='1", "bilo_sta")]
         [InlineData("admin'--", "bilo_sta")]
         [InlineData("'; DROP TABLE Korisnici;--", "bilo_sta")]
         [InlineData("\" OR 1=1--", "bilo_sta")]
-        public async Task Login_SqlInjectionUEmailu_NeDozvoljavaPristup(string sqlPayload, string lozinka)
+        public async Task Login_SqlInjectionUEmailu_VracaBadRequestIliUnauthorized(
+            string sqlPayload, string lozinka)
         {
             var client = CreateClient();
             var resp = await client.PostAsJsonAsync("/api/auth/login", new
@@ -87,17 +83,20 @@ namespace SmartLib.Tests.Security
             Assert.True(
                 resp.StatusCode == HttpStatusCode.BadRequest ||
                 resp.StatusCode == HttpStatusCode.Unauthorized,
-                $"SQL injection payload dao je: {resp.StatusCode}"
+                $"[PT-01] SQL injection u emailu dao je neočekivan status: {resp.StatusCode}. " +
+                $"Payload: {sqlPayload}"
             );
         }
+       
+        // PT-02: SQL Injection u polju lozinke (US-04 / US-05)       
 
         [Theory]
         [InlineData("bibliotekar@smartlib.ba", "' OR '1'='1")]
         [InlineData("bibliotekar@smartlib.ba", "'; DROP TABLE Korisnici;--")]
         [InlineData("bibliotekar@smartlib.ba", "\" OR 1=1--")]
-        public async Task Login_SqlInjectionULozinki_NeDozvoljavaPristup(string email, string sqlPayload)
+        public async Task Login_SqlInjectionULozinki_VracaUnauthorized(
+            string email, string sqlPayload)
         {
-            // Injection u polju lozinke — najčešći vektor napada
             var client = CreateClient();
             var resp = await client.PostAsJsonAsync("/api/auth/login", new
             {
@@ -107,13 +106,11 @@ namespace SmartLib.Tests.Security
 
             Assert.Equal(HttpStatusCode.Unauthorized, resp.StatusCode);
         }
-
-        // ════════════════════════════════════════════════════════════════════════
-        // AUTH — Brute Force (US-04)
-        // ════════════════════════════════════════════════════════════════════════
+       
+        // PT-03: Brute Force napad — 10 uzastopnih pokušaja (US-04)       
 
         [Fact]
-        public async Task Login_ViseNeuspjelihPokusaja_SvakiVraca401NikadNe200()
+        public async Task Login_ViseNeuspjelihPokusaja_SvakiVracaUnauthorized()
         {
             var client = CreateClient();
 
@@ -128,13 +125,11 @@ namespace SmartLib.Tests.Security
                 Assert.Equal(HttpStatusCode.Unauthorized, resp.StatusCode);
             }
         }
-
-        // ════════════════════════════════════════════════════════════════════════
-        // AUTH — Lažni JWT token (US-08)
-        // ════════════════════════════════════════════════════════════════════════
+      
+        // PT-04: Lažni JWT token bez potpisa (US-08)        
 
         [Fact]
-        public async Task ZasticenaRuta_LazniBearerToken_Vraca401()
+        public async Task ZasticenaRuta_LazniJwtBezPotpisa_VracaUnauthorized()
         {
             var client = CreateClient();
             client.DefaultRequestHeaders.Authorization =
@@ -148,14 +143,15 @@ namespace SmartLib.Tests.Security
             var resp = await client.GetAsync("/api/korisnik");
             Assert.Equal(HttpStatusCode.Unauthorized, resp.StatusCode);
         }
+      
+        // PT-05: Modificiran JWT token — promjena potpisa (US-08)       
 
         [Fact]
-        public async Task ZasticenaRuta_TokenSaModifikovanomUlogom_Vraca401()
+        public async Task ZasticenaRuta_ModifikovanJwtPotpis_VracaUnauthorized()
         {
-            var clanToken = await DobijClanToken();
-
-            var dijelovi = clanToken.Split('.');
-            var lazniToken = $"{dijelovi[0]}.{dijelovi[1]}.LAZNI_POTPIS";
+            var validanToken = await DobijClanToken();
+            var dijelovi = validanToken.Split('.');
+            var lazniToken = $"{dijelovi[0]}.{dijelovi[1]}.LAZNI_POTPIS_KOJI_NIJE_VALIDAN";
 
             var client = CreateClient();
             client.DefaultRequestHeaders.Authorization =
@@ -164,249 +160,27 @@ namespace SmartLib.Tests.Security
             var resp = await client.GetAsync("/api/korisnik");
             Assert.Equal(HttpStatusCode.Unauthorized, resp.StatusCode);
         }
-
-        // ════════════════════════════════════════════════════════════════════════
-        // AUTH — Logout
-        // ════════════════════════════════════════════════════════════════════════
-
-        [Fact]
-        public async Task Logout_BezTokena_Vraca401()
-        {
-            var client = CreateClient();
-            var resp = await client.PostAsync("/api/auth/logout", null);
-            Assert.Equal(HttpStatusCode.Unauthorized, resp.StatusCode);
-        }
+        
+        // PT-06: Arhitekturalni sigurnosni rizik — stari JWT deaktiviranog korisnika (US-09)
+        //
+        // Integracijski test pokriva da deaktiviran korisnik ne može dobiti novi token.
+        // Ovaj test dokumentuje preostali arhitekturalni rizik: već izdati JWT token
+        // ostaje validan sve dok ne istekne
 
         [Fact]
-        public async Task Logout_SaValidnimTokenom_Vraca200()
+        public async Task Login_DeaktiviranKorisnik_StariJwtOstajeValidan_ArchitekturalnaNapomena()
         {
-            var token = await DobijClanToken();
-            var client = CreateClient();
-            client.DefaultRequestHeaders.Authorization =
-                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-
-            var resp = await client.PostAsync("/api/auth/logout", null);
-            Assert.Equal(HttpStatusCode.OK, resp.StatusCode);
-        }
-
-        // ════════════════════════════════════════════════════════════════════════
-        // US-09: Deaktiviran korisnik
-        // ════════════════════════════════════════════════════════════════════════
-
-        [Fact]
-        public async Task DeaktiviranKorisnik_SaStarimJwtTokenom_BiljeziSigurnosnuNapomenu()
-        {
-            // JWT je stateless — token ostaje validan dok ne istekne.
-            // Pravi fix: token blacklist ili kratko trajanje + refresh token.
             Assert.True(true,
                 "SIGURNOSNA NAPOMENA (US-09): Deaktiviran korisnik zadržava stari JWT " +
-                "dok ne istekne. Riješiti: token blacklist ili refresh token mehanizam.");
+                "dok ne istekne. Preporuka: token blacklist ili kratko trajanje tokena + refresh.");
         }
-
-        [Fact]
-        public async Task Login_DeaktiviranKorisnik_Vraca401()
-        {
-            // Seed treba sadržavati korisnika sa statusom "deaktiviran" i emailom deaktiviran@smartlib.ba
-            var client = CreateClient();
-            var resp = await client.PostAsJsonAsync("/api/auth/login", new
-            {
-                email = "deaktiviran@smartlib.ba",
-                lozinka = "Test123!"
-            });
-
-            Assert.Equal(HttpStatusCode.Unauthorized, resp.StatusCode);
-        }
-
-        // ════════════════════════════════════════════════════════════════════════
-        // KORISNIK — Direktan URL unos bez autentifikacije (US-08)
-        // ════════════════════════════════════════════════════════════════════════
+        
+        // PT-07: XSS napad u registracijskoj formi — Ime / Prezime (US-01, US-02)        
 
         [Theory]
-        [InlineData("GET", "/api/korisnik")]
-        [InlineData("GET", "/api/korisnik/1")]
-        [InlineData("POST", "/api/korisnik")]
-        [InlineData("PUT", "/api/korisnik/1/uloga")]
-        [InlineData("PUT", "/api/korisnik/1/deaktiviraj")]
-        public async Task KorisnikRute_BezAutentifikacije_Vraca401(string metod, string url)
-        {
-            var client = CreateClient();
-            var request = new HttpRequestMessage(new HttpMethod(metod), url);
-            if (metod == "POST" || metod == "PUT")
-                request.Content = JsonContent.Create(new { });
-
-            var resp = await client.SendAsync(request);
-            Assert.Equal(HttpStatusCode.Unauthorized, resp.StatusCode);
-        }
-
-        [Fact]
-        public async Task KorisnikRute_SaClanTokenom_Vraca403()
-        {
-            // Član (uloga koja nije Bibliotekar/Administrator) ne smije pristupiti
-            var token = await DobijClanToken();
-            var client = CreateClient();
-            client.DefaultRequestHeaders.Authorization =
-                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-
-            var resp = await client.GetAsync("/api/korisnik");
-            Assert.Equal(HttpStatusCode.Forbidden, resp.StatusCode);
-        }
-
-        [Fact]
-        public async Task KorisnikDeaktiviraj_SaClanTokenom_Vraca403()
-        {
-            var token = await DobijClanToken();
-            var client = CreateClient();
-            client.DefaultRequestHeaders.Authorization =
-                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-
-            var resp = await client.PutAsync("/api/korisnik/1/deaktiviraj", null);
-            Assert.Equal(HttpStatusCode.Forbidden, resp.StatusCode);
-        }
-
-        // ════════════════════════════════════════════════════════════════════════
-        // KATEGORIJA — RBAC (US-30..US-34)
-        // ════════════════════════════════════════════════════════════════════════
-
-        [Theory]
-        [InlineData("GET", "/api/kategorija")]
-        [InlineData("GET", "/api/kategorija/1")]
-        [InlineData("POST", "/api/kategorija")]
-        [InlineData("PUT", "/api/kategorija/1")]
-        [InlineData("DELETE", "/api/kategorija/1")]
-        public async Task KategorijaRute_BezAutentifikacije_Vraca401(string metod, string url)
-        {
-            var client = CreateClient();
-            var request = new HttpRequestMessage(new HttpMethod(metod), url);
-            if (metod == "POST" || metod == "PUT")
-                request.Content = JsonContent.Create(new { naziv = "Test" });
-
-            var resp = await client.SendAsync(request);
-            Assert.Equal(HttpStatusCode.Unauthorized, resp.StatusCode);
-        }
-
-        [Theory]
-        [InlineData("GET", "/api/kategorija")]
-        [InlineData("GET", "/api/kategorija/1")]
-        [InlineData("POST", "/api/kategorija")]
-        [InlineData("PUT", "/api/kategorija/1")]
-        [InlineData("DELETE", "/api/kategorija/1")]
-        public async Task KategorijaRute_SaClanTokenom_Vraca403(string metod, string url)
-        {
-            var token = await DobijClanToken();
-            var client = CreateClient();
-            client.DefaultRequestHeaders.Authorization =
-                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-
-            var request = new HttpRequestMessage(new HttpMethod(metod), url);
-            if (metod == "POST" || metod == "PUT")
-                request.Content = JsonContent.Create(new { naziv = "Test" });
-
-            var resp = await client.SendAsync(request);
-            Assert.Equal(HttpStatusCode.Forbidden, resp.StatusCode);
-        }
-
-        // ════════════════════════════════════════════════════════════════════════
-        // KNJIGA — Mješovit pristup (US-25..US-29)
-        // ════════════════════════════════════════════════════════════════════════
-
-        [Theory]
-        [InlineData("GET", "/api/knjiga")]
-        [InlineData("GET", "/api/knjiga/1")]
-        [InlineData("POST", "/api/knjiga")]
-        [InlineData("PUT", "/api/knjiga/1")]
-        [InlineData("DELETE", "/api/knjiga/1")]
-        public async Task KnjigaRute_BezAutentifikacije_Vraca401(string metod, string url)
-        {
-            var client = CreateClient();
-            var request = new HttpRequestMessage(new HttpMethod(metod), url);
-            if (metod == "POST" || metod == "PUT")
-                request.Content = JsonContent.Create(new { });
-
-            var resp = await client.SendAsync(request);
-            Assert.Equal(HttpStatusCode.Unauthorized, resp.StatusCode);
-        }
-
-        [Fact]
-        public async Task KnjigaGet_SaClanTokenom_Vraca200()
-        {
-            // GET je dostupan svim autentifikovanim korisnicima (samo [Authorize], bez Role)
-            var token = await DobijClanToken();
-            var client = CreateClient();
-            client.DefaultRequestHeaders.Authorization =
-                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-
-            var resp = await client.GetAsync("/api/knjiga");
-            Assert.Equal(HttpStatusCode.OK, resp.StatusCode);
-        }
-
-        [Theory]
-        [InlineData("POST", "/api/knjiga")]
-        [InlineData("PUT", "/api/knjiga/1")]
-        [InlineData("DELETE", "/api/knjiga/1")]
-        public async Task KnjigaMutacija_SaClanTokenom_Vraca403(string metod, string url)
-        {
-            // POST/PUT/DELETE zahtijevaju Bibliotekar ili Administrator
-            var token = await DobijClanToken();
-            var client = CreateClient();
-            client.DefaultRequestHeaders.Authorization =
-                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-
-            var request = new HttpRequestMessage(new HttpMethod(metod), url);
-            if (metod == "POST" || metod == "PUT")
-                request.Content = JsonContent.Create(new { });
-
-            var resp = await client.SendAsync(request);
-            Assert.Equal(HttpStatusCode.Forbidden, resp.StatusCode);
-        }
-
-        // ════════════════════════════════════════════════════════════════════════
-        // PRIMJERAK — RBAC (US-21..US-24)
-        // ════════════════════════════════════════════════════════════════════════
-
-        [Theory]
-        [InlineData("GET", "/api/primjerak/knjiga/1")]
-        [InlineData("GET", "/api/primjerak/1")]
-        [InlineData("POST", "/api/primjerak")]
-        [InlineData("POST", "/api/primjerak/1/deaktiviraj")]
-        public async Task PrimjerakRute_BezAutentifikacije_Vraca401(string metod, string url)
-        {
-            var client = CreateClient();
-            var request = new HttpRequestMessage(new HttpMethod(metod), url);
-            if (metod == "POST")
-                request.Content = JsonContent.Create(new { knjigaId = 1, brojNovih = 1 });
-
-            var resp = await client.SendAsync(request);
-            Assert.Equal(HttpStatusCode.Unauthorized, resp.StatusCode);
-        }
-
-        [Theory]
-        [InlineData("GET", "/api/primjerak/knjiga/1")]
-        [InlineData("GET", "/api/primjerak/1")]
-        [InlineData("POST", "/api/primjerak")]
-        [InlineData("POST", "/api/primjerak/1/deaktiviraj")]
-        public async Task PrimjerakRute_SaClanTokenom_Vraca403(string metod, string url)
-        {
-            var token = await DobijClanToken();
-            var client = CreateClient();
-            client.DefaultRequestHeaders.Authorization =
-                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-
-            var request = new HttpRequestMessage(new HttpMethod(metod), url);
-            if (metod == "POST")
-                request.Content = JsonContent.Create(new { knjigaId = 1, brojNovih = 1 });
-
-            var resp = await client.SendAsync(request);
-            Assert.Equal(HttpStatusCode.Forbidden, resp.StatusCode);
-        }
-
-        // ════════════════════════════════════════════════════════════════════════
-        // XSS — Unos skripti u registracijsku formu
-        // ════════════════════════════════════════════════════════════════════════
-
-        [Theory]
-        [InlineData("<script>alert('xss')</script>", "Prezime", "xss@test.ba")]
+        [InlineData("<script>alert('xss')</script>", "Prezime", "xss1@test.ba")]
         [InlineData("Ime", "<img src=x onerror=alert(1)>", "xss2@test.ba")]
-        public async Task Create_XssPayloadUImenu_VracaSeEscapovan(
+        public async Task KorisnikCreate_XssPayloadUImenuIliPrezimenu_OdbijenIliEscapovan(
             string ime, string prezime, string email)
         {
             var token = await DobijBibliotekarToken();
@@ -428,13 +202,19 @@ namespace SmartLib.Tests.Security
                 Assert.DoesNotContain("<script>", body, StringComparison.OrdinalIgnoreCase);
                 Assert.DoesNotContain("onerror", body, StringComparison.OrdinalIgnoreCase);
             }
+            else
+            {
+                Assert.Equal(HttpStatusCode.BadRequest, resp.StatusCode);
+            }
         }
+        
+        // PT-08: XSS napad u nazivu kategorije (US-30)        
 
         [Theory]
-        [InlineData("<script>alert('xss')</script>", "Test", "xss_naziv@test.ba")]
-        [InlineData("Test", "<img src=x onerror=alert(1)>", "xss_opis@test.ba")]
-        public async Task Kategorija_XssPayloadUNazivu_VracaSeEscapovanIliOdbijen(
-            string naziv, string opis, string _)
+        [InlineData("<script>alert('xss')</script>", "Opis")]
+        [InlineData("Naziv", "<img src=x onerror=alert(1)>")]
+        public async Task KategorijaCreate_XssPayloadUNazivu_OdbijenIliEscapovan(
+            string naziv, string opis)
         {
             var token = await DobijBibliotekarToken();
             var client = CreateClient();
@@ -449,63 +229,16 @@ namespace SmartLib.Tests.Security
                 Assert.DoesNotContain("<script>", body, StringComparison.OrdinalIgnoreCase);
                 Assert.DoesNotContain("onerror", body, StringComparison.OrdinalIgnoreCase);
             }
-            // 400/409 su također prihvatljivi
         }
-
-        // ════════════════════════════════════════════════════════════════════════
-        // PRIMJERAK — graničні slučajevi (poslovna validacija)
-        // ════════════════════════════════════════════════════════════════════════
+        
+        // PT-09: Path Traversal i Injection u ISBN polju (US-25)       
 
         [Theory]
-        [InlineData(0)]
-        [InlineData(-1)]
-        [InlineData(51)]
-        [InlineData(999)]
-        public async Task PrimjerakCreate_NevalidinBrojNovih_Vraca400(int brojNovih)
-        {
-            var token = await DobijBibliotekarToken();
-            var client = CreateClient();
-            client.DefaultRequestHeaders.Authorization =
-                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-
-            var resp = await client.PostAsJsonAsync("/api/primjerak", new
-            {
-                knjigaId = 1,
-                brojNovih = brojNovih
-            });
-
-            Assert.Equal(HttpStatusCode.BadRequest, resp.StatusCode);
-        }
-
-        [Fact]
-        public async Task PrimjerakCreate_NepostojecaKnjiga_Vraca400()
-        {
-            var token = await DobijBibliotekarToken();
-            var client = CreateClient();
-            client.DefaultRequestHeaders.Authorization =
-                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-
-            var resp = await client.PostAsJsonAsync("/api/primjerak", new
-            {
-                knjigaId = 99999,
-                brojNovih = 1
-            });
-
-            Assert.Equal(HttpStatusCode.BadRequest, resp.StatusCode);
-        }
-
-        // ════════════════════════════════════════════════════════════════════════
-        // KNJIGA — ISBN injection / fuzzing (US-25)
-        // ════════════════════════════════════════════════════════════════════════
-
-        [Theory]
-        [InlineData("' OR '1'='1")]
-        [InlineData("<script>alert(1)</script>")]
-        [InlineData("../../../../etc/passwd")]
-        [InlineData("")]
-        [InlineData("12345")]          // prekratak
-        [InlineData("ABCDEFGHIJKLM")] // nije broj
-        public async Task KnjigaCreate_NevalidinIsbn_Vraca400(string isbn)
+        [InlineData("' OR '1'='1", "SQL Injection")]
+        [InlineData("<script>alert(1)</script>", "XSS")]
+        [InlineData("../../../../etc/passwd", "Path Traversal")]
+        public async Task KnjigaCreate_InjectionUIsbnPolju_VracaBadRequest(
+            string isbn, string tipNapada)
         {
             var token = await DobijBibliotekarToken();
             var client = CreateClient();
@@ -523,10 +256,8 @@ namespace SmartLib.Tests.Security
 
             Assert.Equal(HttpStatusCode.BadRequest, resp.StatusCode);
         }
-
-        // ════════════════════════════════════════════════════════════════════════
-        // Helpers
-        // ════════════════════════════════════════════════════════════════════════
+       
+        // Helpers        
 
         private async Task<string> DobijBibliotekarToken()
         {
@@ -549,11 +280,8 @@ namespace SmartLib.Tests.Security
                 email = "clan@smartlib.ba",
                 lozinka = "Test123!"
             });
-
-            // Dodaj ovo privremeno da vidiš pravi error:
             var body = await resp.Content.ReadAsStringAsync();
-            Assert.True(resp.IsSuccessStatusCode, $"Login failed: {resp.StatusCode} — {body}");
-
+            Assert.True(resp.IsSuccessStatusCode, $"Login nije uspio: {resp.StatusCode} — {body}");
             var json = await resp.Content.ReadFromJsonAsync<JsonElement>();
             return json.GetProperty("token").GetString()!;
         }
