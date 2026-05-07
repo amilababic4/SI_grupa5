@@ -12,7 +12,7 @@ Ovaj dokument predstavlja formalni izvještaj o testiranju provedenom u okviru S
 
 | Ukupno testova | Prošlo | Preskočeno (Skip) | Greška |
 | :--- | :--- | :--- | :--- |
-| **371** | **371** | **0** | **0** |
+| **384** | **384** | **0** | **0** |
 
 ---
 
@@ -122,6 +122,45 @@ Testiranje je obuhvatilo ključne funkcionalnosti:
 **Rezultati testiranja:**
 Svi scenariji su testirani kroz UI (browser) i validirani očekivani ishodi.
 Manuelnim UAT testiranjem potvrđeno je da implementirane funkcionalnosti ispunjavaju sve definisane Acceptance Criteria iz Sprint Backloga. 
+
+---
+
+### 2.5 Integracijsko testiranje
+
+**Alat:** xUnit + WebApplicationFactory + In-Memory DB (.NET)  
+**Pristup:** Integracijski testovi pokreću aplikaciju kroz stvarni HTTP pipeline (routing, model binding, validacija, autorizacija i pristup bazi) bez mockovanja kritičnih slojeva. Na ovaj način validira se saradnja više komponenti istovremeno i ponašanje sistema iz perspektive stvarnog API/Web poziva.
+
+**Podjela:** Integracijski testovi su grupisani po funkcionalnim cjelinama:
+- **Autentifikacija i autorizacija (RBAC)** — validacija `401/403` scenarija, pristupnih prava i ponašanja za različite uloge
+- **Korisnici i registracija** — provjera kompletnog toka kreiranja, validacije i statusa korisnika kroz HTTP zahtjeve
+- **Kategorije, knjige i primjerci** — provjera međusobnih zavisnosti entiteta, poslovnih pravila i integriteta relacija u realnom toku rada
+
+**Rezultati testiranja:**  
+Svi planirani integracijski testovi su uspješno izvršeni, bez kritičnih odstupanja u očekivanom ponašanju sistema.
+
+![Rezultati integracijskog testiranja](./images/rezultati-integracijsko-testiranje.png)
+
+[**Prikaži detaljan izvještaj svih integracijskih testnih slučajeva**](#detaljni-izvjestaj-integracija)
+
+---
+
+### 2.6 UI testiranje (End-to-End)
+
+**Alat:** Playwright + Chromium (lokalno testno okruženje)  
+**Pristup:** UI testovi su izvođeni kroz automatizirane korisničke scenarije u browseru, sa fokusom na verifikaciju kompletnih tokova od korisničke akcije do prikaza rezultata u interfejsu. Testovi pokrivaju navigaciju, forme, validacije, poruke i role-based pristup ključnim ekranima.
+
+**Podjela:** UI testovi su podijeljeni na:
+- **Autentifikacione scenarije** — login/logout tokovi i ponašanje pri neuspješnoj prijavi
+- **CRUD scenarije u administraciji** — kreiranje, izmjena i brisanje entiteta kroz web forme
+- **Katalog i korisnički tokovi** — pretraga/pregled podataka, detalji knjige i osnovna navigacija
+- **Validacije i povratne poruke** — prikaz grešaka i uspješnih akcija (`TempData` poruke, validacijske poruke)
+
+**Rezultati testiranja:**  
+Svi planirani UI/E2E scenariji su uspješno prošli i potvrđena je konzistentnost ponašanja interfejsa u testnom okruženju.
+
+![Rezultati UI testiranja](./images/rezultati-ui-testiranje.png)
+
+[**Prikaži detaljan izvještaj svih UI testnih scenarija**](#detaljni-izvjestaj-ui)
 
 ---
 
@@ -491,3 +530,200 @@ Ovi testovi osiguravaju da ISBN polje ne može biti iskorišteno kao vektor napa
 | UAT-20 | Brisanje kategorije | 1. Kliknuti na dugme 'Obriši' u listi kategorija <br> 2. Kliknuti na dugme 'Potvrdi' | Kategorija uklonjena iz spiska postojećih kategorija |
 | UAT-21 | Brisanje u upotrebi | 1. Kliknuti na dugme 'Obriši' za slučaj kad ima knjiga sa tom kategorijom | Greška: Kategorija 'X' ima Y knjiga i ne može biti obrisana. |
 | UAT-22 | Prikaz kataloga | 1. Otvoriti katalog klikom na dugme 'Katalog' | Prikazuje se lista dostupnih knjiga |
+
+---
+
+<a name="detaljni-izvjestaj-integracija"></a>
+### 4.4 Integracijski testovi — Detaljna lista
+
+Integracijski testovi validiraju kompletnu saradnju API sloja, middleware-a, autorizacije i baze podataka kroz realne HTTP zahtjeve.
+
+#### 4.4.1 Auth integracijski testovi (`AuthIntegrationTests`) — 6 testova
+
+| ID | Naziv testa | Šta validira | Status |
+|:-:|:---|:---|:---|
+| AUTH-IT-01 | `Login_PogresnaLozinka_Vraca401` | Pogrešna lozinka vraća `401` | Prošao |
+| AUTH-IT-02 | `Login_DeaktiviranKorisnik_Vraca401` | Deaktiviran korisnik nema pristup | Prošao |
+| AUTH-IT-03 | `Login_Neuspjeh_NeOtkrivaDetalje` | Generička poruka bez curenja informacija | Prošao |
+| AUTH-IT-04 | `ZasticenaRuta_BezAuth_Vraca401` | Zaštićene rute blokiraju neautentifikovan pristup | Prošao |
+| AUTH-IT-05 | `Logout_BezAuth_Vraca401` | Logout endpoint zahtijeva autentifikaciju | Prošao |
+| AUTH-IT-06 | `CreateKorisnik_DuplikatEmail_Vraca400_ILI_401` | Duplikat email scenario validira zaštitu endpointa | Prošao |
+
+#### 4.4.2 Knjiga integracijski testovi (`KnjigaIntegrationTests`) — 35 testova
+
+| ID | Naziv testa | Šta validira | Status |
+|:-:|:---|:---|:---|
+| KNJ-IT-01 | `GetAll_BezAuth_Vraca401` | Katalog bez auth vraća `401` | Prošao |
+| KNJ-IT-02 | `GetAll_SaAuth_VracaObjektSaPoljimaKataloga` | Vraćanje kataloških polja pri autorizovanom pozivu | Prošao |
+| KNJ-IT-03 | `GetAll_SeededKnjige_PrikazaneUListiKataloga` | Seed podaci se prikazuju u katalogu | Prošao |
+| KNJ-IT-04 | `GetAll_PageSize1_VracaSamoJedanRezultat` | Paginacija sa `pageSize=1` | Prošao |
+| KNJ-IT-05 | `GetAll_FilterNaslov_VracaSamoOdgovarajuceKnjige` | Filter po naslovu radi ispravno | Prošao |
+| KNJ-IT-06 | `GetById_PostojeciId_VracaKnjigu` | Postojeći ID vraća knjigu | Prošao |
+| KNJ-IT-07 | `GetById_NepostojeciId_Vraca404` | Nepostojeći ID vraća `404` | Prošao |
+| KNJ-IT-08 | `Create_BezAuth_Vraca401` | Kreiranje bez auth vraća `401` | Prošao |
+| KNJ-IT-09 | `Create_KaoClan_Vraca403` | Član nema pravo kreiranja (`403`) | Prošao |
+| KNJ-IT-10 | `Create_ValidanPayload_Vraca201` | Validno kreiranje knjige | Prošao |
+| KNJ-IT-11 | `Create_TriPrimjerka_VracaBrojPrimjerakaIBrojDostupnih` | Broj ukupnih/dostupnih primjeraka nakon kreiranja | Prošao |
+| KNJ-IT-12 | `Create_NulaPrimjeraka_KnjigaUKataloguAliBrojDostupnihJeNula` | Kreiranje knjige bez primjeraka | Prošao |
+| KNJ-IT-13 | `Create_IsbnVecPostoji_Vraca409` | Duplikat ISBN vraća `409` | Prošao |
+| KNJ-IT-14 | `Create_IsbnPrekratak_Vraca400` | ISBN validacija dužine | Prošao |
+| KNJ-IT-15 | `Create_Isbn13SaSlovom_Vraca400` | Nevalidan ISBN-13 format | Prošao |
+| KNJ-IT-16 | `Create_Isbn10SaXNaKraju_Vraca201` | Validan ISBN-10 sa `X` | Prošao |
+| KNJ-IT-17 | `Create_IsbnSaCrtama_NormalizujeISpremaSe` | Normalizacija ISBN sa crticama | Prošao |
+| KNJ-IT-18 | `Create_NevalidnaKategorija_Vraca400` | Neispravna kategorija vraća `400` | Prošao |
+| KNJ-IT-19 | `Update_BezAuth_Vraca401` | Update bez auth vraća `401` | Prošao |
+| KNJ-IT-20 | `Update_KaoClan_Vraca403` | Član nema pravo update-a | Prošao |
+| KNJ-IT-21 | `Update_ValidanPayload_Vraca204` | Uspješan update vraća `204` | Prošao |
+| KNJ-IT-22 | `Update_IdMismatch_Vraca400` | Mismatch URL/body ID vraća `400` | Prošao |
+| KNJ-IT-23 | `Update_NepostojeciId_Vraca404` | Update nepostojeće knjige | Prošao |
+| KNJ-IT-24 | `Update_IzmjenaVidljivaUKatalogu` | Promjene su vidljive nakon update-a | Prošao |
+| KNJ-IT-25 | `Delete_BezAuth_Vraca401` | Delete bez auth vraća `401` | Prošao |
+| KNJ-IT-26 | `Delete_KaoClan_Vraca403` | Član nema pravo brisanja | Prošao |
+| KNJ-IT-27 | `Delete_PostojeciIdBezZaduzenja_Vraca204` | Brisanje knjige bez aktivnih zaduženja | Prošao |
+| KNJ-IT-28 | `Delete_ObrisanaKnjiga_ViseNijeVidljivaUKatalogu` | Obrisana knjiga nestaje iz kataloga | Prošao |
+| KNJ-IT-29 | `Delete_NepostojeciId_Vraca404` | Brisanje nepostojećeg ID-a | Prošao |
+| KNJ-IT-30 | `GetAll_FilterAutor_VracaSamoOdgovarajuceKnjige` | Filter po autoru | Prošao |
+| KNJ-IT-31 | `GetAll_FilterNaslovNePostoji_VracaPrazanRezultat` | Filter bez rezultata vraća prazan niz | Prošao |
+| KNJ-IT-32 | `Delete_KnjigaSaAktivnimZaduzenjem_Vraca400` | Blokada brisanja kod aktivnog zaduženja | Prošao |
+| KNJ-IT-33 | `Delete_KnjigaSaZavrsanimZaduzenjem_Vraca204` | Brisanje uz završena zaduženja je dozvoljeno | Prošao |
+| KNJ-IT-34 | `Create_DuplikatIsbn_SelfContained_Vraca409` | Self-contained duplikat ISBN scenario | Prošao |
+| KNJ-IT-35 | `Update_NevalidnaKategorija_Vraca400` | Update sa nevalidnom kategorijom | Prošao |
+
+#### 4.4.3 Kategorija integracijski testovi (`KategorijaIntegrationTests`) — 32 testa
+
+| ID | Naziv testa | Šta validira | Status |
+|:-:|:---|:---|:---|
+| KAT-IT-01 | `GetAll_BezAuth_Vraca401` | Lista kategorija bez auth | Prošao |
+| KAT-IT-02 | `GetAll_KaoClan_Vraca403` | Član nema pravo pristupa listi | Prošao |
+| KAT-IT-03 | `GetAll_KaoBibliotekar_VracaListuKategorija` | Bibliotekar vidi listu kategorija | Prošao |
+| KAT-IT-04 | `GetAll_SvakiElementImaOcekivanaPolja` | Struktura DTO polja | Prošao |
+| KAT-IT-05 | `GetAll_SeededKategorijaSaKnjigama_ImaIspravanBrojKnjiga` | Broj povezanih knjiga po kategoriji | Prošao |
+| KAT-IT-06 | `GetById_BezAuth_Vraca401` | GetById bez auth | Prošao |
+| KAT-IT-07 | `GetById_PostojeciId_VracaKategoriju` | Dohvat postojeće kategorije | Prošao |
+| KAT-IT-08 | `GetById_NepostojeciId_Vraca404` | Nepostojeća kategorija | Prošao |
+| KAT-IT-09 | `Create_BezAuth_Vraca401` | Create bez auth | Prošao |
+| KAT-IT-10 | `Create_KaoClan_Vraca403` | Član ne može kreirati kategoriju | Prošao |
+| KAT-IT-11 | `Create_ValidanNaziv_Vraca201SaPodrucjem` | Uspješno kreiranje kategorije | Prošao |
+| KAT-IT-12 | `Create_NakonKreiranja_KategorijaVidljivaUGetAll` | Nova kategorija vidljiva u listi | Prošao |
+| KAT-IT-13 | `Create_DuplikatNaziv_Vraca409` | Duplikat naziva (isti case) | Prošao |
+| KAT-IT-14 | `Create_DuplikatNazivRazlicitoKucanje_Vraca409` | Duplikat naziva (različit case) | Prošao |
+| KAT-IT-15 | `Create_PrazanNaziv_Vraca400` | Prazan naziv nije dozvoljen | Prošao |
+| KAT-IT-16 | `Create_NazivSamoRazmaci_Vraca400` | Whitespace naziv nije dozvoljen | Prošao |
+| KAT-IT-17 | `Create_BezOpisa_KategorijaSeSpremaBezOpisa` | Opcionalni opis | Prošao |
+| KAT-IT-18 | `Update_BezAuth_Vraca401` | Update bez auth | Prošao |
+| KAT-IT-19 | `Update_KaoClan_Vraca403` | Član ne može update-ovati kategoriju | Prošao |
+| KAT-IT-20 | `Update_ValidanPayload_Vraca200` | Uspješan update kategorije | Prošao |
+| KAT-IT-21 | `Update_IzmjenaVidljivaUGetById` | Verifikacija izmjene nakon update-a | Prošao |
+| KAT-IT-22 | `Update_DuplikatNazivDrugeKategorije_Vraca409` | Konflikt pri update-u naziva | Prošao |
+| KAT-IT-23 | `Update_IstaNazivIsteKategorije_Vraca200` | Dozvoljen update bez promjene naziva | Prošao |
+| KAT-IT-24 | `Update_PrazanNaziv_Vraca400` | Validacija praznog naziva na update-u | Prošao |
+| KAT-IT-25 | `Update_NepostojeciId_Vraca404` | Update nepostojećeg ID-a | Prošao |
+| KAT-IT-26 | `Delete_BezAuth_Vraca401` | Delete bez auth | Prošao |
+| KAT-IT-27 | `Delete_KaoClan_Vraca403` | Član ne može brisati kategoriju | Prošao |
+| KAT-IT-28 | `Delete_KategorijaBezKnjiga_Vraca200` | Brisanje prazne kategorije | Prošao |
+| KAT-IT-29 | `Delete_ObrisanaKategorija_ViseNijeVidljiva` | Obrisana kategorija više nije dostupna | Prošao |
+| KAT-IT-30 | `Delete_KategorijaSaKnjigama_Vraca409` | Blokada brisanja kategorije sa knjigama | Prošao |
+| KAT-IT-31 | `Delete_KategorijaSaKnjigama_PorukaSadrziRazlog` | Jasna poruka razloga konflikta | Prošao |
+| KAT-IT-32 | `Delete_NepostojeciId_Vraca404` | Brisanje nepostojeće kategorije | Prošao |
+
+#### 4.4.4 Korisnik integracijski testovi (`KorisnikIntegrationTests`) — 30 testova
+
+| ID | Naziv testa | Šta validira | Status |
+|:-:|:---|:---|:---|
+| KOR-IT-01 | `GetAll_BezAuth_Vraca401` | Lista korisnika bez auth | Prošao |
+| KOR-IT-02 | `GetAll_KaoClan_Vraca403` | Član nema pristup listi korisnika | Prošao |
+| KOR-IT-03 | `GetAll_KaoBibliotekar_VracaListuKorisnika` | Bibliotekar pristupa listi korisnika | Prošao |
+| KOR-IT-04 | `GetAll_SvakiElementImaOcekivanaPolja` | Struktura DTO elemenata | Prošao |
+| KOR-IT-05 | `GetAll_VracaSamoAktivneKorisnike` | Filtriranje aktivnih korisnika | Prošao |
+| KOR-IT-06 | `GetById_BezAuth_Vraca401` | GetById bez auth | Prošao |
+| KOR-IT-07 | `GetById_KaoClan_Vraca403` | Član nema pristup tuđim podacima | Prošao |
+| KOR-IT-08 | `GetById_PostojeciId_VracaKorisnika` | Dohvat postojećeg korisnika | Prošao |
+| KOR-IT-09 | `GetById_NepostojeciId_Vraca404` | Nepostojeći korisnik | Prošao |
+| KOR-IT-10 | `GetById_VracaDeaktiviranogKorisnika` | Dohvat deaktiviranog korisnika | Prošao |
+| KOR-IT-11 | `Create_BezAuth_Vraca401` | Kreiranje bez auth | Prošao |
+| KOR-IT-12 | `Create_KaoClan_Vraca403` | Član ne može kreirati korisnike | Prošao |
+| KOR-IT-13 | `Create_ValidanPayload_Vraca201` | Uspješna registracija korisnika | Prošao |
+| KOR-IT-14 | `Create_NoviKorisnik_DobijaUloguClan` | Default uloga nakon kreiranja | Prošao |
+| KOR-IT-15 | `Create_NoviKorisnik_StatusJeAktivan` | Default status = aktivan | Prošao |
+| KOR-IT-16 | `Create_NoviKorisnik_VidljivUGetAll` | Novi korisnik vidljiv u listi | Prošao |
+| KOR-IT-17 | `Create_EmailSeNormalizujeNaLowercase` | Normalizacija emaila | Prošao |
+| KOR-IT-18 | `Create_DuplikatEmail_Vraca400` | Duplikat email zaštita | Prošao |
+| KOR-IT-19 | `Create_DuplikatEmailRazlicitoKucanje_Vraca400` | Case-insensitive duplikat emaila | Prošao |
+| KOR-IT-20 | `Create_PraznoIme_Vraca400` | Validacija obaveznog imena | Prošao |
+| KOR-IT-21 | `Create_PraznoPrezime_Vraca400` | Validacija prezimena | Prošao |
+| KOR-IT-22 | `Create_NevalidanEmailFormat_Vraca400` | Validacija formata emaila | Prošao |
+| KOR-IT-23 | `Create_LozinkaPrekratka_Vraca400` | Minimalna dužina lozinke | Prošao |
+| KOR-IT-24 | `Deactivate_BezAuth_Vraca401` | Deaktivacija bez auth | Prošao |
+| KOR-IT-25 | `Deactivate_KaoClan_Vraca403` | Član ne može deaktivirati korisnika | Prošao |
+| KOR-IT-26 | `Deactivate_PostojeciKorisnik_Vraca204` | Uspješna deaktivacija | Prošao |
+| KOR-IT-27 | `Deactivate_StatusSeMijenjaNaDeaktiviran` | Promjena statusa korisnika | Prošao |
+| KOR-IT-28 | `Deactivate_DeaktiviraniKorisnik_NijeVidljivUGetAll` | Filtriranje deaktiviranih nakon deaktivacije | Prošao |
+| KOR-IT-29 | `Deactivate_DeaktiviraniKorisnik_NeMozeSePrijaviti` | Deaktivirani korisnik ne može login | Prošao |
+| KOR-IT-30 | `Deactivate_NepostojeciId_Vraca404` | Deaktivacija nepostojećeg ID-a | Prošao |
+
+#### 4.4.5 Primjerak integracijski testovi (`PrimjerakIntegrationTests`) — 29 testova
+
+| ID | Naziv testa | Šta validira | Status |
+|:-:|:---|:---|:---|
+| PRI-IT-01 | `GetByKnjiga_BezAuth_Vraca401` | Pristup bez auth | Prošao |
+| PRI-IT-02 | `GetByKnjiga_KaoClan_Vraca403` | Član nema pravo pristupa endpointu | Prošao |
+| PRI-IT-03 | `GetByKnjiga_PostojecaKnjiga_VracaListuPrimjeraka` | Lista primjeraka za postojeću knjigu | Prošao |
+| PRI-IT-04 | `GetByKnjiga_SvakiPrimjerakImaOcekivanaPolja` | Struktura DTO polja primjerka | Prošao |
+| PRI-IT-05 | `GetByKnjiga_SeededPrimjerci_ImajuStatusDostupan` | Seed primjerci imaju status `dostupan` | Prošao |
+| PRI-IT-06 | `GetByKnjiga_NePostojecaKnjiga_Vraca404` | Nepostojeća knjiga vraća `404` | Prošao |
+| PRI-IT-07 | `GetByKnjiga_KnjigaBezPrimjeraka_VracaPrazanNiz` | Prazna lista primjeraka | Prošao |
+| PRI-IT-08 | `GetByKnjiga_PrimjerciPripadajuSamoTojKnjizi` | Ispravno mapiranje primjeraka na knjigu | Prošao |
+| PRI-IT-09 | `GetById_BezAuth_Vraca401` | GetById bez auth | Prošao |
+| PRI-IT-10 | `GetById_PostojeciPrimjerak_VracaPrimjerak` | Dohvat postojećeg primjerka | Prošao |
+| PRI-IT-11 | `GetById_VracaNazivKnjige` | Vraćanje naziva knjige uz primjerak | Prošao |
+| PRI-IT-12 | `GetById_NepostojeciId_Vraca404` | Nepostojeći primjerak | Prošao |
+| PRI-IT-13 | `Create_BezAuth_Vraca401` | Create bez auth | Prošao |
+| PRI-IT-14 | `Create_KaoClan_Vraca403` | Član ne može kreirati primjerke | Prošao |
+| PRI-IT-15 | `Create_ValidanPayload_Vraca201` | Uspješno kreiranje primjeraka | Prošao |
+| PRI-IT-16 | `Create_NovoKreiraniPrimjerci_ImajuStatusDostupan` | Default status novo kreiranih | Prošao |
+| PRI-IT-17 | `Create_NovoKreiraniPrimjerci_PrikazaniUGetByKnjiga` | Novi primjerci vidljivi odmah nakon kreiranja | Prošao |
+| PRI-IT-18 | `Create_NePostojecaKnjiga_Vraca400` | Validacija knjiga ID-a | Prošao |
+| PRI-IT-19 | `Create_NulaPrimjeraka_Vraca400` | Minimalna količina primjeraka | Prošao |
+| PRI-IT-20 | `Create_PrekoMaxPrimjeraka_Vraca400` | Maksimalna količina primjeraka | Prošao |
+| PRI-IT-21 | `Create_InventarniBrojJeJedinstven` | Jedinstvenost inventarnog broja | Prošao |
+| PRI-IT-22 | `Deaktiviraj_BezAuth_Vraca401` | Deaktivacija bez auth | Prošao |
+| PRI-IT-23 | `Deaktiviraj_KaoClan_Vraca403` | Član ne može deaktivirati primjerak | Prošao |
+| PRI-IT-24 | `Deaktiviraj_DostupanPrimjerak_Vraca200` | Uspješna deaktivacija dostupnog primjerka | Prošao |
+| PRI-IT-25 | `Deaktiviraj_StatusSeMijenjaNaDeaktiviran` | Promjena statusa nakon deaktivacije | Prošao |
+| PRI-IT-26 | `Deaktiviraj_DeaktiviraniPrimjerak_NijeViseUBrojuDostupnih` | Deaktivirani primjerak ne ulazi u dostupne | Prošao |
+| PRI-IT-27 | `Deaktiviraj_VecDeaktiviranPrimjerak_Vraca409` | Zaštita od duple deaktivacije | Prošao |
+| PRI-IT-28 | `Deaktiviraj_PrimjerakSAktivnimZaduzenjem_Vraca409` | Blokada deaktivacije pri aktivnom zaduženju | Prošao |
+| PRI-IT-29 | `Deaktiviraj_NepostojeciId_Vraca404` | Deaktivacija nepostojećeg ID-a | Prošao |
+
+![Detaljni rezultati integracijskih testova](./images/rezultati-integracijsko-testiranje.png)
+
+---
+
+<a name="detaljni-izvjestaj-ui"></a>
+### 4.5 UI testovi (End-to-End) — Detaljna lista scenarija
+
+UI testovi pokrivaju ključne korisničke tokove kroz browser: autentifikaciju, rad sa kataloškim podacima, validacije i povratne poruke sistema.
+
+#### 4.5.1 Auth UI testovi (`AuthUiTests`) — 5 testova
+
+| ID | Naziv testa | Šta validira | Status |
+|:-:|:---|:---|:---|
+| AUTH-UI-01 | `LoginPage_DisplaysFormFields` | Prikaz elemenata login forme | Prošao |
+| AUTH-UI-02 | `Login_WrongPassword_ShowsFailureMessage` | Greška pri pogrešnoj lozinci | Prošao |
+| AUTH-UI-03 | `Login_Member_RedirectsToHome_WithDashboardInNav` | Redirect člana nakon prijave | Prošao |
+| AUTH-UI-04 | `Login_Librarian_RedirectsToMembersArea` | Redirect bibliotekara na members područje | Prošao |
+| AUTH-UI-05 | `Logout_ReturnsToLoginPage` | Ispravna odjava i povratak na login | Prošao |
+
+#### 4.5.2 Home UI testovi (`HomeUiTests`) — 1 test
+
+| ID | Naziv testa | Šta validira | Status |
+|:-:|:---|:---|:---|
+| HOME-UI-01 | `Index_ShowsTitleHeroAndPrijavaLink` | Ispravan prikaz početne stranice | Prošao |
+
+#### 4.5.3 Katalog UI testovi (`KatalogUiTests`) — 1 test
+
+| ID | Naziv testa | Šta validira | Status |
+|:-:|:---|:---|:---|
+| KAT-UI-01 | `Member_AfterLogin_CanOpenKatalog` | Pristup katalogu nakon prijave člana | Prošao |
+
+![Detaljni rezultati UI testova](./images/rezultati-ui-testiranje.png)
