@@ -296,11 +296,67 @@ Odbačeni su prijedlozi za generisanje nasumičnih testnih podataka jer je bilo 
 **Rizici, problemi ili greške koje su uočene:**  
  Tokom pisanja testova otkriveno je da API kontroler za knjige nije vraćao ispravan status kada se pokuša unijeti isti ISBN, već je bacao internu grešku. Također, otkriveno je i da je sistem vraćao previše detaljne poruke o grešci pri prijavi, što je korigovano na generičke poruke radi povećanja sigurnosti.
 
- ## AI Log 11: Implementacija penetracijskih / sigurnosnih testova
+## AI Log 11: Implementacija integracijskog testiranja
+ 
+**Datum:** 05.05.2026  
+**Sprint broj:** Sprint 6  
+**Alat koji je korišten:** Claude  
+**Ko je koristio alat:** Esma
+ 
+**Svrha korištenja:**  
+Implementacija integracijskog testiranja backend API-ja kako bi se verificiralo ispravno funkcionisanje sistema kroz cijeli HTTP stack, uključujući autorizaciju, validaciju i poslovnu logiku za sve ključne module sistema.
+ 
+**Kratak opis zadatka ili upita:**  
+Od AI alata je zatraženo da analizira postojeću strukturu projekta i predloži kompletan set integracionih testova za backend API, pokrivajući CRUD operacije za module knjiga, korisnika, kategorija i primjeraka, provjeru autorizacije po ulogama, validaciju ulaznih podataka i poslovna pravila definisana kroz user storyje.
+ 
+**Šta je AI predložio ili generisao:**  
+AI je predložio i generisao kompletnu infrastrukturu za integracijsko testiranje koristeći `WebApplicationFactory`, koja pokreće cijelu ASP.NET Core aplikaciju u memoriji i omogućava slanje realnih HTTP zahtjeva bez potrebe za pokretanjem servera. Predložena je upotreba in-memory baze podataka sa GUID imenima kako bi svaki test run imao vlastitu izoliranu bazu. Generisani su seederi za postavljanje poznatog početnog stanja sa ulogama, korisnicima, kategorijama i podacima potrebnim za testove, kao i helperi za direktno postavljanje složenijih stanja u bazu bez prolaska kroz API. Testovi pokrivaju provjeru HTTP statusnih kodova, strukturu JSON odgovora, autentifikaciju i autorizaciju po ulogama, validaciju ulaznih podataka te provjeru poslovnih pravila kao što je zabrana brisanja resursa koji imaju aktivne zavisnosti. Pokrivenost obuhvata module za knjige, korisnike, kategorije i primjerke knjiga.
+ 
+**Šta je tim prihvatio:**  
+Tim je prihvatio kompletnu infrastrukturu i predloženi pristup testiranja kroz realne HTTP pozive. Prihvaćen je pattern gdje testovi kreiraju vlastite resurse umjesto da se oslanjaju na zajednički seeded sadržaj, čime se osigurava međusobna nezavisnost testova.
+ 
+**Šta je tim izmijenio:**  
+Nazivi polja u seederima su usklađeni sa stvarnim imenima u modelu projekta. Dijagnostički testovi koji su korišteni tokom debug faze su uklonjeni iz finalne verzije test suite-a.
+ 
+**Šta je tim odbacio:**  
+Odbačeni su testovi koji su direktno provjeravali stanje baze podataka umjesto HTTP odgovora, jer integracijsko testiranje treba validirati ponašanje sistema kroz API, a ne internu implementaciju.
+ 
+**Rizici, problemi ili greške koje su uočene:**  
+Tokom implementacije otkriveno je da kontroler nije mogao biti aktiviran jer su nedostajale registracije zavisnosti u `Program.cs`, što je uzrokovalo grešku na svim endpointima. 
+
+## AI Log 12: Implementacija UI testiranja (Playwright)
+ 
+**Datum:** 05.05.2026  
+**Sprint broj:** Sprint 6  
+**Alat koji je korišten:** Cursor  
+**Ko je koristio alat:** Esma
+ 
+**Svrha korištenja:**  
+Implementacija automatiziranih UI testova kroz browser koristeći Playwright, za provjeru korisničkih tokova i ispravnosti prikaza interfejsa.
+ 
+**Kratak opis zadatka ili upita:**  
+Od AI alata je zatraženo da predloži i implementira Playwright UI testove koji pokrivaju ključne korisničke tokove kroz web aplikaciju - autentifikaciju, navigaciju i pristup katalogu knjiga ovisno o ulozi korisnika.
+ 
+**Šta je AI predložio ili generisao:**  
+AI je predložio strukturu testova podijeljenu u klase koje nasljeđuju zajedničku baznu klasu `SmartLibUiTest`. Generisani su testovi za prikaz login forme i vidljivost polja, prikaz greške pri pogrešnoj lozinci, redirekciju člana na Home stranicu nakon prijave, redirekciju bibliotekara na stranicu upravljanja članovima, odjavu i povratak na login stranicu, te pristup katalogu knjiga sa pretragom nakon prijave kao član.
+ 
+**Šta je tim prihvatio:**  
+Tim je prihvatio Playwright kao alat za UI testiranje.
+ 
+**Šta je tim izmijenio:**  
+Tim je uskladio očekivane URL pattern-e i tekstove headinga sa stvarnom implementacijom routinga i Razor View-ova u projektu. Prilagođeni su i email-ovi i lozinke kroz centralizovane `UiTestSettings` kako bi se izbjeglo hardcodiranje u svakom testu.
+ 
+**Šta je tim odbacio:**  
+Odbačena je upotreba Seleniuma kao alata za UI testiranje u korist Playwrighta, koji pruža moderniji API, bolju podršku za asinhrono izvršavanje i stabilnije testove kroz .NET okrzženje.
+ 
+**Rizici, problemi ili greške koje su uočene:**  
+Uočeno je da odjava nije dostupna na početnoj stranici već samo na ostalim stranicama aplikacije, pa je test za odjavu morao navigirati na `/Knjiga` prije nego što klikne dugme za odjavu. 
+
+ ## AI Log 13: Implementacija penetracijskih / sigurnosnih testova
 
 **Datum:** 05.05.2026.  
 **Sprint broj:** Sprint 6  
-**Alat koji je korišten:** Claude / GitHub Copilot 
+**Alat koji je korišten:** Claude / GitHub Copilot  
 **Ko je koristio alat:** Muhamed
 
 **Svrha korištenja:**  
