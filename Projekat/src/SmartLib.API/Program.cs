@@ -10,6 +10,13 @@ using SmartLib.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Auto-load .env file (for local development – the file sits at the solution root)
+var envPath = Path.Combine(builder.Environment.ContentRootPath, "..", "..", ".env");
+if (File.Exists(envPath))
+    DotNetEnv.Env.Load(envPath);
+
+builder.Configuration.AddEnvironmentVariables();
+
 // --------------------
 // SERVISI
 // --------------------
