@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Moq;
 using SmartLib.Web.Controllers;
@@ -48,7 +48,7 @@ namespace SmartLib.Tests.Unit.WebTests
         [Fact]
         public async Task Create_Post_ValidanModel_RedirectsToIndex()
         {
-            var dto = new KorisnikCreateDto { Email = "novi@test.com", Ime = "Test", Prezime = "User", Lozinka = "12345678" };
+            var dto = new KorisnikCreateDto { Email = "novi@test.com", Ime = "Test", Prezime = "User", Lozinka = "12345678", PotvrdaLozinke = "12345678" };
             _repoMock.Setup(r => r.GetByEmailAsync(dto.Email)).ReturnsAsync((Korisnik?)null);
 
             var result = await _controller.Create(dto);
@@ -175,6 +175,63 @@ namespace SmartLib.Tests.Unit.WebTests
             var view = Assert.IsType<ViewResult>(result);
             var model = Assert.IsAssignableFrom<IEnumerable<KorisnikDto>>(view.Model);
             Assert.Empty(model);
+        }
+
+        [Fact]
+        public async Task Create_Post_LozinkeSeNePodudaraju_VracaViewSaGreskom()
+        {
+            var dto = new KorisnikCreateDto
+            {
+                Ime = "Test",
+                Prezime = "User",
+                Email = "test@test.com",
+                Lozinka = "password123",
+                PotvrdaLozinke = "drugiPassword"
+            };
+
+            var result = await _controller.Create(dto);
+
+            var viewResult = Assert.IsType<ViewResult>(result);
+            Assert.False(_controller.ModelState.IsValid);
+            Assert.True(_controller.ModelState.ContainsKey("PotvrdaLozinke"));
+            var errors = _controller.ModelState["PotvrdaLozinke"]!.Errors;
+            Assert.Single(errors);
+            Assert.Equal("Lozinka i potvrda lozinke se ne poklapaju.", errors[0].ErrorMessage);
+            Assert.Equal(dto, viewResult.Model);
+        }
+
+        [Fact]
+        public async Task Index_ClanSaSvimPoljima_MapiraSvaPoljaUDto()
+        {
+            var datum = new DateTime(2025, 1, 15, 10, 30, 0);
+            var korisnici = new List<Korisnik>
+            {
+                new()
+                {
+                    Id = 42,
+                    Ime = "Ajna",
+                    Prezime = "Bajric",
+                    Email = "ajna@test.com",
+                    Status = "aktivan",
+                    DatumKreiranja = datum,
+                    Uloga = new Uloga { Naziv = "Član" }
+                }
+            };
+            _repoMock.Setup(r => r.GetAllAsync()).ReturnsAsync(korisnici);
+
+            var result = await _controller.Index();
+
+            var view = Assert.IsType<ViewResult>(result);
+            var model = Assert.IsAssignableFrom<IEnumerable<KorisnikDto>>(view.Model).ToList();
+            Assert.Single(model);
+            var dto = model[0];
+            Assert.Equal(42, dto.Id);
+            Assert.Equal("Ajna", dto.Ime);
+            Assert.Equal("Bajric", dto.Prezime);
+            Assert.Equal("ajna@test.com", dto.Email);
+            Assert.Equal("Član", dto.Uloga);
+            Assert.Equal("aktivan", dto.Status);
+            Assert.Equal(datum, dto.DatumKreiranja);
         }
     }
 }

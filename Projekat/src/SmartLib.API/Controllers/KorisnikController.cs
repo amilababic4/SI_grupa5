@@ -44,6 +44,12 @@ namespace SmartLib.API.Controllers
             if (!ModelState.IsValid)
                 return ValidationProblem(ModelState);
 
+            if (model.Lozinka != model.PotvrdaLozinke)
+            {
+                ModelState.AddModelError(nameof(model.PotvrdaLozinke), "Lozinka i potvrda lozinke se ne poklapaju.");
+                return ValidationProblem(ModelState);
+            }
+
             // ✅ XSS zaštita
             if (SadrziHtml(model.Ime) || SadrziHtml(model.Prezime))
                 return BadRequest(new { message = "Ime/prezime ne smije sadržavati HTML tagove." });

@@ -51,7 +51,8 @@ namespace SmartLib.Tests.Unit.APITests
                 Ime = "Ime",
                 Prezime = "Prezime",
                 Email = "imeprezime@smartlib.ba",
-                Lozinka = "Lozinka1!"
+                Lozinka = "Lozinka1!",
+                PotvrdaLozinke = "Lozinka1!"
             };
 
             _repoMock.Setup(r => r.GetByEmailAsync(dto.Email)).ReturnsAsync((Korisnik?)null);
@@ -81,7 +82,8 @@ namespace SmartLib.Tests.Unit.APITests
                 Ime = "Test",
                 Prezime = "Clan",
                 Email = "noviClan@smartlib.ba",
-                Lozinka = "Lozinka1!"
+                Lozinka = "Lozinka1!",
+                PotvrdaLozinke = "Lozinka1!"
             });
 
             Assert.NotNull(sacuvani);
@@ -102,7 +104,8 @@ namespace SmartLib.Tests.Unit.APITests
                 Ime = "Novi",
                 Prezime = "Korisnik",
                 Email = "postojeci@smartlib.ba",
-                Lozinka = "Lozinka1!"
+                Lozinka = "Lozinka1!",
+                PotvrdaLozinke = "Lozinka1!"
             });
 
             var obj = result.Result as ObjectResult;
@@ -128,7 +131,8 @@ namespace SmartLib.Tests.Unit.APITests
                 Ime = "Test",
                 Prezime = "Hash",
                 Email = "hash@smartlib.ba",
-                Lozinka = plainLozinka
+                Lozinka = plainLozinka,
+                PotvrdaLozinke = plainLozinka
             });
 
             Assert.NotNull(sacuvani);
@@ -199,7 +203,8 @@ namespace SmartLib.Tests.Unit.APITests
                 Ime = "",                  // testiranje registracije bez imena
                 Prezime = "Prezime",
                 Email = "prezime@smartlib.ba",
-                Lozinka = "Lozinka1!"
+                Lozinka = "Lozinka1!",
+                PotvrdaLozinke = "Lozinka1!"
             };
 
             var greske = ValidirajDto(dto);
@@ -215,7 +220,8 @@ namespace SmartLib.Tests.Unit.APITests
                 Ime = "Ime",
                 Prezime = "",                  // testiranje registracije bez prezimena
                 Email = "ime@smartlib.ba",
-                Lozinka = "Lozinka1!"
+                Lozinka = "Lozinka1!",
+                PotvrdaLozinke = "Lozinka1!"
             };
 
             var greske = ValidirajDto(dto);
@@ -231,7 +237,8 @@ namespace SmartLib.Tests.Unit.APITests
                 Ime = "Ime",
                 Prezime = "Prezime",
                 Email = "",                   // testiranje registracije bez emaila
-                Lozinka = "Lozinka1!"
+                Lozinka = "Lozinka1!",
+                PotvrdaLozinke = "Lozinka1!"
             };
 
             var greske = ValidirajDto(dto);
@@ -247,7 +254,8 @@ namespace SmartLib.Tests.Unit.APITests
                 Ime = "Ime",
                 Prezime = "Prezime",
                 Email = "imeprezime@smartlib.ba",
-                Lozinka = ""                    // testiranje registracije bez lozinke
+                Lozinka = "",                    // testiranje registracije bez lozinke
+                PotvrdaLozinke = ""
             };
 
             var greske = ValidirajDto(dto);
@@ -266,7 +274,8 @@ namespace SmartLib.Tests.Unit.APITests
                 Ime = "Ime",
                 Prezime = "Prezime",
                 Email = "ime@smartlib.ba",
-                Lozinka = "Abc1!xy"
+                Lozinka = "Abc1!xy",
+                PotvrdaLozinke = "Abc1!xy"
             };
 
             var greske = ValidirajDto(dto);
@@ -283,7 +292,8 @@ namespace SmartLib.Tests.Unit.APITests
                 Ime = "Ime",
                 Prezime = "Prezime",
                 Email = "ime@smartlib.ba",
-                Lozinka = "A"                   // 1 znak
+                Lozinka = "A",                   // 1 znak
+                PotvrdaLozinke = "A"
             };
 
             var greske = ValidirajDto(dto);
@@ -300,7 +310,8 @@ namespace SmartLib.Tests.Unit.APITests
                 Ime = "Ime",
                 Prezime = "Prezime",
                 Email = "ime@smartlib.ba",
-                Lozinka = "Abcde1!x"            // tačno 8 znakova
+                Lozinka = "Abcde1!x",            // tačno 8 znakova
+                PotvrdaLozinke = "Abcde1!x"
             };
 
             var greske = ValidirajDto(dto);
@@ -319,7 +330,8 @@ namespace SmartLib.Tests.Unit.APITests
                 Ime = "Ime",
                 Prezime = "Prezime",
                 Email = "imesmartlib.ba",
-                Lozinka = "Lozinka1!"
+                Lozinka = "Lozinka1!",
+                PotvrdaLozinke = "Lozinka1!"
             };
 
             var greske = ValidirajDto(dto);
@@ -335,7 +347,8 @@ namespace SmartLib.Tests.Unit.APITests
                 Ime = "Ime",
                 Prezime = "Prezime",
                 Email = "ime@",              // @ postoji ali nema domene
-                Lozinka = "Lozinka1!"
+                Lozinka = "Lozinka1!",
+                PotvrdaLozinke = "Lozinka1!"
             };
 
             var greske = ValidirajDto(dto);
@@ -351,7 +364,8 @@ namespace SmartLib.Tests.Unit.APITests
                 Ime = "<b>Opasno Ime</b>",
                 Prezime = "Prezime",
                 Email = "xss@smartlib.ba",
-                Lozinka = "Lozinka1!"
+                Lozinka = "Lozinka1!",
+                PotvrdaLozinke = "Lozinka1!"
             };
 
             var result = await _controller.Create(dto);
@@ -368,7 +382,8 @@ namespace SmartLib.Tests.Unit.APITests
                 Ime = "Ime",
                 Prezime = "<script>alert(1)</script>",
                 Email = "xss2@smartlib.ba",
-                Lozinka = "Lozinka1!"
+                Lozinka = "Lozinka1!",
+                PotvrdaLozinke = "Lozinka1!"
             };
 
             var result = await _controller.Create(dto);
@@ -418,6 +433,78 @@ namespace SmartLib.Tests.Unit.APITests
 
             var ok = Assert.IsType<OkObjectResult>(result);
             Assert.Contains("TODO", ok.Value.ToString());
+        }
+
+        // Validacija da se lozinke moraju poklapati
+
+        [Fact]
+        public void Validacija_PotvrdaLozinkeNePoklapa_VracaGresku()
+        {
+            var dto = new KorisnikCreateDto
+            {
+                Ime = "Ime",
+                Prezime = "Prezime",
+                Email = "ime@smartlib.ba",
+                Lozinka = "Lozinka1!",
+                PotvrdaLozinke = "DrugaLozinka!"
+            };
+
+            var greske = ValidirajDto(dto);
+
+            Assert.Contains(greske, g => g.MemberNames.Contains(nameof(dto.PotvrdaLozinke)));
+        }
+
+        [Fact]
+        public void Validacija_PotvrdaLozinkePrazna_VracaGresku()
+        {
+            var dto = new KorisnikCreateDto
+            {
+                Ime = "Ime",
+                Prezime = "Prezime",
+                Email = "ime@smartlib.ba",
+                Lozinka = "Lozinka1!",
+                PotvrdaLozinke = ""
+            };
+
+            var greske = ValidirajDto(dto);
+
+            Assert.Contains(greske, g => g.MemberNames.Contains(nameof(dto.PotvrdaLozinke)));
+        }
+
+        [Fact]
+        public void Validacija_PotvrdaLozinkePoklapa_BezGreske()
+        {
+            var dto = new KorisnikCreateDto
+            {
+                Ime = "Ime",
+                Prezime = "Prezime",
+                Email = "ime@smartlib.ba",
+                Lozinka = "Lozinka1!",
+                PotvrdaLozinke = "Lozinka1!"
+            };
+
+            var greske = ValidirajDto(dto);
+
+            Assert.DoesNotContain(greske, g => g.MemberNames.Contains(nameof(dto.PotvrdaLozinke)));
+        }
+
+        [Fact]
+        public async Task Create_LozinkeSeNePoklapaju_VracaValidationProblem()
+        {
+            var dto = new KorisnikCreateDto
+            {
+                Ime = "Ime",
+                Prezime = "Prezime",
+                Email = "test@smartlib.ba",
+                Lozinka = "Lozinka1!",
+                PotvrdaLozinke = "DrugaLozinka!"
+            };
+
+            var result = await _controller.Create(dto);
+
+            var objectResult = result.Result as ObjectResult;
+            Assert.NotNull(objectResult);
+            Assert.True(_controller.ModelState.ContainsKey("PotvrdaLozinke"));
         }
     }
 }

@@ -61,6 +61,12 @@ namespace SmartLib.Web.Controllers
                 return View(model);
             }
 
+            if (model.Lozinka != model.PotvrdaLozinke)
+            {
+                ModelState.AddModelError(nameof(model.PotvrdaLozinke), "Lozinka i potvrda lozinke se ne poklapaju.");
+                return View(model);
+            }
+
             var existingUser = await _korisnikRepository.GetByEmailAsync(model.Email);
             if (existingUser is not null)
             {

@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -106,7 +106,8 @@ namespace SmartLib.Tests.Integration
                 ime,
                 prezime,
                 email,
-                lozinka = "Test123!"
+                lozinka = "Test123!",
+                potvrdaLozinke = "Test123!"
             });
             resp.EnsureSuccessStatusCode();
             var doc = JsonDocument.Parse(await resp.Content.ReadAsStringAsync());
@@ -238,7 +239,8 @@ namespace SmartLib.Tests.Integration
                 ime = "Test",
                 prezime = "Test",
                 email = "novi@test.com",
-                lozinka = "Test123!"
+                lozinka = "Test123!",
+                potvrdaLozinke = "Test123!"
             });
             Assert.Equal(HttpStatusCode.Unauthorized, resp.StatusCode);
         }
@@ -253,7 +255,8 @@ namespace SmartLib.Tests.Integration
                 ime = "Test",
                 prezime = "Test",
                 email = "noviclan@test.com",
-                lozinka = "Test123!"
+                lozinka = "Test123!",
+                potvrdaLozinke = "Test123!"
             });
             Assert.Equal(HttpStatusCode.Forbidden, resp.StatusCode);
         }
@@ -268,7 +271,8 @@ namespace SmartLib.Tests.Integration
                 ime = "Novi",
                 prezime = "Clan",
                 email = "noviclan1@smartlib.ba",
-                lozinka = "Test123!"
+                lozinka = "Test123!",
+                potvrdaLozinke = "Test123!"
             });
 
             Assert.Equal(HttpStatusCode.Created, resp.StatusCode);
@@ -285,7 +289,8 @@ namespace SmartLib.Tests.Integration
                 ime = "Novi",
                 prezime = "Clan",
                 email = "noviclan2@smartlib.ba",
-                lozinka = "Test123!"
+                lozinka = "Test123!",
+                potvrdaLozinke = "Test123!"
             });
             Assert.Equal(HttpStatusCode.Created, createResp.StatusCode);
 
@@ -307,7 +312,8 @@ namespace SmartLib.Tests.Integration
                 ime = "Novi",
                 prezime = "Clan",
                 email = "noviclan3@smartlib.ba",
-                lozinka = "Test123!"
+                lozinka = "Test123!",
+                potvrdaLozinke = "Test123!"
             });
             Assert.Equal(HttpStatusCode.Created, createResp.StatusCode);
 
@@ -331,7 +337,8 @@ namespace SmartLib.Tests.Integration
                 ime = "Novi",
                 prezime = "Clan",
                 email = "noviclan4@smartlib.ba",
-                lozinka = "Test123!"
+                lozinka = "Test123!",
+                potvrdaLozinke = "Test123!"
             });
 
             var resp = await client.GetAsync("/api/korisnik");
@@ -352,7 +359,8 @@ namespace SmartLib.Tests.Integration
                 ime = "Novi",
                 prezime = "Clan",
                 email = "NoviClan5@SmartLib.BA",
-                lozinka = "Test123!"
+                lozinka = "Test123!",
+                potvrdaLozinke = "Test123!"
             });
             Assert.Equal(HttpStatusCode.Created, createResp.StatusCode);
 
@@ -376,7 +384,8 @@ namespace SmartLib.Tests.Integration
                 ime = "Test",
                 prezime = "Test",
                 email = "clan@smartlib.ba",
-                lozinka = "Test123!"
+                lozinka = "Test123!",
+                potvrdaLozinke = "Test123!"
             });
             Assert.Equal(HttpStatusCode.BadRequest, resp.StatusCode);
         }
@@ -391,7 +400,8 @@ namespace SmartLib.Tests.Integration
                 ime = "Test",
                 prezime = "Test",
                 email = "CLAN@SMARTLIB.BA",
-                lozinka = "Test123!"
+                lozinka = "Test123!",
+                potvrdaLozinke = "Test123!"
             });
             Assert.Equal(HttpStatusCode.BadRequest, resp.StatusCode);
         }
@@ -406,7 +416,8 @@ namespace SmartLib.Tests.Integration
                 ime = "",
                 prezime = "Test",
                 email = "validan@test.com",
-                lozinka = "Test123!"
+                lozinka = "Test123!",
+                potvrdaLozinke = "Test123!"
             });
             Assert.Equal(HttpStatusCode.BadRequest, resp.StatusCode);
         }
@@ -421,7 +432,8 @@ namespace SmartLib.Tests.Integration
                 ime = "Test",
                 prezime = "",
                 email = "validan2@test.com",
-                lozinka = "Test123!"
+                lozinka = "Test123!",
+                potvrdaLozinke = "Test123!"
             });
             Assert.Equal(HttpStatusCode.BadRequest, resp.StatusCode);
         }
@@ -436,7 +448,8 @@ namespace SmartLib.Tests.Integration
                 ime = "Test",
                 prezime = "Test",
                 email = "nijevalidan-email",
-                lozinka = "Test123!"
+                lozinka = "Test123!",
+                potvrdaLozinke = "Test123!"
             });
             Assert.Equal(HttpStatusCode.BadRequest, resp.StatusCode);
         }
@@ -451,7 +464,8 @@ namespace SmartLib.Tests.Integration
                 ime = "Test",
                 prezime = "Test",
                 email = "kratkalozinka@test.com",
-                lozinka = "Abc1!"
+                lozinka = "Abc1!",
+                potvrdaLozinke = "Abc1!"
             });
             Assert.Equal(HttpStatusCode.BadRequest, resp.StatusCode);
         }

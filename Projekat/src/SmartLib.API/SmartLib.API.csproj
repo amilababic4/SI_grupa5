@@ -12,12 +12,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- TODO: Dodati NuGet pakete -->
-    <!-- <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.*" /> -->
-    <!-- <PackageReference Include="Swashbuckle.AspNetCore" Version="6.*" /> -->
-  </ItemGroup>
-
-  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="10.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.0" />
   </ItemGroup>
 
