@@ -8,6 +8,24 @@ using SmartLib.Core.Interfaces;
 using SmartLib.Infrastructure.Data;
 using SmartLib.Infrastructure.Repositories;
 
+// Load .env file if it exists (for local development)
+var envPath = Path.Combine(Directory.GetCurrentDirectory(), ".env");
+if (!File.Exists(envPath))
+    envPath = Path.Combine(Directory.GetCurrentDirectory(), "..", "..", ".env");
+if (File.Exists(envPath))
+{
+    foreach (var line in File.ReadAllLines(envPath))
+    {
+        if (string.IsNullOrWhiteSpace(line) || line.StartsWith('#'))
+            continue;
+        var idx = line.IndexOf('=');
+        if (idx <= 0) continue;
+        var key = line[..idx].Trim();
+        var value = line[(idx + 1)..].Trim();
+        Environment.SetEnvironmentVariable(key, value);
+    }
+}
+
 var builder = WebApplication.CreateBuilder(args);
 
 // --------------------
