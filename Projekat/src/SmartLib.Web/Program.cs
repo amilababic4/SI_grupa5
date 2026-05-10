@@ -42,6 +42,7 @@ builder.Services.AddScoped<IKorisnikRepository, KorisnikRepository>();
 builder.Services.AddScoped<IKnjigaRepository, KnjigaRepository>();
 builder.Services.AddScoped<IPrimjerakRepository, PrimjerakRepository>();
 builder.Services.AddScoped<IKategorijaRepository, KategorijaRepository>();
+builder.Services.AddScoped<IZaduzenjeRepository, ZaduzenjeRepository>();
 
 // Authentication (COOKIE - za Web)
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)

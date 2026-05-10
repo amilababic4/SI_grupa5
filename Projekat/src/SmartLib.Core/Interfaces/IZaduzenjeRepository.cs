@@ -7,6 +7,7 @@ namespace SmartLib.Core.Interfaces
         Task<IEnumerable<Zaduzenje>> GetActiveAsync();
         Task<IEnumerable<Zaduzenje>> GetByKorisnikAsync(int korisnikId);
         Task<IEnumerable<Zaduzenje>> GetHistoryByKorisnikAsync(int korisnikId);
+        Task<Zaduzenje?> GetByIdAsync(int id);
         Task<Zaduzenje> CreateAsync(Zaduzenje zaduzenje);
         Task UpdateAsync(Zaduzenje zaduzenje);
     }

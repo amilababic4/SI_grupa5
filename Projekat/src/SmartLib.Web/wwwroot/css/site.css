@@ -1752,3 +1752,350 @@ body.home-page footer {
         font-size: 0.86rem;
     }
 }
+/* ================================
+   Zaduženje — Status badges & row highlights
+   ================================ */
+
+.status-kasni,
+.status-blizi {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    margin-left: 0.45rem;
+}
+
+.status-kasni {
+    background: rgba(180, 35, 24, 0.1);
+    color: var(--sl-danger);
+    border: 1px solid rgba(180, 35, 24, 0.18);
+}
+
+.status-blizi {
+    background: rgba(180, 120, 10, 0.1);
+    color: #92580a;
+    border: 1px solid rgba(180, 120, 10, 0.18);
+}
+
+.tr-kasni {
+    background: rgba(180, 35, 24, 0.04) !important;
+}
+
+.tr-blizi {
+    background: rgba(180, 120, 10, 0.04) !important;
+}
+
+/* ================================
+   Home — Features section
+   ================================ */
+
+.home-features {
+    background: var(--sl-dark);
+    color: #ffffff;
+    padding: clamp(3.5rem, 7vw, 6rem) max(1.25rem, calc((100vw - 1200px) / 2 + 2rem));
+}
+
+.home-features-inner {
+    max-width: 1060px;
+}
+
+.home-features-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.7rem;
+    color: #8fe3dc;
+    font-size: 0.88rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.75rem;
+}
+
+.home-features-title {
+    font-size: clamp(1.9rem, 4vw, 2.8rem);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    color: #ffffff;
+    margin: 0 0 1rem;
+}
+
+.home-features-lead {
+    color: rgba(255, 255, 255, 0.65);
+    font-size: clamp(1rem, 1.8vw, 1.18rem);
+    max-width: 680px;
+    margin-bottom: 2.5rem;
+    line-height: 1.65;
+}
+
+.home-features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.25rem;
+}
+
+.home-feature-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--sl-radius-lg);
+    padding: 1.5rem 1.35rem;
+    transition: background 0.22s ease, transform 0.22s ease;
+}
+
+    .home-feature-card:hover {
+        background: rgba(255, 255, 255, 0.09);
+        transform: translateY(-3px);
+    }
+
+.home-feature-num {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    color: #8fe3dc;
+    margin-bottom: 0.85rem;
+    font-family: "Plus Jakarta Sans", Arial, sans-serif;
+}
+
+.home-feature-card h3 {
+    font-size: 1.05rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: #ffffff;
+    margin: 0 0 0.5rem;
+}
+
+.home-feature-card p {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.92rem;
+    line-height: 1.6;
+    margin: 0;
+}
+
+@media (max-width: 768px) {
+    .home-features-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .home-features-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ================================
+   Zaduženje — Create form
+   ================================ */
+
+.zad-page-wrap {
+    max-width: 680px;
+    margin: 0 auto;
+}
+
+.zad-form-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.zad-form-header-text h2 {
+    margin: 0 0 0.18rem;
+}
+
+.zad-form-header-text p {
+    color: var(--sl-muted);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.zad-form-card {
+    padding: 1.75rem 2rem;
+}
+
+.zad-field-group {
+    padding: 1.15rem 0;
+}
+
+.zad-field-group > label {
+    display: block;
+    margin-bottom: 0.45rem;
+    font-size: 0.86rem;
+    font-weight: 700;
+    color: #344054;
+}
+
+.zad-divider {
+    height: 1px;
+    background: var(--sl-border);
+}
+
+/* ── Combobox ─────────────────────────────── */
+
+.zad-combo {
+    position: relative;
+}
+
+.zad-combo-field {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--sl-border);
+    border-radius: var(--sl-radius-md);
+    background: rgba(255, 255, 255, 0.84);
+    transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+    cursor: text;
+}
+
+.zad-combo.is-open .zad-combo-field,
+.zad-combo-field:focus-within {
+    border-color: rgba(59, 130, 246, 0.55);
+    background: #ffffff;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.13);
+}
+
+.zad-combo-input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    background: transparent;
+    outline: none;
+    padding: 0.72rem 0.88rem;
+    font-size: 0.95rem;
+    font-family: "Manrope", Arial, sans-serif;
+    color: var(--sl-text);
+}
+
+    .zad-combo-input::placeholder {
+        color: #9ca3af;
+    }
+
+.zad-combo-arrow {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    padding: 0 0.8rem;
+    color: var(--sl-muted);
+    pointer-events: none;
+    transition: transform 0.18s ease;
+}
+
+.zad-combo.is-open .zad-combo-arrow {
+    transform: rotate(180deg);
+}
+
+.zad-combo-list {
+    position: absolute;
+    top: calc(100% + 5px);
+    left: 0;
+    right: 0;
+    z-index: 300;
+    list-style: none;
+    margin: 0;
+    padding: 0.3rem 0;
+    background: #ffffff;
+    border: 1px solid var(--sl-border);
+    border-radius: var(--sl-radius-md);
+    box-shadow: 0 8px 32px rgba(30, 58, 95, 0.13);
+    max-height: 230px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+}
+
+.zad-combo-item {
+    padding: 0.58rem 1rem;
+    font-size: 0.92rem;
+    color: var(--sl-text);
+    cursor: pointer;
+    transition: background 0.1s ease;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+    .zad-combo-item:hover,
+    .zad-combo-item.is-active {
+        background: var(--sl-blue-light);
+    }
+
+    .zad-combo-item.is-selected {
+        font-weight: 700;
+        color: var(--sl-blue);
+    }
+
+.zad-combo-empty {
+    padding: 0.65rem 1rem;
+    font-size: 0.88rem;
+    color: var(--sl-muted);
+    font-style: italic;
+}
+
+/* ── Optional label tag ───────────────────── */
+
+.zad-optional {
+    font-size: 0.79rem;
+    font-weight: 400;
+    color: var(--sl-muted);
+    margin-left: 0.35rem;
+    font-style: normal;
+}
+
+/* ── Date input ───────────────────────────── */
+
+.zad-date-input {
+    display: block;
+    width: 100%;
+    min-height: 46px;
+    padding: 0.72rem 0.88rem;
+    border: 1px solid var(--sl-border);
+    border-radius: var(--sl-radius-md);
+    background: rgba(255, 255, 255, 0.84);
+    color: var(--sl-text);
+    font-size: 0.95rem;
+    font-family: "Manrope", Arial, sans-serif;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+    .zad-date-input:focus {
+        border-color: rgba(59, 130, 246, 0.55);
+        background: #ffffff;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.13);
+    }
+
+    .zad-date-input::-webkit-calendar-picker-indicator {
+        opacity: 0.45;
+        cursor: pointer;
+        transition: opacity 0.15s;
+    }
+
+    .zad-date-input:hover::-webkit-calendar-picker-indicator,
+    .zad-date-input:focus::-webkit-calendar-picker-indicator {
+        opacity: 0.85;
+    }
+
+.zad-date-hint {
+    margin-top: 0.42rem;
+    font-size: 0.82rem;
+    color: var(--sl-muted);
+    line-height: 1.5;
+}
+
+/* ── Validation summary ───────────────────── */
+
+.zad-validation-summary:not(:empty) {
+    margin-bottom: 1rem;
+    padding: 0.75rem 1rem;
+    background: rgba(180, 35, 24, 0.06);
+    border: 1px solid rgba(180, 35, 24, 0.18);
+    border-radius: var(--sl-radius-sm);
+}
+
+@media (max-width: 600px) {
+    .zad-form-card {
+        padding: 1.25rem;
+    }
+}

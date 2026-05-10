@@ -1,0 +1,45 @@
+@model ZaduzenjeViewModel
+@{
+    ViewData["Title"] = "Potvrda vraćanja";
+}
+
+<div class="details-topbar">
+    <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-secondary">← Nazad na detalje</a>
+</div>
+
+<div class="card book-form-card">
+    <div class="details-header">
+        <h2>Evidentiraj vraćanje</h2>
+    </div>
+
+    <p style="margin-bottom:1.25rem; color:var(--sl-text); font-size:1rem;">
+        Da li ste sigurni da želite evidentirati vraćanje sljedeće knjige?
+    </p>
+
+    <div class="details-grid" style="margin-bottom:1.5rem;">
+        <div class="details-item">
+            <span class="details-label">Knjiga</span>
+            <span><strong>@Model.KnjigaNaslov</strong></span>
+        </div>
+        <div class="details-item">
+            <span class="details-label">Inventarni broj</span>
+            <span class="katalog-isbn">@Model.InventarniBroj</span>
+        </div>
+        <div class="details-item">
+            <span class="details-label">Član</span>
+            <span>@Model.KorisnikIme</span>
+        </div>
+        <div class="details-item">
+            <span class="details-label">Rok vraćanja</span>
+            <span>@Model.DatumPlaniranogVracanja.ToLocalTime().ToString("dd.MM.yyyy")</span>
+        </div>
+    </div>
+
+    <form asp-action="Vrati" asp-route-id="@Model.Id" method="post">
+        @Html.AntiForgeryToken()
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Da, evidentiraj vraćanje</button>
+            <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-secondary">Odustani</a>
+        </div>
+    </form>
+</div>

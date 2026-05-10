@@ -1,0 +1,60 @@
+@model IEnumerable<ZaduzenjeViewModel>
+@{
+    ViewData["Title"] = "Moja zaduženja";
+}
+
+<div class="katalog-header">
+    <h2>Moja zaduženja</h2>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="card katalog-empty">
+        <p>Nema aktivnih zaduženja.</p>
+    </div>
+}
+else
+{
+    <div class="card katalog-card">
+        <div class="katalog-table-wrap">
+            <table class="katalog-table">
+                <thead>
+                    <tr>
+                        <th>Knjiga</th>
+                        <th>Inv. br.</th>
+                        <th>Zaduženo</th>
+                        <th>Rok vraćanja</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var z in Model)
+                    {
+                        <tr class="@(z.JeZakasnilo ? "tr-kasni" : z.RokSeBliži ? "tr-blizi" : "")">
+                            <td data-label="Knjiga"><strong>@z.KnjigaNaslov</strong></td>
+                            <td data-label="Inv. br." class="katalog-isbn">@z.InventarniBroj</td>
+                            <td data-label="Zaduženo">@z.DatumZaduzivanja.ToLocalTime().ToString("dd.MM.yyyy")</td>
+                            <td data-label="Rok vraćanja">
+                                @z.DatumPlaniranogVracanja.ToLocalTime().ToString("dd.MM.yyyy")
+                            </td>
+                            <td data-label="Status">
+                                @if (z.JeZakasnilo)
+                                {
+                                    <span class="status-kasni">Zakašnjelo</span>
+                                }
+                                else if (z.RokSeBliži)
+                                {
+                                    <span class="status-blizi">Rok uskoro</span>
+                                }
+                                else
+                                {
+                                    <span class="status-dostupan">Aktivno</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

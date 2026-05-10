@@ -1,28 +1,86 @@
+@model AktivnaZaduzenjaViewModel
 @{
-    ViewData["Title"] = "Zaduženja";
+    ViewData["Title"] = "Aktivna zaduženja";
 }
 
-<h2>Zaduženja</h2>
-
-@* TODO: Forma za zaduživanje (samo bibliotekar) *@
-
-<div class="card" style="margin-top: 1rem;">
-    <h3>Aktivna zaduženja</h3>
-    <table>
-        <thead>
-            <tr><th>Knjiga</th><th>Inv. br.</th><th>Član</th><th>Zaduženo</th><th>Rok</th><th>Status</th><th>Akcije</th></tr>
-        </thead>
-        <tbody>
-            @* TODO: foreach (var z in Model) { ... } *@
-            <tr>
-                <td>Placeholder</td><td>INV-001</td><td>Ime Prezime</td>
-                <td>01.01.2026</td><td>15.01.2026</td><td>Aktivno</td>
-                <td>
-                    <form asp-controller="Zaduzenje" asp-action="Vrati" asp-route-id="1" method="post" style="display:inline;">
-                        <button type="submit" class="btn btn-primary">Vrati</button>
-                    </form>
-                </td>
-            </tr>
-        </tbody>
-    </table>
+<div class="katalog-header">
+    <h2>Aktivna zaduženja</h2>
+    <a asp-action="Create" class="btn btn-primary">+ Novo zaduživanje</a>
 </div>
+
+@if (TempData["SuccessMessage"] is string successMsg)
+{
+    <div class="alert alert-success">@successMsg</div>
+}
+@if (TempData["ErrorMessage"] is string errorMsg)
+{
+    <div class="alert alert-error">@errorMsg</div>
+}
+
+<div class="card katalog-search">
+    <form asp-action="Index" method="get">
+        <div class="search-row">
+            <div class="form-group" style="flex:1; margin-bottom:0;">
+                <input type="text" name="clan" value="@Model.Clan"
+                       placeholder="Pretraga po imenu ili emailu člana..." />
+            </div>
+            <div style="display:flex; gap:0.5rem; align-items:flex-end;">
+                <button type="submit" class="btn btn-primary">Traži</button>
+                <a asp-action="Index" class="btn btn-secondary">Reset</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+@if (!Model.Zaduzenja.Any())
+{
+    <div class="card katalog-empty">
+        <p>Nema aktivnih zaduženja@(string.IsNullOrWhiteSpace(Model.Clan) ? "." : " za zadani filter.")</p>
+    </div>
+}
+else
+{
+    <div class="card katalog-card">
+        <div class="katalog-table-wrap">
+            <table class="katalog-table">
+                <thead>
+                    <tr>
+                        <th>Član</th>
+                        <th>Email</th>
+                        <th>Knjiga</th>
+                        <th>Inv. br.</th>
+                        <th>Zaduženo</th>
+                        <th>Rok vraćanja</th>
+                        <th>Akcije</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var z in Model.Zaduzenja)
+                    {
+                        <tr class="@(z.JeZakasnilo ? "tr-kasni" : z.RokSeBliži ? "tr-blizi" : "")">
+                            <td data-label="Član"><strong>@z.KorisnikIme</strong></td>
+                            <td data-label="Email" class="members-email">@z.KorisnikEmail</td>
+                            <td data-label="Knjiga">@z.KnjigaNaslov</td>
+                            <td data-label="Inv. br." class="katalog-isbn">@z.InventarniBroj</td>
+                            <td data-label="Zaduženo">@z.DatumZaduzivanja.ToLocalTime().ToString("dd.MM.yyyy")</td>
+                            <td data-label="Rok vraćanja">
+                                @z.DatumPlaniranogVracanja.ToLocalTime().ToString("dd.MM.yyyy")
+                                @if (z.JeZakasnilo)
+                                {
+                                    <span class="status-kasni">Zakašnjelo</span>
+                                }
+                                else if (z.RokSeBliži)
+                                {
+                                    <span class="status-blizi">Uskoro</span>
+                                }
+                            </td>
+                            <td data-label="Akcije" class="katalog-actions">
+                                <a asp-action="Details" asp-route-id="@z.Id" class="btn btn-secondary btn-sm">Detalji</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
