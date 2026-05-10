@@ -1,0 +1,90 @@
+@model ZaduzenjeViewModel
+@{
+    ViewData["Title"] = "Detalji zaduženja";
+}
+
+<div class="details-topbar">
+    <a asp-action="Index" class="btn btn-secondary">← Nazad na listu</a>
+</div>
+
+@if (TempData["SuccessMessage"] is string successMsg)
+{
+    <div class="alert alert-success">@successMsg</div>
+}
+@if (TempData["ErrorMessage"] is string errorMsg)
+{
+    <div class="alert alert-error">@errorMsg</div>
+}
+
+<div class="card">
+    <div class="details-header">
+        <div>
+            <h2>Zaduženje #@Model.Id</h2>
+            <p class="details-autor">@Model.KnjigaNaslov</p>
+        </div>
+        @if (Model.Status == "aktivno")
+        {
+            <div class="details-actions">
+                <a asp-action="VratiPotvrda" asp-route-id="@Model.Id" class="btn btn-primary">
+                    Evidentiraj vraćanje
+                </a>
+            </div>
+        }
+    </div>
+
+    <div class="details-grid">
+        <div class="details-item">
+            <span class="details-label">Član</span>
+            <span>@Model.KorisnikIme</span>
+        </div>
+        <div class="details-item">
+            <span class="details-label">Email člana</span>
+            <span>@Model.KorisnikEmail</span>
+        </div>
+        <div class="details-item">
+            <span class="details-label">Knjiga</span>
+            <span>@Model.KnjigaNaslov</span>
+        </div>
+        <div class="details-item">
+            <span class="details-label">Inventarni broj</span>
+            <span class="katalog-isbn">@Model.InventarniBroj</span>
+        </div>
+        <div class="details-item">
+            <span class="details-label">Datum zaduženja</span>
+            <span>@Model.DatumZaduzivanja.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</span>
+        </div>
+        <div class="details-item">
+            <span class="details-label">Rok vraćanja</span>
+            <span>
+                @Model.DatumPlaniranogVracanja.ToLocalTime().ToString("dd.MM.yyyy")
+                @if (Model.JeZakasnilo && Model.Status == "aktivno")
+                {
+                    <span class="status-kasni">Zakašnjelo</span>
+                }
+                else if (Model.RokSeBliži && Model.Status == "aktivno")
+                {
+                    <span class="status-blizi">Uskoro</span>
+                }
+            </span>
+        </div>
+        <div class="details-item">
+            <span class="details-label">Datum vraćanja</span>
+            <span>
+                @if (Model.DatumStvarnogVracanja.HasValue)
+                {
+                    @Model.DatumStvarnogVracanja.Value.ToLocalTime().ToString("dd.MM.yyyy HH:mm")
+                }
+                else
+                {
+                    <span style="color:var(--sl-muted);">-</span>
+                }
+            </span>
+        </div>
+        <div class="details-item">
+            <span class="details-label">Status</span>
+            <span class="@(Model.Status == "aktivno" ? "status-dostupan" : "status-nedostupan")">
+                @Model.Status
+            </span>
+        </div>
+    </div>
+</div>

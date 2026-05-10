@@ -55,10 +55,15 @@
 
                         @if (User.IsInRole("Bibliotekar") || User.IsInRole("Administrator"))
                         {
+                            <li><a asp-controller="Zaduzenje" asp-action="Index">Zaduženja</a></li>
                             <li><a asp-controller="Knjiga" asp-action="Create">Nova knjiga</a></li>
                             <li><a asp-controller="Korisnik" asp-action="Index">Članovi</a></li>
                             <li><a asp-controller="Korisnik" asp-action="Create">Kreiraj člana</a></li>
                             <li><a asp-controller="Kategorija" asp-action="Index">Kategorije</a></li>
+                        }
+                        else
+                        {
+                            <li><a asp-controller="Zaduzenje" asp-action="Moja">Moja zaduženja</a></li>
                         }
 
                         @if (!string.IsNullOrEmpty(User.Identity?.Name))

@@ -1,0 +1,319 @@
+@model ZaduzenjeCreateDto
+@{
+    ViewData["Title"] = "Novo zaduživanje";
+    var clanDataJson      = ViewBag.ClanDataJson      as string ?? "[]";
+    var knjigaDataJson    = ViewBag.KnjigaDataJson    as string ?? "[]";
+    var primjerakDataJson = ViewBag.PrimjerakDataJson as string ?? "[]";
+    var selKorisnikId     = (int)(ViewBag.SelectedKorisnikId  ?? 0);
+    var selKnjigaId       = (int)(ViewBag.SelectedKnjigaId    ?? 0);
+    var selPrimjerakId    = (int)(ViewBag.SelectedPrimjerakId ?? 0);
+    var today             = DateTime.UtcNow.ToString("yyyy-MM-dd");
+}
+
+<div class="zad-page-wrap">
+
+    <div class="zad-form-header">
+        <a asp-action="Index" class="btn btn-secondary btn-sm">← Nazad</a>
+        <div class="zad-form-header-text">
+            <h2>Novo zaduživanje</h2>
+            <p>Odaberite člana, knjigu i primjerak. Rok vraćanja je opcionalan.</p>
+        </div>
+    </div>
+
+    <div class="card zad-form-card">
+        <form asp-action="Zaduzi" method="post" novalidate>
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="validation-message zad-validation-summary"></div>
+
+            @* ── Član ── *@
+            <div class="zad-field-group">
+                <label for="combo-clan-input">Član</label>
+                <div class="zad-combo" id="combo-clan">
+                    <div class="zad-combo-field">
+                        <input type="text" id="combo-clan-input" class="zad-combo-input"
+                               placeholder="Upišite ime, prezime ili e-mail..." autocomplete="off" />
+                        <span class="zad-combo-arrow" aria-hidden="true">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                <path d="M3 6l5 5 5-5" stroke="currentColor" stroke-width="1.8"
+                                      stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </span>
+                    </div>
+                    <ul class="zad-combo-list" id="combo-clan-list" role="listbox" hidden></ul>
+                </div>
+                <input asp-for="KorisnikId" type="hidden" id="hid-korisnik" />
+                <span asp-validation-for="KorisnikId" class="validation-message"></span>
+            </div>
+
+            <div class="zad-divider"></div>
+
+            @* ── Knjiga ── *@
+            <div class="zad-field-group">
+                <label for="combo-knjiga-input">Knjiga</label>
+                <div class="zad-combo" id="combo-knjiga">
+                    <div class="zad-combo-field">
+                        <input type="text" id="combo-knjiga-input" class="zad-combo-input"
+                               placeholder="Upišite naslov ili autora..." autocomplete="off" />
+                        <span class="zad-combo-arrow" aria-hidden="true">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                <path d="M3 6l5 5 5-5" stroke="currentColor" stroke-width="1.8"
+                                      stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </span>
+                    </div>
+                    <ul class="zad-combo-list" id="combo-knjiga-list" role="listbox" hidden></ul>
+                </div>
+                <input asp-for="KnjigaId" type="hidden" id="hid-knjiga" />
+                <span asp-validation-for="KnjigaId" class="validation-message"></span>
+            </div>
+
+            <div class="zad-divider"></div>
+
+            @* ── Primjerak ── *@
+            <div class="zad-field-group">
+                <label for="combo-primjerak-input">Primjerak <span style="font-weight:400;color:var(--sl-muted);font-size:0.82rem;">(inventarni broj)</span></label>
+                <div class="zad-combo" id="combo-primjerak">
+                    <div class="zad-combo-field">
+                        <input type="text" id="combo-primjerak-input" class="zad-combo-input"
+                               placeholder="Prvo odaberite knjigu..." autocomplete="off" />
+                        <span class="zad-combo-arrow" aria-hidden="true">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                <path d="M3 6l5 5 5-5" stroke="currentColor" stroke-width="1.8"
+                                      stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </span>
+                    </div>
+                    <ul class="zad-combo-list" id="combo-primjerak-list" role="listbox" hidden></ul>
+                </div>
+                <input asp-for="PrimjerakId" type="hidden" id="hid-primjerak" />
+                <span asp-validation-for="PrimjerakId" class="validation-message"></span>
+            </div>
+
+            <div class="zad-divider"></div>
+
+            @* ── Rok vraćanja ── *@
+            <div class="zad-field-group">
+                <label asp-for="DatumPovratka">
+                    Rok vraćanja
+                    <span class="zad-optional">nije obavezno</span>
+                </label>
+                <input asp-for="DatumPovratka" type="date" class="zad-date-input" min="@today" />
+                <span asp-validation-for="DatumPovratka" class="validation-message"></span>
+                <p class="zad-date-hint">
+                    Ako ne odaberete datum, rok će biti automatski postavljen na 2 mjeseca od danas.
+                </p>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Potvrdi zaduživanje</button>
+                <a asp-action="Index" class="btn btn-secondary">Odustani</a>
+            </div>
+        </form>
+    </div>
+
+</div>
+
+@section Scripts {
+<script>
+(function () {
+    'use strict';
+
+    var clanData      = @Html.Raw(clanDataJson);
+    var knjigaData    = @Html.Raw(knjigaDataJson);
+    var primjerakData = @Html.Raw(primjerakDataJson);
+
+    var initKorisnik  = @selKorisnikId;
+    var initKnjiga    = @selKnjigaId;
+    var initPrimjerak = @selPrimjerakId;
+
+    /* ────────────────────────────────────────────────
+       Combo factory
+       data     – array of { id, text }
+       hiddenEl – the hidden <input> that holds the id
+       onChange – optional callback(id) on selection
+    ──────────────────────────────────────────────── */
+    function makeCombo(rootEl, data, hiddenEl, onChange) {
+        var input  = rootEl.querySelector('.zad-combo-input');
+        var list   = rootEl.querySelector('.zad-combo-list');
+        var selId  = String(hiddenEl.value || '0');
+        var selLabel = '';
+
+        function labelById(id) {
+            for (var i = 0; i < data.length; i++) {
+                if (String(data[i].id) === String(id)) return data[i].text;
+            }
+            return '';
+        }
+
+        // ── restore pre-selected value after validation error ──
+        if (selId !== '0') {
+            selLabel = labelById(selId);
+            input.value = selLabel;
+        }
+
+        function renderList(query) {
+            var q = query ? query.trim().toLowerCase() : '';
+            var items = q
+                ? data.filter(function (d) { return d.text.toLowerCase().indexOf(q) !== -1; })
+                : data;
+
+            list.innerHTML = '';
+
+            if (!items.length) {
+                var empty = document.createElement('li');
+                empty.className = 'zad-combo-empty';
+                empty.textContent = q ? 'Nema rezultata.' : 'Nema dostupnih stavki.';
+                list.appendChild(empty);
+                return;
+            }
+
+            items.forEach(function (item) {
+                var li = document.createElement('li');
+                li.className = 'zad-combo-item';
+                li.setAttribute('role', 'option');
+                li.setAttribute('data-id', String(item.id));
+                li.textContent = item.text;
+                if (String(item.id) === selId) li.classList.add('is-selected');
+
+                li.addEventListener('mousedown', function (e) {
+                    e.preventDefault(); // keep focus on input
+                    pick(String(item.id), item.text);
+                });
+                list.appendChild(li);
+            });
+        }
+
+        function openList() {
+            rootEl.classList.add('is-open');
+            list.removeAttribute('hidden');
+            // show all when reopening with current selection, filter otherwise
+            var q = (selId !== '0' && input.value === selLabel) ? '' : input.value;
+            renderList(q);
+            var sel = list.querySelector('.is-selected');
+            if (sel) sel.scrollIntoView({ block: 'nearest' });
+        }
+
+        function closeList() {
+            rootEl.classList.remove('is-open');
+            list.setAttribute('hidden', '');
+            // snap back to the confirmed label (or empty if nothing selected)
+            input.value = selId !== '0' ? selLabel : '';
+        }
+
+        function pick(id, text) {
+            selId    = id;
+            selLabel = text;
+            hiddenEl.value = id;
+            closeList();
+            if (onChange) onChange(id);
+        }
+
+        // ── event wiring ──
+        input.addEventListener('focus', openList);
+
+        input.addEventListener('input', function () {
+            // typing clears the confirmed selection
+            selId    = '0';
+            selLabel = '';
+            hiddenEl.value = '0';
+            rootEl.classList.add('is-open');
+            list.removeAttribute('hidden');
+            renderList(this.value);
+        });
+
+        input.addEventListener('blur', function () {
+            setTimeout(closeList, 160);
+        });
+
+        input.addEventListener('keydown', function (e) {
+            var items = Array.from(list.querySelectorAll('.zad-combo-item'));
+            var idx   = items.findIndex(function (li) { return li.classList.contains('is-active'); });
+
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                if (!rootEl.classList.contains('is-open')) openList();
+                var next = idx < items.length - 1 ? idx + 1 : 0;
+                items.forEach(function (li) { li.classList.remove('is-active'); });
+                if (items[next]) { items[next].classList.add('is-active'); items[next].scrollIntoView({ block: 'nearest' }); }
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                var prev = idx > 0 ? idx - 1 : items.length - 1;
+                items.forEach(function (li) { li.classList.remove('is-active'); });
+                if (items[prev]) { items[prev].classList.add('is-active'); items[prev].scrollIntoView({ block: 'nearest' }); }
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                var active = list.querySelector('.is-active');
+                if (active) active.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+            } else if (e.key === 'Escape') {
+                closeList();
+            }
+        });
+
+        return {
+            setData: function (newData) {
+                data     = newData;
+                selId    = '0';
+                selLabel = '';
+            }
+        };
+    }
+
+    /* ── hidden inputs ── */
+    var hidKorisnik  = document.getElementById('hid-korisnik');
+    var hidKnjiga    = document.getElementById('hid-knjiga');
+    var hidPrimjerak = document.getElementById('hid-primjerak');
+
+    hidKorisnik.value  = initKorisnik;
+    hidKnjiga.value    = initKnjiga;
+    hidPrimjerak.value = initPrimjerak;
+
+    /* ── Primjerak (depends on Knjiga) ── */
+    var primjerakInputEl = document.getElementById('combo-primjerak-input');
+
+    function primjerciFor(knjigaId) {
+        return primjerakData.filter(function (p) {
+            return String(p.knjigaId) === String(knjigaId);
+        });
+    }
+
+    var comboP = makeCombo(
+        document.getElementById('combo-primjerak'),
+        primjerciFor(initKnjiga),
+        hidPrimjerak,
+        null
+    );
+
+    function refreshPrimjerak(knjigaId) {
+        var avail = primjerciFor(knjigaId);
+        comboP.setData(avail);
+        hidPrimjerak.value = '0';
+        primjerakInputEl.value = '';
+        primjerakInputEl.placeholder = String(knjigaId) === '0'
+            ? 'Prvo odaberite knjigu...'
+            : avail.length ? 'Odaberite primjerak...' : 'Nema dostupnih primjeraka';
+    }
+
+    /* ── Knjiga ── */
+    makeCombo(
+        document.getElementById('combo-knjiga'),
+        knjigaData,
+        hidKnjiga,
+        function (id) { refreshPrimjerak(id); }
+    );
+
+    /* ── Član ── */
+    makeCombo(document.getElementById('combo-clan'), clanData, hidKorisnik, null);
+
+    /* ── init primjerak state ── */
+    refreshPrimjerak(initKnjiga);
+    if (initPrimjerak && String(initPrimjerak) !== '0') {
+        var pp = primjerakData.filter(function (p) { return String(p.id) === String(initPrimjerak); });
+        if (pp.length) {
+            hidPrimjerak.value = initPrimjerak;
+            primjerakInputEl.value = pp[0].text;
+        }
+    }
+
+})();
+</script>
+}
