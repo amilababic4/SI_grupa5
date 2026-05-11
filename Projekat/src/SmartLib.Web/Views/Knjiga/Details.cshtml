@@ -21,62 +21,137 @@
 
 <!-- Detalji knjige -->
 <div class="card">
-    <div class="details-header">
-        <div>
-            <h2>@Model.Naslov</h2>
-            <p class="details-autor">@Model.Autor</p>
+    <div class="details-book-layout">
+        <div class="details-cover-wrapper">
+            <img src="https://covers.openlibrary.org/b/isbn/@(Model.Isbn)-L.jpg?default=M" 
+                 alt="@Model.Naslov" 
+                 class="details-cover-img" />
         </div>
-        @if (jeOsoblje)
-        {
-            <div class="details-actions">
-                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Uredi</a>
-                <form asp-action="Delete" asp-route-id="@Model.Id" method="post"
-                      onsubmit="return confirm('Jeste li sigurni da želite obrisati knjigu: @Model.Naslov?');">
-                    @Html.AntiForgeryToken()
-                    <button type="submit" class="btn btn-danger">Obriši</button>
-                </form>
-            </div>
-        }
-    </div>
 
-    <div class="details-grid">
-        <div class="details-item">
-            <span class="details-label">ISBN</span>
-            <span>@Model.Isbn</span>
-        </div>
-        <div class="details-item">
-            <span class="details-label">Kategorija</span>
-            <span>
-                @if (Model.Kategorija != null)
+        <div class="details-info-content">
+            <div class="details-header">
+                <div>
+                    <h2>@Model.Naslov</h2>
+                    <p class="details-autor">@Model.Autor</p>
+                </div>
+                @if (jeOsoblje)
                 {
-                    <span class="katalog-badge">@Model.Kategorija</span>
+                    <div class="details-actions">
+                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Uredi</a>
+                        <form asp-action="Delete" asp-route-id="@Model.Id" method="post"
+                              onsubmit="return confirm('Jeste li sigurni da želite obrisati knjigu: @Model.Naslov?');">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-danger">Obriši</button>
+                        </form>
+                    </div>
                 }
-                else
-                {
-                    <span>—</span>
-                }
-            </span>
-        </div>
-        <div class="details-item">
-            <span class="details-label">Izdavač</span>
-            <span>@(Model.Izdavac ?? "—")</span>
-        </div>
-        <div class="details-item">
-            <span class="details-label">Godina izdanja</span>
-            <span>@(Model.GodinaIzdanja?.ToString() ?? "—")</span>
-        </div>
-        <div class="details-item">
-            <span class="details-label">Ukupno primjeraka</span>
-            <span>@Model.BrojPrimjeraka</span>
-        </div>
-        <div class="details-item">
-            <span class="details-label">Dostupno</span>
-            <span class="@(Model.BrojDostupnih > 0 ? "status-dostupan" : "status-nedostupan")">
-                @Model.BrojDostupnih
-            </span>
+            </div>
+
+            <div class="details-grid">
+                <div class="details-item">
+                    <span class="details-label">ISBN</span>
+                    <span>@Model.Isbn</span>
+                </div>
+                <div class="details-item">
+                    <span class="details-label">Kategorija</span>
+                    <span>
+                        @if (Model.Kategorija != null)
+                        {
+                            <span class="katalog-badge">@Model.Kategorija</span>
+                        }
+                        else
+                        {
+                            <span>—</span>
+                        }
+                    </span>
+                </div>
+                <div class="details-item">
+                    <span class="details-label">Izdavač</span>
+                    <span>@(Model.Izdavac ?? "—")</span>
+                </div>
+                <div class="details-item">
+                    <span class="details-label">Godina izdanja</span>
+                    <span>@(Model.GodinaIzdanja?.ToString() ?? "—")</span>
+                </div>
+                <div class="details-item">
+                    <span class="details-label">Ukupno primjeraka</span>
+                    <span>@Model.BrojPrimjeraka</span>
+                </div>
+                <div class="details-item">
+                    <span class="details-label">Dostupno</span>
+                    <span class="@(Model.BrojDostupnih > 0 ? "status-dostupan" : "status-nedostupan")">
+                        @Model.BrojDostupnih
+                    </span>
+                </div>
+            </div>
+
+            <!-- Description Section -->
+            <div class="details-description">
+                <h3 style="margin-bottom:0.8rem; font-size:1.15rem;">O knjizi</h3>
+                <div id="description-box">
+                    <p class="description-loading">Učitavanje opisa sa Open Library...</p>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const isbn = "@Model.Isbn";
+            const descBox = document.getElementById('description-box');
+
+            if (!isbn || isbn.length < 5) {
+                descBox.innerHTML = '<p class="description-text">Opis nije dostupan (neispravan ISBN).</p>';
+                return;
+            }
+
+            const tryOpenLibrary = () => {
+                fetch(`https://openlibrary.org/isbn/${isbn}.json`)
+                    .then(res => res.json())
+                    .then(olData => {
+                        let description = "";
+                        if (olData.description) {
+                            description = typeof olData.description === 'string' 
+                                ? olData.description 
+                                : olData.description.value;
+                        }
+
+                        if (description) {
+                            descBox.innerHTML = `<p class="description-text">${description}</p>`;
+                        } else {
+                            descBox.innerHTML = '<p class="description-text">Opis trenutno nije dostupan u javnim bazama (Google Books & Open Library).</p>';
+                        }
+                    })
+                    .catch(() => {
+                        descBox.innerHTML = '<p class="description-text">Opis trenutno nije dostupan.</p>';
+                    });
+            };
+
+            fetch(`https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.items && data.items.length > 0) {
+                        const info = data.items[0].volumeInfo;
+                        let description = info.description;
+
+                        if (description) {
+                            descBox.innerHTML = `<p class="description-text">${description}</p>`;
+                        } else {
+                            tryOpenLibrary();
+                        }
+                    } else {
+                        tryOpenLibrary();
+                    }
+                })
+                .catch(err => {
+                    console.error("Google Books API Error:", err);
+                    tryOpenLibrary();
+                });
+        });
+    </script>
+}
 
 <!-- US-22 + US-23 + US-24: Lista primjeraka sa statusima i akcijama -->
 <div class="card examples-card">

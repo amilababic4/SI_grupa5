@@ -50,6 +50,18 @@
     }
 </div>
 
+<!-- View Toggle -->
+<div class="view-toggle-container">
+    <div class="view-toggle">
+        <button type="button" class="toggle-btn active" id="btn-list-view" title="Lista">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
+        </button>
+        <button type="button" class="toggle-btn" id="btn-grid-view" title="Mreža">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+        </button>
+    </div>
+</div>
+
 @if (!Model.Knjige.Any())
 {
     <div class="card katalog-empty">
@@ -62,53 +74,69 @@
 }
 else
 {
-    <div class="card katalog-card">
-        <div class="katalog-table-wrap">
-            <table class="katalog-table">
-                <thead>
-                    <tr>
-                        <th>Naslov</th>
-                        <th>Autor</th>
-                        <th>ISBN</th>
-                        <th>Kategorija</th>
-                        <th>God.</th>
-                        <th>Primjerci</th>
-                        <th>Dostupno</th>
-                        <th>Akcije</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var knjiga in Model.Knjige)
-                    {
-                        <tr>
-                            <td data-label="Naslov"><strong>@knjiga.Naslov</strong></td>
-                            <td data-label="Autor">@knjiga.Autor</td>
-                            <td data-label="ISBN" class="katalog-isbn">@knjiga.Isbn</td>
-                            <td data-label="Kategorija">
+    <!-- LIST VIEW -->
+    <div id="katalog-list-layout" class="card katalog-card">
+        <div class="katalog-list">
+            @foreach (var knjiga in Model.Knjige)
+            {
+                <div class="katalog-list-item">
+                    <div class="list-cover-wrapper">
+                        <img src="https://covers.openlibrary.org/b/isbn/@(knjiga.Isbn)-M.jpg?default=M" 
+                             alt="@knjiga.Naslov" 
+                             class="katalog-cover-img-large" 
+                             loading="lazy" />
+                    </div>
+                    <div class="list-content">
+                        <div class="list-info">
+                            <span class="list-title">@knjiga.Naslov</span>
+                            <span class="list-autor">@knjiga.Autor</span>
+                        </div>
+                        
+                        <div class="list-meta">
+                            <div class="list-category">
                                 @if (knjiga.Kategorija != null)
                                 {
                                     <span class="katalog-badge">@knjiga.Kategorija</span>
                                 }
-                            </td>
-                            <td data-label="Godina">@knjiga.GodinaIzdanja</td>
-                            <td data-label="Primjerci" style="text-align:center;">@knjiga.BrojPrimjeraka</td>
-                            <td data-label="Dostupno" style="text-align:center;">
+                            </div>
+                            
+                            <div class="list-status">
                                 <span class="@(knjiga.BrojDostupnih > 0 ? "status-dostupan" : "status-nedostupan")">
-                                    @knjiga.BrojDostupnih
+                                    @(knjiga.BrojDostupnih > 0 ? "DOSTUPNO" : "ZAUZETO")
                                 </span>
-                            </td>
-                            <td data-label="Akcije" class="katalog-actions">
-                                <a asp-action="Details" asp-route-id="@knjiga.Id" class="btn btn-secondary btn-sm">Detalji</a>
-                                @if (User.IsInRole("Bibliotekar") || User.IsInRole("Administrator"))
-                                {
-                                    <a asp-action="Edit" asp-route-id="@knjiga.Id" class="btn btn-primary btn-sm">Uredi</a>
-                                }
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+                            </div>
+                        </div>
+
+                        <div class="list-actions">
+                            <a asp-action="Details" asp-route-id="@knjiga.Id" class="btn btn-secondary">Detalji</a>
+                            @if (User.IsInRole("Bibliotekar") || User.IsInRole("Administrator"))
+                            {
+                                <a asp-action="Edit" asp-route-id="@knjiga.Id" class="btn btn-primary btn-sm">Uredi</a>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
         </div>
+    </div>
+
+    <!-- GRID VIEW -->
+    <div id="katalog-grid-layout" class="katalog-grid hidden-layout">
+        @foreach (var knjiga in Model.Knjige)
+        {
+            <a asp-action="Details" asp-route-id="@knjiga.Id" class="grid-item">
+                <div class="grid-cover-wrapper">
+                    <img src="https://covers.openlibrary.org/b/isbn/@(knjiga.Isbn)-L.jpg?default=M" 
+                         alt="@knjiga.Naslov" 
+                         class="grid-cover-img" 
+                         loading="lazy" />
+                </div>
+                <div class="grid-info">
+                    <span class="grid-title">@knjiga.Naslov</span>
+                    <span class="grid-autor">@knjiga.Autor</span>
+                </div>
+            </a>
+        }
     </div>
 
     <!-- Paginacija -->
@@ -146,4 +174,35 @@ else
             }
         </div>
     }
+}
+
+@section Scripts {
+    <script>
+        const btnList = document.getElementById('btn-list-view');
+        const btnGrid = document.getElementById('btn-grid-view');
+        const layoutList = document.getElementById('katalog-list-layout');
+        const layoutGrid = document.getElementById('katalog-grid-layout');
+
+        btnList.addEventListener('click', () => {
+            btnList.classList.add('active');
+            btnGrid.classList.remove('active');
+            layoutList.classList.remove('hidden-layout');
+            layoutGrid.classList.add('hidden-layout');
+            localStorage.setItem('katalogView', 'list');
+        });
+
+        btnGrid.addEventListener('click', () => {
+            btnGrid.classList.add('active');
+            btnList.classList.remove('active');
+            layoutGrid.classList.remove('hidden-layout');
+            layoutList.classList.add('hidden-layout');
+            localStorage.setItem('katalogView', 'grid');
+        });
+
+        // Restore preference
+        const savedView = localStorage.getItem('katalogView');
+        if (savedView === 'grid') {
+            btnGrid.click();
+        }
+    </script>
 }
