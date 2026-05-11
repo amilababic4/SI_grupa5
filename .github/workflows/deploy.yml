@@ -24,7 +24,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build image
-        run: docker build -f src/SmartLib.Web/Dockerfile -t smartlib-web:latest .
+        run: docker build -f Projekat/src/SmartLib.Web/Dockerfile -t smartlib-web:latest Projekat
 
       - name: Tag image
         run: docker tag smartlib-web:latest docker.io/${{ secrets.DOCKERHUB_USERNAME }}/smartlib-web:latest
