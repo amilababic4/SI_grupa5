@@ -98,6 +98,27 @@
         <p>&copy; 2026 SmartLib — SI Grupa 5, ETF Sarajevo</p>
     </footer>
 
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            document.querySelectorAll(".password-field").forEach((field) => {
+                const input = field.querySelector("input");
+                const toggle = field.querySelector(".password-toggle");
+
+                if (!input || !toggle) {
+                    return;
+                }
+
+                toggle.addEventListener("click", () => {
+                    const isHidden = input.type === "password";
+
+                    input.type = isHidden ? "text" : "password";
+                    toggle.setAttribute("aria-pressed", isHidden ? "true" : "false");
+                    toggle.setAttribute("aria-label", isHidden ? "Sakrij lozinku" : "Prikazi lozinku");
+                });
+            });
+        });
+    </script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
