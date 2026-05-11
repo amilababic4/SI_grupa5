@@ -80,6 +80,7 @@ else
             @foreach (var knjiga in Model.Knjige)
             {
                 <div class="katalog-list-item">
+                    <a asp-action="Details" asp-route-id="@knjiga.Id" class="stretched-link"></a>
                     <div class="list-cover-wrapper">
                         <img src="https://covers.openlibrary.org/b/isbn/@(knjiga.Isbn)-M.jpg?default=M" 
                              alt="@knjiga.Naslov" 
@@ -108,7 +109,6 @@ else
                         </div>
 
                         <div class="list-actions">
-                            <a asp-action="Details" asp-route-id="@knjiga.Id" class="btn btn-secondary">Detalji</a>
                             @if (User.IsInRole("Bibliotekar") || User.IsInRole("Administrator"))
                             {
                                 <a asp-action="Edit" asp-route-id="@knjiga.Id" class="btn btn-primary btn-sm">Uredi</a>
@@ -116,6 +116,8 @@ else
                         </div>
                     </div>
                 </div>
+
+
             }
         </div>
     </div>

@@ -2218,6 +2218,7 @@ body.home-page footer {
 }
 
 .katalog-list-item {
+    position: relative;
     display: flex;
     align-items: center;
     background: var(--sl-card);
@@ -2229,6 +2230,7 @@ body.home-page footer {
     text-decoration: none;
     color: inherit;
 }
+
 
 .katalog-list-item:hover {
     transform: translateY(-3px);
@@ -2311,6 +2313,25 @@ body.home-page footer {
         align-items: flex-start;
     }
 }
+
+/* Stretched Link Utility */
+.stretched-link::after {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1;
+    content: "";
+}
+
+.list-actions {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    gap: 0.6rem;
+}
+
 
 /* Grid View Styles */
 .katalog-grid {
