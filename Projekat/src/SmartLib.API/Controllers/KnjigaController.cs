@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Caching.Memory;
 using SmartLib.Core.DTOs;
 using SmartLib.Core.Interfaces;
 using SmartLib.Core.Models;
@@ -8,31 +9,78 @@ namespace SmartLib.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize] 
+    [Authorize]
     public class KnjigaController : ControllerBase
     {
         private readonly IKnjigaRepository _knjigaRepository;
         private readonly IPrimjerakRepository _primjerakRepository;
         private readonly IKategorijaRepository _kategorijaRepository;
+        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IMemoryCache _cache;
 
         public KnjigaController(
             IKnjigaRepository knjigaRepository,
             IPrimjerakRepository primjerakRepository,
-            IKategorijaRepository kategorijaRepository)
+            IKategorijaRepository kategorijaRepository,
+            IHttpClientFactory httpClientFactory,
+            IMemoryCache cache)
         {
             _knjigaRepository = knjigaRepository;
             _primjerakRepository = primjerakRepository;
             _kategorijaRepository = kategorijaRepository;
+            _httpClientFactory = httpClientFactory;
+            _cache = cache;
+        }
+
+        // GET: api/Knjiga/Korice?isbn=...&size=M
+        [HttpGet("Korice")]
+        [AllowAnonymous]
+        [ResponseCache(Duration = 86400, Location = ResponseCacheLocation.Any, NoStore = false)]
+        public async Task<IActionResult> Korice([FromQuery] string isbn, [FromQuery] string size = "M")
+        {
+            if (string.IsNullOrEmpty(isbn)) return NotFound();
+
+            var normalizedIsbn = NormalizeIsbn(isbn);
+            var cacheKey = $"cover_{normalizedIsbn}_{size}";
+
+            if (_cache.TryGetValue(cacheKey, out byte[] cachedImage))
+            {
+                return File(cachedImage, "image/jpeg");
+            }
+
+            try
+            {
+                var client = _httpClientFactory.CreateClient();
+                var url = $"https://covers.openlibrary.org/b/isbn/{normalizedIsbn}-{size}.jpg?default=M";
+
+                var response = await client.GetAsync(url);
+                if (response.IsSuccessStatusCode)
+                {
+                    var imageBytes = await response.Content.ReadAsByteArrayAsync();
+                    _cache.Set(cacheKey, imageBytes, TimeSpan.FromHours(24));
+                    return File(imageBytes, "image/jpeg");
+                }
+            }
+            catch
+            {
+                // Fallback: ne radimo ništa, vraćamo 404
+            }
+
+            return NotFound();
         }
 
         // GET: api/Knjiga
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<KnjigaDto>>> GetAll([FromQuery] string? naslov, [FromQuery] string? autor, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        public async Task<ActionResult<IEnumerable<KnjigaDto>>> GetAll(
+            [FromQuery] string? naslov,
+            [FromQuery] string? autor,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 16)
         {
             var (knjige, ukupno) = await _knjigaRepository.GetPagedAsync(naslov, autor, page, pageSize);
 
             var dtos = knjige.Select(MapToDto).ToList();
-            
+
             return Ok(new
             {
                 Podaci = dtos,
@@ -57,7 +105,10 @@ namespace SmartLib.API.Controllers
         [Authorize(Roles = "Bibliotekar,Administrator")]
         public async Task<ActionResult<KnjigaDto>> Create(KnjigaCreateDto model)
         {
-            // 1. Validacija ISBN-a 
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            // 1. Validacija ISBN-a
             var normalizedIsbn = NormalizeIsbn(model.Isbn);
             if (!IsValidIsbn(normalizedIsbn))
                 return BadRequest("ISBN nije u ispravnom formatu.");
@@ -95,7 +146,7 @@ namespace SmartLib.API.Controllers
                     DatumNabave = DateTime.UtcNow
                 });
             }
-            
+
             var result = await _knjigaRepository.GetByIdAsync(savedKnjiga.Id);
             return CreatedAtAction(nameof(GetById), new { id = savedKnjiga.Id }, MapToDto(result!));
         }
@@ -110,9 +161,9 @@ namespace SmartLib.API.Controllers
             var knjiga = await _knjigaRepository.GetByIdAsync(id);
             if (knjiga == null) return NotFound();
 
-            var kategorija = await _kategorijaRepository.GetByIdAsync(model.KategorijaId); 
-            if (kategorija == null)                                                          
-                return BadRequest("Odabrana kategorija nije validna.");                      
+            var kategorija = await _kategorijaRepository.GetByIdAsync(model.KategorijaId);
+            if (kategorija == null)
+                return BadRequest("Odabrana kategorija nije validna.");
 
             knjiga.Naslov = model.Naslov.Trim();
             knjiga.Autor = model.Autor.Trim();
@@ -129,25 +180,29 @@ namespace SmartLib.API.Controllers
         [Authorize(Roles = "Bibliotekar,Administrator")]
         public async Task<IActionResult> Delete(int id)
         {
-            // 1. Provjera zaduženja (US-28)
+            // 1. Provjera aktivnih zaduženja (US-28)
             if (await _knjigaRepository.HasActiveLoansAsync(id))
             {
                 return BadRequest(new { poruka = "Knjiga ima aktivna zaduženja i ne može biti obrisana." });
             }
 
             // 2. Izvršavanje brisanja
-            var success = await _knjigaRepository.DeleteAsync(id);
-
-            if (!success)
+            try
             {
-                return NotFound(new { poruka = "Knjiga sa tim ID-om nije pronađena." }); // US-27
-            }
+                var success = await _knjigaRepository.DeleteAsync(id);
 
-            // 204 No Content je standard za uspješno brisanje u API-ju
-            return NoContent();
+                if (!success)
+                    return NotFound(new { poruka = "Knjiga sa tim ID-om nije pronađena." });
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { poruka = "Sistemska greška prilikom brisanja.", detalji = ex.Message });
+            }
         }
 
-        #region Helperi (Isti kao u Web-u)
+        #region Helperi
 
         private static KnjigaDto MapToDto(Knjiga k) => new KnjigaDto
         {
@@ -162,7 +217,8 @@ namespace SmartLib.API.Controllers
             BrojDostupnih = k.Primjerci.Count(p => p.Status == "dostupan")
         };
 
-        private static string NormalizeIsbn(string isbn) => isbn.Replace("-", "").Replace(" ", "").Trim();
+        private static string NormalizeIsbn(string isbn) =>
+            isbn.Replace("-", "").Replace(" ", "").Trim();
 
         private static bool IsValidIsbn(string isbn)
         {

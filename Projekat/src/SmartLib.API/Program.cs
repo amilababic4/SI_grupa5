@@ -38,12 +38,15 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
         ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection"))));
 
 builder.Services.AddControllers();
+builder.Services.AddHttpClient();
+builder.Services.AddMemoryCache();
 
 builder.Services.AddScoped<IKorisnikRepository, KorisnikRepository>();
 builder.Services.AddScoped<IKorisnikRepository, KorisnikRepository>();
-builder.Services.AddScoped<IKnjigaRepository, KnjigaRepository>();        
-builder.Services.AddScoped<IPrimjerakRepository, PrimjerakRepository>();  
+builder.Services.AddScoped<IKnjigaRepository, KnjigaRepository>();
+builder.Services.AddScoped<IPrimjerakRepository, PrimjerakRepository>();
 builder.Services.AddScoped<IKategorijaRepository, KategorijaRepository>();
+builder.Services.AddScoped<IZaduzenjeRepository, ZaduzenjeRepository>();
 
 // JWT Authentication - US-07, US-08
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

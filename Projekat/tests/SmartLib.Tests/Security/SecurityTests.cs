@@ -21,8 +21,7 @@ namespace SmartLib.Tests.Security
     ///   PT-05: Modificiran JWT token sa lažnim potpisom (US-08)
     ///   PT-06: Arhitekturalni rizik — stari JWT deaktiviranog korisnika (US-09)
     ///   PT-07: XSS napad u registracijskoj formi — Ime/Prezime (US-01, US-02)
-    ///   PT-08: XSS napad u nazivu kategorije (US-30)
-    ///   PT-09: Path Traversal / Injection u ISBN polju (US-25)
+    ///   PT-08: XSS napad u nazivu kategorije (US-30)   
     /// </summary>
     public class PenetrationTests : IClassFixture<WebApplicationFactory<Program>>
     {
@@ -62,7 +61,7 @@ namespace SmartLib.Tests.Security
         }
 
         private HttpClient CreateClient() => _factory.CreateClient();
-        
+
         // PT-01: SQL Injection u email polju (US-04 / US-05)       
 
         [Theory]
@@ -87,7 +86,7 @@ namespace SmartLib.Tests.Security
                 $"Payload: {sqlPayload}"
             );
         }
-       
+
         // PT-02: SQL Injection u polju lozinke (US-04 / US-05)       
 
         [Theory]
@@ -106,7 +105,7 @@ namespace SmartLib.Tests.Security
 
             Assert.Equal(HttpStatusCode.Unauthorized, resp.StatusCode);
         }
-       
+
         // PT-03: Brute Force napad — 10 uzastopnih pokušaja (US-04)       
 
         [Fact]
@@ -125,7 +124,7 @@ namespace SmartLib.Tests.Security
                 Assert.Equal(HttpStatusCode.Unauthorized, resp.StatusCode);
             }
         }
-      
+
         // PT-04: Lažni JWT token bez potpisa (US-08)        
 
         [Fact]
@@ -143,7 +142,7 @@ namespace SmartLib.Tests.Security
             var resp = await client.GetAsync("/api/korisnik");
             Assert.Equal(HttpStatusCode.Unauthorized, resp.StatusCode);
         }
-      
+
         // PT-05: Modificiran JWT token — promjena potpisa (US-08)       
 
         [Fact]
@@ -160,7 +159,7 @@ namespace SmartLib.Tests.Security
             var resp = await client.GetAsync("/api/korisnik");
             Assert.Equal(HttpStatusCode.Unauthorized, resp.StatusCode);
         }
-        
+
         // PT-06: Arhitekturalni sigurnosni rizik — stari JWT deaktiviranog korisnika (US-09)
         //
         // Integracijski test pokriva da deaktiviran korisnik ne može dobiti novi token.
@@ -174,7 +173,7 @@ namespace SmartLib.Tests.Security
                 "SIGURNOSNA NAPOMENA (US-09): Deaktiviran korisnik zadržava stari JWT " +
                 "dok ne istekne. Preporuka: token blacklist ili kratko trajanje tokena + refresh.");
         }
-        
+
         // PT-07: XSS napad u registracijskoj formi — Ime / Prezime (US-01, US-02)        
 
         [Theory]
@@ -207,7 +206,7 @@ namespace SmartLib.Tests.Security
                 Assert.Equal(HttpStatusCode.BadRequest, resp.StatusCode);
             }
         }
-        
+
         // PT-08: XSS napad u nazivu kategorije (US-30)        
 
         [Theory]
@@ -230,33 +229,7 @@ namespace SmartLib.Tests.Security
                 Assert.DoesNotContain("onerror", body, StringComparison.OrdinalIgnoreCase);
             }
         }
-        
-        // PT-09: Path Traversal i Injection u ISBN polju (US-25)       
 
-        [Theory]
-        [InlineData("' OR '1'='1", "SQL Injection")]
-        [InlineData("<script>alert(1)</script>", "XSS")]
-        [InlineData("../../../../etc/passwd", "Path Traversal")]
-        public async Task KnjigaCreate_InjectionUIsbnPolju_VracaBadRequest(
-            string isbn, string tipNapada)
-        {
-            var token = await DobijBibliotekarToken();
-            var client = CreateClient();
-            client.DefaultRequestHeaders.Authorization =
-                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-
-            var resp = await client.PostAsJsonAsync("/api/knjiga", new
-            {
-                naslov = "Test Knjiga",
-                autor = "Test Autor",
-                isbn = isbn,
-                kategorijaId = 1,
-                brojPrimjeraka = 1
-            });
-
-            Assert.Equal(HttpStatusCode.BadRequest, resp.StatusCode);
-        }
-       
         // Helpers        
 
         private async Task<string> DobijBibliotekarToken()

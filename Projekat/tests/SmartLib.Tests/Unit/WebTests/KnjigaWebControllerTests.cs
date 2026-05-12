@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Microsoft.Extensions.Caching.Memory;
 using Moq;
+using Moq.Protected;
 using SmartLib.Core.DTOs;
 using SmartLib.Core.Interfaces;
 using SmartLib.Core.Models;
@@ -18,6 +20,8 @@ namespace SmartLib.Tests.Unit.WebTests
         private readonly Mock<IKnjigaRepository> _knjigaMock;
         private readonly Mock<IPrimjerakRepository> _primjerakMock;
         private readonly Mock<IKategorijaRepository> _kategorijaMock;
+        private readonly Mock<IHttpClientFactory> _httpClientFactoryMock;
+        private readonly IMemoryCache _memoryCache;
         private readonly KnjigaController _controller;
 
         public KnjigaWebControllerTests()
@@ -25,11 +29,17 @@ namespace SmartLib.Tests.Unit.WebTests
             _knjigaMock = new Mock<IKnjigaRepository>();
             _primjerakMock = new Mock<IPrimjerakRepository>();
             _kategorijaMock = new Mock<IKategorijaRepository>();
+            _httpClientFactoryMock = new Mock<IHttpClientFactory>();
+
+            _memoryCache = new MemoryCache(new MemoryCacheOptions());
 
             _controller = new KnjigaController(
                 _knjigaMock.Object,
                 _primjerakMock.Object,
-                _kategorijaMock.Object);
+                _kategorijaMock.Object,
+                _httpClientFactoryMock.Object,
+                _memoryCache
+            );
 
             var httpContext = new DefaultHttpContext();
             _controller.ControllerContext = new ControllerContext
@@ -38,6 +48,7 @@ namespace SmartLib.Tests.Unit.WebTests
             };
             _controller.TempData = new TempDataDictionary(httpContext, Mock.Of<ITempDataProvider>());
         }
+
 
         // Pomoćne metode 
 
@@ -80,7 +91,7 @@ namespace SmartLib.Tests.Unit.WebTests
         public async Task Index_VracaKatalogViewModel()
         {
             var knjige = new List<Knjiga> { TestKnjiga() };
-            _knjigaMock.Setup(r => r.GetPagedAsync(null, null, 1, 10))
+            _knjigaMock.Setup(r => r.GetPagedAsync(null, null, 1, 16))
                        .ReturnsAsync((knjige, 1));
 
             var result = await _controller.Index(null, null, 1);
@@ -94,7 +105,7 @@ namespace SmartLib.Tests.Unit.WebTests
         [Fact]
         public async Task Index_NemaKnjiga_VracaPrazanKatalog()
         {
-            _knjigaMock.Setup(r => r.GetPagedAsync(null, null, 1, 10))
+            _knjigaMock.Setup(r => r.GetPagedAsync(null, null, 1, 16))
                        .ReturnsAsync((new List<Knjiga>(), 0));
 
             var result = await _controller.Index(null, null, 1);
@@ -109,7 +120,7 @@ namespace SmartLib.Tests.Unit.WebTests
         public async Task Index_PaginacijaMetadata_IspravnaVrijednost()
         {
             var knjige = Enumerable.Range(1, 10).Select(i => TestKnjiga(i)).ToList();
-            _knjigaMock.Setup(r => r.GetPagedAsync(null, null, 2, 10))
+            _knjigaMock.Setup(r => r.GetPagedAsync(null, null, 2, 16))
                        .ReturnsAsync((knjige, 25));
 
             var result = await _controller.Index(null, null, 2);
@@ -117,9 +128,9 @@ namespace SmartLib.Tests.Unit.WebTests
             var view = Assert.IsType<ViewResult>(result);
             var model = Assert.IsType<KatalogViewModel>(view.Model);
             Assert.Equal(2, model.TrenutnaStrana);
-            Assert.Equal(3, model.UkupnoStrana);
+            Assert.Equal(2, model.UkupnoStrana);
             Assert.Equal(25, model.UkupnoStavki);
-            Assert.Equal(10, model.VelicinaStrane);
+            Assert.Equal(16, model.VelicinaStrane);
         }
 
         [Fact]
@@ -127,7 +138,7 @@ namespace SmartLib.Tests.Unit.WebTests
         {
             var knjiga = TestKnjiga();
             // Knjiga ima 2 primjerka: 1 dostupan, 1 zaduzen
-            _knjigaMock.Setup(r => r.GetPagedAsync(null, null, 1, 10))
+            _knjigaMock.Setup(r => r.GetPagedAsync(null, null, 1, 16))
                        .ReturnsAsync((new List<Knjiga> { knjiga }, 1));
 
             var result = await _controller.Index(null, null, 1);
@@ -461,12 +472,12 @@ namespace SmartLib.Tests.Unit.WebTests
         [Fact]
         public async Task Index_PageManjiOd1_KoristiStranu1()
         {
-            _knjigaMock.Setup(r => r.GetPagedAsync(null, null, 1, 10))
+            _knjigaMock.Setup(r => r.GetPagedAsync(null, null, 1, 16))
                        .ReturnsAsync((new List<Knjiga>(), 0));
 
             var result = await _controller.Index(null, null, -5);
 
-            _knjigaMock.Verify(r => r.GetPagedAsync(null, null, 1, 10), Times.Once);
+            _knjigaMock.Verify(r => r.GetPagedAsync(null, null, 1, 16), Times.Once);
         }
 
         [Fact]
@@ -475,7 +486,7 @@ namespace SmartLib.Tests.Unit.WebTests
             var knjiga = TestKnjiga();
             knjiga.Kategorija = null;
 
-            _knjigaMock.Setup(r => r.GetPagedAsync(null, null, 1, 10))
+            _knjigaMock.Setup(r => r.GetPagedAsync(null, null, 1, 16))
                        .ReturnsAsync((new List<Knjiga> { knjiga }, 1));
 
             var result = await _controller.Index(null, null, 1);
@@ -581,7 +592,7 @@ namespace SmartLib.Tests.Unit.WebTests
         [Fact]
         public async Task Index_NemaKnjiga_UkupnoStranaJe1()
         {
-            _knjigaMock.Setup(r => r.GetPagedAsync(null, null, 1, 10))
+            _knjigaMock.Setup(r => r.GetPagedAsync(null, null, 1, 16))
                        .ReturnsAsync((new List<Knjiga>(), 0));
 
             var result = await _controller.Index(null, null, 1);
@@ -615,6 +626,176 @@ namespace SmartLib.Tests.Unit.WebTests
             await _controller.Edit(1);
 
             Assert.Equal("9780451524935", _controller.ViewBag.Isbn);
+        }
+
+        // ── Korice ────────────────────────────────────────────────────────────────
+        // Napomena: Web controller koristi pravi MemoryCache iz konstruktora,
+        // pa ne treba mockovati CreateEntry — možeš direktno koristiti _memoryCache.
+
+        [Fact]
+        public async Task Korice_PrazanIsbn_VracaNotFound()
+        {
+            // Pokriva: if (string.IsNullOrEmpty(isbn)) return NotFound();
+            var result = await _controller.Korice("");
+
+            Assert.IsType<NotFoundResult>(result);
+        }
+
+        [Fact]
+        public async Task Korice_NullIsbn_VracaNotFound()
+        {
+            // Pokriva: if (string.IsNullOrEmpty(isbn)) return NotFound(); — null grana
+            var result = await _controller.Korice(null!);
+
+            Assert.IsType<NotFoundResult>(result);
+        }
+
+        [Fact]
+        public async Task Korice_CacheHit_VracaFileIzCachea()
+        {
+            // Pokriva: if (_cache.TryGetValue(cacheKey, out byte[] cachedImage)) return File(...)
+            var imageBytes = new byte[] { 1, 2, 3 };
+            _memoryCache.Set("cover_1234567890_M", imageBytes, TimeSpan.FromHours(1));
+
+            var result = await _controller.Korice("1234567890");
+
+            Assert.IsType<FileContentResult>(result);
+        }
+
+        [Fact]
+        public async Task Korice_IsbnSaCrticama_NormalizujeSeZaCacheKljuc()
+        {
+            // Pokriva: NormalizeIsbn — crtica se uklanjaju prije cache lookupa
+            var imageBytes = new byte[] { 1, 2, 3 };
+            // Normalizovani ISBN bez crtica se koristi kao cache ključ
+            _memoryCache.Set("cover_9780451524935_M", imageBytes, TimeSpan.FromHours(1));
+
+            var result = await _controller.Korice("978-0-451-52493-5");
+
+            Assert.IsType<FileContentResult>(result);
+        }
+
+        [Fact]
+        public async Task Korice_HttpClientVracaUspjesanOdgovor_VracaFileISpremaUCache()
+        {
+            // Pokriva: response.IsSuccessStatusCode → _cache.Set + return File(imageBytes)
+            var imageBytes = new byte[] { 0xFF, 0xD8, 0xFF };
+
+            var handlerMock = new Mock<HttpMessageHandler>();
+            handlerMock
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(new HttpResponseMessage(System.Net.HttpStatusCode.OK)
+                {
+                    Content = new ByteArrayContent(imageBytes)
+                });
+
+            var httpClient = new HttpClient(handlerMock.Object);
+            var httpClientFactoryMock = new Mock<IHttpClientFactory>();
+            httpClientFactoryMock.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(httpClient);
+
+            var controller = new KnjigaController(
+                _knjigaMock.Object,
+                _primjerakMock.Object,
+                _kategorijaMock.Object,
+                httpClientFactoryMock.Object,
+                _memoryCache);
+
+            SetupControllerContext(controller);
+
+            var result = await controller.Korice("1234567890");
+
+            Assert.IsType<FileContentResult>(result);
+            // Provjera da je stvarno snimljeno u cache
+            Assert.True(_memoryCache.TryGetValue("cover_1234567890_M", out byte[]? cached));
+            Assert.Equal(imageBytes, cached);
+        }
+
+        [Fact]
+        public async Task Korice_HttpClientVracaNeuspjesanStatusCode_VracaNotFound()
+        {
+            // Pokriva: !response.IsSuccessStatusCode → pada na return NotFound() na kraju
+            var handlerMock = new Mock<HttpMessageHandler>();
+            handlerMock
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(new HttpResponseMessage(System.Net.HttpStatusCode.NotFound));
+
+            var httpClient = new HttpClient(handlerMock.Object);
+            var httpClientFactoryMock = new Mock<IHttpClientFactory>();
+            httpClientFactoryMock.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(httpClient);
+
+            var controller = new KnjigaController(
+                _knjigaMock.Object,
+                _primjerakMock.Object,
+                _kategorijaMock.Object,
+                httpClientFactoryMock.Object,
+                _memoryCache);
+
+            SetupControllerContext(controller);
+
+            var result = await controller.Korice("1234567890");
+
+            Assert.IsType<NotFoundResult>(result);
+        }
+
+        [Fact]
+        public async Task Korice_HttpClientBacaException_VracaNotFound()
+        {
+            // Pokriva: catch blok → return NotFound() na kraju
+            var handlerMock = new Mock<HttpMessageHandler>();
+            handlerMock
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>())
+                .ThrowsAsync(new HttpRequestException("Network error"));
+
+            var httpClient = new HttpClient(handlerMock.Object);
+            var httpClientFactoryMock = new Mock<IHttpClientFactory>();
+            httpClientFactoryMock.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(httpClient);
+
+            var controller = new KnjigaController(
+                _knjigaMock.Object,
+                _primjerakMock.Object,
+                _kategorijaMock.Object,
+                httpClientFactoryMock.Object,
+                _memoryCache);
+
+            SetupControllerContext(controller);
+
+            var result = await controller.Korice("1234567890");
+
+            Assert.IsType<NotFoundResult>(result);
+        }
+
+        [Fact]
+        public async Task Korice_DrugacijaVelicina_KoristiIspravanCacheKljuc()
+        {
+            // Pokriva: size parametar se uključuje u cache ključ (cover_{isbn}_{size})
+            var imageBytes = new byte[] { 1, 2, 3 };
+            _memoryCache.Set("cover_1234567890_L", imageBytes, TimeSpan.FromHours(1));
+
+            var result = await _controller.Korice("1234567890", "L");
+
+            Assert.IsType<FileContentResult>(result);
+        }
+
+        private void SetupControllerContext(KnjigaController controller)
+        {
+            var httpContext = new DefaultHttpContext();
+            controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = httpContext
+            };
+            controller.TempData = new TempDataDictionary(httpContext, Mock.Of<ITempDataProvider>());
         }
     }
 }
