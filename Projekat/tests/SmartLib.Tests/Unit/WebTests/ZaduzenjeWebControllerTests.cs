@@ -427,5 +427,131 @@ namespace SmartLib.Tests.Unit.WebTests
             Assert.False(model[0].JeZakasnilo);
             Assert.True(model[0].RokSeBliži);
         }
+
+        // ── Details ───────────────────────────────────────────────────────────────
+
+        [Fact]
+        public async Task Details_ZaduzenjePostoji_VracaViewSaModelom()
+        {
+            _zaduzenjeRepo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(TestZaduzenje());
+
+            var result = await _controller.Details(1);
+
+            var view = Assert.IsType<ViewResult>(result);
+            var model = Assert.IsType<ZaduzenjeViewModel>(view.Model);
+            Assert.Equal(1, model.Id);
+        }
+
+        [Fact]
+        public async Task Details_ZaduzenjeNePostoji_VracaNotFound()
+        {
+            _zaduzenjeRepo.Setup(r => r.GetByIdAsync(99)).ReturnsAsync((Zaduzenje?)null);
+
+            var result = await _controller.Details(99);
+
+            Assert.IsType<NotFoundResult>(result);
+        }
+
+        // ── Create GET ────────────────────────────────────────────────────────────
+
+        [Fact]
+        public async Task Create_Get_VracaViewSaPraznimModelom()
+        {
+            SetupCreateDropdownMocks();
+
+            var result = await _controller.Create();
+
+            var view = Assert.IsType<ViewResult>(result);
+            Assert.IsType<ZaduzenjeCreateDto>(view.Model);
+        }
+
+        [Fact]
+        public async Task Create_Get_PopunjavaViewBagDropdowne()
+        {
+            SetupCreateDropdownMocks();
+
+            await _controller.Create();
+
+            Assert.NotNull(_controller.ViewBag.ClanDataJson);
+            Assert.NotNull(_controller.ViewBag.KnjigaDataJson);
+            Assert.NotNull(_controller.ViewBag.PrimjerakDataJson);
+        }
+
+        // ── VratiPotvrda ──────────────────────────────────────────────────────────
+
+        [Fact]
+        public async Task VratiPotvrda_AktivnoZaduzenje_VracaViewSaModelom()
+        {
+            _zaduzenjeRepo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(TestZaduzenje(1, "aktivno"));
+
+            var result = await _controller.VratiPotvrda(1);
+
+            var view = Assert.IsType<ViewResult>(result);
+            var model = Assert.IsType<ZaduzenjeViewModel>(view.Model);
+            Assert.Equal(1, model.Id);
+        }
+
+        [Fact]
+        public async Task VratiPotvrda_ZaduzenjeNePostoji_VracaNotFound()
+        {
+            _zaduzenjeRepo.Setup(r => r.GetByIdAsync(99)).ReturnsAsync((Zaduzenje?)null);
+
+            var result = await _controller.VratiPotvrda(99);
+
+            Assert.IsType<NotFoundResult>(result);
+        }
+
+        [Fact]
+        public async Task VratiPotvrda_ZaduzenjeNijeAktivno_RedirektujeSeNaIndex()
+        {
+            // Pokriva: if (z.Status != "aktivno") return RedirectToAction(nameof(Index));
+            _zaduzenjeRepo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(TestZaduzenje(1, "zatvoreno"));
+
+            var result = await _controller.VratiPotvrda(1);
+
+            var redirect = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal("Index", redirect.ActionName);
+        }
+
+        // ── Historija ─────────────────────────────────────────────────────────────
+
+        [Fact]
+        public async Task Historija_UvijekVracaView()
+        {
+            // Stub metoda — samo provjeravamo da vraća View bez greške
+            var result = await _controller.Historija(1);
+
+            Assert.IsType<ViewResult>(result);
+        }
+
+        [Fact]
+        public async Task Moja_KorisnikNijeIdentificiran_RedirektujeNaLogin()
+        {
+            _controller.ControllerContext.HttpContext.User =
+                new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>(), "TestAuth"));
+
+            var result = await _controller.Moja();
+
+            var redirect = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal("Login", redirect.ActionName);
+            Assert.Equal("Auth", redirect.ControllerName);
+        }
+
+        [Fact]
+        public async Task Moja_NevalidanKorisnikIdFormat_RedirektujeNaLogin()
+        {
+            var claims = new List<Claim>
+    {
+        new(ClaimTypes.NameIdentifier, "nije-broj")
+    };
+            _controller.ControllerContext.HttpContext.User =
+                new ClaimsPrincipal(new ClaimsIdentity(claims, "TestAuth"));
+
+            var result = await _controller.Moja();
+
+            var redirect = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal("Login", redirect.ActionName);
+            Assert.Equal("Auth", redirect.ControllerName);
+        }
     }
 }

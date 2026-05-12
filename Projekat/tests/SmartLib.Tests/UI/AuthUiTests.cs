@@ -29,16 +29,25 @@ public sealed class AuthUiTests : SmartLibUiTest
     }
 
     [Test]
-    public async Task Login_Member_RedirectsToHome_WithDashboardInNav()
+    public async Task Login_Member_ShowsCorrectNavbar()
     {
         await Page.GotoAsync("/Auth/Login");
+
         await Page.GetByLabel("Email").FillAsync(UiTestSettings.MemberEmail);
         await Page.GetByLabel("Lozinka").FillAsync(UiTestSettings.SharedSeedPassword);
+
         await Page.GetByRole(AriaRole.Button, new() { Name = "Prijavi se" }).ClickAsync();
 
-        // Cookie auth redirects član to Home — URL is often "/" not "/Home".
-        await Expect(Page.GetByRole(AriaRole.Link, new() { Name = "Dashboard" })).ToBeVisibleAsync();
-        Assert.That(Page.Url, Does.Not.Contain("/Auth/Login").IgnoreCase);
+        // ostaje na home
+        await Expect(Page).ToHaveURLAsync(new Regex(".*/$"));
+
+        var nav = Page.GetByRole(AriaRole.Navigation);
+
+        await Expect(
+            nav.GetByRole(AriaRole.Link, new() { Name = "Katalog" })
+        ).ToBeVisibleAsync();
+        await Expect(Page.GetByText("Moja zaduženja")).ToBeVisibleAsync();
+        await Expect(Page.GetByRole(AriaRole.Button, new() { Name = "Odjava" })).ToBeVisibleAsync();
     }
 
     [Test]
