@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using SmartLib.Core.DTOs;
 using SmartLib.Core.Interfaces;
 using SmartLib.Core.Models;
+using Microsoft.Extensions.Caching.Memory;
+using System.Net.Http;
 
 namespace SmartLib.Web.Controllers
 {
@@ -13,15 +15,59 @@ namespace SmartLib.Web.Controllers
         private readonly IKnjigaRepository _knjigaRepository;
         private readonly IPrimjerakRepository _primjerakRepository;
         private readonly IKategorijaRepository _kategorijaRepository;
+        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IMemoryCache _cache;
 
         public KnjigaController(
             IKnjigaRepository knjigaRepository,
             IPrimjerakRepository primjerakRepository,
-            IKategorijaRepository kategorijaRepository)
+            IKategorijaRepository kategorijaRepository,
+            IHttpClientFactory httpClientFactory,
+            IMemoryCache cache)
         {
             _knjigaRepository = knjigaRepository;
             _primjerakRepository = primjerakRepository;
             _kategorijaRepository = kategorijaRepository;
+            _httpClientFactory = httpClientFactory;
+            _cache = cache;
+        }
+
+        [AllowAnonymous]
+        [ResponseCache(Duration = 86400, Location = ResponseCacheLocation.Any, NoStore = false)]
+        public async Task<IActionResult> Korice(string isbn, string size = "M")
+        {
+            if (string.IsNullOrEmpty(isbn)) return NotFound();
+
+            var normalizedIsbn = NormalizeIsbn(isbn);
+            var cacheKey = $"cover_{normalizedIsbn}_{size}";
+
+            if (_cache.TryGetValue(cacheKey, out byte[] cachedImage))
+            {
+                return File(cachedImage, "image/jpeg");
+            }
+
+            try
+            {
+                var client = _httpClientFactory.CreateClient();
+                var url = $"https://covers.openlibrary.org/b/isbn/{normalizedIsbn}-{size}.jpg?default=M";
+                
+                var response = await client.GetAsync(url);
+                if (response.IsSuccessStatusCode)
+                {
+                    var imageBytes = await response.Content.ReadAsByteArrayAsync();
+                    
+                    // Cache for 24 hours in memory
+                    _cache.Set(cacheKey, imageBytes, TimeSpan.FromHours(24));
+                    
+                    return File(imageBytes, "image/jpeg");
+                }
+            }
+            catch
+            {
+                // Fallback or just let it fail
+            }
+
+            return NotFound();
         }
 
         public async Task<IActionResult> Index(string? naslov, string? autor, int page = 1)

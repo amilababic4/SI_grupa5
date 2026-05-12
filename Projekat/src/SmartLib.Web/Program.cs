@@ -36,6 +36,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
         ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection"))));
 
 builder.Services.AddControllersWithViews();
+builder.Services.AddHttpClient();
+builder.Services.AddMemoryCache();
 
 // Repositories
 builder.Services.AddScoped<IKorisnikRepository, KorisnikRepository>();

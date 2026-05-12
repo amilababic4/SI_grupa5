@@ -82,7 +82,7 @@ else
                 <div class="katalog-list-item">
                     <a asp-action="Details" asp-route-id="@knjiga.Id" class="stretched-link"></a>
                     <div class="list-cover-wrapper">
-                        <img src="https://covers.openlibrary.org/b/isbn/@(knjiga.Isbn)-M.jpg?default=M" 
+                        <img src="@Url.Action("Korice", "Knjiga", new { isbn = knjiga.Isbn, size = "M" })" 
                              alt="@knjiga.Naslov" 
                              class="katalog-cover-img-large" 
                              loading="lazy" />
@@ -128,7 +128,7 @@ else
         {
             <a asp-action="Details" asp-route-id="@knjiga.Id" class="grid-item">
                 <div class="grid-cover-wrapper">
-                    <img src="https://covers.openlibrary.org/b/isbn/@(knjiga.Isbn)-L.jpg?default=M" 
+                    <img src="@Url.Action("Korice", "Knjiga", new { isbn = knjiga.Isbn, size = "L" })" 
                          alt="@knjiga.Naslov" 
                          class="grid-cover-img" 
                          loading="lazy" />
