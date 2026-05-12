@@ -72,7 +72,7 @@ namespace SmartLib.Web.Controllers
 
         public async Task<IActionResult> Index(string? naslov, string? autor, int page = 1)
         {
-            const int pageSize = 10;
+            const int pageSize = 16;
             if (page < 1) page = 1;
 
             var (knjige, ukupno) = await _knjigaRepository.GetPagedAsync(naslov, autor, page, pageSize);
