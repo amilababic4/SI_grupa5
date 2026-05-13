@@ -151,3 +151,74 @@ Tokom ovog sprinta implementiraju se funkcionalnosti vezane za:
 | **Pretpostavke / Otvorena pitanja** | Sistem vodi evidenciju o ukupnom i dostupnom broju primjeraka knjiga. <br> Da li se rezervisani primjerci računaju kao nedostupni? |
  **Veze i zavisnosti** | Implementirano zaduživanje i vraćanje knjiga, kao i prikaz detalja knjige. |
 
+
+<br>
+
+---
+
+## PB-35: Pregled vlastitih zaduženja
+
+### Naziv: Prikaz detalja svakog aktivnog zaduženja  
+### US-62: Kao član biblioteke, želim vidjeti sve knjige koje trenutno imam zadužene, kako bih imao pregled svojih obaveza.
+
+**Acceptance Criteria:**
+- Kada je korisnik prijavljen u sistem, tada može otvoriti sekciju "Moja zaduženja"
+- Kada korisnik otvori ovu sekciju, tada se prikazuje lista svih aktivnih zaduženja
+- Za svako zaduženje prikazuje se naziv knjige i datum zaduživanja
+- Ako član nema aktivnih zaduženja, tada se prikazuje poruka "Nema aktivnih zaduženja"
+- Sistem ne smije prikazivati zaduženja drugih korisnika
+
+---
+
+| **Prioritet** | Visok |
+|---------------|-------|
+| **Poslovna vrijednost** | Omogućava članovima biblioteke jednostavan pregled trenutno posuđenih knjiga i njihovih obaveza. |
+| **Pretpostavke / Otvorena pitanja** | Sistem već vodi evidenciju aktivnih zaduženja korisnika. |
+| **Veze i zavisnosti** | Implementirano zaduživanje knjiga i autentifikacija korisnika. |
+
+---
+
+<br>
+
+## PB-36: Pregled trenutnih zaduženja
+
+### Naziv: Pregled aktivnih zaduženja po članovima  
+### US-65: Kao bibliotekar, želim vidjeti sva trenutno aktivna zaduženja u sistemu, kako bih mogao pratiti koje knjige su trenutno posuđene i kod kojih članova.
+
+**Acceptance Criteria:**
+- Kada je bibliotekar prijavljen u sistem, tada može otvoriti sekciju "Aktivna zaduženja"
+- Kada se sekcija otvori, tada se prikazuje lista svih aktivnih zaduženja
+- Za svako zaduženje prikazuju se: ime i email člana, naziv knjige, datum zaduživanja i rok vraćanja
+- Ako ne postoje aktivna zaduženja, tada se prikazuje poruka "Nema aktivnih zaduženja"
+
+---
+
+| **Prioritet** | Visok |
+|---------------|-------|
+| **Poslovna vrijednost** | Omogućava bibliotekarima efikasnije praćenje zaduženih knjiga i upravljanje aktivnim zaduženjima. |
+| **Pretpostavke / Otvorena pitanja** | Bibliotekar ima pristup administrativnom dijelu sistema i evidenciji zaduženja. |
+| **Veze i zavisnosti** | Implementirano zaduživanje knjiga i korisničke uloge sistema. |
+
+---
+
+<br>
+
+## PB-37: Pregled historije zaduženja
+
+### Naziv: Pregled prethodnih zaduženja člana  
+### US-66: Kao član biblioteke, želim vidjeti historiju svojih prethodnih zaduženja, kako bih imao pregled ranije posuđenih knjiga.
+
+**Acceptance Criteria:**
+- Kada je korisnik prijavljen u sistem, tada može otvoriti sekciju "Historija zaduženja"
+- Kada korisnik otvori sekciju, tada sistem prikazuje listu prethodnih zaduženja
+- Za svako prethodno zaduženje prikazuju se naziv knjige, datum zaduživanja i datum vraćanja
+- Ako korisnik nema prethodnih zaduženja, tada se prikazuje poruka "Nema historije zaduženja"
+- Sistem prikazuje samo historiju prijavljenog korisnika
+
+---
+
+| **Prioritet** | Nizak |
+|---------------|-------|
+| **Poslovna vrijednost** | Omogućava članovima biblioteke pregled ranije korištenih knjiga i bolju evidenciju vlastitih aktivnosti. |
+| **Pretpostavke / Otvorena pitanja** | Sistem čuva historijske podatke o vraćenim zaduženjima. |
+| **Veze i zavisnosti** | Implementirano zaduživanje i vraćanje knjiga. |
