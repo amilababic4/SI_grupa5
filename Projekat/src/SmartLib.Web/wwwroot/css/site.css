@@ -443,6 +443,7 @@ main,
 .book-form-card {
     max-width: 760px;
     margin-top: 1rem;
+    margin-inline: auto;
 }
 
 .form-group {
@@ -850,6 +851,51 @@ td {
 .empty-note {
     margin: 0;
     color: var(--sl-muted);
+}
+
+/* ================================
+   Details — poboljšan book layout
+   ================================ */
+
+.details-book-layout {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 0;
+    align-items: stretch;
+}
+
+.details-cover-wrapper {
+    margin: -1.35rem 0 -1.35rem -1.35rem;
+    border-radius: var(--sl-radius-lg) 0 0 var(--sl-radius-lg);
+    overflow: hidden;
+    min-height: 280px;
+}
+
+.details-cover-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.details-info-content {
+    padding: 1.5rem 1rem 1rem 1.75rem;
+}
+
+@media (max-width: 640px) {
+    .details-book-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .details-cover-wrapper {
+        margin: -1.35rem -1.35rem 0 -1.35rem;
+        border-radius: var(--sl-radius-lg) var(--sl-radius-lg) 0 0;
+        min-height: 220px;
+    }
+
+    .details-info-content {
+        padding: 1.25rem 0.5rem 0.5rem;
+    }
 }
 
 /* ================================
