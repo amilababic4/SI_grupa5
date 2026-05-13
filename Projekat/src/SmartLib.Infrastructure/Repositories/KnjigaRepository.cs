@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+ï»¿using Microsoft.EntityFrameworkCore;
 using SmartLib.Core.Interfaces;
 using SmartLib.Core.Models;
 using SmartLib.Infrastructure.Data;
@@ -94,20 +94,20 @@ namespace SmartLib.Infrastructure.Repositories
 
         public async Task<bool> DeleteAsync(int id)
         {
-            // 1. Uèitavamo knjigu ZAJEDNO sa primjercima
+            // 1. UÃ¨itavamo knjigu ZAJEDNO sa primjercima
             var knjiga = await _db.Knjige
                 .Include(k => k.Primjerci)
                 .FirstOrDefaultAsync(k => k.Id == id);
 
             if (knjiga == null) return false;
 
-            // 2. Ruèno uklanjamo sve primjerke iz baze podataka           
+            // 2. RuÃ¨no uklanjamo sve primjerke iz baze podataka           
             if (knjiga.Primjerci != null && knjiga.Primjerci.Any())
             {
                 _db.Primjerci.RemoveRange(knjiga.Primjerci);
             }
 
-            // 3. Sada brišemo knjigu
+            // 3. Sada briÅ¡emo knjigu
             _db.Knjige.Remove(knjiga);
 
             await _db.SaveChangesAsync();
@@ -121,5 +121,15 @@ namespace SmartLib.Infrastructure.Repositories
                 .AnyAsync(z => z.Primjerak.KnjigaId == id &&
                               (z.Status == "aktivno" || z.DatumPlaniranogVracanja == null));
         }
+
+        public async Task<IEnumerable<Knjiga>> GetRandomAsync(int count)
+        {
+            return await _db.Knjige
+                .Include(k => k.Kategorija)
+                .OrderBy(k => Guid.NewGuid())
+                .Take(count)
+                .ToListAsync();
+        }
     }
 }
+

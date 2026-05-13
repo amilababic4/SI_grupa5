@@ -1,3 +1,4 @@
+@model List<SmartLib.Core.DTOs.KnjigaDto>
 @{
     ViewData["Title"] = "SmartLib";
     ViewData["BodyClass"] = "home-page";
@@ -14,13 +15,63 @@
         <p class="home-lead">
             Moderna platforma za biblioteku koja omogućava jednostavno upravljanje knjigama, članovima i zaduženjima na jednom mjestu.
         </p>
-        @* Dugme se prikazuje samo ako korisnik NIJE autentifikovan *@
-        @if (!(User.Identity?.IsAuthenticated ?? false))
-        {
-            <a asp-controller="Auth" asp-action="Login" class="btn btn-primary btn-hero">Prijava u sistem</a>
-        }
+        @* Search Bar *@
+        <div class="home-search-container">
+            <form asp-controller="Knjiga" asp-action="Index" method="get" class="hero-search-form">
+                <input type="text" name="naslov" class="hero-search-input" placeholder="Pretražite katalog knjiga..." />
+                <button type="submit" class="hero-search-btn">Traži</button>
+            </form>
+        </div>
+
+        @* Dugmad *@
+        <div class="home-hero-actions">
+            @if (User.Identity?.IsAuthenticated ?? false)
+            {
+                <a asp-controller="Knjiga" asp-action="Index" class="btn btn-secondary btn-home-secondary">Pregledaj katalog</a>
+            }
+            @if (!(User.Identity?.IsAuthenticated ?? false))
+            {
+                <a asp-controller="Auth" asp-action="Login" class="btn btn-primary btn-hero">Prijava u sistem</a>
+            }
+        </div>
+
+
     </div>
 </section>
+
+@if (Model != null && Model.Any())
+{
+    <section class="home-featured-books" aria-label="Popularne knjige">
+        <div class="container">
+            <div class="featured-header">
+                <h2>Nasumični naslovi</h2>
+                <a asp-controller="Knjiga" asp-action="Index" class="browse-more">vidi sve...</a>
+            </div>
+
+            <div class="books-grid">
+                @foreach (var knjiga in Model)
+                {
+                    <a asp-controller="Knjiga" asp-action="Details" asp-route-id="@knjiga.Id" class="book-card">
+                        <div class="book-cover-wrapper">
+                            <img src="@Url.Action("Korice", "Knjiga", new { isbn = knjiga.Isbn, size = "L" })" alt="@knjiga.Naslov" loading="lazy" />
+                            <div class="book-overlay">
+                                <span class="view-details-icon">
+                                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                                </span>
+                                <span class="view-details-text">Detalji</span>
+                            </div>
+                        </div>
+                        <div class="book-info">
+                            <span class="book-title">@knjiga.Naslov</span>
+                            <span class="book-year">@knjiga.GodinaIzdanja.</span>
+                        </div>
+                    </a>
+                }
+            </div>
+        </div>
+    </section>
+}
+
 
 <section class="home-features" aria-label="Funkcionalnosti sistema">
     <div class="home-features-inner">

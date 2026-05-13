@@ -32,59 +32,43 @@
             </div>
 
             <ul class="nav-links">
-                @if (isFrontPage)
+                @if (User.Identity?.IsAuthenticated == true)
                 {
-                    if (User.Identity?.IsAuthenticated == true)
+                    <li><a asp-controller="Knjiga" asp-action="Index">Katalog</a></li>
+                }
+
+
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    @if (User.IsInRole("Bibliotekar") || User.IsInRole("Administrator"))
                     {
-                        <li>
-                            <a asp-controller="Knjiga" asp-action="Index" class="nav-login-link">Dashboard</a>
-                        </li>
+                        <li><a asp-controller="Zaduzenje" asp-action="Index">Zaduženja</a></li>
+                        <li><a asp-controller="Korisnik" asp-action="Index">Članovi</a></li>
+                        <li><a asp-controller="Kategorija" asp-action="Index">Kategorije</a></li>
                     }
                     else
                     {
+                        <li><a asp-controller="Zaduzenje" asp-action="Moja">Moja zaduženja</a></li>
+                    }
+
+                    @if (!string.IsNullOrEmpty(User.Identity?.Name))
+                    {
                         <li>
-                            <a asp-controller="Auth" asp-action="Login" class="nav-login-link">Prijava</a>
+                            <span class="nav-user-name">@User.Identity.Name</span>
                         </li>
                     }
+
+                    <li>
+                        <form asp-controller="Auth" asp-action="Logout" method="post" class="nav-form">
+                            <button type="submit" class="nav-link-btn">Odjava</button>
+                        </form>
+                    </li>
                 }
                 else
                 {
-                    @if (User.Identity?.IsAuthenticated == true)
-                    {
-                        <li><a asp-controller="Knjiga" asp-action="Index">Katalog</a></li>
-
-                        @if (User.IsInRole("Bibliotekar") || User.IsInRole("Administrator"))
-                        {
-                            <li><a asp-controller="Zaduzenje" asp-action="Index">Zaduženja</a></li>
-                            <li><a asp-controller="Knjiga" asp-action="Create">Nova knjiga</a></li>
-                            <li><a asp-controller="Korisnik" asp-action="Index">Članovi</a></li>
-                            <li><a asp-controller="Korisnik" asp-action="Create">Kreiraj člana</a></li>
-                            <li><a asp-controller="Kategorija" asp-action="Index">Kategorije</a></li>
-                        }
-                        else
-                        {
-                            <li><a asp-controller="Zaduzenje" asp-action="Moja">Moja zaduženja</a></li>
-                        }
-
-                        @if (!string.IsNullOrEmpty(User.Identity?.Name))
-                        {
-                            <li>
-                                <span class="nav-user-name">@User.Identity.Name</span>
-                            </li>
-                        }
-
-                        <li>
-                            <form asp-controller="Auth" asp-action="Logout" method="post" class="nav-form">
-                                <button type="submit" class="nav-link-btn">Odjava</button>
-                            </form>
-                        </li>
-                    }
-                    else
-                    {
-                        <li>
-                            <a asp-controller="Auth" asp-action="Login" class="nav-login-link">Prijava</a>
-                        </li>
-                    }
+                    <li>
+                        <a asp-controller="Auth" asp-action="Login" class="nav-login-link">Prijava</a>
+                    </li>
                 }
             </ul>
         </div>

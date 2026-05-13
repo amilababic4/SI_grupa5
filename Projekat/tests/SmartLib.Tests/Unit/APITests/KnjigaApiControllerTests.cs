@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using Moq;
+using Moq.Protected;
 using SmartLib.API.Controllers;
 using SmartLib.Core.DTOs;
 using SmartLib.Core.Interfaces;
@@ -24,7 +26,9 @@ namespace SmartLib.Tests.Unit.APITests
             _controller = new KnjigaController(
                 _knjigaMock.Object,
                 _primjerakMock.Object,
-                _kategorijaMock.Object);
+                _kategorijaMock.Object,
+                new Mock<IHttpClientFactory>().Object,
+                new Mock<IMemoryCache>().Object);
         }
 
         // Pomoćne metode za testne podatke
@@ -466,6 +470,232 @@ namespace SmartLib.Tests.Unit.APITests
             var result = await _controller.Create(dto);
 
             Assert.IsType<CreatedAtActionResult>(result.Result);
+        }
+
+        // ── Korice ────────────────────────────────────────────────────────────────
+
+        [Fact]
+        public async Task Korice_PrazanIsbn_VracaNotFound()
+        {
+            // Pokriva: if (string.IsNullOrEmpty(isbn)) return NotFound();
+            var result = await _controller.Korice("");
+
+            Assert.IsType<NotFoundResult>(result);
+        }
+
+        [Fact]
+        public async Task Korice_NullIsbn_VracaNotFound()
+        {
+            var result = await _controller.Korice(null!);
+
+            Assert.IsType<NotFoundResult>(result);
+        }
+
+        [Fact]
+        public async Task Korice_HttpClientVracaGresku_VracaNotFound()
+        {
+            // Pokriva: catch blok i fallback NotFound kad HTTP poziv ne uspije
+            var handlerMock = new Mock<HttpMessageHandler>();
+            handlerMock
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>())
+                .ThrowsAsync(new HttpRequestException("Network error"));
+
+            var httpClient = new HttpClient(handlerMock.Object);
+            var httpClientFactoryMock = new Mock<IHttpClientFactory>();
+            httpClientFactoryMock.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(httpClient);
+
+            var cacheMock = new Mock<IMemoryCache>();
+            object? cacheOut = null;
+            cacheMock.Setup(c => c.TryGetValue(It.IsAny<object>(), out cacheOut)).Returns(false);
+
+            var controller = new KnjigaController(
+                _knjigaMock.Object,
+                _primjerakMock.Object,
+                _kategorijaMock.Object,
+                httpClientFactoryMock.Object,
+                cacheMock.Object);
+
+            var result = await controller.Korice("1234567890");
+
+            Assert.IsType<NotFoundResult>(result);
+        }
+
+        [Fact]
+        public async Task Korice_HttpClientVracaNeuspjesanStatusCode_VracaNotFound()
+        {
+            // Pokriva: if (!response.IsSuccessStatusCode) → pad na return NotFound()
+            var handlerMock = new Mock<HttpMessageHandler>();
+            handlerMock
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(new HttpResponseMessage(System.Net.HttpStatusCode.NotFound));
+
+            var httpClient = new HttpClient(handlerMock.Object);
+            var httpClientFactoryMock = new Mock<IHttpClientFactory>();
+            httpClientFactoryMock.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(httpClient);
+
+            var cacheMock = new Mock<IMemoryCache>();
+            object? cacheOut = null;
+            cacheMock.Setup(c => c.TryGetValue(It.IsAny<object>(), out cacheOut)).Returns(false);
+
+            var controller = new KnjigaController(
+                _knjigaMock.Object,
+                _primjerakMock.Object,
+                _kategorijaMock.Object,
+                httpClientFactoryMock.Object,
+                cacheMock.Object);
+
+            var result = await controller.Korice("1234567890");
+
+            Assert.IsType<NotFoundResult>(result);
+        }
+
+        [Fact]
+        public async Task Korice_SljedeciPozivKoristiCache_VracaFile()
+        {
+            // Pokriva: if (_cache.TryGetValue(...)) return File(...)
+            var imageBytes = new byte[] { 1, 2, 3 };
+            object? cacheOut = (object)imageBytes;
+
+            var cacheMock = new Mock<IMemoryCache>();
+            cacheMock
+                .Setup(c => c.TryGetValue(It.IsAny<object>(), out cacheOut))
+                .Returns(true);
+
+            var controller = new KnjigaController(
+                _knjigaMock.Object,
+                _primjerakMock.Object,
+                _kategorijaMock.Object,
+                new Mock<IHttpClientFactory>().Object,
+                cacheMock.Object);
+
+            var result = await controller.Korice("1234567890");
+
+            Assert.IsType<FileContentResult>(result);
+        }
+
+        [Fact]
+        public async Task Korice_UspjesanHttpPoziv_VracaFileISpremaUCache()
+        {
+            // Pokriva: uspješan HTTP poziv, _cache.Set i return File(imageBytes)
+            var imageBytes = new byte[] { 0xFF, 0xD8, 0xFF }; // JPEG magic bytes
+
+            var handlerMock = new Mock<HttpMessageHandler>();
+            handlerMock
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(new HttpResponseMessage(System.Net.HttpStatusCode.OK)
+                {
+                    Content = new ByteArrayContent(imageBytes)
+                });
+
+            var httpClient = new HttpClient(handlerMock.Object);
+            var httpClientFactoryMock = new Mock<IHttpClientFactory>();
+            httpClientFactoryMock.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(httpClient);
+
+            var cacheMock = new Mock<IMemoryCache>();
+            object? cacheOut = null;
+            cacheMock.Setup(c => c.TryGetValue(It.IsAny<object>(), out cacheOut)).Returns(false);
+
+            // IMemoryCache.Set je extension metoda, trebamo mockovati CreateEntry
+            var cacheEntryMock = new Mock<ICacheEntry>();
+            cacheEntryMock.SetupAllProperties();
+            cacheMock.Setup(c => c.CreateEntry(It.IsAny<object>())).Returns(cacheEntryMock.Object);
+
+            var controller = new KnjigaController(
+                _knjigaMock.Object,
+                _primjerakMock.Object,
+                _kategorijaMock.Object,
+                httpClientFactoryMock.Object,
+                cacheMock.Object);
+
+            var result = await controller.Korice("1234567890");
+
+            Assert.IsType<FileContentResult>(result);
+            cacheMock.Verify(c => c.CreateEntry(It.IsAny<object>()), Times.Once);
+        }
+
+        // ── Create — ModelState invalid ───────────────────────────────────────────
+
+        [Fact]
+        public async Task Create_ModelStateInvalid_VracaBadRequest()
+        {
+            // Pokriva: if (!ModelState.IsValid) return BadRequest(ModelState);
+            _controller.ModelState.AddModelError("Naslov", "Naslov je obavezan.");
+
+            var result = await _controller.Create(new KnjigaCreateDto());
+
+            Assert.IsType<BadRequestObjectResult>(result.Result);
+        }
+
+        // ── Delete — catch blok ───────────────────────────────────────────────────
+
+        [Fact]
+        public async Task Delete_DeleteAsyncBacaException_Vraca500()
+        {
+            // Pokriva: catch (Exception ex) → StatusCode(500, ...)
+            _knjigaMock.Setup(r => r.HasActiveLoansAsync(1)).ReturnsAsync(false);
+            _knjigaMock.Setup(r => r.DeleteAsync(1)).ThrowsAsync(new Exception("DB greška"));
+
+            var result = await _controller.Delete(1);
+
+            var statusResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(500, statusResult.StatusCode);
+            Assert.Contains("Sistemska greška", statusResult.Value!.ToString());
+        }
+
+        // ── MapToDto — BrojDostupnih ──────────────────────────────────────────────
+
+        [Fact]
+        public async Task GetById_KnjigaSaMjesovitimPrimjercima_BrojDostupnihIspravan()
+        {
+            // Pokriva: k.Primjerci.Count(p => p.Status == "dostupan")
+            var knjiga = TestKnjiga();
+            knjiga.Primjerci = new List<Primjerak>
+    {
+        new Primjerak { Id = 1, Status = "dostupan" },
+        new Primjerak { Id = 2, Status = "dostupan" },
+        new Primjerak { Id = 3, Status = "zadužen" },  // nije dostupan
+        new Primjerak { Id = 4, Status = "otpisan" }   // nije dostupan
+    };
+
+            _knjigaMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(knjiga);
+
+            var result = await _controller.GetById(1);
+
+            var ok = Assert.IsType<OkObjectResult>(result.Result);
+            var dto = Assert.IsType<KnjigaDto>(ok.Value);
+            Assert.Equal(4, dto.BrojPrimjeraka);
+            Assert.Equal(2, dto.BrojDostupnih); // samo 2 dostupna
+        }
+
+        [Fact]
+        public async Task GetById_SviPrimjerciZaduzeni_BrojDostupnihJeNula()
+        {
+            var knjiga = TestKnjiga();
+            knjiga.Primjerci = new List<Primjerak>
+    {
+        new Primjerak { Id = 1, Status = "zadužen" },
+        new Primjerak { Id = 2, Status = "zadužen" }
+    };
+
+            _knjigaMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(knjiga);
+
+            var result = await _controller.GetById(1);
+
+            var ok = Assert.IsType<OkObjectResult>(result.Result);
+            var dto = Assert.IsType<KnjigaDto>(ok.Value);
+            Assert.Equal(0, dto.BrojDostupnih);
         }
     }
 }

@@ -1,0 +1,36 @@
+name: Build, Push Docker & Deploy to Render
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    types: [closed]
+    branches: ["main"]
+
+jobs:
+  build-push-deploy:
+    if: |
+      github.event_name == 'push' ||
+      (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build image
+        run: docker build -f Projekat/src/SmartLib.Web/Dockerfile -t smartlib-web:latest Projekat
+
+      - name: Tag image
+        run: docker tag smartlib-web:latest docker.io/${{ secrets.DOCKERHUB_USERNAME }}/smartlib-web:latest
+
+      - name: Push image
+        run: docker push docker.io/${{ secrets.DOCKERHUB_USERNAME }}/smartlib-web:latest
+
+      - name: Trigger Render deploy
+        run: curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"

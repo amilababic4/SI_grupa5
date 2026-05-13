@@ -1,18 +1,59 @@
 # SmartLib — Bibliotečki informacioni sistem
-## Izvještaj o testiranju — Sprint 5 & 6
+## Izvještaj o testiranju
 
-**Datum kreiranja izvještaja:** 06.05.2026.  
+**Datum kreiranja izvještaja:** 12.05.2026.  
 **Okruženje:** Development / Test (In-Memory DB), Chrome (za UI testove)  
 **Alati:** xUnit, WebApplicationFactory, Browser DevTools, Playwright, Fine Code Coverage 
 
 ---
 
+> ## NAPOMENA: Sprint 7 — Pregled novododanih testnih aktivnosti
+>
+> U okviru Sprinta 7 provedeno je testiranje novih funkcionalnosti u skladu sa definiranom test strategijom. Svi prethodno implementirani testovi uspješno su zadržali status *Prošao* kroz kontinuirano regresiono testiranje. Pregled svih testnih slučajeva dodanih u okviru Sprinta 7 dat je u nastavku.
+>
+> ---
+>
+> ### Zaduživanje i vraćanje knjiga
+>
+> - **Unit testovi — API kontroler** (`ZaduzenjeApiControllerTests`, 39 testova): pokrivaju kreiranje zaduženja, evidenciju vraćanja, pregled aktivnih i vlastitih zaduženja, filtriranje, computed polja (kašnjenje, blizina roka) te granične slučajeve poput duplikata i nedostupnih primjeraka.
+> - **Unit testovi — Web kontroler** (`ZaduzenjeWebControllerTests`, 29 testova): validiraju iste tokove kroz MVC layer, uključujući redirect logiku, TempData poruke i ispravnost ViewBag dropdownova.
+> - **Integracijski testovi** (`ZaduzenjeIntegrationTests`, 17 testova): kroz realni HTTP pipeline i in-memory bazu validiraju autorizaciju, kreiranje zaduženja, filtriranje, historiju te proces vraćanja knjige.
+> - **UI testovi** (2 testa): Playwright scenariji koji pokrivaju kompletan E2E tok kreiranja novog zaduženja i evidentiranja vraćanja knjige kroz browser.
+>
+> ---
+>
+> ### Pretraga i prikaz knjiga
+>
+> Implementirane i testirane su sljedeće funkcionalnosti:
+> - pretraga knjiga po naslovu i autoru uz mogućnost reseta pretrage,
+> - prikaz stranice sa detaljnim informacijama o knjizi (uključujući obradu slučaja kada knjiga ne postoji),
+> - prikaz dostupnosti i broja slobodnih primjeraka u realnom vremenu.
+>
+> Za sve navedene funkcionalnosti dodani su **unit testovi** (API i Web kontroleri), **integracijski testovi**, **sigurnosni / penetracijski testovi** te **UI testovi** — čime je pokrivenost ovih funkcionalnosti usklađena s ostalim modulima sistema.
+>
+> ---
+>
+> ### UAT testiranje
+>
+> Manuelno prihvatno testiranje provedeno je od strane svih članova tima. Dodani su novi UAT scenariji koji pokrivaju:
+> - zaduživanje knjige — uspješan tok (UAT-23) i slučaj nedostupnog primjerka (UAT-24),
+> - vraćanje knjige (UAT-25),
+> - pregled vlastitih zaduženja od strane člana (UAT-26).
+>
+> ---
+>
+> ### Regresiono testiranje
+>
+> Nakon implementacije svih novih funkcionalnosti izvršeno je regresiono testiranje kompletnog test seta. Posebna pažnja posvećena je modulu zaduživanja i vraćanja knjiga — verificirano je da nove operacije ne narušavaju postojeću logiku upravljanja knjigama, primjercima i korisnicima, te da se statusi primjeraka i svi povezani zapisi konzistentno ažuriraju bez uticaja na ostatak sistema.
+
+---
+
 ## 1. Pregled testiranja
-Ovaj dokument predstavlja formalni izvještaj o testiranju provedenom u okviru Sprinta 5 i 6 projekta SmartLib. Testiranje je provedeno u skladu sa definiranom Test strategijom (Sprint 3) i obuhvata sve implementirane funkcionalnosti (Knjige, Kategorije, Primjerci, Korisnici, Autentifikacija).
+Ovaj dokument predstavlja formalni izvještaj o testiranju provedenom tokom svih razvojnih faza zaključno sa Sprintom 7. Testiranje je provedeno u skladu sa definiranom Test strategijom (Sprint 3) i obuhvata sve funkcionalnosti implementirane u okviru Sprintova 5, 6 i 7 projekta SmartLib.
 
 | Ukupno testova | Prošlo | Preskočeno (Skip) | Greška |
 | :--- | :--- | :--- | :--- |
-| **384** | **384** | **0** | **0** |
+| **486** | **486** | **0** | **0** |
 
 ---
 
@@ -32,7 +73,7 @@ Ovaj dokument predstavlja formalni izvještaj o testiranju provedenom u okviru S
 * **Branch Coverage:** ~97% (gotovo svi logički putevi su validirani).
 
 **Rezultati testiranja:**
-Svi planirani unit testovi (ukupno 221) su uspješno izvršeni. 
+Svi planirani unit testovi (ukupno 313) su uspješno izvršeni. 
 
 ![Rezultati unit testiranja](./images/rezultati-unit-testiranja.png)
 
@@ -60,7 +101,7 @@ Svi planirani unit testovi (ukupno 221) su uspješno izvršeni.
 - **Autentifikacija i SQL Injection** — testiraju otpornost login endpointa na zlonamjerne unose i valjanost JWT mehanizma
 - **XSS zaštita** — testiraju da li sistem odbija ili neutralizira skripte u korisničkim unosima
 - **Granične vrijednosti** — testiraju ponašanje sistema na rubnim i nevažećim ulazima
-> **Napomena:** Provjere 401 bez tokena i 403 za eskalaciju privilegija (RBAC) namjerno su izostavljene iz sigurnosnih testova jer su u potpunosti pokrivene integracijskim testovima (Auth, Korisnik, Kategorija, Knjiga, Primjerak).
+> **Napomena:** Provjere 401 bez tokena i 403 za eskalaciju privilegija (RBAC) namjerno su izostavljene iz sigurnosnih testova jer su u potpunosti pokrivene integracijskim testovima.
  
 **Rezultati testiranja:**  
 Svi planirani sigurnosni testovi su uspješno izvršeni.
@@ -75,7 +116,6 @@ Svi planirani sigurnosni testovi su uspješno izvršeni.
 > * **PT-04 / PT-05:** Lažni i modificirani JWT token (US-08)
 > * **PT-06:** Arhitekturalni rizik — stari JWT deaktiviranog korisnika (US-09)
 > * **PT-07 / PT-08:** XSS u registracijskom obrascu i nazivu kategorije (US-01, US-02, US-30)
-> * **PT-09:** Path Traversal / Injection u ISBN polju (US-25)
 
 
 ---
@@ -103,6 +143,9 @@ Svi planirani sigurnosni testovi su uspješno izvršeni.
 
 * **Paginacija i filtriranje:**
     Nakon značajnog povećanja broja testnih podataka u bazi tokom Sprinta 6, ponovo je testirana paginacija u katalogu. Potvrđeno je da sistem ispravno raspoređuje knjige po stranicama i da navigacija funkcioniše bez gubitka sinhronizacije podataka u prikazu.
+
+* **Evidentiranje zaduživanja i vraćanja knjiga:** 
+    Nakon implementacije funkcionalnosti zaduživanja i vraćanja knjiga, izvršeno je regresiono testiranje kako bi se potvrdilo da nove operacije ne utiču na postojeću logiku upravljanja knjigama i korisnicima. Testiranjem je potvrđeno da se status knjige ispravno mijenja prilikom zaduživanja i vraćanja, te da se svi povezani zapisi (korisnik–knjiga relacija, datumi zaduženja i povrata) konzistentno ažuriraju u bazi podataka bez narušavanja ostalih funkcionalnosti sistema.
 
 ---
 
@@ -328,6 +371,54 @@ Ovi unit testovi pokrivaju upravljanje fizičkim primjercima knjiga, uključuju�
 
 ---
 
+##### Zaduženje API (`ZaduzenjeApiControllerTests`)
+
+Ovi unit testovi pokrivaju upravljanje zaduženjima i vraćanjem knjiga, autorizaciju prijavljenog korisnika, te ključna poslovna pravila koja sprječavaju zaduživanje nedostupnih primjeraka i vraćanje već zatvorenih zaduženja.
+
+| ID | Naziv testa | Opis | Testni koraci | Očekivani rezultat | Stvarni rezultat | US | Status |
+|:-:|:---|:---|:---|:---|:---|:-:|:---|
+| 1 | GetActive_BezFiltera_VracaOkSaListom | Pregled svih aktivnih zaduženja | 1. Pozvati GET /api/zaduzenje | HTTP 200 OK + lista zaduženja | Lista vraćena | US-65 | Prošao |
+| 2 | GetActive_SaFilteromClan_VracaSamoOdgovarajuca | Filter po imenu člana | 1. Pozvati GET sa query param clan | HTTP 200 + filtrirana lista | Filtrirano po imenu | US-66 | Prošao |
+| 3 | GetActive_FilterPoEmailu_VracaOdgovarajuca | Filter po email adresi | 1. Pozvati GET sa email vrijednošću | HTTP 200 + odgovarajuća zaduženja | Filtrirano po emailu | US-66 | Prošao |
+| 4 | GetActive_PraznaLista_VracaOkSaPraznimNizom | Nema aktivnih zaduženja | 1. Pozvati GET kada nema zaduženja | HTTP 200 + prazan niz | Prazan niz vraćen | US-65 | Prošao |
+| 5 | GetActive_WhitespaceFilter_TretiraSeKaoNull | Whitespace filter se ignoriše | 1. Poslati filter od samih razmaka | HTTP 200 + nefiltrirana lista | Lista vraćena bez filtriranja | US-66 | Prošao |
+| 6 | GetMine_PrijavljenKorisnik_VracaOkSaListom | Vlastita zaduženja prijavljenog korisnika | 1. Autentificirati korisnika<br>2. GET /api/zaduzenje/moja | HTTP 200 + lista zaduženja | Lista vraćena | US-62 | Prošao |
+| 7 | GetMine_PrijavljenKorisnik_PrazneListe_VracaOk | Korisnik nema zaduženja | 1. Autentificirati korisnika<br>2. GET /api/zaduzenje/moja | HTTP 200 + prazan niz | Prazan niz vraćen | US-63 | Prošao |
+| 8 | GetMine_NijeIdentificiran_VracaUnauthorized | Neidentificiran korisnik | 1. Request bez NameIdentifier claima | HTTP 401 Unauthorized | Pristup odbijen | US-64 | Prošao |
+| 9 | GetMine_NevalidanKorisnikIdFormat_VracaUnauthorized | Neispravan format ID-a u tokenu | 1. Claim postoji ali nije broj | HTTP 401 Unauthorized | Pristup odbijen | US-64 | Prošao |
+| 10 | GetById_ZaduzenjePostoji_VracaOkIObjekt | Detalji jednog zaduženja | 1. Pozvati GET /api/zaduzenje/{id} | HTTP 200 OK + objekt zaduženja | Detalji vraćeni | US-67 | Prošao |
+| 11 | GetById_ZaduzenjeNePostoji_VracaNotFound | Nepostojeće zaduženje | 1. Pozvati GET sa nevalidnim ID | HTTP 404 Not Found | 404 vraćen | US-67 | Prošao |
+| 12 | GetHistory_KorisnikPostoji_VracaOkSaListom | Historija zaduženja člana | 1. Pozvati GET /api/zaduzenje/historija/{id} | HTTP 200 + lista historije | Historija vraćena | US-68 | Prošao |
+| 13 | GetHistory_KorisnikNePostoji_VracaNotFound | Historija za nepostojećeg korisnika | 1. Pozvati GET sa nevalidnim korisnikId | HTTP 404 Not Found | 404 vraćen | US-68 | Prošao |
+| 14 | GetHistory_KorisnikNemaZaduzenja_VracaOkSaPraznimNizom | Korisnik bez historije | 1. Pozvati GET za korisnika bez zaduženja | HTTP 200 + prazan niz | Prazan niz vraćen | US-68 | Prošao |
+| 15 | Zaduzi_ModelStateInvalid_VracaBadRequest | Nevaljani podaci u zahtjevu | 1. Poslati DTO sa greškom u ModelState | HTTP 400 BadRequest | Greška validacije vraćena | US-44 | Prošao |
+| 16 | Zaduzi_PrimjerakNePostoji_VracaBadRequest | Primjerak nije pronađen | 1. Poslati nepostojeći PrimjerakId | HTTP 400 BadRequest | Greška vraćena | US-47 | Prošao |
+| 17 | Zaduzi_PrimjerakNijeDostupan_VracaBadRequest | Primjerak nije u statusu dostupan | 1. Poslati PrimjerakId sa statusom "zadužen" | HTTP 400 BadRequest | Zaduživanje blokirano | US-47 | Prošao |
+| 18 | Zaduzi_PrimjerakVecImaAktivnoZaduzenje_VracaBadRequest | Duplikat aktivnog zaduženja | 1. Primjerak već ima aktivno zaduženje<br>2. Pokušaj novog zaduživanja | HTTP 400 BadRequest | Duplikat blokiran | US-47 | Prošao |
+| 19 | Zaduzi_DatumPovratkaUProslosti_VracaBadRequest | Datum povratka u prošlosti | 1. Poslati datum povratka koji je prošao | HTTP 400 BadRequest | Greška vraćena | US-46 | Prošao |
+| 20 | Zaduzi_ValidanPayloadBezDatuma_VracaCreated | Zaduživanje bez datuma (automatski rok) | 1. Poslati validan DTO bez DatumPovratka | HTTP 201 Created | Zaduženje kreirano, rok +2 mjeseca | US-44 | Prošao |
+| 21 | Zaduzi_ValidanPayloadSaDatumom_VracaCreated | Zaduživanje s ručno unesenim datumom | 1. Poslati validan DTO sa DatumPovratka | HTTP 201 Created | Zaduženje kreirano s unesenim rokom | US-46 | Prošao |
+| 22 | Zaduzi_ValidanPayload_AzuriraStatusPrimjerka | Status primjerka se mijenja na zadužen | 1. Kreirati zaduženje<br>2. Provjeriti UpdateStatusAsync poziv | UpdateStatusAsync pozvan s "zadužen" | Primjerak označen zaduženim | US-47 | Prošao |
+| 23 | Zaduzi_ValidanPayload_KreiraZaduzenje | CreateAsync se poziva tačno jednom | 1. Kreirati zaduženje<br>2. Verificirati CreateAsync poziv | CreateAsync pozvan jednom | Zaduženje pohranjeno | US-44 | Prošao |
+| 24 | Vrati_ZaduzenjeNePostoji_VracaNotFound | Vraćanje nepostojećeg zaduženja | 1. Pozvati POST /api/zaduzenje/vrati/{id} sa nevalidnim ID | HTTP 404 Not Found | 404 vraćen | US-45 | Prošao |
+| 25 | Vrati_ZaduzenjeNijeAktivno_VracaBadRequest | Vraćanje već zatvorenog zaduženja | 1. Zaduženje ima status "zatvoreno"<br>2. Pokušaj vraćanja | HTTP 400 BadRequest | Vraćanje blokirano | US-45 | Prošao |
+| 26 | Vrati_AktivnoZaduzenje_VracaOk | Uspješno vraćanje knjige | 1. Pozvati POST vrati za aktivno zaduženje | HTTP 200 OK | Vraćanje evidentirano | US-45 | Prošao |
+| 27 | Vrati_AktivnoZaduzenje_StatusSeMijenjaNaZatvoreno | Status zaduženja se mijenja | 1. Vratiti aktivno zaduženje<br>2. Provjeriti status | Status == "zatvoreno" | Status ažuriran | US-45 | Prošao |
+| 28 | Vrati_AktivnoZaduzenje_PrimjerakPostajeDostupan | Primjerak se oslobađa | 1. Vratiti aktivno zaduženje<br>2. Provjeriti UpdateStatusAsync poziv | UpdateStatusAsync pozvan s "dostupan" | Primjerak dostupan | US-45 | Prošao |
+| 29 | Vrati_AktivnoZaduzenje_DatumStvarnogVracanjaJePostavljeno | Datum vraćanja se bilježi | 1. Vratiti aktivno zaduženje<br>2. Provjeriti DatumStvarnogVracanja | DatumStvarnogVracanja != null | Datum pohranjen | US-45 | Prošao |
+| 30 | GetById_ZaduzenjeZakasnilo_JeZakasniloJeTrue | Zakasnilo zaduženje | 1. Zaduženje aktivno s rokom u prošlosti | JeZakasnilo == true u odgovoru | Zakasnilo označeno | US-68 | Prošao |
+| 31 | GetById_ZaduzenjeRokSeBliziZa3Dana_RokSeBliziJeTrue | Rok se bliži za 3 dana | 1. Zaduženje aktivno, rok za 2 dana | RokSeBlizi == true u odgovoru | Upozorenje postavljeno | US-68 | Prošao |
+| 32 | GetById_ZaduzenjeZatvoreno_JeZakasniloJeFalse | Zatvoreno zaduženje nije zakasnilo | 1. Zaduženje zatvoreno, rok prošao | JeZakasnilo == false | Ispravno tretirano | US-68 | Prošao |
+| 33 | GetById_ZaduzenjeBezKorisnika_KorisnikImeJeCrtica | Null korisnik u MapToDto | 1. Zaduženje bez Korisnik objekta | KorisnikIme == "-" | Fallback vrijednost vraćena | US-67 | Prošao |
+| 34 | GetById_ZaduzenjeBezPrimjerka_InventarniBrojJeCrtica | Null primjerak u MapToDto | 1. Zaduženje bez Primjerak objekta | InventarniBroj == "-" | Fallback vrijednost vraćena | US-67 | Prošao |
+| 35 | GetById_ZaduzenjeBezKnjige_KnjigaNaslovJeCrtica | Null knjiga u MapToDto | 1. Primjerak bez Knjiga objekta | KnjigaNaslov == "-" | Fallback vrijednost vraćena | US-67 | Prošao |
+| 36 | GetActive_FilterPoImenu_VracaSamoOdgovarajucaZaduzenja | Filtriranje aktivnih zaduženja po imenu korisnika | 1. Kreirati više zaduženja različitih korisnika<br>2. Pozvati GET sa filterom "marko" | HTTP 200 + samo odgovarajuća zaduženja | Vraćeno samo Markovo zaduženje | US-66 | Prošao |
+| 37 | GetActive_FilterPoEmailu_IskljucujeNepodudarne | Filtriranje aktivnih zaduženja po email adresi | 1. Kreirati više zaduženja različitih email adresa<br>2. Pozvati GET sa email filterom | HTTP 200 + filtrirana lista | Vraćena samo odgovarajuća zaduženja | US-66 | Prošao |
+| 38 | GetActive_FilterKojiNikoNeProlazi_VracaPrazanNiz | Filter bez rezultata | 1. Pozvati GET sa nepostojećim filterom | HTTP 200 + prazan niz | Prazna lista vraćena | US-66 | Prošao |
+| 39 | GetActive_FilterSaKorisnicimaKojiImajuNullKorisnik_NePuca | Obrada zaduženja sa null korisnikom | 1. Kreirati zaduženje bez Korisnik objekta<br>2. Pozvati GET sa filterom | HTTP 200 bez exception-a | Prazna lista vraćena bez greške | US-66 | Prošao |
+
+---
+
 #### 4.1.2 Web Kontroleri — Unit testovi
 
 ##### Auth Web (`AuthWebControllerTests`)
@@ -452,6 +543,41 @@ Ovi unit testovi validiraju web interfejs za upravljanje fizičkim primjercima k
 
 ---
 
+##### Zaduženje Web (`ZaduzenjeWebControllerTests`)
+Ovi unit testovi validiraju upravljanje zaduživanjem i vraćanjem knjiga putem web forme (MVC), pokrivajući kreiranje zaduženja, evidenciju vraćanja, pregled vlastitih i svih aktivnih zaduženja, te ispravno mapiranje computed polja kao što su kašnjenje i blizina roka.
+
+| ID | Naziv testa | Opis | Testni koraci | Očekivani rezultat | Stvarni rezultat | US | Status |
+|:-:|:---|:---|:---|:---|:---|:---|:---|
+| 1 | `Index_VracaAktivnaZaduzenja` | Pregled svih aktivnih zaduženja | Pozvati Index bez filtera uz jedno aktivno zaduženje u repozitoriju | ViewResult sa modelom koji sadrži jedno zaduženje | Kao očekivano | US-65 | Prošao |
+| 2 | `Index_NemaZaduzenja_VracaPrazanModel` | Prikaz prazne liste kada nema aktivnih zaduženja | Pozvati Index uz praznu listu iz repozitorija | ViewResult sa praznom listom zaduženja | Kao očekivano | US-65 | Prošao |
+| 3 | `Index_FilterPoClanu_VracaFilteriranaZaduzenja` | Filtriranje aktivnih zaduženja po imenu člana | Pozvati Index sa filterom "Ana" uz dva zaduženja različitih članova | ViewResult sa jednim zaduženjima koje odgovara filteru | Kao očekivano | US-66 | Prošao |
+| 4 | `Index_AktivnaZaduzenjaSortiranaPoRoku` | Provjera redosljeda prikaza po datumu povratka | Pozvati Index uz dva zaduženja različitih rokova | Lista sortirana uzlazno po datumu planiranog vraćanja | Kao očekivano | US-68 | Prošao |
+| 5 | `Moja_VracaSamoVlastiteAktivnaZaduzenja` | Član vidi samo svoja zaduženja | Autenticirati korisnika ID=10 i pozvati Moja | ViewResult sa zaduženjima samo tog korisnika | Kao očekivano | US-62 | Prošao |
+| 6 | `Moja_KorisnikBezZaduzenja_VracaPrazanSeznam` | Prikaz prazne liste kada član nema zaduženja | Autenticirati korisnika i pozvati Moja uz praznu listu | ViewResult sa praznom listom | Kao očekivano | US-63 | Prošao |
+| 7 | `Zaduzi_ValidniPodaci_KreiraZaduzenjeIRedirektuje` | Uspješno kreiranje zaduženja | Poslati validan DTO sa dostupnim primjerkom | Redirect na Index i zaduženje kreirano | Kao očekivano | US-44 | Prošao |
+| 8 | `Zaduzi_BezDatumaPovratka_PostavljaRok2Mjeseca` | Automatski rok vraćanja od 2 mjeseca | Poslati DTO bez datuma povratka | Zaduženje kreirano sa rokom 2 mjeseca od danas | Kao očekivano | US-44 | Prošao |
+| 9 | `Zaduzi_SaValidnimDatumomPovratka_KoristitiTajDatum` | Ručno unesen datum povratka | Poslati DTO sa datumom povratka za 21 dan | Zaduženje kreirano sa unesenim datumom | Kao očekivano | US-46 | Prošao |
+| 10 | `Zaduzi_SProslinDatumomPovratka_VracaValidacijskuGresku` | Blokada unosa datuma u prošlosti | Poslati DTO sa datumom povratka jučer | View Create sa validacijskom greškom, zaduženje nije kreirano | Kao očekivano | US-46 | Prošao |
+| 11 | `Zaduzi_ValidniPodaci_MijenjaSatusPrimjerakaUZaduzen` | Ažuriranje statusa primjerka nakon zaduživanja | Kreirati validno zaduženje | UpdateStatusAsync pozvan jednom sa statusom "zadužen" | Kao očekivano | US-47 | Prošao |
+| 12 | `Zaduzi_PrimjerakNedostupan_VracaViewSaGreskom` | Blokada zaduživanja nedostupnog primjerka | Poslati DTO gdje primjerak ima status "zadužen" | View Create sa greškom, zaduženje nije kreirano | Kao očekivano | US-47 | Prošao |
+| 13 | `Zaduzi_AktivnoZaduzenjePrimjeraka_VracaViewSaGreskom` | Sprječavanje duplikata aktivnog zaduženja | Poslati DTO gdje primjerak već ima aktivno zaduženje | View Create sa greškom, zaduženje nije kreirano | Kao očekivano | US-47 | Prošao |
+| 14 | `Zaduzi_NeispravanModel_VracaViewCreate` | Validacija modela prije obrade | Dodati ModelState grešku i pozvati Zaduzi | View Create vraćen, CreateAsync nije pozvan | Kao očekivano | US-44 | Prošao |
+| 15 | `Vrati_AktivnoZaduzenje_ZatvaraZaduzenjeIVracaPrimjerak` | Uspješna evidencija vraćanja knjige | Pozvati Vrati sa ID-om aktivnog zaduženja | Status "zatvoreno", datum vraćanja postavljen, primjerak "dostupan", redirect na Details | Kao očekivano | US-45 | Prošao |
+| 16 | `Vrati_NepostojeceZaduzenje_VracaNotFound` | Rukovanje nepostojećim zaduženjima | Pozvati Vrati sa nepostojećim ID-om | NotFoundResult | Kao očekivano | US-45 | Prošao |
+| 17 | `Vrati_VecZatvoreno_RedirektujeSaGreskom` | Blokada vraćanja već zatvorenog zaduženja | Pozvati Vrati sa ID-om zatvorenog zaduženja | Redirect na Index, UpdateAsync nije pozvan | Kao očekivano | US-45 | Prošao |
+| 18 | `Moja_ZakasnjeloZaduzenje_JeZakasniloJeTrue` | Mapiranje computed polja za kašnjenje | Učitati zaduženje čiji je rok u prošlosti | JeZakasnilo = true u ViewModel-u | Kao očekivano | US-64 | Prošao |
+| 19 | `Moja_RokUskoro_RokSeBliziJeTrue` | Upozorenje kada se rok vraćanja bliži | Učitati zaduženje čiji je rok za 2 dana | JeZakasnilo = false, RokSeBliži = true | Kao očekivano | US-64 | Prošao |
+| 20 | `Details_ZaduzenjePostoji_VracaViewSaModelom` | Prikaz detalja jednog zaduženja | Pozvati Details sa postojećim ID-om | ViewResult sa ispravnim ZaduzenjeViewModel | Kao očekivano | US-67 | Prošao |
+| 21 | `Details_ZaduzenjeNePostoji_VracaNotFound` | Rukovanje nepostojećim zaduženjima u Details | Pozvati Details sa nepostojećim ID-om | NotFoundResult | Kao očekivano | US-67 | Prošao |
+| 22 | `Create_Get_VracaViewSaPraznimModelom` | Prikaz forme za novo zaduženje | Pozvati Create GET akciju | ViewResult sa praznim ZaduzenjeCreateDto | Kao očekivano | US-44 | Prošao |
+| 23 | `Create_Get_PopunjavaViewBagDropdowne` | Punjenje dropdown listi na formi | Pozvati Create GET akciju | ViewBag sadrži ClanDataJson, KnjigaDataJson i PrimjerakDataJson | Kao očekivano | US-44 | Prošao |
+| 24 | `VratiPotvrda_AktivnoZaduzenje_VracaViewSaModelom` | Prikaz stranice za potvrdu vraćanja | Pozvati VratiPotvrda sa ID-om aktivnog zaduženja | ViewResult sa ispravnim modelom | Kao očekivano | US-45 | Prošao |
+| 25 | `VratiPotvrda_ZaduzenjeNePostoji_VracaNotFound` | Rukovanje nepostojećim zaduženjima u potvrdi vraćanja | Pozvati VratiPotvrda sa nepostojećim ID-om | NotFoundResult | Kao očekivano | US-45 | Prošao |
+| 26 | `VratiPotvrda_ZaduzenjeNijeAktivno_RedirektujeSeNaIndex` | Blokada potvrde vraćanja za neaktivna zaduženja | Pozvati VratiPotvrda sa ID-om zatvorenog zaduženja | Redirect na Index | Kao očekivano | US-45 | Prošao |
+| 27 | `Historija_UvijekVracaView` | Stub metoda vraća View bez greške | Pozvati Historija sa bilo kojim korisnikId | ViewResult bez iznimke | Kao očekivano | — | Prošao |
+
+---
+
 <a name="detaljni-izvjestaj-security"></a>
 ### 4.2 Penetracijski / Sigurnosni testovi — Detaljna lista
  
@@ -486,18 +612,6 @@ Ovi testovi provjeravaju da sistem nikada ne pohrani niti vrati neobrađene HTML
 | **3** | `KategorijaCreate_XssPayloadUNazivu_OdbijenIliEscapovan` | Script tag u nazivu kategorije ne prolazi validaciju | `<script>alert('xss')</script>` | 400 ili odgovor bez taga | Prošao |
 | **4** | `KategorijaCreate_XssPayloadUNazivu_OdbijenIliEscapovan` | Inline event handler u opisu kategorije biva odbijen | `<img src=x onerror=alert(1)>` | 400 ili odgovor bez atributa | Prošao |
  
----
- 
-#### 4.2.3 Path Traversal i Injection u ISBN polju
- 
-Ovi testovi osiguravaju da ISBN polje ne može biti iskorišteno kao vektor napada — nevažeći, ekstremni i zlonamjerni unosi moraju biti odbijeni validacijom bez curenja internih grešaka.
- 
-| # | Naziv testa | Šta se provjerava | Payload / Input | Očekivano | Status |
-|:-:|:---|:---|:---|:-:|:-:|
-| **1** | `KnjigaCreate_InjectionUIsbnPolju_VracaBadRequest` | SQL injection u ISBN polju se odbija validacijom | `' OR '1'='1` | 400 | Prošao |
-| **2** | `KnjigaCreate_InjectionUIsbnPolju_VracaBadRequest` | XSS payload u ISBN polju ne prolazi format validaciju | `<script>alert(1)</script>` | 400 | Prošao |
-| **3** | `KnjigaCreate_InjectionUIsbnPolju_VracaBadRequest` | Path traversal napad u ISBN polju biva odbijen | `../../../../etc/passwd` | 400 | Prošao |
-
 
 > **Napomena:** Provjere `401` bez tokena i `403` za eskalaciju privilegija testiraju ispravnost implementacije (poslovnu logiku), a ne napadačke vektore — u potpunosti su pokrivene integracijskim testovima i namjerno su izostavljene u ovom nivou testiranja.
 
@@ -530,6 +644,10 @@ Ovi testovi osiguravaju da ISBN polje ne može biti iskorišteno kao vektor napa
 | UAT-20 | Brisanje kategorije | 1. Kliknuti na dugme 'Obriši' u listi kategorija <br> 2. Kliknuti na dugme 'Potvrdi' | Kategorija uklonjena iz spiska postojećih kategorija |
 | UAT-21 | Brisanje u upotrebi | 1. Kliknuti na dugme 'Obriši' za slučaj kad ima knjiga sa tom kategorijom | Greška: Kategorija 'X' ima Y knjiga i ne može biti obrisana. |
 | UAT-22 | Prikaz kataloga | 1. Otvoriti katalog klikom na dugme 'Katalog' | Prikazuje se lista dostupnih knjiga |
+| UAT-23 | Zaduživanje knjige (uspješan tok) | 1. Prijava kao bibliotekar/admin <br> 2. Odlazak na sekciju 'Zaduženja' <br> 3. Klik na 'Novo zaduživanje' <br> 4. Odabir člana, knjige i dostupnog primjerka <br> 5. Potvrda akcije | Zaduženje kreirano, status primjerka promijenjen u 'zadužen', prikazana poruka o uspjehu. |
+| UAT-24 | Zaduživanje nedostupnog primjerka | 1. Pokušaj odabira primjerka koji je već zadužen ili u kvaru <br> 2. Pokušaj spašavanja zaduženja | Sistem ne dozvoljava odabir ili ispisuje grešku: 'Odabrani primjerak nije dostupan'. |
+| UAT-25 | Vraćanje knjige | 1. Otvoriti listu aktivnih zaduženja <br> 2. Odabrati detalje zaduženja <br> 3. Kliknuti na 'Evidentiraj vraćanje' <br> 4. Potvrditi akciju | Status zaduženja postaje 'zatvoreno', primjerak ponovo postaje 'dostupan', upisuje se stvarni datum vraćanja. |
+| UAT-26 | Pregled vlastitih zaduženja (Član) | 1. Prijava kao obični Član <br> 2. Odlazak na sekciju 'Moja zaduženja' | Prikazuje se lista samo onih knjiga koje je taj konkretni član zadužio. |
 
 ---
 
@@ -695,7 +813,28 @@ Integracijski testovi validiraju kompletnu saradnju API sloja, middleware-a, aut
 | PRI-IT-28 | `Deaktiviraj_PrimjerakSAktivnimZaduzenjem_Vraca409` | Blokada deaktivacije pri aktivnom zaduženju | Prošao |
 | PRI-IT-29 | `Deaktiviraj_NepostojeciId_Vraca404` | Deaktivacija nepostojećeg ID-a | Prošao |
 
-![Detaljni rezultati integracijskih testova](./images/rezultati-integracijsko-testiranje.png)
+#### 4.4.6 Zaduženje integracijski testovi (`ZaduzenjeIntegrationTests`) — 17 testova
+
+| ID | Naziv testa | Šta validira | Status |
+|:-:|:---|:---|:---|
+| ZAD-IT-01 | `GetActive_BezAuth_Vraca401` | Endpoint za aktivna zaduženja zahtijeva autentifikaciju | Prošao |
+| ZAD-IT-02 | `GetActive_SaBibliotekarToken_VracaOkSaListom` | Bibliotekar može dohvatiti listu aktivnih zaduženja | Prošao |
+| ZAD-IT-03 | `GetActive_SaFilteromPoImenu_VracaJedanRezultat` | Filtriranje aktivnih zaduženja po članu vraća odgovarajući rezultat | Prošao |
+| ZAD-IT-04 | `GetMine_BezAuth_Vraca401` | Endpoint za vlastita zaduženja blokira neautentifikovan pristup | Prošao |
+| ZAD-IT-05 | `GetMine_SaClanToken_VracaSamoVlastitaZaduzenja` | Član vidi isključivo vlastita zaduženja | Prošao |
+| ZAD-IT-06 | `GetById_PostojeciId_Vraca200IJson` | Dohvat postojećeg zaduženja po ID vraća validan JSON odgovor | Prošao |
+| ZAD-IT-07 | `GetById_NepostojeciId_Vraca404` | Nepostojeći ID vraća `404` | Prošao |
+| ZAD-IT-08 | `GetHistory_PostojeciKorisnik_Vraca200` | Historija zaduženja za postojećeg korisnika uspješno se dohvaća | Prošao |
+| ZAD-IT-09 | `GetHistory_NepostojeciKorisnik_Vraca404` | Historija za nepostojećeg korisnika vraća `404` | Prošao |
+| ZAD-IT-10 | `Zaduzi_BezAuth_Vraca401` | Endpoint za kreiranje zaduženja zahtijeva autentifikaciju | Prošao |
+| ZAD-IT-11 | `Zaduzi_KaoClan_Vraca403` | Član nema dozvolu za kreiranje zaduženja | Prošao |
+| ZAD-IT-12 | `Zaduzi_ValidanPayload_Vraca201IPraviZaduzenje` | Validno zaduženje kreira zapis i ažurira status primjerka | Prošao |
+| ZAD-IT-13 | `Zaduzi_PrimjerakNedostupan_Vraca400` | Nije moguće zadužiti već zauzet primjerak | Prošao |
+| ZAD-IT-14 | `Zaduzi_DatumUProslosti_Vraca400` | Datum povratka u prošlosti vraća `400 Bad Request` | Prošao |
+| ZAD-IT-15 | `Vrati_AktivnoZaduzenje_Vraca200IAzuriraStatus` | Povrat aktivnog zaduženja zatvara zaduženje i oslobađa primjerak | Prošao |
+| ZAD-IT-16 | `Vrati_NeaktivnoZaduzenje_Vraca400` | Nije moguće vratiti već zatvoreno zaduženje | Prošao |
+| ZAD-IT-17 | `Vrati_NepostojeciId_Vraca404` | Povrat nepostojećeg zaduženja vraća `404 Not Found` | Prošao |
+
 
 ---
 
@@ -711,8 +850,7 @@ UI testovi pokrivaju ključne korisničke tokove kroz browser: autentifikaciju, 
 | AUTH-UI-01 | `LoginPage_DisplaysFormFields` | Prikaz elemenata login forme | Prošao |
 | AUTH-UI-02 | `Login_WrongPassword_ShowsFailureMessage` | Greška pri pogrešnoj lozinci | Prošao |
 | AUTH-UI-03 | `Login_Member_RedirectsToHome_WithDashboardInNav` | Redirect člana nakon prijave | Prošao |
-| AUTH-UI-04 | `Login_Librarian_RedirectsToMembersArea` | Redirect bibliotekara na members područje | Prošao |
-| AUTH-UI-05 | `Logout_ReturnsToLoginPage` | Ispravna odjava i povratak na login | Prošao |
+| AUTH-UI-04 | `Login_Librarian_Redirects# SmartLib — Bibliotečki informacioni sistem
 
 #### 4.5.2 Home UI testovi (`HomeUiTests`) — 1 test
 
@@ -726,4 +864,9 @@ UI testovi pokrivaju ključne korisničke tokove kroz browser: autentifikaciju, 
 |:-:|:---|:---|:---|
 | KAT-UI-01 | `Member_AfterLogin_CanOpenKatalog` | Pristup katalogu nakon prijave člana | Prošao |
 
-![Detaljni rezultati UI testova](./images/rezultati-ui-testiranje.png)
+#### 4.5.4 Zaduženja UI testovi (`ZaduzenjeUiTests`) — 2 testa
+
+| ID | Naziv testa | Šta validira | Status |
+|:-:|:---|:---|:---|
+| ZAD-UI-01 | `Librarian_CanCreateZaduzenje_ShowsSuccessMessage` | Uspješno kreiranje novog zaduženja (član, knjiga, primjerak) i prikaz potvrde | Prošao |
+| ZAD-UI-02 | `Librarian_CanReturnBook_ShowsSuccessMessage` | Proces evidentiranja vraćanja knjige preko stranice detalja zaduženja i potvrdu akcije | Prošao |
