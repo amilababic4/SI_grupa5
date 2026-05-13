@@ -52,10 +52,10 @@ Ovaj dokument predstavlja ažurirani Product Backlog projekta **Bibliotečki inf
 | PB-28 | Pregled kataloga | Korisnik može pregledati listu dostupnih knjiga | Feature | Visok | M | Završeno u Sprintu 6 | Sprint 6 | Zavisi od knjiga i njihovog broja |
 | PB-29 | Pretraga knjiga | Korisnik može pretraživati knjige po naslovu, autoru ili ključnoj riječi | Feature | Visok | M | Završeno u Sprintu 7 | Sprint 7 | Nadogradnja kataloga |
 | PB-30 | Pregled dostupnosti knjige | Sistem prikazuje da li je knjiga dostupna i broj primjeraka | Feature | Visok | M | Završeno u Sprintu 7 | Sprint 7 |  |
-| PB-35 | Pregled vlastitih zaduženja | Član biblioteke vidi koje knjige trenutno ima zadužene | Feature | Visok | S | Završeno u Sprintu 7 | Sprint 7 | Zavisi od zaduživanja |
-| PB-36 | Pregled trenutnih zaduženja | Bibliotekar vidi koje su knjige trenutno zadužene od strane članova | Feature | Visok | S | Završeno u Sprintu 7 | Sprint 7 | Zavisi od zaduživanja |
-| PB-37 | Pregled historije zaduženja | Sistem prikazuje ranija zaduženja člana | Feature | Nizak | M | Završeno u Sprintu 7 | Sprint 7 | Nadogradnja evidencije |
-| PB-31 | Evidencija zaduživanja i vraćanja | Bibliotekar evidentira da je član zadužio određenu knjigu ili je vratio | Feature | Visok | M | U backlogu | Sprint 8 | Core funkcionalnost |
+| PB-35 | Pregled vlastitih zaduženja | Član biblioteke vidi koje knjige trenutno ima zadužene | Feature | Visok | S | Završeno u Sprintu 7 | Sprint 8 | Zavisi od zaduživanja |
+| PB-36 | Pregled trenutnih zaduženja | Bibliotekar vidi koje su knjige trenutno zadužene od strane članova | Feature | Visok | S | Završeno u Sprintu 7 | Sprint 8 | Zavisi od zaduživanja |
+| PB-37 | Pregled historije zaduženja | Sistem prikazuje ranija zaduženja člana | Feature | Nizak | M | U Backlogu | Sprint 8 | Nadogradnja evidencije |
+| PB-31 | Evidencija zaduživanja i vraćanja | Bibliotekar evidentira da je član zadužio određenu knjigu ili je vratio | Feature | Visok | M | Završeno u Sprintu 7 | Sprint 7 | Core funkcionalnost |
 | PB-32 | Upravljanje korisnicima od strane admina | Administrator može pregledati sve korisnike, promijeniti ulogu ili deaktivirati nalog | Feature | Srednji | M | U backlogu | Sprint 8 | Osnova za administraciju sistema |
 | PB-33 | Upravljanje statusom članarine | Bibliotekar ili administrator može pregledati, ažurirati i evidentirati status članarine korisnika | Feature | Srednji | M | U backlogu | Sprint 8 | Osnova za administraciju sistema |
 | PB-34 | Pregled statusa članarine za člana | Član biblioteke može vidjeti trenutni status i datum isteka svoje članarine | Feature | Srednji | S | U backlogu | Sprint 8 |  |
