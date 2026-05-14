@@ -379,3 +379,32 @@ Odbačeni su testovi koji su samo ponavljali provjere iz integracijskim testova 
 
 **Rizici, problemi ili greške koje su uočene:**  
 Uočeno je da originalna verzija sigurnosnih testova sadržavala preklapanja sa integracijskim testovima, što je moglo dovesti do lažnog osjećaja sigurnosti i nepotrebne duplikacije. 
+
+
+## AI Log 14: Implementacija evidencije zaduživanja knjiga
+
+**Datum:** 09.05.2026.  
+**Sprint broj:** Sprint 7  
+**Alat koji je korišten:** Claude Code  
+**Ko je koristio alat:** Ilma
+
+**Svrha korištenja:**  
+Implementacija funkcionalnosti za evidentiranje zaduživanja knjiga u SmartLib sistemu.
+
+**Kratak opis zadatka ili upita:**  
+Od AI alata je zatraženo da pomogne u implementaciji funkcionalnosti koja bibliotekaru omogućava da evidentira zaduživanje knjige članu biblioteke. Funkcionalnost je trebala obuhvatiti izbor člana, izbor dostupnog primjerka knjige, unos datuma zaduživanja i automatsko postavljanje očekivanog datuma vraćanja.
+
+**Šta je AI predložio ili generisao:**  
+AI je predložio strukturu kontrolera, repozitorijsku logiku i osnovni tok validacije prije kreiranja zaduženja. Predloženo je da se prije zaduživanja provjeri da li je član aktivan, da li primjerak knjige postoji, da li je primjerak dostupan i da li već postoji aktivno zaduženje za isti primjerak.
+
+**Šta je tim prihvatio:**  
+Tim je prihvatio osnovnu logiku validacije i tok kreiranja zaduženja, uključujući provjeru dostupnosti primjerka i povezivanje zaduženja sa članom i bibliotekarom.
+
+**Šta je tim izmijenio:**  
+Tim je prilagodio nazive metoda, rute i View modele postojećoj strukturi SmartLib projekta. Dodatno su prilagođene poruke korisniku kako bi bibliotekar jasno vidio da li je zaduženje uspješno evidentirano ili zašto nije moguće zadužiti knjigu.
+
+**Šta je tim odbacio:**  
+Odbačeni su prijedlozi koji su uvodili nepotrebno složene statuse zaduženja ili dodatne tokove koji nisu bili dio planiranog opsega Sprinta 7.
+
+**Rizici, problemi ili greške koje su uočene:**  
+Glavni rizik bio je mogućnost da se isti primjerak knjige zaduži više puta dok prethodno zaduženje još nije zaključeno. Zbog toga je posebna pažnja posvećena provjeri aktivnih zaduženja prije kreiranja novog zapisa.
