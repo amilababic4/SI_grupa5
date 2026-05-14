@@ -1,10 +1,10 @@
 # Sprint Review – Sprint 7
 
 ## Datum održavanja
-13.05.2026.
+14.05.2026.
 
 ## Učesnici
-Tim (svi članovi grupe 5), product owner, asistent
+Tim (svi članovi grupe 5), asistent
 
 ---
 
