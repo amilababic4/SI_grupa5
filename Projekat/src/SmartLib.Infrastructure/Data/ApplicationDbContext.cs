@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using SmartLib.Core.Models;
 
 namespace SmartLib.Infrastructure.Data
@@ -47,6 +47,8 @@ namespace SmartLib.Infrastructure.Data
                 e.Property(k => k.Prezime).IsRequired().HasMaxLength(100);
                 e.Property(k => k.Email).IsRequired().HasMaxLength(200);
                 e.Property(k => k.LozinkaHash).IsRequired();
+                e.Property(k => k.ResetToken).HasMaxLength(256);
+                e.Property(k => k.ResetTokenExpiry);
                 e.Property(k => k.Status).IsRequired().HasDefaultValue("aktivan");
                 e.Property(k => k.DatumKreiranja).IsRequired();
                 e.HasIndex(k => k.Email).IsUnique();

@@ -37,6 +37,13 @@ namespace SmartLib.Infrastructure.Repositories
                 .FirstOrDefaultAsync(k => k.Email == normalized);
         }
 
+        public async Task<Korisnik?> GetByResetTokenAsync(string token)
+        {
+            return await _db.Korisnici
+                .Include(k => k.Uloga)
+                .FirstOrDefaultAsync(k => k.ResetToken == token && k.Status == "aktivan");
+        }
+
         public async Task<Korisnik> CreateAsync(Korisnik korisnik)
         {
             _db.Korisnici.Add(korisnik);

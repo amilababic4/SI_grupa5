@@ -23,5 +23,14 @@ namespace SmartLib.Core.Models
         public ICollection<Rezervacija> Rezervacije { get; set; } = new List<Rezervacija>();
 
         public ICollection<Clanarina> Clanarine { get; set; } = new List<Clanarina>();
+
+        // Password Reset Flow
+        public string? ResetToken { get; set; }
+        public DateTime? ResetTokenExpiry { get; set; }
+
+        // TODO: Book Recommendation System
+        // Add navigation properties for user history/ratings when models are implemented
+        // public ICollection<Ocjena> Ocjene { get; set; } = new List<Ocjena>();
+        // public ICollection<IstorijaCitanja> IstorijaCitanja { get; set; } = new List<IstorijaCitanja>();
     }
 }
