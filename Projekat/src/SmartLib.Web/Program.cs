@@ -72,7 +72,22 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    db.Database.Migrate();
+    db.Database.EnsureCreated();
+
+    // Manually add ResetToken columns if they don't exist (needed because EnsureCreated doesn't update schema)
+    try
+    {
+        db.Database.ExecuteSqlRaw(@"
+            ALTER TABLE Korisnici ADD COLUMN IF NOT EXISTS ResetToken VARCHAR(256) NULL;
+        ");
+        db.Database.ExecuteSqlRaw(@"
+            ALTER TABLE Korisnici ADD COLUMN IF NOT EXISTS ResetTokenExpiry DATETIME(6) NULL;
+        ");
+    }
+    catch (Exception)
+    {
+        // Columns already exist or DB doesn't support IF NOT EXISTS — safe to ignore
+    }
 
     // Seed kategorija ako tabela prazna
     if (!db.Kategorije.Any())
