@@ -39,6 +39,10 @@
             <span asp-validation-for="Lozinka" class="validation-message"></span>
         </div>
 
+        <div style="text-align: right; margin-bottom: 1.5rem; margin-top: -0.5rem;">
+            <a asp-action="ForgotPassword" asp-controller="Auth" style="font-size: 0.9rem; color: var(--color-primary); text-decoration: none;">Zaboravili ste lozinku?</a>
+        </div>
+
         <button type="submit" class="btn btn-primary" style="width: 100%;">Prijavi se</button>
     </form>
 </div>

@@ -1,4 +1,4 @@
-@model List<SmartLib.Core.DTOs.KnjigaDto>
+@model SmartLib.Web.Models.HomeViewModel
 @{
     ViewData["Title"] = "SmartLib";
     ViewData["BodyClass"] = "home-page";
@@ -6,6 +6,7 @@
 }
 
 <section class="home-hero" aria-labelledby="smartlib-title">
+    @* ... (hero content remains same) ... *@
     <img class="home-hero-image" src="~/images/smartlib-hero-books.png" alt="" aria-hidden="true" />
     <div class="home-hero-shine" aria-hidden="true"></div>
 
@@ -34,12 +35,43 @@
                 <a asp-controller="Auth" asp-action="Login" class="btn btn-primary btn-hero">Prijava u sistem</a>
             }
         </div>
-
-
     </div>
 </section>
 
-@if (Model != null && Model.Any())
+@if (Model.RecommendedKnjige.Any())
+{
+    <section class="home-featured-books recommended-section" aria-label="Preporučeno za vas" style="background: var(--bg-alt);">
+        <div class="container">
+            <div class="featured-header">
+                <h2>Preporučeno za vas</h2>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">Na osnovu vaše istorije čitanja</p>
+            </div>
+
+            <div class="books-grid">
+                @foreach (var knjiga in Model.RecommendedKnjige)
+                {
+                    <a asp-controller="Knjiga" asp-action="Details" asp-route-id="@knjiga.Id" class="book-card">
+                        <div class="book-cover-wrapper">
+                            <img src="@Url.Action("Korice", "Knjiga", new { isbn = knjiga.Isbn, size = "L" })" alt="@knjiga.Naslov" loading="lazy" />
+                            <div class="book-overlay">
+                                <span class="view-details-icon">
+                                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                                </span>
+                                <span class="view-details-text">Detalji</span>
+                            </div>
+                        </div>
+                        <div class="book-info">
+                            <span class="book-title">@knjiga.Naslov</span>
+                            <span class="book-year">@knjiga.GodinaIzdanja.</span>
+                        </div>
+                    </a>
+                }
+            </div>
+        </div>
+    </section>
+}
+
+@if (Model.RandomKnjige.Any())
 {
     <section class="home-featured-books" aria-label="Popularne knjige">
         <div class="container">
@@ -49,7 +81,7 @@
             </div>
 
             <div class="books-grid">
-                @foreach (var knjiga in Model)
+                @foreach (var knjiga in Model.RandomKnjige)
                 {
                     <a asp-controller="Knjiga" asp-action="Details" asp-route-id="@knjiga.Id" class="book-card">
                         <div class="book-cover-wrapper">
