@@ -25,24 +25,24 @@ namespace SmartLib.Infrastructure.Services
 
         public async Task SendEmailAsync(string toEmail, string subject, string message)
         {
-            // Strategy 1: Try Resend HTTP API (works on Render and all hosting)
-            var resendApiKey = _configuration["EmailSettings:ResendApiKey"];
-            var senderEmail = _configuration["EmailSettings:SenderEmail"] ?? "onboarding@resend.dev";
+            // Strategy 1: Try Brevo HTTP API (works on Render and allows sending to any email)
+            var brevoApiKey = _configuration["EmailSettings:BrevoApiKey"];
+            var senderEmail = _configuration["EmailSettings:SenderEmail"] ?? "theofficialsmartlibrary@gmail.com";
             var senderName = _configuration["EmailSettings:SenderName"] ?? "SmartLib";
 
-            if (!string.IsNullOrWhiteSpace(resendApiKey))
+            if (!string.IsNullOrWhiteSpace(brevoApiKey))
             {
                 try
                 {
-                    using var request = new HttpRequestMessage(HttpMethod.Post, "https://api.resend.com/emails");
-                    request.Headers.Add("Authorization", $"Bearer {resendApiKey}");
+                    using var request = new HttpRequestMessage(HttpMethod.Post, "https://api.brevo.com/v3/smtp/email");
+                    request.Headers.Add("api-key", brevoApiKey);
 
                     var payload = new
                     {
-                        from = $"{senderName} <{senderEmail}>",
-                        to = new[] { toEmail },
+                        sender = new { name = senderName, email = senderEmail },
+                        to = new[] { new { email = toEmail } },
                         subject = subject,
-                        html = message
+                        htmlContent = message
                     };
 
                     request.Content = new StringContent(
@@ -52,16 +52,16 @@ namespace SmartLib.Infrastructure.Services
 
                     if (response.IsSuccessStatusCode)
                     {
-                        _logger.LogInformation("Email sent via Resend to {ToEmail}", toEmail);
+                        _logger.LogInformation("Email sent via Brevo to {ToEmail}", toEmail);
                         return;
                     }
 
                     var responseBody = await response.Content.ReadAsStringAsync();
-                    _logger.LogWarning("Resend API returned {StatusCode}: {Body}", response.StatusCode, responseBody);
+                    _logger.LogWarning("Brevo API returned {StatusCode}: {Body}", response.StatusCode, responseBody);
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(ex, "Resend API failed for {ToEmail}, falling back to SMTP", toEmail);
+                    _logger.LogWarning(ex, "Brevo API failed for {ToEmail}, falling back to SMTP", toEmail);
                 }
             }
 
