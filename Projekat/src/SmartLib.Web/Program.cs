@@ -46,6 +46,10 @@ builder.Services.AddScoped<IPrimjerakRepository, PrimjerakRepository>();
 builder.Services.AddScoped<IKategorijaRepository, KategorijaRepository>();
 builder.Services.AddScoped<IZaduzenjeRepository, ZaduzenjeRepository>();
 
+// Services
+builder.Services.AddTransient<IEmailService, SmartLib.Infrastructure.Services.EmailService>();
+builder.Services.AddScoped<IBookRecommender, SmartLib.Infrastructure.Services.BookRecommender>();
+
 // Authentication (COOKIE - za Web)
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
