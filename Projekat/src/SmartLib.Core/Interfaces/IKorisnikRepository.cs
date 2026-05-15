@@ -12,6 +12,7 @@ namespace SmartLib.Core.Interfaces
         Task<Korisnik?> GetByEmailAsync(string email);
         Task<Korisnik> CreateAsync(Korisnik korisnik);
         Task UpdateAsync(Korisnik korisnik);
+        Task<Korisnik?> GetByResetTokenAsync(string token);
         // Nema DeleteAsync — koristimo soft delete (deaktivacija)
     }
 }

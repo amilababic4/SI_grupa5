@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Microsoft.AspNetCore.Mvc.Routing;
 using Moq;
 using SmartLib.Core.DTOs;
 using SmartLib.Core.Interfaces;
@@ -48,7 +49,10 @@ namespace SmartLib.Tests.Unit.WebTests
                 RequestServices = serviceProviderMock.Object
             };
 
-            _controller = new AuthController(_repoMock.Object)
+            var emailServiceMock = new Mock<IEmailService>();
+            var loggerMock = new Mock<Microsoft.Extensions.Logging.ILogger<AuthController>>();
+
+            _controller = new AuthController(_repoMock.Object, emailServiceMock.Object, loggerMock.Object)
             {
                 ControllerContext = new ControllerContext
                 {
@@ -59,6 +63,7 @@ namespace SmartLib.Tests.Unit.WebTests
 
             var urlHelperMock = new Mock<IUrlHelper>();
             urlHelperMock.Setup(u => u.IsLocalUrl(It.IsAny<string>())).Returns(true);
+            urlHelperMock.Setup(u => u.Action(It.IsAny<UrlActionContext>())).Returns("http://localhost/reset-link");
 
             _controller.Url = urlHelperMock.Object;
         }
@@ -287,6 +292,68 @@ namespace SmartLib.Tests.Unit.WebTests
             // Ne baca exception, redirekuje na Home (nije Bibliotekar ni Administrator)
             var redirect = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal("Home", redirect.ControllerName);
+        }
+        // US: Password Reset
+        [Fact]
+        public async Task ForgotPassword_ValidEmail_SetsTokenAndSendsEmail()
+        {
+            var korisnik = KorisnikSaUlogom("Član");
+            _repoMock.Setup(r => r.GetByEmailAsync("test@smartlib.ba"))
+                     .ReturnsAsync(korisnik);
+
+            var emailServiceMock = new Mock<IEmailService>();
+            var loggerMock = new Mock<Microsoft.Extensions.Logging.ILogger<AuthController>>();
+
+            var controller = new AuthController(_repoMock.Object, emailServiceMock.Object, loggerMock.Object)
+            {
+                ControllerContext = _controller.ControllerContext,
+                TempData = _controller.TempData,
+                Url = _controller.Url
+            };
+
+            var request = new ForgotPasswordRequest { Email = "test@smartlib.ba" };
+            var result = await controller.ForgotPassword(request);
+
+            Assert.IsType<ViewResult>(result);
+            _repoMock.Verify(r => r.UpdateAsync(It.Is<Korisnik>(k => k.ResetToken != null && k.ResetTokenExpiry != null)), Times.Once);
+            emailServiceMock.Verify(e => e.SendEmailAsync("test@smartlib.ba", It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+        }
+
+        [Fact]
+        public async Task ResetPassword_ValidToken_ResetsPassword()
+        {
+            var rawToken = "my-secret-token";
+            var korisnik = KorisnikSaUlogom("Član");
+            korisnik.ResetToken = PasswordHasher.HashPassword(rawToken);
+            korisnik.ResetTokenExpiry = DateTime.UtcNow.AddHours(1);
+
+            _repoMock.Setup(r => r.GetByEmailAsync("test@smartlib.ba"))
+                     .ReturnsAsync(korisnik);
+
+            var emailServiceMock = new Mock<IEmailService>();
+            var loggerMock = new Mock<Microsoft.Extensions.Logging.ILogger<AuthController>>();
+
+            var controller = new AuthController(_repoMock.Object, emailServiceMock.Object, loggerMock.Object)
+            {
+                ControllerContext = _controller.ControllerContext,
+                TempData = _controller.TempData,
+                Url = _controller.Url
+            };
+
+            var request = new ResetPasswordRequest 
+            { 
+                Token = rawToken, 
+                NovaLozinka = "NovaLozinka123!", 
+                PotvrdaLozinke = "NovaLozinka123!" 
+            };
+
+            var result = await controller.ResetPassword(request, "test@smartlib.ba");
+
+            var viewResult = Assert.IsType<ViewResult>(result);
+            Assert.Equal("ResetPasswordConfirmation", viewResult.ViewName);
+            Assert.Null(korisnik.ResetToken);
+            Assert.Null(korisnik.ResetTokenExpiry);
+            _repoMock.Verify(r => r.UpdateAsync(korisnik), Times.Once);
         }
     }
 }
