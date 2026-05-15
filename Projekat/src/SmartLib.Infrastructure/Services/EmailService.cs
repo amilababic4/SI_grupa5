@@ -47,7 +47,8 @@ namespace SmartLib.Infrastructure.Services
                 using var client = new SmtpClient(smtpServer, smtpPort)
                 {
                     Credentials = new NetworkCredential(username, password),
-                    EnableSsl = true
+                    EnableSsl = true,
+                    Timeout = 15000 // 15 seconds max
                 };
 
                 var mailMessage = new MailMessage
@@ -59,7 +60,9 @@ namespace SmartLib.Infrastructure.Services
                 };
                 mailMessage.To.Add(toEmail);
 
-                await client.SendMailAsync(mailMessage);
+                // Use a CancellationToken to enforce timeout on async send
+                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+                await client.SendMailAsync(mailMessage, cts.Token);
                 _logger.LogInformation("Email sent successfully to {ToEmail}", toEmail);
             }
             catch (Exception ex)
