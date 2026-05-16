@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using SmartLib.Core.DTOs;
 using SmartLib.Core.Interfaces;
 using SmartLib.Core.Models;
+using System.Security.Claims;
 
 namespace SmartLib.Web.Controllers
 {
@@ -41,10 +42,31 @@ namespace SmartLib.Web.Controllers
             return View(clanovi);
         }
 
+        [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> Profil()
         {
-            // Pregled vlastitog profila sa zaduženjima i članarinom će se dodati kasnije.
-            return View();
+            var idClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (idClaim == null || !int.TryParse(idClaim, out int id))
+                return RedirectToAction("Login", "Auth");
+
+            var korisnik = await _korisnikRepository.GetByIdAsync(id);
+            if (korisnik == null)
+                return NotFound();
+
+            ViewBag.JeMojProfil = true;
+            return View("Profil", korisnik);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ProfilClana(int id)
+        {
+            var korisnik = await _korisnikRepository.GetByIdAsync(id);
+            if (korisnik == null)
+                return NotFound();
+
+            ViewBag.JeMojProfil = false;
+            return View("Profil", korisnik);
         }
 
         [HttpGet]

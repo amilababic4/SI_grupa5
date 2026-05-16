@@ -33,14 +33,20 @@
                 <tbody>
                 @foreach (var clan in Model)
                 {
-                    <tr>
-                        <td data-label="Ime i prezime">@clan.Ime @clan.Prezime</td>
-                        <td data-label="Email" class="members-email">@clan.Email</td>
-                        <td data-label="Status">
-                            <span class="members-status">@clan.Status</span>
-                        </td>
-                        <td data-label="Kreiran">@clan.DatumKreiranja.ToString("dd.MM.yyyy HH:mm")</td>
-                    </tr>
+                        <tr class="members-row-link"
+                            onclick="window.location='@Url.Action("ProfilClana", "Korisnik", new { id = clan.Id })'"
+                            title="Pogledaj profil — @clan.Ime @clan.Prezime">
+                            <td data-label="Ime i prezime">
+                                <span class="members-name">@clan.Ime @clan.Prezime</span>
+                            </td>
+                            <td data-label="Email" class="members-email">@clan.Email</td>
+                            <td data-label="Status">
+                                <span class="members-status @(clan.Status == "aktivan" ? "members-status--aktivan" : "members-status--deaktiviran")">
+                                    @clan.Status
+                                </span>
+                            </td>
+                            <td data-label="Kreiran">@clan.DatumKreiranja.ToString("dd.MM.yyyy HH:mm")</td>
+                        </tr>
                 }
                 </tbody>
             </table>

@@ -42,4 +42,10 @@ namespace SmartLib.Core.DTOs
         public IEnumerable<ZaduzenjeViewModel> Zaduzenja { get; set; } = new List<ZaduzenjeViewModel>();
         public string? Clan { get; set; }
     }
+
+    public class HistorijaZaduzenjaViewModel
+    {
+        public string? Clan { get; set; }
+        public List<ZaduzenjeViewModel> Zaduzenja { get; set; } = new List<ZaduzenjeViewModel>();
+    }
 }

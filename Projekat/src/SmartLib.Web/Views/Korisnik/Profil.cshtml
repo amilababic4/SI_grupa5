@@ -1,16 +1,104 @@
+@model SmartLib.Core.Models.Korisnik
 @{
-    ViewData["Title"] = "Moj profil";
+    var jeMojProfil = ViewBag.JeMojProfil as bool? ?? true;
+    ViewData["Title"] = jeMojProfil ? "Moj profil" : $"{Model.Ime} {Model.Prezime}";
 }
 
-<h2>Moj profil</h2>
-<div class="card">
-    @* TODO: Popuniti iz Model-a *@
-    <p><strong>Ime:</strong> TODO</p>
-    <p><strong>Prezime:</strong> TODO</p>
-    <p><strong>Email:</strong> TODO</p>
-    <p><strong>Uloga:</strong> TODO</p>
-    <hr style="margin: 1rem 0;" />
-    <h3>Članarina</h3>
-    <p><strong>Status:</strong> TODO</p>
-    <p><strong>Datum isteka:</strong> TODO</p>
+<div class="details-topbar">
+    @if (jeMojProfil)
+    {
+    }
+    else
+    {
+        <a asp-controller="Korisnik" asp-action="Index" class="btn btn-secondary">← Nazad na članove</a>
+    }
+</div>
+
+@if (TempData["SuccessMessage"] is string successMsg)
+{
+    <div class="alert alert-success">@successMsg</div>
+}
+@if (TempData["ErrorMessage"] is string errorMsg)
+{
+    <div class="alert alert-error">@errorMsg</div>
+}
+
+<div class="card profil-card">
+    <div class="profil-layout">
+
+        <!-- Avatar -->
+        <div class="profil-avatar-wrapper">
+            <div class="profil-avatar">
+                <span class="profil-avatar-inicijali">
+                    @(Model.Ime.Length > 0 ? Model.Ime[0].ToString() : "")@(Model.Prezime.Length > 0 ? Model.Prezime[0].ToString() : "")
+                </span>
+            </div>
+        </div>
+
+        <!-- Informacije -->
+        <div class="profil-info-content">
+            <div class="details-header">
+                <div>
+                    <h2>@Model.Ime @Model.Prezime</h2>
+                    <p class="details-autor">@(Model.Uloga?.Naziv ?? "—")</p>
+                </div>
+                @if (jeMojProfil)
+                {
+                    <div class="details-actions">
+                        <button type="button" class="btn btn-password" onclick="return false;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                 stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                            </svg>
+                            Promjena lozinke
+                        </button>
+                    </div>
+                }
+            </div>
+
+            <div class="profil-grid">
+                <div class="details-item">
+                    <span class="details-label">ID korisnika</span>
+                    <span class="profil-id-badge">#@Model.Id</span>
+                </div>
+                <div class="details-item">
+                    <span class="details-label">Ime</span>
+                    <span>@Model.Ime</span>
+                </div>
+                <div class="details-item">
+                    <span class="details-label">Prezime</span>
+                    <span>@Model.Prezime</span>
+                </div>
+                <div class="details-item">
+                    <span class="details-label">E-mail adresa</span>
+                    <span class="profil-email">@Model.Email</span>
+                </div>
+                <div class="details-item">
+                    <span class="details-label">Uloga</span>
+                    <span>
+                        @if (Model.Uloga != null)
+                        {
+                            <span class="katalog-badge">@Model.Uloga.Naziv</span>
+                        }
+                        else
+                        {
+                            <span>—</span>
+                        }
+                    </span>
+                </div>
+                <div class="details-item">
+                    <span class="details-label">Status računa</span>
+                    <span class="@(Model.Status == "aktivan" ? "status-dostupan" : "status-deaktiviran")">
+                        @Model.Status
+                    </span>
+                </div>
+                <div class="details-item profil-grid-full">
+                    <span class="details-label">Datum kreiranja</span>
+                    <span>@Model.DatumKreiranja.ToString("dd.MM.yyyy")</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
 </div>

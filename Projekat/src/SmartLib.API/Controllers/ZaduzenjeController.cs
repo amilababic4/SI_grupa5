@@ -148,6 +148,60 @@ namespace SmartLib.API.Controllers
             return Ok(MapToDto(z));
         }
 
+        /// US-54: Evidencija vraćanja knjige (bibliotekar)
+        [HttpGet("historija")]
+        [Authorize(Roles = "Bibliotekar,Administrator")]
+        public async Task<IActionResult> Historija([FromQuery] string? clan)
+        {
+            var granica = DateTime.UtcNow.AddYears(-3);
+            var sva = await _zaduzenjeRepo.GetClosedSinceAsync(granica);
+
+            if (!string.IsNullOrWhiteSpace(clan))
+            {
+                var filter = clan.Trim().ToLowerInvariant();
+                sva = sva.Where(z =>
+                    ($"{z.Korisnik?.Ime} {z.Korisnik?.Prezime}").ToLowerInvariant().Contains(filter) ||
+                    (z.Korisnik?.Email ?? string.Empty).ToLowerInvariant().Contains(filter));
+            }
+
+            return Ok(sva.Select(MapToDto));
+        }
+
+        // Nema user story, dodao jer mi je bilo logično 
+        [HttpGet("moja/historija")]
+        public async Task<IActionResult> MojaHistorija()
+        {
+            var korisnikIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!int.TryParse(korisnikIdStr, out var korisnikId))
+                return Unauthorized(new { poruka = "Korisnik nije identificiran." });
+
+            var granica = DateTime.UtcNow.AddYears(-3);
+            var sva = await _zaduzenjeRepo.GetByKorisnikAsync(korisnikId);
+
+            var historija = sva
+                .Where(z => z.Status == "zatvoreno" && z.DatumStvarnogVracanja >= granica)
+                .Select(MapToDto);
+
+            return Ok(historija);
+        }
+
+        // Nema user story, dodao jer mi je bilo logično 
+        [Authorize]
+        public async Task<IActionResult> MojaHistorija()
+        {
+            var korisnikIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!int.TryParse(korisnikIdStr, out var korisnikId))
+                return RedirectToAction("Login", "Auth");
+
+            var granica = DateTime.UtcNow.AddYears(-3);
+
+            var mojaZaduzenja = await _zaduzenjeRepo.GetClosedHistoryForKorisnikAsync(korisnikId, granica);
+
+            var model = mojaZaduzenja.Select(MapToViewModel).ToList();
+
+            return View(model);
+        }
+
         #region Helperi
 
         private static object MapToDto(Zaduzenje z)

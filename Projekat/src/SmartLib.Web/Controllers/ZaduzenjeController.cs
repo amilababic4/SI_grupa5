@@ -177,11 +177,45 @@ namespace SmartLib.Web.Controllers
             return RedirectToAction(nameof(Details), new { id });
         }
 
-        // Historija — stub, nije u opsegu sprinta
+        // US-54: Evidencija vraćanja knjige (bibliotekar)
         [Authorize(Roles = RoleNames.Bibliotekar + "," + RoleNames.Administrator)]
-        public async Task<IActionResult> Historija(int korisnikId)
+        public async Task<IActionResult> Historija(string? clan)
         {
-            return View();
+            var granica = DateTime.UtcNow.AddYears(-3);
+            var sva = await _zaduzenjeRepo.GetClosedSinceAsync(granica);
+
+            if (!string.IsNullOrWhiteSpace(clan))
+            {
+                var filter = clan.Trim().ToLowerInvariant();
+                sva = sva.Where(z =>
+                    ($"{z.Korisnik?.Ime} {z.Korisnik?.Prezime}").ToLowerInvariant().Contains(filter) ||
+                    (z.Korisnik?.Email ?? string.Empty).ToLowerInvariant().Contains(filter));
+            }
+
+            var model = new HistorijaZaduzenjaViewModel
+            {
+                Clan = clan,
+                Zaduzenja = sva.Select(MapToViewModel).ToList()
+            };
+
+            return View(model);
+        }
+
+        // Nema user story, dodao jer mi je bilo logično 
+        [Authorize]
+        public async Task<IActionResult> MojaHistorija()
+        {
+            var korisnikIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!int.TryParse(korisnikIdStr, out var korisnikId))
+                return RedirectToAction("Login", "Auth");
+
+            var granica = DateTime.UtcNow.AddYears(-3);
+
+            var mojaZaduzenja = await _zaduzenjeRepo.GetClosedHistoryForKorisnikAsync(korisnikId, granica);
+
+            var model = mojaZaduzenja.Select(MapToViewModel).ToList();
+
+            return View(model);
         }
 
         // ── Helpers ──────────────────────────────────────────────────────────────
