@@ -10,5 +10,7 @@ namespace SmartLib.Core.Interfaces
         Task<Zaduzenje?> GetByIdAsync(int id);
         Task<Zaduzenje> CreateAsync(Zaduzenje zaduzenje);
         Task UpdateAsync(Zaduzenje zaduzenje);
+        Task<IEnumerable<Zaduzenje>> GetClosedSinceAsync(DateTime granica);
+        Task<IEnumerable<Zaduzenje>> GetClosedHistoryForKorisnikAsync(int korisnikId, DateTime granica);
     }
 }

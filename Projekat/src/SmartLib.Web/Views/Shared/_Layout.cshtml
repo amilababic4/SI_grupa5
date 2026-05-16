@@ -54,7 +54,9 @@
                     @if (!string.IsNullOrEmpty(User.Identity?.Name))
                     {
                         <li>
-                            <span class="nav-user-name">@User.Identity.Name</span>
+                            <a asp-controller="Korisnik" asp-action="Profil" class="nav-user-name">
+                                @User.Identity.Name
+                            </a>
                         </li>
                     }
 

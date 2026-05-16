@@ -68,5 +68,32 @@ namespace SmartLib.Infrastructure.Repositories
             _db.Zaduzenja.Update(zaduzenje);
             await _db.SaveChangesAsync();
         }
+
+        public async Task<IEnumerable<Zaduzenje>> GetClosedSinceAsync(DateTime granica)
+        {
+            return await _db.Zaduzenja 
+                .Include(z => z.Korisnik)
+                    .ThenInclude(k => k!.Uloga) 
+                .Include(z => z.Primjerak)
+                    .ThenInclude(p => p!.Knjiga) 
+                .Where(z => z.Status == "zatvoreno" && z.DatumStvarnogVracanja >= granica)
+                .OrderByDescending(z => z.DatumStvarnogVracanja)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Zaduzenje>> GetClosedHistoryForKorisnikAsync(int korisnikId, DateTime granica)
+        {
+            return await _db.Zaduzenja
+                .AsNoTracking()
+                .Include(z => z.Korisnik) 
+                .Include(z => z.Primjerak)
+                    .ThenInclude(p => p!.Knjiga)
+                .Where(z => z.KorisnikId == korisnikId &&
+                            z.Status == "zatvoreno" &&
+                            z.DatumStvarnogVracanja >= granica)
+                .OrderByDescending(z => z.DatumStvarnogVracanja)
+                .ToListAsync();
+        }
+
     }
 }

@@ -1,9 +1,10 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SmartLib.Core.DTOs;
 using SmartLib.Core.Interfaces;
 using SmartLib.Core.Models;
 using SmartLib.Infrastructure.Security;
-using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 using System.Text.RegularExpressions;
 
 namespace SmartLib.API.Controllers
@@ -34,6 +35,31 @@ namespace SmartLib.API.Controllers
             var korisnik = await _korisnikRepository.GetByIdAsync(id);
             if (korisnik is null)
                 return NotFound();
+
+            return Ok(MapToDto(korisnik));
+        }
+
+        [HttpGet("profil")]
+        [Authorize] 
+        public async Task<IActionResult> Profil()
+        {
+            var idClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (idClaim == null || !int.TryParse(idClaim, out int id))
+                return Unauthorized(new { poruka = "Korisnik nije identificiran." });
+
+            var korisnik = await _korisnikRepository.GetByIdAsync(id);
+            if (korisnik == null)
+                return NotFound(new { poruka = "Korisnik nije pronađen." });
+
+            return Ok(MapToDto(korisnik));
+        }
+
+        [HttpGet("{id}/profil")]
+        public async Task<IActionResult> ProfilClana(int id)
+        {
+            var korisnik = await _korisnikRepository.GetByIdAsync(id);
+            if (korisnik == null)
+                return NotFound(new { poruka = "Korisnik nije pronađen." });
 
             return Ok(MapToDto(korisnik));
         }

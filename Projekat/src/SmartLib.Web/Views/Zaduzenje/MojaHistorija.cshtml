@@ -1,17 +1,22 @@
-@model IEnumerable<ZaduzenjeViewModel>
+﻿@model IEnumerable<ZaduzenjeViewModel>
 @{
-    ViewData["Title"] = "Moja zaduženja";
+    ViewData["Title"] = "Historija mojih zaduženja";
+    var lista = Model.OrderByDescending(z => z.DatumStvarnogVracanja).ToList();
 }
 
 <div class="katalog-header">
-    <h2>Moja zaduženja</h2>
-    <a asp-action="MojaHistorija" class="btn btn-secondary">Historija zaduženja</a>
+    <h2>Historija mojih zaduženja</h2>
+    <a asp-action="Moja" class="btn btn-secondary">← Aktivna zaduženja</a>
 </div>
 
-@if (!Model.Any())
+<p class="katalog-meta">
+    Zatvorena zaduženja iz <strong>posljednje 3 godine</strong> · ukupno: <strong>@lista.Count</strong>
+</p>
+
+@if (!lista.Any())
 {
     <div class="card katalog-empty">
-        <p>Nema aktivnih zaduženja.</p>
+        <p>Nema zatvorenih zaduženja u posljednje 3 godine.</p>
     </div>
 }
 else
@@ -25,31 +30,25 @@ else
                         <th>Inv. br.</th>
                         <th>Zaduženo</th>
                         <th>Rok vraćanja</th>
-                        <th>Status</th>
+                        <th>Vraćeno</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var z in Model)
+                    @foreach (var z in lista)
                     {
-                        <tr class="@(z.JeZakasnilo ? "tr-kasni" : z.RokSeBliži ? "tr-blizi" : "")">
+                        <tr>
                             <td data-label="Knjiga"><strong>@z.KnjigaNaslov</strong></td>
                             <td data-label="Inv. br." class="katalog-isbn">@z.InventarniBroj</td>
                             <td data-label="Zaduženo">@z.DatumZaduzivanja.ToLocalTime().ToString("dd.MM.yyyy")</td>
-                            <td data-label="Rok vraćanja">
-                                @z.DatumPlaniranogVracanja.ToLocalTime().ToString("dd.MM.yyyy")
-                            </td>
-                            <td data-label="Status">
-                                @if (z.JeZakasnilo)
+                            <td data-label="Rok vraćanja">@z.DatumPlaniranogVracanja.ToLocalTime().ToString("dd.MM.yyyy")</td>
+                            <td data-label="Vraćeno">
+                                @if (z.DatumStvarnogVracanja.HasValue)
                                 {
-                                    <span class="status-kasni">Zakašnjelo</span>
-                                }
-                                else if (z.RokSeBliži)
-                                {
-                                    <span class="status-blizi">Rok uskoro</span>
+                                    <span class="historija-vraceno">@z.DatumStvarnogVracanja.Value.ToLocalTime().ToString("dd.MM.yyyy")</span>
                                 }
                                 else
                                 {
-                                    <span class="status-dostupan">Aktivno</span>
+                                    <span class="historija-nepoznato">—</span>
                                 }
                             </td>
                         </tr>
