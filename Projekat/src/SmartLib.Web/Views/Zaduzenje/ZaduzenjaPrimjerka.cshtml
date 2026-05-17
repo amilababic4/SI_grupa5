@@ -1,0 +1,119 @@
+﻿@model IEnumerable<ZaduzenjeViewModel>
+@{
+    var primjerakInvBroj = ViewBag.InventarniBroj as string ?? "Primjerak";
+    var primjerakId = ViewBag.PrimjerakId as int? ?? 0;
+    var knjigaNaslov = ViewBag.KnjigaNaslov as string ?? "";
+    var knjigaId = ViewBag.KnjigaId as int? ?? 0;
+    ViewData["Title"] = $"Zaduženja — {primjerakInvBroj}";
+
+    var lista = Model.OrderByDescending(z => z.DatumZaduzivanja).ToList();
+    var aktivna = lista.Count(z => z.Status != "zatvoreno");
+    var zatvorena = lista.Count(z => z.Status == "zatvoreno");
+}
+
+<div class="details-topbar">
+    <a asp-controller="Knjiga" asp-action="Details" asp-route-id="@knjigaId"
+       class="btn btn-secondary">← Nazad na detalje knjige</a>
+</div>
+
+<div class="katalog-header">
+    <h2>Zaduženja primjerka</h2>
+    <span class="profil-id-badge" style="align-self:center;">@primjerakInvBroj</span>
+</div>
+
+<p class="katalog-meta">
+    @if (!string.IsNullOrWhiteSpace(knjigaNaslov))
+    {
+        <span>Knjiga: <strong>@knjigaNaslov</strong> · </span>
+    }
+    Ukupno: <strong>@lista.Count</strong>
+    @if (aktivna > 0)
+    {
+        <span> · <span class="status-dostupan">@aktivna aktivno</span></span>
+    }
+    @if (zatvorena > 0)
+    {
+        <span> · <span style="color:var(--sl-muted)">@zatvorena zatvoreno</span></span>
+    }
+</p>
+
+@if (!lista.Any())
+{
+    <div class="card katalog-empty">
+        <p>Ovaj primjerak nikad nije bio zadužen.</p>
+    </div>
+}
+else
+{
+    <div class="card katalog-card">
+        <div class="katalog-table-wrap">
+            <table class="katalog-table">
+                <thead>
+                    <tr>
+                        <th>Član</th>
+                        <th>Email</th>
+                        <th>Zaduženo</th>
+                        <th>Rok vraćanja</th>
+                        <th>Vraćeno</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var z in lista)
+                    {
+                        <tr class="@(z.JeZakasnilo ? "tr-kasni" : z.RokSeBliži ? "tr-blizi" : "")">
+                            <td data-label="Član"><strong>@z.KorisnikIme</strong></td>
+                            <td data-label="Email" class="members-email">@z.KorisnikEmail</td>
+                            <td data-label="Zaduženo">
+                                @z.DatumZaduzivanja.ToLocalTime().ToString("dd.MM.yyyy")
+                            </td>
+                            <td data-label="Rok vraćanja">
+                                @z.DatumPlaniranogVracanja.ToLocalTime().ToString("dd.MM.yyyy")
+                                @if (z.JeZakasnilo)
+                                {
+                                    <span class="status-kasni">Zakašnjelo</span>
+                                }
+                                else if (z.RokSeBliži)
+                                {
+                                    <span class="status-blizi">Uskoro</span>
+                                }
+                            </td>
+                            <td data-label="Vraćeno">
+                                @if (z.DatumStvarnogVracanja.HasValue)
+                                {
+                                    <span class="historija-vraceno">
+                                        @z.DatumStvarnogVracanja.Value.ToLocalTime().ToString("dd.MM.yyyy")
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="historija-nepoznato">—</span>
+                                }
+                            </td>
+                            <td data-label="Status">
+                                @{
+                                    var (statusKlasa, statusLabel) = z.Status switch
+                                    {
+                                        "zatvoreno" => ("status-nedostupan", "zatvoreno"),
+                                        "zakašnjelo" => ("status-kasni", "zakašnjelo"),
+                                        _ => ("status-dostupan", "aktivno")
+                                    };
+                                }
+                                <span class="@statusKlasa">@statusLabel</span>
+                            </td>
+                            <td class="katalog-actions">
+                                <a asp-controller="Zaduzenje"
+                                   asp-action="Details"
+                                   asp-route-id="@z.Id"
+                                   asp-route-returnUrl="ZaduzenjaPrimjerka"
+                                   asp-route-primjerakId="@primjerakId"
+                                   class="btn btn-secondary btn-sm">Detalji</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

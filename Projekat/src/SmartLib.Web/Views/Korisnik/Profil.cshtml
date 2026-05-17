@@ -1,16 +1,24 @@
 @model SmartLib.Core.Models.Korisnik
 @{
     var jeMojProfil = ViewBag.JeMojProfil as bool? ?? true;
+    var jeAdmin = User.IsInRole("Administrator");
+    var jeBibliotekarIliAdmin = User.IsInRole("Bibliotekar") || User.IsInRole("Administrator");
     ViewData["Title"] = jeMojProfil ? "Moj profil" : $"{Model.Ime} {Model.Prezime}";
+
+    // Odakle smo došli — za "Nazad" dugme
+    var nazadController = ViewBag.NazadController as string ?? "Korisnik";
+    var nazadAction = ViewBag.NazadAction as string ?? "Index";
+    var nazadLabel = ViewBag.NazadLabel as string ?? "← Nazad na članove";
 }
 
 <div class="details-topbar">
     @if (jeMojProfil)
     {
+        <a asp-controller="Knjiga" asp-action="Index" class="btn btn-secondary">← Nazad na katalog</a>
     }
     else
     {
-        <a asp-controller="Korisnik" asp-action="Index" class="btn btn-secondary">← Nazad na članove</a>
+        <a asp-controller="@nazadController" asp-action="@nazadAction" class="btn btn-secondary">@nazadLabel</a>
     }
 </div>
 
@@ -42,9 +50,16 @@
                     <h2>@Model.Ime @Model.Prezime</h2>
                     <p class="details-autor">@(Model.Uloga?.Naziv ?? "—")</p>
                 </div>
-                @if (jeMojProfil)
-                {
-                    <div class="details-actions">
+                <div class="details-actions">
+                    @if (jeAdmin)
+                    {
+                        <a asp-controller="Korisnik" asp-action="Uredi" asp-route-id="@Model.Id"
+                           class="btn btn-primary">
+                            Uredi profil
+                        </a>
+                    }
+                    @if (jeMojProfil)
+                    {
                         <button type="button" class="btn btn-password" onclick="return false;">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                                  stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -53,8 +68,8 @@
                             </svg>
                             Promjena lozinke
                         </button>
-                    </div>
-                }
+                    }
+                </div>
             </div>
 
             <div class="profil-grid">
@@ -98,6 +113,22 @@
                     <span>@Model.DatumKreiranja.ToString("dd.MM.yyyy")</span>
                 </div>
             </div>
+
+            @if (jeBibliotekarIliAdmin && !jeMojProfil)
+            {
+                <div class="profil-zaduzenja-bar">
+                    <a asp-controller="Zaduzenje" asp-action="ZaduzenjaClana"
+                       asp-route-korisnikId="@Model.Id"
+                       class="btn btn-zaduzenja-aktivna">
+                        Aktivna zaduženja
+                    </a>
+                    <a asp-controller="Zaduzenje" asp-action="HistorijaClana"
+                       asp-route-korisnikId="@Model.Id"
+                       class="btn btn-zaduzenja-historija">
+                        Historija zaduženja
+                    </a>
+                </div>
+            }
         </div>
 
     </div>

@@ -37,13 +37,16 @@
                     <li><a asp-controller="Knjiga" asp-action="Index">Katalog</a></li>
                 }
 
-
                 @if (User.Identity?.IsAuthenticated == true)
                 {
                     @if (User.IsInRole("Bibliotekar") || User.IsInRole("Administrator"))
                     {
                         <li><a asp-controller="Zaduzenje" asp-action="Index">Zaduženja</a></li>
                         <li><a asp-controller="Korisnik" asp-action="Index">Članovi</a></li>
+                        @if (User.IsInRole("Administrator"))
+                        {
+                            <li><a asp-controller="Korisnik" asp-action="IndexBibliotekar">Bibliotekari</a></li>
+                        }
                         <li><a asp-controller="Kategorija" asp-action="Index">Kategorije</a></li>
                     }
                     else

@@ -95,5 +95,17 @@ namespace SmartLib.Infrastructure.Repositories
                 .ToListAsync();
         }
 
+        public async Task<IEnumerable<Zaduzenje>> GetByPrimjerakAsync(int primjerakId)
+        {
+            return await _db.Zaduzenja
+                .Include(z => z.Korisnik)
+                    .ThenInclude(k => k.Uloga)
+                .Include(z => z.Primjerak)
+                    .ThenInclude(p => p.Knjiga)
+                .Where(z => z.PrimjerakId == primjerakId)
+                .OrderByDescending(z => z.DatumZaduzivanja)
+                .ToListAsync();
+        }
+
     }
 }

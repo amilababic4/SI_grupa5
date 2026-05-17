@@ -1,0 +1,78 @@
+﻿@model IEnumerable<ZaduzenjeViewModel>
+@{
+    var korisnikIme = ViewBag.KorisnikIme as string ?? "Korisnik";
+    var korisnikId = ViewBag.KorisnikId as int? ?? 0;
+    ViewData["Title"] = $"Aktivna zaduženja — {korisnikIme}";
+    var lista = Model.ToList();
+}
+
+<div class="details-topbar">
+    <a asp-controller="Korisnik" asp-action="ProfilClana" asp-route-id="@korisnikId"
+       class="btn btn-secondary">← Nazad na profil</a>
+</div>
+
+<div class="katalog-header">
+    <h2>Aktivna zaduženja</h2>
+    <span class="profil-id-badge" style="align-self:center;">@korisnikIme</span>
+</div>
+
+<p class="katalog-meta">
+    Aktivna zaduženja člana · ukupno: <strong>@lista.Count</strong>
+</p>
+
+@if (!lista.Any())
+{
+    <div class="card katalog-empty">
+        <p>Ovaj član nema aktivnih zaduženja.</p>
+    </div>
+}
+else
+{
+    <div class="card katalog-card">
+        <div class="katalog-table-wrap">
+            <table class="katalog-table">
+                <thead>
+                    <tr>
+                        <th>Knjiga</th>
+                        <th>Inv. br.</th>
+                        <th>Zaduženo</th>
+                        <th>Rok vraćanja</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var z in lista)
+                    {
+                        <tr class="@(z.JeZakasnilo ? "tr-kasni" : z.RokSeBliži ? "tr-blizi" : "")">
+                            <td data-label="Knjiga"><strong>@z.KnjigaNaslov</strong></td>
+                            <td data-label="Inv. br." class="katalog-isbn">@z.InventarniBroj</td>
+                            <td data-label="Zaduženo">@z.DatumZaduzivanja.ToLocalTime().ToString("dd.MM.yyyy")</td>
+                            <td data-label="Rok vraćanja">
+                                @z.DatumPlaniranogVracanja.ToLocalTime().ToString("dd.MM.yyyy")
+                                @if (z.JeZakasnilo)
+                                {
+                                    <span class="status-kasni">Zakašnjelo</span>
+                                }
+                                else if (z.RokSeBliži)
+                                {
+                                    <span class="status-blizi">Uskoro</span>
+                                }
+                            </td>
+                            <td data-label="Status">
+                                <span class="status-dostupan">Aktivno</span>
+                            </td>
+                            <td class="katalog-actions">
+                                <a asp-controller="Zaduzenje" asp-action="Details"
+                                   asp-route-id="@z.Id"
+                                   asp-route-returnUrl="ZaduzenjaClana"
+                                   asp-route-korisnikId="@korisnikId"
+                                   class="btn btn-secondary btn-sm">Detalji</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

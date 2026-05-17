@@ -7,6 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="Views\Zaduzenje\MojaHistorija.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Views\Zaduzenje\MojaHistorija.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\SmartLib.Core\SmartLib.Core.csproj" />
     <ProjectReference Include="..\SmartLib.Infrastructure\SmartLib.Infrastructure.csproj" />
   </ItemGroup>

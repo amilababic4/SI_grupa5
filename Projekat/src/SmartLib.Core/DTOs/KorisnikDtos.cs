@@ -38,4 +38,27 @@ namespace SmartLib.Core.DTOs
         [Compare(nameof(Lozinka), ErrorMessage = "Lozinka i potvrda lozinke se ne poklapaju.")]
         public string PotvrdaLozinke { get; set; } = string.Empty;
     }
+
+    public class UrediKorisnikaDto
+    {
+        public int Id { get; set; }
+
+        [Required(ErrorMessage = "Ime je obavezno.")]
+        [MaxLength(100)]
+        public string Ime { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Prezime je obavezno.")]
+        [MaxLength(100)]
+        public string Prezime { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Status je obavezan.")]
+        public string Status { get; set; } = "aktivan";
+
+        // Opcionalno — prazno = ne mijenja lozinku
+        [MinLength(6, ErrorMessage = "Lozinka mora imati najmanje 6 karaktera.")]
+        public string? NovaLozinka { get; set; }
+
+        [Compare(nameof(NovaLozinka), ErrorMessage = "Lozinke se ne poklapaju.")]
+        public string? PotvrdaLozinke { get; set; }
+    }
 }

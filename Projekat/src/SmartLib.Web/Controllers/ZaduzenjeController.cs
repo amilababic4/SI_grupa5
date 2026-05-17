@@ -66,12 +66,20 @@ namespace SmartLib.Web.Controllers
 
         // US-67: Detalji zaduženja (bibliotekar)
         [Authorize(Roles = RoleNames.Bibliotekar + "," + RoleNames.Administrator)]
-        public async Task<IActionResult> Details(int id)
+        public async Task<IActionResult> Details(int id, string? returnUrl = null,
+            int? korisnikId = null, int? primjerakId = null)
         {
             var z = await _zaduzenjeRepo.GetByIdAsync(id);
             if (z == null) return NotFound();
+
+            var poznatUrl = new[] { "Historija", "ZaduzenjaClana", "HistorijaClana", "ZaduzenjaPrimjerka" };
+            ViewBag.ReturnUrl = poznatUrl.Contains(returnUrl) ? returnUrl : "Index";
+            ViewBag.KorisnikId = korisnikId;
+            ViewBag.PrimjerakId = primjerakId;
+
             return View(MapToViewModel(z));
         }
+
 
         // US-44: Forma za novo zaduživanje (bibliotekar)
         [Authorize(Roles = RoleNames.Bibliotekar + "," + RoleNames.Administrator)]
@@ -218,6 +226,60 @@ namespace SmartLib.Web.Controllers
             return View(model);
         }
 
+        [Authorize(Roles = RoleNames.Bibliotekar + "," + RoleNames.Administrator)]
+        public async Task<IActionResult> HistorijaClana(int korisnikId)
+        {
+            var korisnik = await _korisnikRepo.GetByIdAsync(korisnikId);
+            if (korisnik == null) return NotFound();
+
+            var granica = DateTime.UtcNow.AddYears(-3);
+
+            var zatvorenaZaduzenja = await _zaduzenjeRepo.GetClosedHistoryForKorisnikAsync(korisnikId, granica);
+
+            var historija = zatvorenaZaduzenja
+                .Select(MapToViewModel)
+                .ToList();
+
+            ViewBag.KorisnikId = korisnikId;
+            ViewBag.KorisnikIme = $"{korisnik.Ime} {korisnik.Prezime}";
+
+            return View(historija);
+        }
+
+        [Authorize(Roles = RoleNames.Bibliotekar + "," + RoleNames.Administrator)]
+        public async Task<IActionResult> ZaduzenjaClana(int korisnikId)
+        {
+            var korisnik = await _korisnikRepo.GetByIdAsync(korisnikId);
+            if (korisnik == null) return NotFound();
+
+            var sva = await _zaduzenjeRepo.GetByKorisnikAsync(korisnikId);
+            var aktivna = sva
+                .Where(z => z.Status != "zatvoreno")
+                .Select(MapToViewModel)
+                .ToList();
+
+            ViewBag.KorisnikId = korisnikId;
+            ViewBag.KorisnikIme = $"{korisnik.Ime} {korisnik.Prezime}";
+
+            return View(aktivna);
+        }
+
+        [Authorize(Roles = RoleNames.Bibliotekar + "," + RoleNames.Administrator)]
+        public async Task<IActionResult> ZaduzenjaPrimjerka(int primjerakId)
+        {
+            var primjerak = await _primjerakRepo.GetByIdAsync(primjerakId);
+            if (primjerak == null) return NotFound();
+
+            var sva = await _zaduzenjeRepo.GetByPrimjerakAsync(primjerakId);
+            var model = sva.Select(MapToViewModel).ToList();
+
+            ViewBag.PrimjerakId = primjerakId;
+            ViewBag.InventarniBroj = primjerak.InventarniBroj;
+            ViewBag.KnjigaNaslov = primjerak.Knjiga?.Naslov ?? string.Empty;
+            ViewBag.KnjigaId = primjerak.KnjigaId;
+
+            return View(model);
+        }
         // ── Helpers ──────────────────────────────────────────────────────────────
 
         private static ZaduzenjeViewModel MapToViewModel(Zaduzenje z)
