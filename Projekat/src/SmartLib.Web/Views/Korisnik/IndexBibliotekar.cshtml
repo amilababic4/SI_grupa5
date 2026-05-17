@@ -1,0 +1,55 @@
+﻿@model IEnumerable<SmartLib.Core.DTOs.KorisnikDto>
+@{
+    ViewData["Title"] = "Bibliotekari";
+}
+
+<div class="members-header">
+    <h2>Bibliotekari</h2>
+    <a asp-action="CreateBibliotekar" class="btn btn-primary">Kreiraj nalog bibliotekara</a>
+</div>
+
+@if (TempData["SuccessMessage"] is string successMessage)
+{
+    <div class="validation-message members-feedback">@successMessage</div>
+}
+
+<div class="card members-card">
+    @if (!Model.Any())
+    {
+        <p style="padding:1rem; color:var(--sl-muted);">Trenutno nema registrovanih bibliotekara.</p>
+    }
+    else
+    {
+        <div class="members-table-wrap">
+            <table class="members-table">
+                <thead>
+                    <tr>
+                        <th>Ime i prezime</th>
+                        <th>Email</th>
+                        <th>Status</th>
+                        <th>Kreiran</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var b in Model)
+                    {
+                        <tr class="members-row-link"
+                            onclick="window.location='@Url.Action("ProfilClana", "Korisnik", new { id = b.Id })'"
+                            title="Pogledaj profil — @b.Ime @b.Prezime">
+                            <td data-label="Ime i prezime">
+                                <span class="members-name">@b.Ime @b.Prezime</span>
+                            </td>
+                            <td data-label="Email" class="members-email">@b.Email</td>
+                            <td data-label="Status">
+                                <span class="members-status @(b.Status == "aktivan" ? "members-status--aktivan" : "members-status--deaktiviran")">
+                                    @b.Status
+                                </span>
+                            </td>
+                            <td data-label="Kreiran">@b.DatumKreiranja.ToString("dd.MM.yyyy HH:mm")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

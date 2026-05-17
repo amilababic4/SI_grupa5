@@ -1,42 +1,29 @@
-﻿@model HistorijaZaduzenjaViewModel
+﻿@model IEnumerable<ZaduzenjeViewModel>
 @{
-    ViewData["Title"] = "Historija zaduženja";
+    var korisnikIme = ViewBag.KorisnikIme as string ?? "Korisnik";
+    var korisnikId = ViewBag.KorisnikId as int? ?? 0;
+    ViewData["Title"] = $"Historija zaduženja — {korisnikIme}";
+    var lista = Model.OrderByDescending(z => z.DatumStvarnogVracanja).ToList();
 }
+
+<div class="details-topbar">
+    <a asp-controller="Korisnik" asp-action="ProfilClana" asp-route-id="@korisnikId"
+       class="btn btn-secondary">← Nazad na profil</a>
+</div>
 
 <div class="katalog-header">
     <h2>Historija zaduženja</h2>
-    <a asp-action="Index" class="btn btn-secondary">← Aktivna zaduženja</a>
-</div>
-
-<div class="card katalog-search">
-    <form asp-action="Historija" method="get">
-        <div class="search-row">
-            <div class="form-group" style="flex:1; margin-bottom:0;">
-                <input type="text" name="clan" value="@Model.Clan"
-                       placeholder="Pretraga po imenu ili emailu člana..." />
-            </div>
-            <div style="display:flex; gap:0.5rem; align-items:flex-end;">
-                <button type="submit" class="btn btn-primary">Traži</button>
-                <a asp-action="Historija" class="btn btn-secondary">Reset</a>
-            </div>
-        </div>
-    </form>
+    <span class="profil-id-badge" style="align-self:center;">@korisnikIme</span>
 </div>
 
 <p class="katalog-meta">
-    Prikazuju se zatvorena zaduženja iz
-    <strong>posljednje 3 godine</strong>
-    @if (!string.IsNullOrWhiteSpace(Model.Clan))
-    {
-        <span> · filtriran po: <strong>@Model.Clan</strong></span>
-    }
-    · ukupno: <strong>@Model.Zaduzenja.Count</strong>
+    Zatvorena zaduženja iz <strong>posljednje 3 godine</strong> · ukupno: <strong>@lista.Count</strong>
 </p>
 
-@if (!Model.Zaduzenja.Any())
+@if (!lista.Any())
 {
     <div class="card katalog-empty">
-        <p>Nema zatvorenih zaduženja@(string.IsNullOrWhiteSpace(Model.Clan) ? " u posljednje 3 godine." : " za zadani filter.")</p>
+        <p>Ovaj član nema zatvorenih zaduženja u posljednje 3 godine.</p>
     </div>
 }
 else
@@ -46,8 +33,6 @@ else
             <table class="katalog-table">
                 <thead>
                     <tr>
-                        <th>Član</th>
-                        <th>Email</th>
                         <th>Knjiga</th>
                         <th>Inv. br.</th>
                         <th>Zaduženo</th>
@@ -57,12 +42,10 @@ else
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var z in Model.Zaduzenja.OrderByDescending(x => x.DatumStvarnogVracanja))
+                    @foreach (var z in lista)
                     {
                         <tr>
-                            <td data-label="Član"><strong>@z.KorisnikIme</strong></td>
-                            <td data-label="Email" class="members-email">@z.KorisnikEmail</td>
-                            <td data-label="Knjiga">@z.KnjigaNaslov</td>
+                            <td data-label="Knjiga"><strong>@z.KnjigaNaslov</strong></td>
                             <td data-label="Inv. br." class="katalog-isbn">@z.InventarniBroj</td>
                             <td data-label="Zaduženo">@z.DatumZaduzivanja.ToLocalTime().ToString("dd.MM.yyyy")</td>
                             <td data-label="Rok vraćanja">@z.DatumPlaniranogVracanja.ToLocalTime().ToString("dd.MM.yyyy")</td>
@@ -77,9 +60,10 @@ else
                                 }
                             </td>
                             <td class="katalog-actions">
-                                <a asp-action="Details"
+                                <a asp-controller="Zaduzenje" asp-action="Details"
                                    asp-route-id="@z.Id"
-                                   asp-route-returnUrl="Historija"
+                                   asp-route-returnUrl="HistorijaClana"
+                                   asp-route-korisnikId="@korisnikId"
                                    class="btn btn-secondary btn-sm">Detalji</a>
                             </td>
                         </tr>

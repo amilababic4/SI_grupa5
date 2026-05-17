@@ -1,10 +1,58 @@
 @model ZaduzenjeViewModel
 @{
     ViewData["Title"] = "Detalji zaduženja";
+
+    var returnUrl = ViewBag.ReturnUrl as string ?? "Index";
+    var korisnikId = ViewBag.KorisnikId as int?;
+    var primjerakId = ViewBag.PrimjerakId as int?;
+
+    string nazadAction, nazadLabel;
+    bool trebaPrimjerak = false;
+    bool trebaKorisnik = false;
+
+    switch (returnUrl)
+    {
+        case "Historija":
+            nazadAction = "Historija";
+            nazadLabel = "← Nazad na historiju";
+            break;
+        case "ZaduzenjaClana":
+            nazadAction = "ZaduzenjaClana";
+            nazadLabel = "← Nazad na aktivna zaduženja";
+            trebaKorisnik = true;
+            break;
+        case "HistorijaClana":
+            nazadAction = "HistorijaClana";
+            nazadLabel = "← Nazad na historiju člana";
+            trebaKorisnik = true;
+            break;
+        case "ZaduzenjaPrimjerka":
+            nazadAction = "ZaduzenjaPrimjerka";
+            nazadLabel = "← Nazad na zaduženja primjerka";
+            trebaPrimjerak = true;
+            break;
+        default:
+            nazadAction = "Index";
+            nazadLabel = "← Nazad na listu";
+            break;
+    }
 }
 
 <div class="details-topbar">
-    <a asp-action="Index" class="btn btn-secondary">← Nazad na listu</a>
+    @if (trebaPrimjerak && primjerakId.HasValue)
+    {
+        <a asp-action="@nazadAction" asp-route-primjerakId="@primjerakId"
+           class="btn btn-secondary">@nazadLabel</a>
+    }
+    else if (trebaKorisnik && korisnikId.HasValue)
+    {
+        <a asp-action="@nazadAction" asp-route-korisnikId="@korisnikId"
+           class="btn btn-secondary">@nazadLabel</a>
+    }
+    else
+    {
+        <a asp-action="@nazadAction" class="btn btn-secondary">@nazadLabel</a>
+    }
 </div>
 
 @if (TempData["SuccessMessage"] is string successMsg)
