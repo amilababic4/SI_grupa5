@@ -19,10 +19,10 @@ namespace SmartLib.Infrastructure.Services
             // TODO: Implement actual recommendation logic based on user history, ratings, and categories.
             // Requires adding `Ocjene` (Ratings) and `IstorijaCitanja` (Reading History) models to `Korisnik`.
 
-            // Placeholder logic: Return top 5 popular or recently added books.
+            // Placeholder logic: Return top 4 popular or recently added books.
             return await _dbContext.Knjige
                 .OrderByDescending(k => k.Id) // Fallback to newly added books
-                .Take(5)
+                .Take(4)
                 .ToListAsync();
         }
     }

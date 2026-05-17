@@ -519,7 +519,11 @@ namespace SmartLib.Tests.Unit.WebTests
         public async Task Historija_UvijekVracaView()
         {
             // Stub metoda — samo provjeravamo da vraća View bez greške
-            var result = await _controller.Historija(1);
+            _zaduzenjeRepo
+                .Setup(r => r.GetClosedSinceAsync(It.IsAny<DateTime>()))
+                .ReturnsAsync(new List<Zaduzenje>());
+
+            var result = await _controller.Historija(null);
 
             Assert.IsType<ViewResult>(result);
         }

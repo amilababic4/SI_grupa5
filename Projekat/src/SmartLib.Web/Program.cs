@@ -45,6 +45,7 @@ builder.Services.AddScoped<IKnjigaRepository, KnjigaRepository>();
 builder.Services.AddScoped<IPrimjerakRepository, PrimjerakRepository>();
 builder.Services.AddScoped<IKategorijaRepository, KategorijaRepository>();
 builder.Services.AddScoped<IZaduzenjeRepository, ZaduzenjeRepository>();
+builder.Services.AddScoped<IClanarinaRepository, ClanarinaRepository>();
 
 // Services
 builder.Services.AddTransient<IEmailService, SmartLib.Infrastructure.Services.EmailService>();

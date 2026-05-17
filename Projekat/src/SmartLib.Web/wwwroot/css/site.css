@@ -2973,6 +2973,142 @@ body.home-page footer {
         text-decoration: none;
     }
 
+/* ================================
+   Profil — Sekcija članarine (US-55, US-56, US-57)
+   Dodaj na kraj site.css
+   ================================ */
+
+.profil-clanarina-section {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--sl-border);
+}
+
+.profil-clanarina-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.85rem;
+}
+
+.profil-clanarina-naslov {
+    font-size: 0.76rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.045em;
+    color: var(--sl-muted);
+}
+
+/* Dugme "Upravljanje članarinom" — isti stil kao btn-zaduzenja-historija */
+.btn-clanarina-upravljaj {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+    font-size: 0.84rem;
+    font-weight: 700;
+    text-decoration: none;
+    border: 1.5px solid rgba(30, 58, 95, 0.15);
+    background: rgba(30, 58, 95, 0.06);
+    color: var(--sl-blue);
+    white-space: nowrap;
+    transition: background 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+    .btn-clanarina-upravljaj:hover {
+        background: rgba(30, 58, 95, 0.11);
+        box-shadow: 0 6px 18px rgba(30, 58, 95, 0.1);
+        transform: translateY(-1px);
+        text-decoration: none;
+    }
+
+/* Kartica s datumima i statusom */
+.profil-clanarina-body {
+    background: rgba(248, 250, 252, 0.74);
+    border: 1px solid rgba(30, 41, 59, 0.07);
+    border-radius: var(--sl-radius-md);
+    padding: 0.95rem 1rem;
+}
+
+.profil-clanarina-info {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+/* Svaki datum blok — isti izgled kao .details-item */
+.profil-clanarina-datum {
+    display: flex;
+    flex-direction: column;
+    gap: 0.32rem;
+}
+
+/* Status badge se pozicionira desno */
+.profil-clanarina-status {
+    margin-left: auto;
+}
+
+/* Poruka kad nema članarine */
+.profil-clanarina-prazno {
+    color: var(--sl-muted);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.profil-zaduzenja-bar {
+    justify-content: flex-start;
+}
+
+/* ── FIX: Članarina — kad nema evidentirane, dugme i tekst u jednom redu */
+
+.profil-clanarina-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+}
+
+.profil-clanarina-header {
+    align-items: center; /* već postoji, samo potvrđujemo */
+}
+
+/* Kad nema članarine — wrapper koji drži dugme i poruku zajedno */
+.profil-clanarina-prazno-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.profil-clanarina-prazno {
+    margin: 0; /* ukloni default margin od <p> */
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .profil-clanarina-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.65rem;
+    }
+
+    .btn-clanarina-upravljaj {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .profil-clanarina-info {
+        gap: 1rem;
+    }
+
+    .profil-clanarina-status {
+        margin-left: 0;
+        width: 100%;
+    }
+}
+
 @media (max-width: 992px) {
     .books-grid {
         grid-template-columns: repeat(2, 1fr);

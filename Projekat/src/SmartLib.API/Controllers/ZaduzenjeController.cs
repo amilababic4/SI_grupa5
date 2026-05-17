@@ -184,24 +184,6 @@ namespace SmartLib.API.Controllers
 
             return Ok(historija);
         }
-
-        // Nema user story, dodao jer mi je bilo logično 
-        [Authorize]
-        public async Task<IActionResult> MojaHistorija()
-        {
-            var korisnikIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (!int.TryParse(korisnikIdStr, out var korisnikId))
-                return RedirectToAction("Login", "Auth");
-
-            var granica = DateTime.UtcNow.AddYears(-3);
-
-            var mojaZaduzenja = await _zaduzenjeRepo.GetClosedHistoryForKorisnikAsync(korisnikId, granica);
-
-            var model = mojaZaduzenja.Select(MapToViewModel).ToList();
-
-            return View(model);
-        }
-
         #region Helperi
 
         private static object MapToDto(Zaduzenje z)

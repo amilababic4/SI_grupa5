@@ -7,6 +7,6 @@ namespace SmartLib.Core.Interfaces
         Task<Clanarina?> GetByKorisnikAsync(int korisnikId);
         Task<Clanarina> CreateAsync(Clanarina clanarina);
         Task UpdateAsync(Clanarina clanarina);
-        Task<bool> IsActiveAsync(int korisnikId);
+        Task<bool> IsActiveAsync(int korisnikId);        
     }
 }
