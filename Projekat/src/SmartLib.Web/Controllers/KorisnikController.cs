@@ -14,10 +14,14 @@ namespace SmartLib.Web.Controllers
     public class KorisnikController : Controller
     {
         private readonly IKorisnikRepository _korisnikRepository;
+        private readonly IClanarinaRepository _clanarinaRepository; // NOVO
 
-        public KorisnikController(IKorisnikRepository korisnikRepository)
+        public KorisnikController(
+            IKorisnikRepository korisnikRepository,
+            IClanarinaRepository clanarinaRepository) // NOVO
         {
             _korisnikRepository = korisnikRepository;
+            _clanarinaRepository = clanarinaRepository; // NOVO
         }
 
         public async Task<IActionResult> Index()
@@ -65,6 +69,7 @@ namespace SmartLib.Web.Controllers
             return View(bibliotekari);
         }
 
+        // ─── IZMIJENJENO: dohvat vlastite članarine ──────────────────────────
         [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> Profil()
@@ -77,10 +82,23 @@ namespace SmartLib.Web.Controllers
             if (korisnik == null)
                 return NotFound();
 
+            // Dohvati članarinu i proslijedi u ViewBag
+            var clanarina = await _clanarinaRepository.GetByKorisnikAsync(id);
+            if (clanarina != null)
+            {
+                ViewBag.Clanarina = new ClanarinaDto
+                {
+                    Id = clanarina.Id,
+                    DatumPocetka = clanarina.DatumPocetka,
+                    DatumIsteka = clanarina.DatumIsteka
+                };
+            }
+
             ViewBag.JeMojProfil = true;
             return View("Profil", korisnik);
         }
 
+        // ─── IZMIJENJENO: dohvat članarine za profil člana ───────────────────
         [HttpGet]
         public async Task<IActionResult> ProfilClana(int id)
         {
@@ -88,7 +106,20 @@ namespace SmartLib.Web.Controllers
             if (korisnik == null)
                 return NotFound();
 
+            // Dohvati članarinu i proslijedi u ViewBag
+            var clanarina = await _clanarinaRepository.GetByKorisnikAsync(id);
+            if (clanarina != null)
+            {
+                ViewBag.Clanarina = new ClanarinaDto
+                {
+                    Id = clanarina.Id,
+                    DatumPocetka = clanarina.DatumPocetka,
+                    DatumIsteka = clanarina.DatumIsteka
+                };
+            }
+
             ViewBag.JeMojProfil = false;
+            ViewBag.ProfilKorisnikId = id;
 
             var uloga = korisnik.Uloga?.Naziv ?? string.Empty;
             if (string.Equals(uloga, RoleNames.Bibliotekar, StringComparison.OrdinalIgnoreCase))
@@ -117,9 +148,7 @@ namespace SmartLib.Web.Controllers
         public async Task<IActionResult> Create(KorisnikCreateDto model)
         {
             if (!ModelState.IsValid)
-            {
                 return View(model);
-            }
 
             if (model.Lozinka != model.PotvrdaLozinke)
             {
@@ -178,7 +207,6 @@ namespace SmartLib.Web.Controllers
                 return View(model);
             }
 
-            // Dohvati UlogaId za Bibliotekar
             var sviKorisnici = await _korisnikRepository.GetAllAsync();
             var bibliotekarUlogaId = sviKorisnici
                 .FirstOrDefault(k => string.Equals(k.Uloga?.Naziv, RoleNames.Bibliotekar, StringComparison.OrdinalIgnoreCase))
@@ -212,9 +240,7 @@ namespace SmartLib.Web.Controllers
         {
             var korisnik = await _korisnikRepository.GetByIdAsync(id);
             if (korisnik is null)
-            {
                 return NotFound();
-            }
 
             korisnik.Status = "deaktiviran";
             await _korisnikRepository.UpdateAsync(korisnik);
@@ -261,11 +287,8 @@ namespace SmartLib.Web.Controllers
             korisnik.Prezime = model.Prezime.Trim();
             korisnik.Status = model.Status;
 
-            // Promjena lozinke samo ako je unesena
             if (!string.IsNullOrWhiteSpace(model.NovaLozinka))
-            {
                 korisnik.LozinkaHash = SmartLib.Infrastructure.Security.PasswordHasher.HashPassword(model.NovaLozinka);
-            }
 
             await _korisnikRepository.UpdateAsync(korisnik);
 

@@ -1,14 +1,16 @@
 @model SmartLib.Core.Models.Korisnik
+@using SmartLib.Core.DTOs
 @{
     var jeMojProfil = ViewBag.JeMojProfil as bool? ?? true;
     var jeAdmin = User.IsInRole("Administrator");
     var jeBibliotekarIliAdmin = User.IsInRole("Bibliotekar") || User.IsInRole("Administrator");
     ViewData["Title"] = jeMojProfil ? "Moj profil" : $"{Model.Ime} {Model.Prezime}";
 
-    // Odakle smo došli — za "Nazad" dugme
     var nazadController = ViewBag.NazadController as string ?? "Korisnik";
     var nazadAction = ViewBag.NazadAction as string ?? "Index";
     var nazadLabel = ViewBag.NazadLabel as string ?? "← Nazad na članove";
+
+    var clanarina = ViewBag.Clanarina as ClanarinaDto;
 }
 
 <div class="details-topbar">
@@ -29,6 +31,10 @@
 @if (TempData["ErrorMessage"] is string errorMsg)
 {
     <div class="alert alert-error">@errorMsg</div>
+}
+@if (TempData["Uspjeh"] is string uspjehMsg)
+{
+    <div class="alert alert-success">@uspjehMsg</div>
 }
 
 <div class="card profil-card">
@@ -74,10 +80,6 @@
 
             <div class="profil-grid">
                 <div class="details-item">
-                    <span class="details-label">ID korisnika</span>
-                    <span class="profil-id-badge">#@Model.Id</span>
-                </div>
-                <div class="details-item">
                     <span class="details-label">Ime</span>
                     <span>@Model.Ime</span>
                 </div>
@@ -85,7 +87,7 @@
                     <span class="details-label">Prezime</span>
                     <span>@Model.Prezime</span>
                 </div>
-                <div class="details-item">
+                <div class="details-item profil-grid-full">
                     <span class="details-label">E-mail adresa</span>
                     <span class="profil-email">@Model.Email</span>
                 </div>
@@ -114,22 +116,74 @@
                 </div>
             </div>
 
-            @if (jeBibliotekarIliAdmin && !jeMojProfil)
+            @* ── SEKCIJA: ČLANARINA (US-55, US-56, US-57) ───────────────────── *@
+            @if (Model.Uloga?.Id != 2)
             {
-                <div class="profil-zaduzenja-bar">
-                    <a asp-controller="Zaduzenje" asp-action="ZaduzenjaClana"
-                       asp-route-korisnikId="@Model.Id"
-                       class="btn btn-zaduzenja-aktivna">
-                        Aktivna zaduženja
-                    </a>
-                    <a asp-controller="Zaduzenje" asp-action="HistorijaClana"
-                       asp-route-korisnikId="@Model.Id"
-                       class="btn btn-zaduzenja-historija">
-                        Historija zaduženja
-                    </a>
-                </div>
-            }
-        </div>
+                <div class="profil-clanarina-section">
 
+                    @* Header: naslov + dugme uvijek desno, bez obzira ima li članarine *@
+                    <div class="profil-clanarina-header">
+                        <span class="profil-clanarina-naslov">Članarina</span>
+                        @if (jeBibliotekarIliAdmin && !jeMojProfil)
+                        {
+                            <a asp-controller="Clanarina"
+                               asp-action="Upsert"
+                               asp-route-korisnikId="@Model.Id"
+                               class="btn-clanarina-upravljaj">
+                                @(clanarina is not null ? "Upravljanje članarinom" : "Evidentiraj članarinu")
+                            </a>
+                        }
+                    </div>
+
+                    @* Tijelo: ako postoji članarina prikaži detalje, inače poruku *@
+                    @if (clanarina is not null)
+                    {
+                        <div class="profil-grid" style="margin-top: 0.5rem;">
+                            <div class="details-item">
+                                <span class="details-label">Datum početka</span>
+                                <span>@clanarina.DatumPocetka.ToString("dd.MM.yyyy")</span>
+                            </div>
+                            <div class="details-item">
+                                <span class="details-label">Važi do</span>
+                                <span>@clanarina.DatumIsteka.ToString("dd.MM.yyyy")</span>
+                            </div>
+                            <div class="details-item profil-grid-full">
+                                <span class="details-label">Status članarine</span>
+                                @if (clanarina.JeAktivna)
+                                {
+                                    <span class="status-dostupan">aktivna</span>
+                                }
+                                else
+                                {
+                                    <span class="status-deaktiviran">istekla</span>
+                                }
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="profil-clanarina-prazno">Članarina nije evidentirana.</p>
+                    }
+
+                </div>
+
+                @if (jeBibliotekarIliAdmin && !jeMojProfil)
+                {
+                    <div class="profil-zaduzenja-bar">
+                        <a asp-controller="Zaduzenje" asp-action="ZaduzenjaClana"
+                           asp-route-korisnikId="@Model.Id"
+                           class="btn btn-zaduzenja-aktivna">
+                            Aktivna zaduženja
+                        </a>
+                        <a asp-controller="Zaduzenje" asp-action="HistorijaClana"
+                           asp-route-korisnikId="@Model.Id"
+                           class="btn btn-zaduzenja-historija">
+                            Historija zaduženja
+                        </a>
+                    </div>
+                }
+            }
+
+        </div>
     </div>
 </div>

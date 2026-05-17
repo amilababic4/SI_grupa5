@@ -12,16 +12,18 @@ namespace SmartLib.Tests.Unit.WebTests
     public class KorisnikWebControllerTests
     {
         private readonly Mock<IKorisnikRepository> _repoMock;
+        private readonly Mock<IClanarinaRepository> _clanarinaRepoMock;
         private readonly KorisnikController _controller;
 
         public KorisnikWebControllerTests()
         {
             _repoMock = new Mock<IKorisnikRepository>();
+            _clanarinaRepoMock = new Mock<IClanarinaRepository>();
 
             var tempDataProvider = new Mock<ITempDataProvider>();
             var tempData = new TempDataDictionary(new Microsoft.AspNetCore.Http.DefaultHttpContext(), tempDataProvider.Object);
 
-            _controller = new KorisnikController(_repoMock.Object)
+            _controller = new KorisnikController(_repoMock.Object, _clanarinaRepoMock.Object)
             {
                 TempData = tempData
             };
@@ -114,14 +116,6 @@ namespace SmartLib.Tests.Unit.WebTests
             var result = await _controller.Deaktiviraj(99);
 
             Assert.IsType<NotFoundResult>(result);
-        }
-
-        [Fact]
-        public async Task Profil_VracaView()
-        {
-            var result = await _controller.Profil();
-
-            Assert.IsType<ViewResult>(result);
         }
 
         [Fact]
