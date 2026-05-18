@@ -140,19 +140,26 @@
                 </div>
                 <div class="details-item">
                     <span class="details-label">Status računa</span>
-                    <span class="@(Model.Status == "aktivan" ? "status-dostupan" : "status-deaktiviran")">
+                    <span class="@(Model.Status == "aktivan" ? "status-dostupan" : "status-deaktiviran") details-value--center">
                         @Model.Status
                     </span>
                 </div>
-                <div class="details-item profil-grid-full">
-                    <span class="details-label">Datum kreiranja</span>
-                    <span class="details-value">@Model.DatumKreiranja.ToString("dd.MM.yyyy")</span>
-                </div>
                 @if (!statusAktivan && Model.DatumDeaktivacije.HasValue)
                 {
-                    <div class="details-item profil-grid-full">
+                    <div class="details-item">
+                        <span class="details-label">Datum kreiranja</span>
+                        <span class="details-value details-value--center">@Model.DatumKreiranja.ToString("dd.MM.yyyy")</span>
+                    </div>
+                    <div class="details-item">
                         <span class="details-label">Datum deaktivacije</span>
-                        <span class="details-value">@Model.DatumDeaktivacije.Value.ToString("dd.MM.yyyy HH:mm")</span>
+                        <span class="details-value details-value--center">@Model.DatumDeaktivacije.Value.ToString("dd.MM.yyyy HH:mm")</span>
+                    </div>
+                }
+                else
+                {
+                    <div class="details-item profil-grid-full">
+                        <span class="details-label">Datum kreiranja</span>
+                        <span class="details-value details-value--center">@Model.DatumKreiranja.ToString("dd.MM.yyyy")</span>
                     </div>
                 }
             </div>
