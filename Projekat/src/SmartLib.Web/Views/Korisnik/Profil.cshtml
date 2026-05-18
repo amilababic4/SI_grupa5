@@ -148,6 +148,13 @@
                     <span class="details-label">Datum kreiranja</span>
                     <span>@Model.DatumKreiranja.ToString("dd.MM.yyyy")</span>
                 </div>
+                @if (!statusAktivan && Model.DatumDeaktivacije.HasValue)
+                {
+                    <div class="details-item profil-grid-full">
+                        <span class="details-label">Datum deaktivacije</span>
+                        <span class="status-deaktiviran">@Model.DatumDeaktivacije.Value.ToString("dd.MM.yyyy HH:mm")</span>
+                    </div>
+                }
             </div>
 
             @* ── SEKCIJA: ČLANARINA (US-55, US-56, US-57) ───────────────────── *@
