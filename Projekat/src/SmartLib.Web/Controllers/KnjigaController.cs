@@ -175,9 +175,13 @@ namespace SmartLib.Web.Controllers
             var remaining = allRandom.Except(selectedBooks).Take(totalTarget - selectedBooks.Count).ToList();
             selectedBooks.AddRange(remaining);
 
-            // Start fetching descriptions in parallel
-            var descriptionTasks = selectedBooks.Select(book => FetchDescriptionFromGoogleBooksAsync(book.Isbn)).ToList();
-            var descriptions = await Task.WhenAll(descriptionTasks);
+            var descriptions = new List<string>();
+            foreach (var book in selectedBooks)
+            {
+                var desc = await FetchDescriptionFromGoogleBooksAsync(book.Isbn);
+                descriptions.Add(desc);
+                await Task.Delay(50); // Kratka pauza da ne bismo preplavili Google API (429 Too Many Requests)
+            }
 
             var rawCards = new List<ExploreCardViewModel>();
             for (int i = 0; i < selectedBooks.Count; i++)
@@ -474,6 +478,12 @@ namespace SmartLib.Web.Controllers
             if (string.IsNullOrWhiteSpace(isbn)) return "Opis nije dostupan.";
             var normalizedIsbn = NormalizeIsbn(isbn);
             
+            var cacheKey = $"desc_{normalizedIsbn}";
+            if (_cache.TryGetValue(cacheKey, out string? cachedDesc) && !string.IsNullOrEmpty(cachedDesc))
+            {
+                return cachedDesc;
+            }
+            
             var apiKey = _configuration["GOOGLE_BOOKS_API_KEY"] ?? _configuration["GoogleBooks:ApiKey"];
             var url = $"https://www.googleapis.com/books/v1/volumes?q=isbn:{normalizedIsbn}";
             if (!string.IsNullOrWhiteSpace(apiKey))
@@ -495,7 +505,13 @@ namespace SmartLib.Web.Controllers
                         if (firstItem.TryGetProperty("volumeInfo", out var volumeInfo))
                         {
                             var description = GetJsonString(volumeInfo, "description");
-                            return TrimText(description, 260);
+                            var trimmed = TrimText(description, 260);
+                            
+                            if (trimmed != "Opis nije dostupan.")
+                            {
+                                _cache.Set(cacheKey, trimmed, TimeSpan.FromHours(24));
+                            }
+                            return trimmed;
                         }
                     }
                 }
@@ -505,6 +521,7 @@ namespace SmartLib.Web.Controllers
                 // Ignoriši greške
             }
 
+            _cache.Set(cacheKey, "Opis nije dostupan.", TimeSpan.FromMinutes(10));
             return "Opis nije dostupan.";
         }
 
