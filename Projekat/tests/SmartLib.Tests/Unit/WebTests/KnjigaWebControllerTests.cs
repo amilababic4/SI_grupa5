@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Moq.Protected;
 using SmartLib.Core.DTOs;
@@ -23,6 +24,7 @@ namespace SmartLib.Tests.Unit.WebTests
         private readonly Mock<IKategorijaRepository> _kategorijaMock;
         private readonly Mock<IZaduzenjeRepository> _zaduzenjeMock;
         private readonly Mock<IHttpClientFactory> _httpClientFactoryMock;
+        private readonly Mock<ILogger<KnjigaController>> _loggerMock;
         private readonly IMemoryCache _memoryCache;
         private readonly IConfiguration _configuration;
         private readonly KnjigaController _controller;
@@ -34,6 +36,7 @@ namespace SmartLib.Tests.Unit.WebTests
             _kategorijaMock = new Mock<IKategorijaRepository>();
             _zaduzenjeMock = new Mock<IZaduzenjeRepository>();
             _httpClientFactoryMock = new Mock<IHttpClientFactory>();
+            _loggerMock = new Mock<ILogger<KnjigaController>>();
             _configuration = new ConfigurationBuilder().Build();
 
             _memoryCache = new MemoryCache(new MemoryCacheOptions());
@@ -45,7 +48,8 @@ namespace SmartLib.Tests.Unit.WebTests
                 _zaduzenjeMock.Object,
                 _httpClientFactoryMock.Object,
                 _memoryCache,
-                _configuration
+                _configuration,
+                _loggerMock.Object
             );
 
             var httpContext = new DefaultHttpContext();
@@ -711,7 +715,8 @@ namespace SmartLib.Tests.Unit.WebTests
                 _zaduzenjeMock.Object,
                 httpClientFactoryMock.Object,
                 _memoryCache,
-                _configuration);
+                _configuration,
+                _loggerMock.Object);
 
             SetupControllerContext(controller);
 
@@ -747,7 +752,8 @@ namespace SmartLib.Tests.Unit.WebTests
                 _zaduzenjeMock.Object,
                 httpClientFactoryMock.Object,
                 _memoryCache,
-                _configuration);
+                _configuration,
+                _loggerMock.Object);
 
             SetupControllerContext(controller);
 
@@ -780,7 +786,8 @@ namespace SmartLib.Tests.Unit.WebTests
                 _zaduzenjeMock.Object,
                 httpClientFactoryMock.Object,
                 _memoryCache,
-                _configuration);
+                _configuration,
+                _loggerMock.Object);
 
             SetupControllerContext(controller);
 

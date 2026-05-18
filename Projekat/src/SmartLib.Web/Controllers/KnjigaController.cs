@@ -22,6 +22,7 @@ namespace SmartLib.Web.Controllers
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IMemoryCache _cache;
         private readonly IConfiguration _configuration;
+        private readonly ILogger<KnjigaController> _logger;
 
         public KnjigaController(
             IKnjigaRepository knjigaRepository,
@@ -30,7 +31,8 @@ namespace SmartLib.Web.Controllers
             IZaduzenjeRepository zaduzenjeRepository,
             IHttpClientFactory httpClientFactory,
             IMemoryCache cache,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            ILogger<KnjigaController> logger)
         {
             _knjigaRepository = knjigaRepository;
             _primjerakRepository = primjerakRepository;
@@ -39,6 +41,7 @@ namespace SmartLib.Web.Controllers
             _httpClientFactory = httpClientFactory;
             _cache = cache;
             _configuration = configuration;
+            _logger = logger;
         }
 
         [AllowAnonymous]
@@ -161,25 +164,38 @@ namespace SmartLib.Web.Controllers
             var surpriseBudget = totalTarget - preferredBudget;
 
             var perPreferred = preferredCategories.Count == 0 ? preferredBudget : Math.Max(4, preferredBudget / preferredCategories.Count);
-            var perSurprise = surpriseCategories.Count == 0 ? 0 : Math.Max(3, surpriseBudget / surpriseCategories.Count);
+            var allRandom = await _knjigaRepository.GetRandomAsync(totalTarget * 2);
+            var preferredBooks = allRandom.Where(b => b.Kategorija != null && preferredCategories.Contains(b.Kategorija.Naziv, StringComparer.OrdinalIgnoreCase)).Take(preferredBudget).ToList();
+            var surpriseBooks = allRandom.Where(b => b.Kategorija != null && surpriseCategories.Contains(b.Kategorija.Naziv, StringComparer.OrdinalIgnoreCase)).Take(surpriseBudget).ToList();
 
-            var fetchTasks = new List<Task<List<ExploreCardViewModel>>>();
-            foreach (var category in preferredCategories)
-            {
-                fetchTasks.Add(FetchGoogleBooksAsync(category, false, perPreferred));
-            }
-            foreach (var category in surpriseCategories)
-            {
-                fetchTasks.Add(FetchGoogleBooksAsync(category, true, perSurprise));
-            }
+            var selectedBooks = new List<Knjiga>();
+            selectedBooks.AddRange(preferredBooks);
+            selectedBooks.AddRange(surpriseBooks);
 
-            var fetched = await Task.WhenAll(fetchTasks);
-            var rawCards = fetched.SelectMany(cards => cards).ToList();
+            var remaining = allRandom.Except(selectedBooks).Take(totalTarget - selectedBooks.Count).ToList();
+            selectedBooks.AddRange(remaining);
 
-            if (rawCards.Count < totalTarget / 2)
+            var rawCards = new List<ExploreCardViewModel>();
+            foreach (var book in selectedBooks)
             {
-                var fallback = await FetchGoogleBooksAsync("Ostalo", true, totalTarget);
-                rawCards.AddRange(fallback);
+                var thumbnail = string.Empty;
+                if (!string.IsNullOrWhiteSpace(book.Isbn))
+                {
+                    thumbnail = Url.Action("Korice", "Knjiga", new { isbn = book.Isbn, size = "L" }) ?? string.Empty;
+                }
+                
+                bool isWildcard = book.Kategorija != null && surpriseCategories.Contains(book.Kategorija.Naziv, StringComparer.OrdinalIgnoreCase);
+
+                rawCards.Add(new ExploreCardViewModel
+                {
+                    Title = string.IsNullOrWhiteSpace(book.Naslov) ? "Nepoznat naslov" : book.Naslov,
+                    Authors = string.IsNullOrWhiteSpace(book.Autor) ? "Nepoznat autor" : book.Autor,
+                    Category = book.Kategorija?.Naziv ?? "Ostalo",
+                    Description = "Lokalna knjiga",
+                    ThumbnailUrl = thumbnail,
+                    InfoLink = Url.Action("Details", "Knjiga", new { id = book.Id }) ?? string.Empty,
+                    IsWildcard = isWildcard
+                });
             }
 
             var uniqueCards = new List<ExploreCardViewModel>();
@@ -203,6 +219,42 @@ namespace SmartLib.Web.Controllers
             };
 
             return View(model);
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetCatalogRecommendation(string? category = null)
+        {
+            try
+            {
+                var books = await _knjigaRepository.GetRandomAsync(10);
+                if (!books.Any()) return NotFound();
+
+                Knjiga? book = null;
+                if (!string.IsNullOrWhiteSpace(category))
+                {
+                    book = books.FirstOrDefault(b => 
+                        b.Kategorija?.Naziv?.Equals(category.Trim(), StringComparison.OrdinalIgnoreCase) ?? false);
+                }
+
+                book ??= books.FirstOrDefault();
+
+                if (book == null) return NotFound();
+
+                return Json(new
+                {
+                    id = book.Id,
+                    title = book.Naslov,
+                    authors = book.Autor,
+                    category = book.Kategorija?.Naziv ?? "Ostalo",
+                    isbn = book.Isbn
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning("Error fetching catalog recommendation: {Message}", ex.Message);
+                return StatusCode(500);
+            }
         }
 
         public async Task<IActionResult> Details(int id)
@@ -398,90 +450,11 @@ namespace SmartLib.Web.Controllers
             return null;
         }
 
-        private async Task<List<ExploreCardViewModel>> FetchGoogleBooksAsync(string localCategory, bool isWildcard, int maxResults)
-        {
-            if (maxResults <= 0) return new List<ExploreCardViewModel>();
 
-            var subject = MapLocalCategoryToGoogleSubject(localCategory);
-            var query = $"subject:{subject}";
-            var apiKey = _configuration["GOOGLE_BOOKS_API_KEY"] ?? _configuration["GoogleBooks:ApiKey"];
 
-            var url = $"https://www.googleapis.com/books/v1/volumes?q={Uri.EscapeDataString(query)}&maxResults={Math.Min(maxResults, 40)}&printType=books&projection=lite";
-            if (!string.IsNullOrWhiteSpace(apiKey))
-            {
-                url += $"&key={Uri.EscapeDataString(apiKey)}";
-            }
 
-            try
-            {
-                var client = _httpClientFactory.CreateClient();
-                var response = await client.GetAsync(url);
-                if (!response.IsSuccessStatusCode) return new List<ExploreCardViewModel>();
 
-                var json = await response.Content.ReadAsStringAsync();
-                using var doc = JsonDocument.Parse(json);
-                if (!doc.RootElement.TryGetProperty("items", out var items))
-                    return new List<ExploreCardViewModel>();
 
-                var results = new List<ExploreCardViewModel>();
-                foreach (var item in items.EnumerateArray())
-                {
-                    if (!item.TryGetProperty("volumeInfo", out var volumeInfo)) continue;
-
-                    var title = GetJsonString(volumeInfo, "title") ?? "Nepoznat naslov";
-                    var authors = GetJsonArray(volumeInfo, "authors");
-                    var authorsText = authors.Count > 0 ? string.Join(", ", authors) : "Nepoznat autor";
-                    var description = TrimText(GetJsonString(volumeInfo, "description"), 260);
-                    var infoLink = GetJsonString(volumeInfo, "infoLink") ?? string.Empty;
-                    var thumbnail = GetThumbnailUrl(volumeInfo);
-
-                    if (string.IsNullOrWhiteSpace(thumbnail))
-                    {
-                        var isbn = GetIsbn(volumeInfo);
-                        if (!string.IsNullOrWhiteSpace(isbn))
-                        {
-                            thumbnail = Url.Action("Korice", "Knjiga", new { isbn, size = "L" }) ?? string.Empty;
-                        }
-                    }
-
-                    results.Add(new ExploreCardViewModel
-                    {
-                        Title = title,
-                        Authors = authorsText,
-                        Category = localCategory,
-                        Description = description,
-                        ThumbnailUrl = thumbnail,
-                        InfoLink = infoLink,
-                        IsWildcard = isWildcard
-                    });
-                }
-
-                return results;
-            }
-            catch
-            {
-                return new List<ExploreCardViewModel>();
-            }
-        }
-
-        private static string MapLocalCategoryToGoogleSubject(string category)
-        {
-            if (string.IsNullOrWhiteSpace(category)) return "General";
-
-            return category.Trim() switch
-            {
-                "Beletristika" => "Fiction",
-                "Naučna fantastika" => "Science Fiction",
-                "Historija" => "History",
-                "Nauka i tehnika" => "Science",
-                "Filozofija" => "Philosophy",
-                "Biografija" => "Biography",
-                "Dječija literatura" => "Juvenile Fiction",
-                "Udžbenici" => "Textbooks",
-                "Ostalo" => "General",
-                _ => category
-            };
-        }
 
         private static int MapCoverZoom(string size) => size switch
         {
@@ -490,54 +463,7 @@ namespace SmartLib.Web.Controllers
             _ => 2
         };
 
-        private static string? GetJsonString(JsonElement element, string propertyName)
-            => element.TryGetProperty(propertyName, out var prop) && prop.ValueKind == JsonValueKind.String
-                ? prop.GetString()
-                : null;
 
-        private static List<string> GetJsonArray(JsonElement element, string propertyName)
-        {
-            if (!element.TryGetProperty(propertyName, out var prop) || prop.ValueKind != JsonValueKind.Array)
-                return new List<string>();
-
-            return prop.EnumerateArray()
-                .Where(item => item.ValueKind == JsonValueKind.String)
-                .Select(item => item.GetString())
-                .Where(s => !string.IsNullOrWhiteSpace(s))
-                .Select(s => s!)
-                .ToList();
-        }
-
-        private static string TrimText(string? text, int maxLength)
-        {
-            if (string.IsNullOrWhiteSpace(text)) return "Opis nije dostupan.";
-            var trimmed = text.Trim();
-            return trimmed.Length <= maxLength ? trimmed : trimmed[..maxLength].TrimEnd() + "...";
-        }
-
-        private static string GetThumbnailUrl(JsonElement volumeInfo)
-        {
-            if (!volumeInfo.TryGetProperty("imageLinks", out var links)) return string.Empty;
-            var url = GetJsonString(links, "thumbnail") ?? GetJsonString(links, "smallThumbnail") ?? string.Empty;
-            return url.Replace("http://", "https://");
-        }
-
-        private static string? GetIsbn(JsonElement volumeInfo)
-        {
-            if (!volumeInfo.TryGetProperty("industryIdentifiers", out var ids) || ids.ValueKind != JsonValueKind.Array)
-                return null;
-
-            foreach (var item in ids.EnumerateArray())
-            {
-                var type = GetJsonString(item, "type");
-                var identifier = GetJsonString(item, "identifier");
-                if (string.IsNullOrWhiteSpace(identifier)) continue;
-                if (type == "ISBN_13") return identifier;
-                if (type == "ISBN_10") return identifier;
-            }
-
-            return null;
-        }
 
         private static string NormalizeIsbn(string isbn)
             => isbn.Replace("-", "").Replace(" ", "").Trim();
