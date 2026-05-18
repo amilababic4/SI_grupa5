@@ -3201,3 +3201,361 @@ body.home-page footer {
         gap: 0.9rem;
     }
 }
+
+/* ================================
+   Status — deaktiviran (gray pill)
+   Consistent with katalog-badge /
+   status-dostupan visual language
+   ================================ */
+
+.status-deaktiviran {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 28px;
+    padding: 0.28rem 0.65rem;
+    border-radius: 999px;
+    background: rgba(100, 116, 139, 0.13);
+    color: #64748b;
+    border: 1px solid rgba(100, 116, 139, 0.18);
+    font-size: 0.84rem;
+    font-weight: 700;
+}
+
+/* ================================
+   Dark Mode Toggle Button
+   ================================ */
+
+.theme-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
+}
+
+.smartlib-navbar-app .theme-toggle-btn {
+    color: #334155;
+    background: rgba(219, 234, 254, 0.55);
+    border-color: rgba(30, 58, 95, 0.12);
+}
+
+    .smartlib-navbar-app .theme-toggle-btn:hover {
+        background: rgba(219, 234, 254, 0.9);
+        border-color: rgba(30, 58, 95, 0.2);
+        transform: rotate(18deg) scale(1.08);
+    }
+
+.smartlib-navbar-front .theme-toggle-btn {
+    color: rgba(255, 255, 255, 0.88);
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+    .smartlib-navbar-front .theme-toggle-btn:hover {
+        background: rgba(255, 255, 255, 0.16);
+        color: #ffffff;
+        transform: rotate(18deg) scale(1.08);
+    }
+
+/* ================================
+   Dark Mode
+   ================================ */
+
+[data-theme="dark"] {
+    /* NOTE: --sl-dark (#07111f) intentionally kept unchanged —
+       it is the background of home page sections and must stay dark. */
+    --sl-blue: #60a5fa;
+    --sl-blue-light: #0d1421;
+    --sl-blue-light-2: #0f1826;
+    --sl-blue-soft: #1e3554;
+    --sl-gold: #d4a854;
+    --sl-text: #e2e8f0;
+    --sl-muted: #94a3b8;
+    --sl-border: rgba(255, 255, 255, 0.08);
+    --sl-card: rgba(17, 28, 46, 0.97);
+    --sl-card-solid: #111c2e;
+    --sl-danger: #f87171;
+    --sl-success: #34d399;
+    --sl-shadow: 0 18px 45px rgba(0, 0, 0, 0.5);
+    --sl-shadow-hover: 0 24px 65px rgba(0, 0, 0, 0.62);
+}
+
+/* Base */
+[data-theme="dark"] html {
+    background-color: #0d1421;
+}
+
+[data-theme="dark"] body:not(.home-page) {
+    background: radial-gradient(circle at top left, rgba(30, 58, 100, 0.22), transparent 34%),
+                radial-gradient(circle at top right, rgba(20, 40, 80, 0.28), transparent 32%),
+                linear-gradient(135deg, #0d1421 0%, #0f1826 48%, #0d1b2e 100%);
+    color: var(--sl-text);
+}
+
+/* Navbar */
+[data-theme="dark"] .smartlib-navbar-app {
+    background: rgba(11, 18, 32, 0.92);
+    border-bottom-color: rgba(255, 255, 255, 0.07);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .smartlib-navbar-app .nav-brand a {
+    color: #e2e8f0;
+}
+
+[data-theme="dark"] .smartlib-navbar-app .nav-links a,
+[data-theme="dark"] .smartlib-navbar-app .nav-link-btn {
+    color: #cbd5e1;
+}
+
+[data-theme="dark"] .smartlib-navbar-app .nav-links a:hover,
+[data-theme="dark"] .smartlib-navbar-app .nav-link-btn:hover {
+    color: #60a5fa;
+    background: rgba(96, 165, 250, 0.1);
+}
+
+[data-theme="dark"] .nav-user-name {
+    background: rgba(96, 165, 250, 0.12);
+    color: #60a5fa;
+}
+
+[data-theme="dark"] .smartlib-navbar-app .nav-link-btn {
+    background: rgba(248, 113, 113, 0.1);
+    color: #f87171;
+    border-color: rgba(248, 113, 113, 0.18);
+}
+
+[data-theme="dark"] .smartlib-navbar-app .nav-link-btn:hover {
+    background: #f87171;
+    color: #ffffff;
+}
+
+[data-theme="dark"] .smartlib-navbar-app .theme-toggle-btn {
+    color: #94a3b8;
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .smartlib-navbar-app .theme-toggle-btn:hover {
+    color: #60a5fa;
+    background: rgba(96, 165, 250, 0.1);
+    border-color: rgba(96, 165, 250, 0.2);
+}
+
+/* Cards */
+[data-theme="dark"] .card {
+    background: rgba(17, 28, 46, 0.97);
+    border-color: rgba(255, 255, 255, 0.07);
+}
+
+/* Details items */
+[data-theme="dark"] .details-item {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.06);
+}
+
+[data-theme="dark"] .details-label {
+    color: #64748b;
+}
+
+[data-theme="dark"] .details-header {
+    border-bottom-color: rgba(255, 255, 255, 0.07);
+}
+
+/* Tables */
+[data-theme="dark"] .katalog-table thead,
+[data-theme="dark"] .members-table thead th {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+[data-theme="dark"] .katalog-table th,
+[data-theme="dark"] .members-table th {
+    color: #64748b;
+    border-bottom-color: rgba(255, 255, 255, 0.07);
+}
+
+[data-theme="dark"] .katalog-table td {
+    border-bottom-color: rgba(255, 255, 255, 0.05);
+    color: #cbd5e1;
+}
+
+[data-theme="dark"] .katalog-table tbody tr:hover {
+    background: rgba(96, 165, 250, 0.06);
+}
+
+[data-theme="dark"] .katalog-isbn {
+    color: #64748b;
+}
+
+[data-theme="dark"] .members-table th,
+[data-theme="dark"] .members-table td {
+    border-bottom-color: rgba(255, 255, 255, 0.05);
+    color: #cbd5e1;
+}
+
+[data-theme="dark"] .members-table tbody tr:hover {
+    background: rgba(96, 165, 250, 0.06);
+}
+
+/* Forms */
+[data-theme="dark"] .form-group label {
+    color: #94a3b8;
+}
+
+[data-theme="dark"] .form-group input,
+[data-theme="dark"] .form-group select,
+[data-theme="dark"] .form-group textarea {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #e2e8f0;
+}
+
+[data-theme="dark"] .form-group input::placeholder,
+[data-theme="dark"] .form-group textarea::placeholder {
+    color: #475569;
+}
+
+[data-theme="dark"] .form-group input:focus,
+[data-theme="dark"] .form-group select:focus,
+[data-theme="dark"] .form-group textarea:focus {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(96, 165, 250, 0.5);
+    box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.1);
+}
+
+[data-theme="dark"] .form-group input:disabled {
+    background: rgba(255, 255, 255, 0.03);
+    color: #475569;
+}
+
+/* Buttons */
+[data-theme="dark"] .btn-secondary {
+    background: rgba(255, 255, 255, 0.06);
+    color: #cbd5e1;
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #e2e8f0;
+    border-color: rgba(255, 255, 255, 0.16);
+}
+
+/* Alerts */
+[data-theme="dark"] .alert-success {
+    background: rgba(52, 211, 153, 0.1);
+    color: #34d399;
+    border-color: rgba(52, 211, 153, 0.18);
+}
+
+[data-theme="dark"] .alert-error {
+    background: rgba(248, 113, 113, 0.1);
+    color: #f87171;
+    border-color: rgba(248, 113, 113, 0.18);
+}
+
+/* Badges */
+[data-theme="dark"] .katalog-badge {
+    background: rgba(96, 165, 250, 0.14);
+    color: #60a5fa;
+    border-color: rgba(96, 165, 250, 0.2);
+}
+
+[data-theme="dark"] .status-dostupan {
+    background: rgba(52, 211, 153, 0.12);
+    color: #34d399;
+}
+
+[data-theme="dark"] .status-nedostupan {
+    background: rgba(248, 113, 113, 0.12);
+    color: #f87171;
+}
+
+[data-theme="dark"] .status-deaktiviran {
+    background: rgba(100, 116, 139, 0.18);
+    color: #94a3b8;
+    border-color: rgba(100, 116, 139, 0.22);
+}
+
+[data-theme="dark"] .members-status {
+    background: rgba(96, 165, 250, 0.12);
+    color: #60a5fa;
+}
+
+/* Pagination */
+[data-theme="dark"] .pagination-info {
+    color: #64748b;
+}
+
+[data-theme="dark"] .pagination-info strong {
+    color: #94a3b8;
+}
+
+/* Password toggle */
+[data-theme="dark"] .password-toggle {
+    background: rgba(255, 255, 255, 0.06);
+    color: #64748b;
+}
+
+[data-theme="dark"] .password-toggle:hover {
+    color: #60a5fa;
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Footer */
+[data-theme="dark"] footer {
+    background: rgba(9, 15, 26, 0.9);
+    border-top-color: rgba(255, 255, 255, 0.06);
+    color: #475569;
+}
+
+/* Katalog empty */
+[data-theme="dark"] .katalog-empty {
+    background: rgba(255, 255, 255, 0.03);
+    color: #64748b;
+}
+
+/* Katalog meta */
+[data-theme="dark"] .katalog-meta {
+    color: #64748b;
+}
+
+[data-theme="dark"] .katalog-meta strong {
+    color: #94a3b8;
+}
+
+/* h1/h2 text colors in dark mode */
+[data-theme="dark"] .katalog-header h2,
+[data-theme="dark"] .details-header h2,
+[data-theme="dark"] h1,
+[data-theme="dark"] h2,
+[data-theme="dark"] h3 {
+    color: #e2e8f0;
+}
+
+/* Mobile table rows */
+@media (max-width: 768px) {
+    [data-theme="dark"] .katalog-table tbody tr,
+    [data-theme="dark"] .members-table tbody tr {
+        background: rgba(17, 28, 46, 0.9);
+        border-color: rgba(255, 255, 255, 0.07);
+    }
+
+    [data-theme="dark"] .katalog-table td,
+    [data-theme="dark"] .members-table td {
+        border-bottom-color: rgba(255, 255, 255, 0.04);
+    }
+
+    [data-theme="dark"] .katalog-table td::before,
+    [data-theme="dark"] .members-table td::before {
+        color: #64748b;
+    }
+}
