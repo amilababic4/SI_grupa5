@@ -1,6 +1,10 @@
 @model IEnumerable<SmartLib.Core.DTOs.KorisnikDto>
 @{
     ViewData["Title"] = "Članovi biblioteke";
+    var pretraga = ViewBag.Pretraga as string;
+    var prikaziDeaktivirane = (bool)(ViewBag.PrikaziDeaktivirane ?? false);
+    var ukupno = (int)(ViewBag.UkupnoRezultata ?? 0);
+    bool imaFilter = !string.IsNullOrWhiteSpace(pretraga) || prikaziDeaktivirane;
 }
 
 <div class="members-header">
@@ -13,26 +17,79 @@
     <div class="validation-message members-feedback">@successMessage</div>
 }
 
+<!-- Pretraga -->
+<div class="card katalog-search">
+    <form asp-controller="Korisnik" asp-action="Index" method="get">
+        <div class="search-row">
+            <div class="form-group" style="flex:1; margin-bottom:0;">
+                <input type="text"
+                       name="pretraga"
+                       value="@pretraga"
+                       placeholder="Pretraga po imenu, prezimenu ili e-mailu..." />
+            </div>
+            <div class="members-search-toggle" style="display:flex; align-items:center; gap:0.5rem; white-space:nowrap;">
+                <input type="checkbox"
+                       id="chkDeaktivClan"
+                       @(prikaziDeaktivirane ? "checked" : "")
+                       onchange="window.location='@Url.Action("Index", "Korisnik", new {
+                           pretraga = pretraga,
+                           prikaziDeaktivirane = !prikaziDeaktivirane
+                       })'" />
+
+                <label for="chkDeaktivClan"
+                       style="font-size:0.9rem; font-weight:600; color:var(--sl-muted); cursor:pointer; user-select:none;">
+                    Prikaži deaktivirane
+                </label>
+            </div>
+            <div style="display:flex; gap:0.5rem; align-items:flex-end;">
+                <button type="submit" class="btn btn-primary">Traži</button>
+                <a asp-controller="Korisnik" asp-action="Index" class="btn btn-secondary">Reset</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Meta -->
+<div class="katalog-meta">
+    @if (imaFilter)
+    {
+        <span>Pronađeno: <strong>@ukupno</strong> @(ukupno == 1 ? "član" : "članova")</span>
+    }
+    else
+    {
+        <span>Ukupno aktivnih članova: <strong>@ukupno</strong></span>
+    }
+</div>
+
 <div class="card members-card">
     @if (!Model.Any())
     {
-        <p>Trenutno nema registrovanih članova.</p>
+        <p style="padding:1rem; color:var(--sl-muted);">
+            @if (imaFilter)
+            {
+                <text>Nema članova koji odgovaraju pretrazi.</text>
+            }
+            else
+            {
+                <text>Trenutno nema registrovanih članova.</text>
+            }
+        </p>
     }
     else
     {
         <div class="members-table-wrap">
             <table class="members-table">
                 <thead>
-                <tr>
-                    <th>Ime i prezime</th>
-                    <th>Email</th>
-                    <th>Status</th>
-                    <th>Kreiran</th>
-                </tr>
+                    <tr>
+                        <th>Ime i prezime</th>
+                        <th>Email</th>
+                        <th>Status</th>
+                        <th>Kreiran</th>
+                    </tr>
                 </thead>
                 <tbody>
-                @foreach (var clan in Model)
-                {
+                    @foreach (var clan in Model)
+                    {
                         <tr class="members-row-link"
                             onclick="window.location='@Url.Action("ProfilClana", "Korisnik", new { id = clan.Id })'"
                             title="Pogledaj profil — @clan.Ime @clan.Prezime">
@@ -47,7 +104,7 @@
                             </td>
                             <td data-label="Kreiran">@clan.DatumKreiranja.ToString("dd.MM.yyyy HH:mm")</td>
                         </tr>
-                }
+                    }
                 </tbody>
             </table>
         </div>

@@ -85,12 +85,13 @@ namespace SmartLib.Infrastructure.Repositories
         {
             return await _db.Zaduzenja
                 .AsNoTracking()
-                .Include(z => z.Korisnik) 
+                .Include(z => z.Korisnik)
                 .Include(z => z.Primjerak)
                     .ThenInclude(p => p!.Knjiga)
                 .Where(z => z.KorisnikId == korisnikId &&
                             z.Status == "zatvoreno" &&
-                            z.DatumStvarnogVracanja >= granica)
+                            z.DatumStvarnogVracanja.HasValue &&          
+                            z.DatumStvarnogVracanja.Value >= granica)     
                 .OrderByDescending(z => z.DatumStvarnogVracanja)
                 .ToListAsync();
         }

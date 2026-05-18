@@ -223,7 +223,8 @@ namespace SmartLib.Web.Controllers
 
             var model = mojaZaduzenja.Select(MapToViewModel).ToList();
 
-            return View(model);
+            // Promijeni samo ovu liniju na dnu:
+            return View("MojaHistorija", model);
         }
 
         [Authorize(Roles = RoleNames.Bibliotekar + "," + RoleNames.Administrator)]

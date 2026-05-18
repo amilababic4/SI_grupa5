@@ -44,21 +44,25 @@ namespace SmartLib.Core.DTOs
         public int Id { get; set; }
 
         [Required(ErrorMessage = "Ime je obavezno.")]
-        [MaxLength(100)]
+        [StringLength(100)]
         public string Ime { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Prezime je obavezno.")]
-        [MaxLength(100)]
+        [StringLength(100)]
         public string Prezime { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Status je obavezan.")]
         public string Status { get; set; } = "aktivan";
 
-        // Opcionalno — prazno = ne mijenja lozinku
-        [MinLength(6, ErrorMessage = "Lozinka mora imati najmanje 6 karaktera.")]
+        /// <summary>
+        /// ID uloge koja će biti dodijeljena korisniku.
+        /// Ignorira se ako je korisnik Administrator.
+        /// </summary>
+        public int UlogaId { get; set; }
+
+        [StringLength(200, MinimumLength = 6, ErrorMessage = "Lozinka mora imati najmanje 6 karaktera.")]
         public string? NovaLozinka { get; set; }
 
-        [Compare(nameof(NovaLozinka), ErrorMessage = "Lozinke se ne poklapaju.")]
         public string? PotvrdaLozinke { get; set; }
     }
 }

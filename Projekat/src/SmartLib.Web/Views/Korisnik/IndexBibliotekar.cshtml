@@ -1,6 +1,10 @@
 ﻿@model IEnumerable<SmartLib.Core.DTOs.KorisnikDto>
 @{
     ViewData["Title"] = "Bibliotekari";
+    var pretraga = ViewBag.Pretraga as string;
+    var prikaziDeaktivirane = (bool)(ViewBag.PrikaziDeaktivirane ?? false);
+    var ukupno = (int)(ViewBag.UkupnoRezultata ?? 0);
+    bool imaFilter = !string.IsNullOrWhiteSpace(pretraga) || prikaziDeaktivirane;
 }
 
 <div class="members-header">
@@ -13,10 +17,64 @@
     <div class="validation-message members-feedback">@successMessage</div>
 }
 
+<div class="card katalog-search">
+    <form asp-controller="Korisnik" asp-action="IndexBibliotekar" method="get">
+        <div class="search-row">
+            <div class="form-group" style="flex:1; margin-bottom:0;">
+                <input type="text"
+                       name="pretraga"
+                       value="@pretraga"
+                       placeholder="Pretraga po imenu, prezimenu ili e-mailu..." />
+            </div>
+
+            <div class="members-search-toggle" style="display:flex; align-items:center; gap:0.5rem; white-space:nowrap;">
+
+                <input type="checkbox"
+                       id="chkDeaktivBib"
+                       @(prikaziDeaktivirane ? "checked" : "")
+                       onchange="window.location='@Url.Action("IndexBibliotekar", "Korisnik", new {
+                           pretraga = pretraga,
+                           prikaziDeaktivirane = !prikaziDeaktivirane
+                       })'" />
+
+                <label for="chkDeaktivBib"
+                       style="font-size:0.9rem; font-weight:600; color:var(--sl-muted); cursor:pointer; user-select:none;">
+                    Prikaži deaktivirane
+                </label>
+            </div>
+
+            <div style="display:flex; gap:0.5rem; align-items:flex-end;">
+                <button type="submit" class="btn btn-primary">Traži</button>
+                <a asp-controller="Korisnik" asp-action="IndexBibliotekar" class="btn btn-secondary">Reset</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="katalog-meta">
+    @if (imaFilter)
+    {
+        <span>Pronađeno: <strong>@ukupno</strong> @(ukupno == 1 ? "bibliotekar" : "bibliotekara")</span>
+    }
+    else
+    {
+        <span>Ukupno aktivnih bibliotekara: <strong>@ukupno</strong></span>
+    }
+</div>
+
 <div class="card members-card">
     @if (!Model.Any())
     {
-        <p style="padding:1rem; color:var(--sl-muted);">Trenutno nema registrovanih bibliotekara.</p>
+        <p style="padding:1rem; color:var(--sl-muted);">
+            @if (imaFilter)
+            {
+                <text>Nema bibliotekara koji odgovaraju pretrazi.</text>
+            }
+            else
+            {
+                <text>Trenutno nema registrovanih bibliotekara.</text>
+            }
+        </p>
     }
     else
     {
