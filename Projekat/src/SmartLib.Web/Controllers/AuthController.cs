@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using SmartLib.Core.DTOs;
 using SmartLib.Core.Interfaces;
+using SmartLib.Core.Models;
 using SmartLib.Infrastructure.Security;
 using Microsoft.AspNetCore.Authorization;
 
@@ -262,6 +263,12 @@ namespace SmartLib.Web.Controllers
           var korisnik = await _korisnikRepository.GetByIdAsync(id);
           if (korisnik == null)
             return NotFound();
+
+          if (string.Equals(korisnik.Uloga?.Naziv, RoleNames.Administrator, StringComparison.OrdinalIgnoreCase))
+          {
+            TempData["ErrorMessage"] = "Administrator ne može deaktivirati svoj nalog.";
+            return RedirectToAction("Profil", "Korisnik");
+          }
 
           if (!string.Equals(korisnik.Status, "deaktiviran", StringComparison.OrdinalIgnoreCase))
           {

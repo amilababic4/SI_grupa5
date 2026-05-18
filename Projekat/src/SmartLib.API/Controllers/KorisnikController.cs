@@ -135,7 +135,7 @@ namespace SmartLib.API.Controllers
                 RoleNames.Administrator,
                 StringComparison.OrdinalIgnoreCase);
 
-            if (targetIsAdmin && !isSelf)
+            if (targetIsAdmin)
                 return Forbid();
 
             korisnik.Status = "deaktiviran";
