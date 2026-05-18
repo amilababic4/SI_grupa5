@@ -335,8 +335,8 @@ main,
 
 .explore-deck {
     position: relative;
-    height: 620px;
-    min-height: 520px;
+    height: 500px;
+    min-height: 480px;
 }
 
 .explore-card {
@@ -351,7 +351,7 @@ main,
     overflow: hidden;
     display: grid;
     grid-template-columns: 1.1fr 1fr;
-    transform: translateY(calc(var(--i) * 10px));
+    transform: translateY(calc(var(--i) * 3px));
     opacity: calc(1 - var(--i) * 0.12);
     transition: transform 0.35s ease, opacity 0.35s ease, box-shadow 0.35s ease;
     z-index: calc(100 - var(--i));
@@ -532,7 +532,7 @@ main,
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-top: 1.2rem;
+    margin-top: 4rem;
 }
 
 .explore-progress {
