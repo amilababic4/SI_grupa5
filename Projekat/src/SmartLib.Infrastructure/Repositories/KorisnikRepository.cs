@@ -18,7 +18,6 @@ namespace SmartLib.Infrastructure.Repositories
         {
             return await _db.Korisnici
                 .Include(k => k.Uloga)
-                .Where(k => k.Status == "aktivan")
                 .ToListAsync();
         }
 

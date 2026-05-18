@@ -2380,12 +2380,23 @@ body.home-page footer {
 }
 
 .uredi-section--lozinka {
-    background: rgba(238, 246, 255, 0.5);
-    border-radius: var(--sl-radius-md);
-    padding: 1.25rem 1.25rem 0.5rem;
-    margin-inline: -1.25rem;
-    border-bottom: none;
+    background: #f8fafc; 
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem !important; 
+    max-width: 750px; 
+    margin-top: 1.5rem !important;
 }
+
+    .uredi-section--lozinka .uredi-section-title {
+        margin-bottom: 0.25rem !important;
+        font-size: 1.1rem !important;
+    }
+
+    .uredi-section--lozinka .uredi-hint {
+        margin-bottom: 1rem !important;
+        font-size: 0.85rem !important;
+        color: var(--sl-muted);
+    }
 
 .uredi-actions {
     display: flex;
@@ -3084,6 +3095,36 @@ body.home-page footer {
 
 .profil-clanarina-prazno {
     margin: 0; /* ukloni default margin od <p> */
+}
+
+/* ================================
+   Members — Search bar 
+   Isti stil kao katalog-search, prilagođen za members
+   ================================ */
+
+.members-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+}
+
+/* Checkbox toggle "Prikaži deaktivirane" */
+.members-search-toggle input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--sl-blue);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+/* Responsive: na malim ekranima checkbox ide ispod inputa */
+@media (max-width: 640px) {
+    .members-search-toggle {
+        width: 100%;
+    }
 }
 
 /* Responsive */

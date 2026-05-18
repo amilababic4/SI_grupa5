@@ -1,6 +1,15 @@
 ﻿@model SmartLib.Core.DTOs.UrediKorisnikaDto
+@using Microsoft.AspNetCore.Mvc.Rendering
 @{
     ViewData["Title"] = "Uredi profil";
+    var jeAdmin = (bool)(ViewBag.JeAdmin ?? false);
+    var trenutnaUloga = ViewBag.TrenutnaUloga as string ?? "—";
+    var trenutnoIme = ViewBag.TrenutnoIme as string ?? "Korisnik";
+    var uloge = ViewBag.Uloge as List<SelectListItem> ?? new List<SelectListItem>();
+
+    // Inicijali za avatar
+    var dijelovi = trenutnoIme.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+    var inicijali = string.Concat(dijelovi.Take(2).Select(d => d[0].ToString().ToUpper()));
 }
 
 <div class="details-topbar">
@@ -14,88 +23,150 @@
 }
 
 <div class="card profil-card">
-    <div class="profil-info-content" style="max-width:520px; margin-inline:auto;">
+    <form asp-controller="Korisnik" asp-action="Uredi" asp-route-id="@Model.Id" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id" />
 
-        <div class="details-header" style="margin-bottom:1.5rem;">
-            <div>
-                <h2>Uredi profil</h2>
-                <p class="details-autor">Korisnik #@Model.Id</p>
+        <div class="profil-layout">
+
+            <!-- Avatar (isti stil kao Profil.cshtml) -->
+            <div class="profil-avatar-wrapper">
+                <div class="profil-avatar">
+                    <span class="profil-avatar-inicijali">@inicijali</span>
+                </div>
+                <span class="profil-id-badge">#@Model.Id</span>
+            </div>
+
+            <!-- Sadržaj forme -->
+            <div class="profil-info-content">
+
+                <!-- Naslov -->
+                <div class="details-header" style="margin-bottom:1.5rem;">
+                    <div>
+                        <h2>@trenutnoIme</h2>
+                        <p class="details-autor">@trenutnaUloga</p>
+                    </div>
+                </div>
+
+                @* ── SEKCIJA: Osnovni podaci ──────────────────────────────────── *@
+                <div class="uredi-section">
+                    <h3 class="uredi-section-title">Osnovni podaci</h3>
+                    <div class="profil-grid">
+                        <div class="form-group details-item" style="display:flex; flex-direction:column; gap:0.35rem;">
+                            <label asp-for="Ime" class="details-label">Ime</label>
+                            <input asp-for="Ime" placeholder="Ime korisnika" />
+                            <span asp-validation-for="Ime" class="validation-message"></span>
+                        </div>
+                        <div class="form-group details-item" style="display:flex; flex-direction:column; gap:0.35rem;">
+                            <label asp-for="Prezime" class="details-label">Prezime</label>
+                            <input asp-for="Prezime" placeholder="Prezime korisnika" />
+                            <span asp-validation-for="Prezime" class="validation-message"></span>
+                        </div>
+                    </div>
+                </div>
+
+                @* ── SEKCIJA: Uloga i status ──────────────────────────────────── *@
+                <div class="uredi-section" style="margin-top:1.5rem; padding-top:1.5rem; border-top:1px solid var(--sl-border);">
+                    <h3 class="uredi-section-title">Uloga i status računa</h3>
+
+                    @if (jeAdmin)
+                    {
+                        <!-- Admin: read-only prikaz, bez mogućnosti promjene -->
+                        <div class="profil-grid">
+                            <div class="details-item">
+                                <span class="details-label">Uloga</span>
+                                <span class="katalog-badge">@trenutnaUloga</span>
+                            </div>
+                            <div class="details-item">
+                                <span class="details-label">Status računa</span>
+                                <span class="status-dostupan">aktivan</span>
+                            </div>
+                        </div>
+                        <p class="uredi-hint" style="margin-top:0.65rem;">
+                            ⚠️ Uloga i status administratora ne mogu se mijenjati.
+                        </p>
+                        <!-- Hidden polja da model binding ne padne -->
+                        <input type="hidden" asp-for="UlogaId" />
+                        <input type="hidden" asp-for="Status" value="aktivan" />
+                    }
+                    else
+                    {
+                        <div class="profil-grid">
+                            <div class="form-group details-item" style="display:flex; flex-direction:column; gap:0.35rem;">
+                                <label asp-for="UlogaId" class="details-label">Uloga</label>
+                                <select asp-for="UlogaId" asp-items="@uloge"></select>
+                                <span asp-validation-for="UlogaId" class="validation-message"></span>
+                            </div>
+                            <div class="form-group details-item" style="display:flex; flex-direction:column; gap:0.35rem;">
+                                <label asp-for="Status" class="details-label">Status računa</label>
+                                <select asp-for="Status">
+                                    <option value="aktivan">Aktivan</option>
+                                    <option value="deaktiviran">Deaktiviran</option>
+                                </select>
+                                <span asp-validation-for="Status" class="validation-message"></span>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                @* ── SEKCIJA: Promjena lozinke ────────────────────────────────── *@
+                <div class="uredi-section uredi-section--lozinka"
+                     style="margin-top:1.5rem; padding-top:1.5rem; border-top:1px solid var(--sl-border);">
+                    <h3 class="uredi-section-title">
+                        Promjena lozinke
+                        <span class="uredi-optional">(opcionalno)</span>
+                    </h3>
+                    <p class="uredi-hint">Ostavite prazno ako ne želite promijeniti lozinku.</p>
+
+                    <div class="profil-grid">
+                        <div class="form-group details-item" style="display:flex; flex-direction:column; gap:0.35rem;">
+                            <label asp-for="NovaLozinka" class="details-label">Nova lozinka</label>
+                            <div class="password-field">
+                                <input asp-for="NovaLozinka" type="password"
+                                       placeholder="Min. 6 karaktera"
+                                       autocomplete="new-password" />
+                                <button type="button" class="password-toggle"
+                                        aria-label="Prikaži lozinku" aria-pressed="false">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                                         viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                        <circle cx="12" cy="12" r="3" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <span asp-validation-for="NovaLozinka" class="validation-message"></span>
+                        </div>
+
+                        <div class="form-group details-item" style="display:flex; flex-direction:column; gap:0.35rem;">
+                            <label asp-for="PotvrdaLozinke" class="details-label">Potvrda lozinke</label>
+                            <div class="password-field">
+                                <input asp-for="PotvrdaLozinke" type="password"
+                                       placeholder="Ponovite novu lozinku"
+                                       autocomplete="new-password" />
+                                <button type="button" class="password-toggle"
+                                        aria-label="Prikaži lozinku" aria-pressed="false">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                                         viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                        <circle cx="12" cy="12" r="3" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <span asp-validation-for="PotvrdaLozinke" class="validation-message"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dugmad na dnu (mobile fallback) -->
+                <div class="uredi-actions" style="margin-top:1.75rem; padding-top:1.5rem; border-top:1px solid var(--sl-border);">
+                    <button type="submit" class="btn btn-primary">Spremi izmjene</button>
+                    <a asp-controller="Korisnik" asp-action="ProfilClana" asp-route-id="@Model.Id"
+                       class="btn btn-secondary">Odustani</a>
+                </div>
+
             </div>
         </div>
-
-        <form asp-controller="Korisnik" asp-action="Uredi" asp-route-id="@Model.Id" method="post">
-            @Html.AntiForgeryToken()
-            <input type="hidden" asp-for="Id" />
-
-            <div class="uredi-section">
-                <h3 class="uredi-section-title">Osnovni podaci</h3>
-
-                <div class="form-group">
-                    <label asp-for="Ime">Ime</label>
-                    <input asp-for="Ime" placeholder="Ime korisnika" />
-                    <span asp-validation-for="Ime" class="validation-message"></span>
-                </div>
-
-                <div class="form-group">
-                    <label asp-for="Prezime">Prezime</label>
-                    <input asp-for="Prezime" placeholder="Prezime korisnika" />
-                    <span asp-validation-for="Prezime" class="validation-message"></span>
-                </div>
-
-                <div class="form-group">
-                    <label asp-for="Status">Status računa</label>
-                    <select asp-for="Status">
-                        <option value="aktivan">Aktivan</option>
-                        <option value="deaktiviran">Deaktiviran</option>
-                    </select>
-                    <span asp-validation-for="Status" class="validation-message"></span>
-                </div>
-            </div>
-
-            <div class="uredi-section uredi-section--lozinka">
-                <h3 class="uredi-section-title">
-                    Promjena lozinke
-                    <span class="uredi-optional">(opcionalno)</span>
-                </h3>
-                <p class="uredi-hint">Ostavite prazno ako ne želite promijeniti lozinku.</p>
-
-                <div class="form-group">
-                    <label asp-for="NovaLozinka">Nova lozinka</label>
-                    <div class="password-field">
-                        <input asp-for="NovaLozinka" type="password" placeholder="Min. 6 karaktera" autocomplete="new-password" />
-                        <button type="button" class="password-toggle" aria-label="Prikaži lozinku" aria-pressed="false">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                                <circle cx="12" cy="12" r="3" />
-                            </svg>
-                        </button>
-                    </div>
-                    <span asp-validation-for="NovaLozinka" class="validation-message"></span>
-                </div>
-
-                <div class="form-group">
-                    <label asp-for="PotvrdaLozinke">Potvrda lozinke</label>
-                    <div class="password-field">
-                        <input asp-for="PotvrdaLozinke" type="password" placeholder="Ponovite novu lozinku" autocomplete="new-password" />
-                        <button type="button" class="password-toggle" aria-label="Prikaži lozinku" aria-pressed="false">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                                <circle cx="12" cy="12" r="3" />
-                            </svg>
-                        </button>
-                    </div>
-                    <span asp-validation-for="PotvrdaLozinke" class="validation-message"></span>
-                </div>
-            </div>
-
-            <div class="uredi-actions">
-                <button type="submit" class="btn btn-primary">Spremi izmjene</button>
-                <a asp-controller="Korisnik" asp-action="ProfilClana" asp-route-id="@Model.Id"
-                   class="btn btn-secondary">Odustani</a>
-            </div>
-        </form>
-
-    </div>
+    </form>
 </div>

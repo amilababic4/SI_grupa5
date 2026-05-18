@@ -14,21 +14,36 @@ namespace SmartLib.Web.Controllers
     public class KorisnikController : Controller
     {
         private readonly IKorisnikRepository _korisnikRepository;
-        private readonly IClanarinaRepository _clanarinaRepository; // NOVO
+        private readonly IClanarinaRepository _clanarinaRepository;
 
         public KorisnikController(
             IKorisnikRepository korisnikRepository,
-            IClanarinaRepository clanarinaRepository) // NOVO
+            IClanarinaRepository clanarinaRepository)
         {
             _korisnikRepository = korisnikRepository;
-            _clanarinaRepository = clanarinaRepository; // NOVO
+            _clanarinaRepository = clanarinaRepository;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? pretraga, bool prikaziDeaktivirane = false)
         {
             var korisnici = await _korisnikRepository.GetAllAsync();
-            var clanovi = korisnici
-                .Where(k => string.Equals(k.Uloga?.Naziv, RoleNames.Clan, StringComparison.OrdinalIgnoreCase))
+
+            var upit = korisnici
+                .Where(k => string.Equals(k.Uloga?.Naziv, RoleNames.Clan, StringComparison.OrdinalIgnoreCase));
+
+            if (!prikaziDeaktivirane)
+                upit = upit.Where(k => string.Equals(k.Status, "aktivan", StringComparison.OrdinalIgnoreCase));
+
+            if (!string.IsNullOrWhiteSpace(pretraga))
+            {
+                var term = pretraga.Trim().ToLowerInvariant();
+                upit = upit.Where(k =>
+                    (k.Ime != null && k.Ime.ToLowerInvariant().Contains(term)) ||
+                    (k.Prezime != null && k.Prezime.ToLowerInvariant().Contains(term)) ||
+                    (k.Email != null && k.Email.ToLowerInvariant().Contains(term)));
+            }
+
+            var clanovi = upit
                 .OrderBy(k => k.Prezime)
                 .ThenBy(k => k.Ime)
                 .Select(k => new KorisnikDto
@@ -42,16 +57,35 @@ namespace SmartLib.Web.Controllers
                     DatumKreiranja = k.DatumKreiranja
                 })
                 .ToList();
+
+            ViewBag.Pretraga = pretraga;
+            ViewBag.PrikaziDeaktivirane = prikaziDeaktivirane;
+            ViewBag.UkupnoRezultata = clanovi.Count;
 
             return View(clanovi);
         }
 
         [Authorize(Roles = RoleNames.Administrator)]
-        public async Task<IActionResult> IndexBibliotekar()
+        public async Task<IActionResult> IndexBibliotekar(string? pretraga, bool prikaziDeaktivirane = false)
         {
             var korisnici = await _korisnikRepository.GetAllAsync();
-            var bibliotekari = korisnici
-                .Where(k => string.Equals(k.Uloga?.Naziv, RoleNames.Bibliotekar, StringComparison.OrdinalIgnoreCase))
+
+            var upit = korisnici
+                .Where(k => string.Equals(k.Uloga?.Naziv, RoleNames.Bibliotekar, StringComparison.OrdinalIgnoreCase));
+
+            if (!prikaziDeaktivirane)
+                upit = upit.Where(k => string.Equals(k.Status, "aktivan", StringComparison.OrdinalIgnoreCase));
+
+            if (!string.IsNullOrWhiteSpace(pretraga))
+            {
+                var term = pretraga.Trim().ToLowerInvariant();
+                upit = upit.Where(k =>
+                    (k.Ime != null && k.Ime.ToLowerInvariant().Contains(term)) ||
+                    (k.Prezime != null && k.Prezime.ToLowerInvariant().Contains(term)) ||
+                    (k.Email != null && k.Email.ToLowerInvariant().Contains(term)));
+            }
+
+            var bibliotekari = upit
                 .OrderBy(k => k.Prezime)
                 .ThenBy(k => k.Ime)
                 .Select(k => new KorisnikDto
@@ -66,10 +100,13 @@ namespace SmartLib.Web.Controllers
                 })
                 .ToList();
 
+            ViewBag.Pretraga = pretraga;
+            ViewBag.PrikaziDeaktivirane = prikaziDeaktivirane;
+            ViewBag.UkupnoRezultata = bibliotekari.Count;
+
             return View(bibliotekari);
         }
 
-        // ─── IZMIJENJENO: dohvat vlastite članarine ──────────────────────────
         [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> Profil()
@@ -82,7 +119,6 @@ namespace SmartLib.Web.Controllers
             if (korisnik == null)
                 return NotFound();
 
-            // Dohvati članarinu i proslijedi u ViewBag
             var clanarina = await _clanarinaRepository.GetByKorisnikAsync(id);
             if (clanarina != null)
             {
@@ -98,7 +134,6 @@ namespace SmartLib.Web.Controllers
             return View("Profil", korisnik);
         }
 
-        // ─── IZMIJENJENO: dohvat članarine za profil člana ───────────────────
         [HttpGet]
         public async Task<IActionResult> ProfilClana(int id)
         {
@@ -106,7 +141,6 @@ namespace SmartLib.Web.Controllers
             if (korisnik == null)
                 return NotFound();
 
-            // Dohvati članarinu i proslijedi u ViewBag
             var clanarina = await _clanarinaRepository.GetByKorisnikAsync(id);
             if (clanarina != null)
             {
@@ -242,6 +276,13 @@ namespace SmartLib.Web.Controllers
             if (korisnik is null)
                 return NotFound();
 
+            // ── Zaštita: admin se ne može deaktivirati ──
+            if (string.Equals(korisnik.Uloga?.Naziv, RoleNames.Administrator, StringComparison.OrdinalIgnoreCase))
+            {
+                TempData["ErrorMessage"] = "Administrator ne može biti deaktiviran.";
+                return RedirectToAction(nameof(ProfilClana), new { id });
+            }
+
             korisnik.Status = "deaktiviran";
             await _korisnikRepository.UpdateAsync(korisnik);
 
@@ -249,6 +290,7 @@ namespace SmartLib.Web.Controllers
             return RedirectToAction("Index");
         }
 
+        // ─── IZMIJENJENO: dohvat UlogaId + lista uloga za dropdown ──────────────
         [HttpGet]
         [Authorize(Roles = RoleNames.Administrator)]
         public async Task<IActionResult> Uredi(int id)
@@ -257,17 +299,42 @@ namespace SmartLib.Web.Controllers
             if (korisnik == null)
                 return NotFound();
 
+            var jeAdmin = string.Equals(
+                korisnik.Uloga?.Naziv, RoleNames.Administrator, StringComparison.OrdinalIgnoreCase);
+
+            // Dohvati distinktne uloge iz baze (preko korisnika koji ih imaju)
+            var sviKorisnici = await _korisnikRepository.GetAllAsync();
+            var uloge = sviKorisnici
+                .Where(k => k.Uloga != null)
+                .Select(k => new { k.UlogaId, Naziv = k.Uloga!.Naziv })
+                .DistinctBy(u => u.UlogaId)
+                .OrderBy(u => u.UlogaId)
+                .Select(u => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
+                {
+                    Value = u.UlogaId.ToString(),
+                    Text = u.Naziv,
+                    Selected = (u.UlogaId == korisnik.UlogaId)
+                })
+                .ToList();
+
+            ViewBag.Uloge = uloge;
+            ViewBag.JeAdmin = jeAdmin;
+            ViewBag.TrenutnaUloga = korisnik.Uloga?.Naziv ?? "—";
+            ViewBag.TrenutnoIme = $"{korisnik.Ime} {korisnik.Prezime}";
+
             var dto = new UrediKorisnikaDto
             {
                 Id = korisnik.Id,
                 Ime = korisnik.Ime,
                 Prezime = korisnik.Prezime,
-                Status = korisnik.Status
+                Status = korisnik.Status,
+                UlogaId = korisnik.UlogaId
             };
 
             return View(dto);
         }
 
+        // ─── IZMIJENJENO: primjena uloge + zaštita admina ────────────────────────
         [HttpPost]
         [Authorize(Roles = RoleNames.Administrator)]
         [ValidateAntiForgeryToken]
@@ -283,9 +350,19 @@ namespace SmartLib.Web.Controllers
             if (korisnik == null)
                 return NotFound();
 
+            var jeAdmin = string.Equals(
+                korisnik.Uloga?.Naziv, RoleNames.Administrator, StringComparison.OrdinalIgnoreCase);
+
             korisnik.Ime = model.Ime.Trim();
             korisnik.Prezime = model.Prezime.Trim();
-            korisnik.Status = model.Status;
+
+            if (!jeAdmin)
+            {
+                // Samo ne-admin korisnicima možemo mijenjati ulogu i status
+                korisnik.UlogaId = model.UlogaId;
+                korisnik.Status = model.Status;
+            }
+            // Ako je admin — uloga i status ostaju nepromijenjeni
 
             if (!string.IsNullOrWhiteSpace(model.NovaLozinka))
                 korisnik.LozinkaHash = SmartLib.Infrastructure.Security.PasswordHasher.HashPassword(model.NovaLozinka);
