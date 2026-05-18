@@ -13,6 +13,8 @@ namespace SmartLib.Core.Models
         public int KategorijaId { get; set; }
         public string? Izdavac { get; set; }
         public int? GodinaIzdanja { get; set; }
+        public string? Opis { get; set; }
+        public string? SlikaUrl { get; set; }
 
         // Navigaciona svojstva
         public Kategorija? Kategorija { get; set; }

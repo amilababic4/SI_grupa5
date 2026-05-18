@@ -116,6 +116,48 @@ using (var scope = app.Services.CreateScope())
         // Column already exists — safe to ignore
     }
 
+    try
+    {
+        db.Database.ExecuteSqlRaw(@"
+            ALTER TABLE Knjige ADD COLUMN Opis TEXT NULL;
+        ");
+    }
+    catch (Exception) { }
+
+    try
+    {
+        db.Database.ExecuteSqlRaw(@"
+            ALTER TABLE Knjige ADD COLUMN SlikaUrl VARCHAR(512) NULL;
+        ");
+    }
+    catch (Exception) { }
+
+    // Hardkodirani seed podataka (Opis i Slika) za knjige kako se ne bismo oslanjali na nepouzdan Google Books/OpenLibrary API
+    db.Database.ExecuteSqlRaw(@"
+        UPDATE Knjige SET Opis = 'A heartfelt novel about a flawed man reflecting on his life, marriages, and friendships in Montreal.' WHERE Isbn = '3404921038' AND Opis IS NULL;
+        UPDATE Knjige SET Opis = 'A dramatic family saga spanning across generations during the turbulent times in Germany.' WHERE Isbn = '3442410665' AND Opis IS NULL;
+        UPDATE Knjige SET Opis = 'An intense legal thriller where a lawyer defends a man against a seemingly impossible murder charge.' WHERE Isbn = '3442446937' AND Opis IS NULL;
+        UPDATE Knjige SET Opis = 'A contemplative novel about a nun experiencing spiritual visions and a crisis of faith.', SlikaUrl = 'https://m.media-amazon.com/images/I/41KTRWfA7tL.jpg' WHERE Isbn = '0375406328' AND Opis IS NULL;
+        UPDATE Knjige SET Opis = 'The unforgettable novel of a childhood in a sleepy Southern town and the crisis of conscience that rocked it.', SlikaUrl = 'https://m.media-amazon.com/images/I/81gepf1eMqL._AC_UF1000,1000_QL80_.jpg' WHERE Isbn = '0446310786' AND Opis IS NULL;
+        UPDATE Knjige SET Opis = 'The true story of the undersized Depression-era racehorse whose victories lifted the spirits of the nation.', SlikaUrl = 'https://m.media-amazon.com/images/I/81rY1F7yJ1L._AC_UF1000,1000_QL80_.jpg' WHERE Isbn = '0449005615' AND Opis IS NULL;
+        UPDATE Knjige SET Opis = 'A mother and her adopted Cherokee daughter flee across America to escape tribal law separating them.', SlikaUrl = 'https://m.media-amazon.com/images/I/81h6tXW47lL._AC_UF1000,1000_QL80_.jpg' WHERE Isbn = '0060168013' AND Opis IS NULL;
+        UPDATE Knjige SET Opis = 'Miss Zukas, a pragmatic librarian, finds herself embroiled in a mysterious murder investigation.', SlikaUrl = 'https://m.media-amazon.com/images/I/51A1Z9W7WGL._AC_UF1000,1000_QL80_.jpg' WHERE Isbn = '038078243X' AND Opis IS NULL;
+        UPDATE Knjige SET Opis = 'A classic romance novel depicting the emotional development of the protagonist, Elizabeth Bennet.', SlikaUrl = 'https://m.media-amazon.com/images/I/71Q1tPupKjL._AC_UF1000,1000_QL80_.jpg' WHERE Isbn = '055321215X' AND Opis IS NULL;
+        UPDATE Knjige SET Opis = 'A comprehensive guide on energy healing techniques and the power of human touch.', SlikaUrl = 'https://m.media-amazon.com/images/I/71qZ8x+37hL._AC_UF1000,1000_QL80_.jpg' WHERE Isbn = '067176537X' AND Opis IS NULL;
+        UPDATE Knjige SET Opis = 'A captivating story of love, ambition, and societal pressures set in the vibrant downtown scene.', SlikaUrl = 'https://m.media-amazon.com/images/I/81f1C+rR6lL._AC_UF1000,1000_QL80_.jpg' WHERE Isbn = '0061099686' AND Opis IS NULL;
+        UPDATE Knjige SET Opis = 'A gripping thriller involving scientists trapped on a shrinking iceberg with an explosive device.', SlikaUrl = 'https://m.media-amazon.com/images/I/81L67qOaE-L._AC_UF1000,1000_QL80_.jpg' WHERE Isbn = '0553582909' AND Opis IS NULL;
+        UPDATE Knjige SET Opis = 'A suspenseful mystery where a woman discovers a look-alike victim and uncovers a deep conspiracy.', SlikaUrl = 'https://m.media-amazon.com/images/I/81s4b4xWf+L._AC_UF1000,1000_QL80_.jpg' WHERE Isbn = '0671888587' AND Opis IS NULL;
+        UPDATE Knjige SET Opis = 'A supernatural thriller following a prodigy boy pursued by a relentless and terrifying killer.', SlikaUrl = 'https://m.media-amazon.com/images/I/81U+yE+xL-L._AC_UF1000,1000_QL80_.jpg' WHERE Isbn = '0553582747' AND Opis IS NULL;
+        UPDATE Knjige SET Opis = 'Dr. Kay Scarpetta investigates a bizarre murder involving dog hair and uncovers a deadly plot.', SlikaUrl = 'https://m.media-amazon.com/images/I/81w+r+kG8LL._AC_UF1000,1000_QL80_.jpg' WHERE Isbn = '0425182908' AND Opis IS NULL;
+        UPDATE Knjige SET Opis = 'Eve Dallas investigates a series of murders committed by an extremist vigilante group.', SlikaUrl = 'https://m.media-amazon.com/images/I/81R6v-2P6qL._AC_UF1000,1000_QL80_.jpg' WHERE Isbn = '042518630X' AND Opis IS NULL;
+        UPDATE Knjige SET Opis = 'Kultna i poučna priča o ježu koji hrabro brani svoj dom i slobodu od šumskih zvijeri.', SlikaUrl = 'https://svjetlostkomerc.ba/wp-content/uploads/2021/04/Jezeva-kucica-4.jpg' WHERE Isbn = '9789531713269' AND Opis IS NULL;
+        UPDATE Knjige SET Opis = 'Potresno i snažno svjedočanstvo djevojčice koja se skriva od nacističkog progona u Amsterdamu.', SlikaUrl = 'https://znanje.hr/product-images/655655c6-b51e-450e-a4b5-12c8b02c8c4a.jpg' WHERE Isbn = '9780822203070' AND Opis IS NULL;
+        UPDATE Knjige SET Opis = 'A hilarious pop-culture satire involving chocolate statues and modern commercialism.', SlikaUrl = 'https://m.media-amazon.com/images/I/51A2X4Z5P9L.jpg' WHERE Isbn = '0425163091' AND Opis IS NULL;
+        UPDATE Knjige SET Opis = 'A complete and fascinating history of the rat and its incredible role in human civilization.', SlikaUrl = 'https://m.media-amazon.com/images/I/51A8C8C7EBL.jpg' WHERE Naslov LIKE '%More Cunning Than Man%' AND Opis IS NULL;
+        UPDATE Knjige SET Opis = 'A quirky, brilliant collection of short fables that mix innocence with existential dread.', SlikaUrl = 'https://m.media-amazon.com/images/I/61k8wD1CqQL._AC_UF1000,1000_QL80_.jpg' WHERE Naslov LIKE '%The Middle Stories%' AND Opis IS NULL;
+        UPDATE Knjige SET Opis = 'A gripping legal thriller centered around a vanished partner, missing millions, and corporate greed.', SlikaUrl = 'https://m.media-amazon.com/images/I/81w8v+3Zp5L._AC_UF1000,1000_QL80_.jpg' WHERE Naslov LIKE '%Pleading Guilty%' AND Opis IS NULL;
+    ");
+
     // Seed kategorija ako tabela prazna
     if (!db.Kategorije.Any())
     {

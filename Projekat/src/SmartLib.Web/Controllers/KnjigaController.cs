@@ -190,9 +190,16 @@ namespace SmartLib.Web.Controllers
             var descriptions = new List<string>();
             foreach (var book in selectedBooks)
             {
-                var desc = await FetchDescriptionFromGoogleBooksAsync(book.Isbn);
-                descriptions.Add(desc);
-                await Task.Delay(50); // Kratka pauza da ne bismo preplavili Google API (429 Too Many Requests)
+                if (!string.IsNullOrWhiteSpace(book.Opis))
+                {
+                    descriptions.Add(book.Opis);
+                }
+                else
+                {
+                    var desc = await FetchDescriptionFromGoogleBooksAsync(book.Isbn);
+                    descriptions.Add(desc);
+                    await Task.Delay(50); // Kratka pauza da ne bismo preplavili Google API
+                }
             }
 
             var rawCards = new List<ExploreCardViewModel>();
@@ -201,10 +208,16 @@ namespace SmartLib.Web.Controllers
                 var book = selectedBooks[i];
                 var description = descriptions[i];
 
+                // Prefer serving covers from our internal Korice endpoint (consistent caching/fallbacks).
                 var thumbnail = string.Empty;
                 if (!string.IsNullOrWhiteSpace(book.Isbn))
                 {
                     thumbnail = Url.Action("Korice", "Knjiga", new { isbn = book.Isbn, size = "L" }) ?? string.Empty;
+                }
+                else if (!string.IsNullOrWhiteSpace(book.SlikaUrl))
+                {
+                    // Fallback to stored external image URL if ISBN is not available
+                    thumbnail = book.SlikaUrl;
                 }
                 bool isWildcard = book.Kategorija != null && surpriseCategories.Contains(book.Kategorija.Naziv, StringComparer.OrdinalIgnoreCase);
 
@@ -249,8 +262,17 @@ namespace SmartLib.Web.Controllers
         {
             try
             {
-                var books = await _knjigaRepository.GetRandomAsync(10);
+                var books = await _knjigaRepository.GetRandomAsync(50);
                 if (!books.Any()) return NotFound();
+
+                // Avoid always recommending the demo book when possible.
+                var nonDemo = books
+                    .Where(b => !string.Equals(b.Naslov, "Demo knjiga", StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+                if (nonDemo.Any())
+                {
+                    books = nonDemo;
+                }
 
                 Knjiga? book = null;
                 if (!string.IsNullOrWhiteSpace(category))
@@ -259,7 +281,7 @@ namespace SmartLib.Web.Controllers
                         b.Kategorija?.Naziv?.Equals(category.Trim(), StringComparison.OrdinalIgnoreCase) ?? false);
                 }
 
-                book ??= books.FirstOrDefault();
+                book ??= books.OrderBy(_ => Random.Shared.Next()).FirstOrDefault();
 
                 if (book == null) return NotFound();
 

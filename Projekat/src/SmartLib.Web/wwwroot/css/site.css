@@ -274,7 +274,7 @@ main,
    ================================ */
 
 .explore-hero {
-    padding: 2.5rem 2rem 1.5rem;
+    padding: 2.5rem 2rem 3.5rem;
     background: radial-gradient(circle at top right, rgba(14, 116, 144, 0.2), transparent 45%),
         linear-gradient(135deg, #061425 0%, #0b223c 40%, #123a63 100%);
     color: #f8fafc;
@@ -322,7 +322,7 @@ main,
 
 .explore-stage {
     max-width: 1200px;
-    margin: -2.5rem auto 3rem;
+    margin: -0.75rem auto 3rem;
     padding: 0 2rem 2rem;
 }
 
@@ -351,14 +351,15 @@ main,
     overflow: hidden;
     display: grid;
     grid-template-columns: 1.1fr 1fr;
-    transform: translateY(calc(var(--i) * 3px));
-    opacity: calc(1 - var(--i) * 0.12);
-    transition: transform 0.35s ease, opacity 0.35s ease, box-shadow 0.35s ease;
+    opacity: 0;
+    visibility: hidden;
+    transition: transform 0.35s ease, opacity 0.35s ease, box-shadow 0.35s ease, visibility 0s linear 0.35s;
     z-index: calc(100 - var(--i));
 }
 
 .explore-card.is-active {
     opacity: 1;
+    visibility: visible;
     box-shadow: var(--sl-shadow-hover);
 }
 
@@ -578,6 +579,34 @@ main,
     display: flex;
     flex-direction: column;
     gap: 1.2rem;
+}
+
+.explore-sidepanel.is-recommendation {
+    padding: 2.6rem;
+    background: linear-gradient(165deg, rgba(15, 23, 42, 0.08), rgba(15, 23, 42, 0.02));
+}
+
+.explore-sidepanel.is-recommendation .explore-recommendation {
+    margin-top: 0;
+}
+
+.explore-sidepanel.is-recommendation .explore-reco-card {
+    grid-template-columns: 1fr 220px;
+    padding: 1.6rem;
+    gap: 1.5rem;
+    background: rgba(15, 23, 42, 0.08);
+}
+
+.explore-sidepanel.is-recommendation .explore-reco-media {
+    height: 240px;
+}
+
+.explore-sidepanel.is-recommendation .explore-reco-title {
+    font-size: 1.4rem;
+}
+
+.explore-sidepanel.is-recommendation .explore-reco-author {
+    font-size: 1rem;
 }
 
 .explore-sidepanel h3 {
