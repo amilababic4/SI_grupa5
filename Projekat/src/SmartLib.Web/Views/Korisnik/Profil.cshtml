@@ -4,6 +4,8 @@
     var jeMojProfil = ViewBag.JeMojProfil as bool? ?? true;
     var jeAdmin = User.IsInRole("Administrator");
     var jeBibliotekarIliAdmin = User.IsInRole("Bibliotekar") || User.IsInRole("Administrator");
+    var targetIsAdmin = string.Equals(Model.Uloga?.Naziv, "Administrator", StringComparison.OrdinalIgnoreCase);
+    var statusAktivan = string.Equals(Model.Status, "aktivan", StringComparison.OrdinalIgnoreCase);
     ViewData["Title"] = jeMojProfil ? "Moj profil" : $"{Model.Ime} {Model.Prezime}";
 
     var nazadController = ViewBag.NazadController as string ?? "Korisnik";
@@ -74,6 +76,38 @@
                             </svg>
                             Promjena lozinke
                         </button>
+                    }
+                    @if (jeMojProfil && statusAktivan)
+                    {
+                        <form asp-controller="Auth" asp-action="DeaktivirajMojNalog" method="post"
+                              onsubmit="return confirm('Da li ste sigurni da zelite deaktivirati nalog?');"
+                              style="display:inline-block;">
+                            <button type="submit" class="btn btn-danger">Deaktiviraj nalog</button>
+                        </form>
+                    }
+                    @if (!jeMojProfil && jeBibliotekarIliAdmin)
+                    {
+                        if (statusAktivan)
+                        {
+                            if (!targetIsAdmin)
+                            {
+                                <form asp-controller="Korisnik" asp-action="Deaktiviraj" asp-route-id="@Model.Id"
+                                      method="post"
+                                      onsubmit="return confirm('Deaktivirati nalog korisnika?');"
+                                      style="display:inline-block;">
+                                    <button type="submit" class="btn btn-danger">Deaktiviraj nalog</button>
+                                </form>
+                            }
+                        }
+                        else
+                        {
+                            <form asp-controller="Korisnik" asp-action="Aktiviraj" asp-route-id="@Model.Id"
+                                  method="post"
+                                  onsubmit="return confirm('Reaktivirati nalog korisnika?');"
+                                  style="display:inline-block;">
+                                <button type="submit" class="btn btn-primary">Reaktiviraj nalog</button>
+                            </form>
+                        }
                     }
                 </div>
             </div>

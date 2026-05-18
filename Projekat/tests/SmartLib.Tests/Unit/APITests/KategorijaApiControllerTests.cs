@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Moq;
 using SmartLib.API.Controllers;
 using SmartLib.Core.Interfaces;
@@ -327,7 +327,7 @@ namespace SmartLib.Tests.Unit.APITests
             var result = await _controller.Create(request);
 
             var badRequest = Assert.IsType<BadRequestObjectResult>(result);
-            Assert.Contains("ne smije sadržavati HTML tagove", badRequest.Value.ToString());
+            Assert.Contains("ne smije sadržavati HTML tagove", badRequest.Value!.ToString());
         }
 
         [Fact]
@@ -343,7 +343,7 @@ namespace SmartLib.Tests.Unit.APITests
             var result = await _controller.Update(1, request);
 
             var badRequest = Assert.IsType<BadRequestObjectResult>(result);
-            Assert.Contains("ne smije sadržavati HTML tagove", badRequest.Value.ToString());
+            Assert.Contains("ne smije sadržavati HTML tagove", badRequest.Value!.ToString());
         }
     }
 }

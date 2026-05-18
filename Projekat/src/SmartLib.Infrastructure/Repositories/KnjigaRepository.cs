@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using SmartLib.Core.Interfaces;
 using SmartLib.Core.Models;
 using SmartLib.Infrastructure.Data;
@@ -116,10 +116,9 @@ namespace SmartLib.Infrastructure.Repositories
 
         public async Task<bool> HasActiveLoansAsync(int id)
         {
-            // US-28: Provjerava status svih primjeraka koji pripadaju ovoj knjizi           
+            // US-28: Provjerava status svih primjeraka koji pripadaju ovoj knjizi
             return await _db.Zaduzenja
-                .AnyAsync(z => z.Primjerak.KnjigaId == id &&
-                              (z.Status == "aktivno" || z.DatumPlaniranogVracanja == null));
+                .AnyAsync(z => z.Primjerak!.KnjigaId == id && z.Status == "aktivno");
         }
 
         public async Task<IEnumerable<Knjiga>> GetRandomAsync(int count)

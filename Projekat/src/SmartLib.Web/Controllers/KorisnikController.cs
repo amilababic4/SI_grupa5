@@ -24,7 +24,7 @@ namespace SmartLib.Web.Controllers
             _clanarinaRepository = clanarinaRepository;
         }
 
-        public async Task<IActionResult> Index(string? pretraga, bool prikaziDeaktivirane = false)
+        public async Task<IActionResult> Index(string? pretraga = null, bool prikaziDeaktivirane = false)
         {
             var korisnici = await _korisnikRepository.GetAllAsync();
 
@@ -52,7 +52,7 @@ namespace SmartLib.Web.Controllers
                     Ime = k.Ime,
                     Prezime = k.Prezime,
                     Email = k.Email,
-                    Uloga = k.Uloga?.Naziv,
+                    Uloga = k.Uloga?.Naziv ?? string.Empty,
                     Status = k.Status,
                     DatumKreiranja = k.DatumKreiranja
                 })
@@ -66,7 +66,7 @@ namespace SmartLib.Web.Controllers
         }
 
         [Authorize(Roles = RoleNames.Administrator)]
-        public async Task<IActionResult> IndexBibliotekar(string? pretraga, bool prikaziDeaktivirane = false)
+        public async Task<IActionResult> IndexBibliotekar(string? pretraga = null, bool prikaziDeaktivirane = false)
         {
             var korisnici = await _korisnikRepository.GetAllAsync();
 
@@ -94,7 +94,7 @@ namespace SmartLib.Web.Controllers
                     Ime = k.Ime,
                     Prezime = k.Prezime,
                     Email = k.Email,
-                    Uloga = k.Uloga?.Naziv,
+                    Uloga = k.Uloga?.Naziv ?? string.Empty,
                     Status = k.Status,
                     DatumKreiranja = k.DatumKreiranja
                 })
@@ -284,10 +284,37 @@ namespace SmartLib.Web.Controllers
             }
 
             korisnik.Status = "deaktiviran";
+            korisnik.DatumDeaktivacije = DateTime.UtcNow;
             await _korisnikRepository.UpdateAsync(korisnik);
 
             TempData["SuccessMessage"] = "Nalog člana je deaktiviran.";
             return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Aktiviraj(int id)
+        {
+            var korisnik = await _korisnikRepository.GetByIdAsync(id);
+            if (korisnik is null)
+                return NotFound();
+
+            var targetIsAdmin = string.Equals(
+                korisnik.Uloga?.Naziv,
+                RoleNames.Administrator,
+                StringComparison.OrdinalIgnoreCase);
+
+            if (targetIsAdmin && !User.IsInRole(RoleNames.Administrator))
+            {
+                TempData["ErrorMessage"] = "Samo administrator može reaktivirati admin nalog.";
+                return RedirectToAction(nameof(ProfilClana), new { id });
+            }
+
+            korisnik.Status = "aktivan";
+            korisnik.DatumDeaktivacije = null;
+            await _korisnikRepository.UpdateAsync(korisnik);
+
+            TempData["SuccessMessage"] = "Nalog je reaktiviran.";
+            return RedirectToAction(nameof(ProfilClana), new { id });
         }
 
         // ─── IZMIJENJENO: dohvat UlogaId + lista uloga za dropdown ──────────────
@@ -360,7 +387,14 @@ namespace SmartLib.Web.Controllers
             {
                 // Samo ne-admin korisnicima možemo mijenjati ulogu i status
                 korisnik.UlogaId = model.UlogaId;
-                korisnik.Status = model.Status;
+                if (!string.Equals(korisnik.Status, model.Status, StringComparison.OrdinalIgnoreCase))
+                {
+                    korisnik.Status = model.Status;
+                    if (string.Equals(model.Status, "deaktiviran", StringComparison.OrdinalIgnoreCase))
+                        korisnik.DatumDeaktivacije = DateTime.UtcNow;
+                    else if (string.Equals(model.Status, "aktivan", StringComparison.OrdinalIgnoreCase))
+                        korisnik.DatumDeaktivacije = null;
+                }
             }
             // Ako je admin — uloga i status ostaju nepromijenjeni
 

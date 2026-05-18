@@ -100,9 +100,9 @@ namespace SmartLib.Infrastructure.Repositories
         {
             return await _db.Zaduzenja
                 .Include(z => z.Korisnik)
-                    .ThenInclude(k => k.Uloga)
+                    .ThenInclude(k => k!.Uloga)
                 .Include(z => z.Primjerak)
-                    .ThenInclude(p => p.Knjiga)
+                    .ThenInclude(p => p!.Knjiga)
                 .Where(z => z.PrimjerakId == primjerakId)
                 .OrderByDescending(z => z.DatumZaduzivanja)
                 .ToListAsync();

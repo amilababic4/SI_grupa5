@@ -250,5 +250,29 @@ namespace SmartLib.Web.Controllers
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Login", "Auth");
         }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> DeaktivirajMojNalog()
+        {
+          var idClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+          if (idClaim == null || !int.TryParse(idClaim, out int id))
+            return RedirectToAction("Login", "Auth");
+
+          var korisnik = await _korisnikRepository.GetByIdAsync(id);
+          if (korisnik == null)
+            return NotFound();
+
+          if (!string.Equals(korisnik.Status, "deaktiviran", StringComparison.OrdinalIgnoreCase))
+          {
+            korisnik.Status = "deaktiviran";
+            korisnik.DatumDeaktivacije = DateTime.UtcNow;
+            await _korisnikRepository.UpdateAsync(korisnik);
+          }
+
+          await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+          TempData["SuccessMessage"] = "Nalog je deaktiviran. Kontaktirajte biblioteku ako zelite reaktivaciju.";
+          return RedirectToAction("Login", "Auth");
+        }
     }
 }

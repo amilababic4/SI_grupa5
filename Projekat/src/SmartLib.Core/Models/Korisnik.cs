@@ -16,6 +16,7 @@ namespace SmartLib.Core.Models
         public int UlogaId { get; set; }
         public string Status { get; set; } = "aktivan";     // aktivan / deaktiviran
         public DateTime DatumKreiranja { get; set; } = DateTime.UtcNow;
+        public DateTime? DatumDeaktivacije { get; set; }
 
         // Navigaciona svojstva
         public Uloga? Uloga { get; set; }
