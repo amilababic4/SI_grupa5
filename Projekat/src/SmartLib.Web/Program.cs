@@ -7,10 +7,15 @@ using SmartLib.Infrastructure.Repositories;
 using SmartLib.Infrastructure.Services;
 
 // Load .env file if it exists (for local development)
-var envPath = Path.Combine(Directory.GetCurrentDirectory(), ".env");
-if (!File.Exists(envPath))
-    envPath = Path.Combine(Directory.GetCurrentDirectory(), "..", "..", ".env");
-if (File.Exists(envPath))
+string[] possiblePaths = {
+    Path.Combine(Directory.GetCurrentDirectory(), ".env"),
+    Path.Combine(Directory.GetCurrentDirectory(), "Projekat", ".env"),
+    Path.Combine(Directory.GetCurrentDirectory(), "..", "..", ".env"),
+    Path.Combine(Directory.GetCurrentDirectory(), "..", ".env")
+};
+var envPath = possiblePaths.FirstOrDefault(File.Exists);
+
+if (envPath != null)
 {
     foreach (var line in File.ReadAllLines(envPath))
     {
