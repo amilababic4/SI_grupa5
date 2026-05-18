@@ -363,6 +363,110 @@ namespace SmartLib.Tests.Integration
 
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
+
+        // ─── GET /api/zaduzenje/historija — US-54 ─────────────────────
+
+        [Fact]
+        public async Task Historija_BezAuth_Vraca401()
+        {
+            using var factory = new ZaduzenjeTestFixture();
+
+            var response = await factory.CreateClient().GetAsync("/api/zaduzenje/historija");
+
+            Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task Historija_KaoClan_Vraca403()
+        {
+            using var factory = new ZaduzenjeTestFixture();
+            var client = await CreateAuthedClientAsync(factory, "clan@smartlib.ba", "Test123!");
+
+            var response = await client.GetAsync("/api/zaduzenje/historija");
+
+            Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task Historija_KaoBibliotekar_VracaZatvorenaZaduzenja()
+        {
+            using var factory = new ZaduzenjeTestFixture();
+            var client = await CreateAuthedClientAsync(factory, "bibliotekar@smartlib.ba", "Test123!");
+
+            var response = await client.GetAsync("/api/zaduzenje/historija");
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            using var document = await ReadJsonAsync(response);
+
+            Assert.NotEmpty(document.RootElement.EnumerateArray());
+            Assert.All(
+                document.RootElement.EnumerateArray(),
+                element => Assert.Equal("zatvoreno", element.GetProperty("status").GetString()));
+        }
+
+        [Fact]
+        public async Task Historija_SaFilteromPoEmailu_VracaFiltriraneRezultate()
+        {
+            using var factory = new ZaduzenjeTestFixture();
+            var client = await CreateAuthedClientAsync(factory, "bibliotekar@smartlib.ba", "Test123!");
+
+            var response = await client.GetAsync("/api/zaduzenje/historija?clan=deaktiviran");
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            using var document = await ReadJsonAsync(response);
+
+            Assert.NotEmpty(document.RootElement.EnumerateArray());
+            Assert.All(
+                document.RootElement.EnumerateArray(),
+                element => Assert.Contains(
+                    "deaktiviran",
+                    element.GetProperty("korisnikEmail").GetString()!,
+                    StringComparison.OrdinalIgnoreCase));
+        }
+
+        // ─── GET /api/zaduzenje/moja/historija ─────────────────────────
+
+        [Fact]
+        public async Task MojaHistorija_BezAuth_Vraca401()
+        {
+            using var factory = new ZaduzenjeTestFixture();
+
+            var response = await factory.CreateClient().GetAsync("/api/zaduzenje/moja/historija");
+
+            Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task MojaHistorija_KaoClanBezZatvorenih_VracaPraznuListu()
+        {
+            using var factory = new ZaduzenjeTestFixture();
+            var client = await CreateAuthedClientAsync(factory, "clan@smartlib.ba", "Test123!");
+
+            var response = await client.GetAsync("/api/zaduzenje/moja/historija");
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            using var document = await ReadJsonAsync(response);
+            Assert.Empty(document.RootElement.EnumerateArray());
+        }
+
+        [Fact]
+        public async Task MojaHistorija_NakonVracanjaKnjige_VracaZatvorenoZaduzenje()
+        {
+            using var factory = new ZaduzenjeTestFixture();
+            var bibClient = await CreateAuthedClientAsync(factory, "bibliotekar@smartlib.ba", "Test123!");
+            var clanClient = await CreateAuthedClientAsync(factory, "clan@smartlib.ba", "Test123!");
+
+            await bibClient.PostAsync("/api/zaduzenje/vrati/1", null);
+
+            var response = await clanClient.GetAsync("/api/zaduzenje/moja/historija");
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            using var document = await ReadJsonAsync(response);
+
+            Assert.Single(document.RootElement.EnumerateArray());
+            Assert.Equal("zatvoreno", document.RootElement[0].GetProperty("status").GetString());
+            Assert.Equal(1, document.RootElement[0].GetProperty("id").GetInt32());
+        }
     }
 
     internal static class ZaduzenjeDbSeeder

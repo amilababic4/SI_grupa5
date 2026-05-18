@@ -585,8 +585,8 @@ namespace SmartLib.Tests.Unit.APITests
         public async Task Korice_UspjesanHttpPoziv_VracaFileISpremaUCache()
         {
             // Pokriva: uspješan HTTP poziv, _cache.Set i return File(imageBytes)
-            var imageBytes = new byte[] { 0xFF, 0xD8, 0xFF }; // JPEG magic bytes
-
+            var imageBytes = new byte[3000];
+            imageBytes[0] = 0xFF; imageBytes[1] = 0xD8; imageBytes[2] = 0xFF;
             var handlerMock = new Mock<HttpMessageHandler>();
             handlerMock
                 .Protected()

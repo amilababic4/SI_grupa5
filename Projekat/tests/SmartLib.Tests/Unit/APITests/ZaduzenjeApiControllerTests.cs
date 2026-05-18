@@ -374,11 +374,13 @@ namespace SmartLib.Tests.Unit.APITests
             {
                 KorisnikId = 1,
                 PrimjerakId = 1,
-                DatumPovratka = DateTime.Today.AddDays(-1)
+                DatumPovratka = DateTime.UtcNow.AddDays(-1)
             });
 
             var bad = Assert.IsType<BadRequestObjectResult>(result);
-            Assert.Contains("prošlosti", bad.Value!.ToString());
+
+            var jsonString = System.Text.Json.JsonSerializer.Serialize(bad.Value);
+            Assert.Contains("Datum povratka ne mo", jsonString);
         }
 
         [Fact]
