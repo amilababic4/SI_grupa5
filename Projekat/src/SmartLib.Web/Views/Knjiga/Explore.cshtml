@@ -159,8 +159,12 @@
                     recommendation.innerHTML = '<p class="explore-reco-empty">Nema dovoljno feedbacka za personalizovanu preporuku. Označi nekoliko knjiga sa "Sviđa mi se".</p>';
                     recommendation.hidden = false;
                     sidepanelContent.hidden = true;
-                    if (controls) controls.hidden = true;
+                    if (controls) {
+                        controls.hidden = true;
+                        controls.style.display = 'none';
+                    }
                     if (progress) progress.hidden = true;
+                    document.body.classList.add('explore-complete');
                     if (sidepanel) sidepanel.classList.add('is-recommendation');
                     return;
                 }
@@ -192,16 +196,24 @@
                     `;
                     recommendation.hidden = false;
                     sidepanelContent.hidden = true;
-                    if (controls) controls.hidden = true;
+                    if (controls) {
+                        controls.hidden = true;
+                        controls.style.display = 'none';
+                    }
                     if (progress) progress.hidden = true;
+                    document.body.classList.add('explore-complete');
                     if (sidepanel) sidepanel.classList.add('is-recommendation');
                 } catch (error) {
                     console.error('Error rendering recommendation:', error);
                     recommendation.innerHTML = '<p class="explore-reco-empty">Greška pri učitavanju preporuke. Pokušaj ponovo.</p>';
                     recommendation.hidden = false;
                     sidepanelContent.hidden = true;
-                    if (controls) controls.hidden = true;
+                    if (controls) {
+                        controls.hidden = true;
+                        controls.style.display = 'none';
+                    }
                     if (progress) progress.hidden = true;
+                    document.body.classList.add('explore-complete');
                     if (sidepanel) sidepanel.classList.add('is-recommendation');
                 }
             };
@@ -217,8 +229,12 @@
                 }
 
                 if (currentIndex >= cards.length) {
-                    if (controls) controls.hidden = true;
+                    if (controls) {
+                        controls.hidden = true;
+                        controls.style.display = 'none';
+                    }
                     if (progress) progress.hidden = true;
+                    document.body.classList.add('explore-complete');
                     if (endState) endState.hidden = true;
                 }
             };
@@ -228,14 +244,20 @@
                 if (!card) return;
                 const state = recordSwipe(card, direction === 'right');
                 card.classList.add(direction === 'right' ? 'swipe-right' : 'swipe-left');
-                card.addEventListener('transitionend', () => {
+                let finalized = false;
+                const finalizeSwipe = () => {
+                    if (finalized) return;
+                    finalized = true;
                     card.classList.add('is-gone');
                     currentIndex += 1;
                     updateActive();
                     if (currentIndex >= cards.length) {
                         renderRecommendation(state);
                     }
-                }, { once: true });
+                };
+
+                card.addEventListener('transitionend', finalizeSwipe, { once: true });
+                setTimeout(finalizeSwipe, 500);
             };
 
             buttons.forEach((btn) => {
