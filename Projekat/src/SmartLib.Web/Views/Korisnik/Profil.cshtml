@@ -115,15 +115,15 @@
             <div class="profil-grid">
                 <div class="details-item">
                     <span class="details-label">Ime</span>
-                    <span>@Model.Ime</span>
+                    <span class="details-value">@Model.Ime</span>
                 </div>
                 <div class="details-item">
                     <span class="details-label">Prezime</span>
-                    <span>@Model.Prezime</span>
+                    <span class="details-value">@Model.Prezime</span>
                 </div>
                 <div class="details-item profil-grid-full">
                     <span class="details-label">E-mail adresa</span>
-                    <span class="profil-email">@Model.Email</span>
+                    <span class="profil-email details-value">@Model.Email</span>
                 </div>
                 <div class="details-item">
                     <span class="details-label">Uloga</span>
@@ -146,13 +146,13 @@
                 </div>
                 <div class="details-item profil-grid-full">
                     <span class="details-label">Datum kreiranja</span>
-                    <span>@Model.DatumKreiranja.ToString("dd.MM.yyyy")</span>
+                    <span class="details-value">@Model.DatumKreiranja.ToString("dd.MM.yyyy")</span>
                 </div>
                 @if (!statusAktivan && Model.DatumDeaktivacije.HasValue)
                 {
                     <div class="details-item profil-grid-full">
                         <span class="details-label">Datum deaktivacije</span>
-                        <span class="status-deaktiviran">@Model.DatumDeaktivacije.Value.ToString("dd.MM.yyyy HH:mm")</span>
+                        <span class="details-value">@Model.DatumDeaktivacije.Value.ToString("dd.MM.yyyy HH:mm")</span>
                     </div>
                 }
             </div>
