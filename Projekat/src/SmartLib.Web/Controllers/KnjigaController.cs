@@ -175,15 +175,21 @@ namespace SmartLib.Web.Controllers
             var remaining = allRandom.Except(selectedBooks).Take(totalTarget - selectedBooks.Count).ToList();
             selectedBooks.AddRange(remaining);
 
+            // Start fetching descriptions in parallel
+            var descriptionTasks = selectedBooks.Select(book => FetchDescriptionFromGoogleBooksAsync(book.Isbn)).ToList();
+            var descriptions = await Task.WhenAll(descriptionTasks);
+
             var rawCards = new List<ExploreCardViewModel>();
-            foreach (var book in selectedBooks)
+            for (int i = 0; i < selectedBooks.Count; i++)
             {
+                var book = selectedBooks[i];
+                var description = descriptions[i];
+
                 var thumbnail = string.Empty;
                 if (!string.IsNullOrWhiteSpace(book.Isbn))
                 {
                     thumbnail = Url.Action("Korice", "Knjiga", new { isbn = book.Isbn, size = "L" }) ?? string.Empty;
                 }
-                
                 bool isWildcard = book.Kategorija != null && surpriseCategories.Contains(book.Kategorija.Naziv, StringComparer.OrdinalIgnoreCase);
 
                 rawCards.Add(new ExploreCardViewModel
@@ -191,7 +197,7 @@ namespace SmartLib.Web.Controllers
                     Title = string.IsNullOrWhiteSpace(book.Naslov) ? "Nepoznat naslov" : book.Naslov,
                     Authors = string.IsNullOrWhiteSpace(book.Autor) ? "Nepoznat autor" : book.Autor,
                     Category = book.Kategorija?.Naziv ?? "Ostalo",
-                    Description = "Lokalna knjiga",
+                    Description = description,
                     ThumbnailUrl = thumbnail,
                     InfoLink = Url.Action("Details", "Knjiga", new { id = book.Id }) ?? string.Empty,
                     IsWildcard = isWildcard
@@ -463,7 +469,56 @@ namespace SmartLib.Web.Controllers
             _ => 2
         };
 
+        private async Task<string> FetchDescriptionFromGoogleBooksAsync(string? isbn)
+        {
+            if (string.IsNullOrWhiteSpace(isbn)) return "Opis nije dostupan.";
+            var normalizedIsbn = NormalizeIsbn(isbn);
+            
+            var apiKey = _configuration["GOOGLE_BOOKS_API_KEY"] ?? _configuration["GoogleBooks:ApiKey"];
+            var url = $"https://www.googleapis.com/books/v1/volumes?q=isbn:{normalizedIsbn}";
+            if (!string.IsNullOrWhiteSpace(apiKey))
+            {
+                url += $"&key={Uri.EscapeDataString(apiKey)}";
+            }
 
+            try
+            {
+                var client = _httpClientFactory.CreateClient();
+                var response = await client.GetAsync(url);
+                if (response.IsSuccessStatusCode)
+                {
+                    var json = await response.Content.ReadAsStringAsync();
+                    using var doc = JsonDocument.Parse(json);
+                    if (doc.RootElement.TryGetProperty("items", out var items) && items.GetArrayLength() > 0)
+                    {
+                        var firstItem = items[0];
+                        if (firstItem.TryGetProperty("volumeInfo", out var volumeInfo))
+                        {
+                            var description = GetJsonString(volumeInfo, "description");
+                            return TrimText(description, 260);
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                // Ignoriši greške
+            }
+
+            return "Opis nije dostupan.";
+        }
+
+        private static string? GetJsonString(JsonElement element, string propertyName)
+            => element.TryGetProperty(propertyName, out var prop) && prop.ValueKind == JsonValueKind.String
+                ? prop.GetString()
+                : null;
+
+        private static string TrimText(string? text, int maxLength)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return "Opis nije dostupan.";
+            var trimmed = text.Trim();
+            return trimmed.Length <= maxLength ? trimmed : trimmed[..maxLength].TrimEnd() + "...";
+        }
 
         private static string NormalizeIsbn(string isbn)
             => isbn.Replace("-", "").Replace(" ", "").Trim();
