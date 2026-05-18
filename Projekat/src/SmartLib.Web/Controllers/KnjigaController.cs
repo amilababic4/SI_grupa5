@@ -41,7 +41,7 @@ namespace SmartLib.Web.Controllers
             var normalizedIsbn = NormalizeIsbn(isbn);
             var cacheKey = $"cover_{normalizedIsbn}_{size}";
 
-            if (_cache.TryGetValue(cacheKey, out byte[] cachedImage))
+            if (_cache.TryGetValue(cacheKey, out byte[]? cachedImage) && cachedImage != null)
             {
                 return File(cachedImage, "image/jpeg");
             }

@@ -11,7 +11,7 @@ namespace SmartLib.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Roles = "Bibliotekar,Administrator")]
+    [Authorize]
     public class KorisnikController : ControllerBase
     {
         private readonly IKorisnikRepository _korisnikRepository;
@@ -22,14 +22,19 @@ namespace SmartLib.API.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Bibliotekar,Administrator")]
         public async Task<ActionResult<IEnumerable<KorisnikDto>>> GetAll()
         {
             var korisnici = await _korisnikRepository.GetAllAsync();
-            var result = korisnici.Select(MapToDto).ToList();
+            var result = korisnici
+                .Where(k => string.Equals(k.Status, "aktivan", StringComparison.OrdinalIgnoreCase))
+                .Select(MapToDto)
+                .ToList();
             return Ok(result);
         }
 
         [HttpGet("{id}")]
+        [Authorize(Roles = "Bibliotekar,Administrator")]
         public async Task<ActionResult<KorisnikDto>> GetById(int id)
         {
             var korisnik = await _korisnikRepository.GetByIdAsync(id);
@@ -40,7 +45,7 @@ namespace SmartLib.API.Controllers
         }
 
         [HttpGet("profil")]
-        [Authorize] 
+        [Authorize]
         public async Task<IActionResult> Profil()
         {
             var idClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -55,6 +60,7 @@ namespace SmartLib.API.Controllers
         }
 
         [HttpGet("{id}/profil")]
+        [Authorize(Roles = "Bibliotekar,Administrator")]
         public async Task<IActionResult> ProfilClana(int id)
         {
             var korisnik = await _korisnikRepository.GetByIdAsync(id);
@@ -65,6 +71,7 @@ namespace SmartLib.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Bibliotekar,Administrator")]
         public async Task<ActionResult<KorisnikDto>> Create([FromBody] KorisnikCreateDto model)
         {
             if (!ModelState.IsValid)
@@ -103,6 +110,7 @@ namespace SmartLib.API.Controllers
         }
 
         [HttpPut("{id}/uloga")]
+        [Authorize(Roles = "Bibliotekar,Administrator")]
         public IActionResult ChangeRole(int id)
         {
             return Ok(new { message = "TODO" });
@@ -115,9 +123,59 @@ namespace SmartLib.API.Controllers
             if (korisnik is null)
                 return NotFound();
 
+            var requestUserId = GetUserId();
+            var isSelf = requestUserId.HasValue && requestUserId.Value == id;
+            var isStaff = IsStaff();
+
+            if (!isSelf && !isStaff)
+                return Forbid();
+
+            var targetIsAdmin = string.Equals(
+                korisnik.Uloga?.Naziv,
+                RoleNames.Administrator,
+                StringComparison.OrdinalIgnoreCase);
+
+            if (targetIsAdmin && !isSelf)
+                return Forbid();
+
             korisnik.Status = "deaktiviran";
+            korisnik.DatumDeaktivacije = DateTime.UtcNow;
             await _korisnikRepository.UpdateAsync(korisnik);
             return NoContent();
+        }
+
+        [HttpPut("{id}/aktiviraj")]
+        public async Task<IActionResult> Reactivate(int id)
+        {
+            var korisnik = await _korisnikRepository.GetByIdAsync(id);
+            if (korisnik is null)
+                return NotFound();
+
+            var requestUserId = GetUserId();
+            var isSelf = requestUserId.HasValue && requestUserId.Value == id;
+            var isStaff = IsStaff();
+
+            if (!isSelf && !isStaff)
+                return Forbid();
+
+            if (string.Equals(korisnik.Status, "aktivan", StringComparison.OrdinalIgnoreCase))
+                return NoContent();
+
+            korisnik.Status = "aktivan";
+            korisnik.DatumDeaktivacije = null;
+            await _korisnikRepository.UpdateAsync(korisnik);
+            return NoContent();
+        }
+
+        private bool IsStaff()
+        {
+            return User.IsInRole(RoleNames.Bibliotekar) || User.IsInRole(RoleNames.Administrator);
+        }
+
+        private int? GetUserId()
+        {
+            var idClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            return int.TryParse(idClaim, out var id) ? id : null;
         }
 
         // XSS helper

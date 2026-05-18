@@ -9,30 +9,30 @@ namespace SmartLib.Web.Controllers
     {
         // TODO: Inject IRezervacijaRepository
 
-        public async Task<IActionResult> Index()
+        public Task<IActionResult> Index()
         {
             // TODO: Pregled aktivnih rezervacija (bibliotekar)
-            return View();
+            return Task.FromResult<IActionResult>(View());
         }
 
-        public async Task<IActionResult> Moje()
+        public Task<IActionResult> Moje()
         {
             // TODO: Pregled vlastitih rezervacija (član)
-            return View();
+            return Task.FromResult<IActionResult>(View());
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(int knjigaId)
+        public Task<IActionResult> Create(int knjigaId)
         {
             // TODO: Kreiranje rezervacije
-            return RedirectToAction("Details", "Knjiga", new { id = knjigaId });
+            return Task.FromResult<IActionResult>(RedirectToAction("Details", "Knjiga", new { id = knjigaId }));
         }
 
         [HttpPost]
-        public async Task<IActionResult> Otkazi(int id)
+        public Task<IActionResult> Otkazi(int id)
         {
             // TODO: Otkazivanje rezervacije
-            return RedirectToAction("Moje");
+            return Task.FromResult<IActionResult>(RedirectToAction("Moje"));
         }
     }
 }

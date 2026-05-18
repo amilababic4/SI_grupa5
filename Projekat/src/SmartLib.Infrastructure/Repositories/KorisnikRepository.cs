@@ -55,5 +55,18 @@ namespace SmartLib.Infrastructure.Repositories
             _db.Korisnici.Update(korisnik);
             await _db.SaveChangesAsync();
         }
+
+        public async Task<int> DeleteDeactivatedOlderThanAsync(DateTime cutoffUtc)
+        {
+            return await _db.Database.ExecuteSqlInterpolatedAsync($@"
+                DELETE FROM Korisnici
+                WHERE Status = {"deaktiviran"}
+                  AND DatumDeaktivacije IS NOT NULL
+                  AND DatumDeaktivacije <= {cutoffUtc}
+                  AND NOT EXISTS (SELECT 1 FROM Zaduzenja z WHERE z.KorisnikId = Korisnici.Id)
+                  AND NOT EXISTS (SELECT 1 FROM Rezervacije r WHERE r.KorisnikId = Korisnici.Id)
+                  AND NOT EXISTS (SELECT 1 FROM Clanarine c WHERE c.KorisnikId = Korisnici.Id)
+            ");
+        }
     }
 }

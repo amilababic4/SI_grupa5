@@ -12,30 +12,30 @@ namespace SmartLib.Web.Controllers
     {
         // TODO: Inject potrebne repozitorije
 
-        public async Task<IActionResult> Korisnici()
+        public Task<IActionResult> Korisnici()
         {
             // TODO: Pregled svih korisnika (samo admin)
-            return View();
+            return Task.FromResult<IActionResult>(View());
         }
 
-        public async Task<IActionResult> AuditLog(int page = 1)
+        public Task<IActionResult> AuditLog(int page = 1)
         {
             // TODO: Pregled audit log zapisa (samo admin)
-            return View();
+            return Task.FromResult<IActionResult>(View());
         }
 
         [HttpPost]
-        public async Task<IActionResult> PromijeniUlogu(int id /*, TODO: string novaUloga */)
+        public Task<IActionResult> PromijeniUlogu(int id /*, TODO: string novaUloga */)
         {
             // TODO: Promjena uloge korisnika
-            return RedirectToAction("Korisnici");
+            return Task.FromResult<IActionResult>(RedirectToAction("Korisnici"));
         }
 
         [HttpPost]
-        public async Task<IActionResult> DeaktivirajKorisnika(int id)
+        public Task<IActionResult> DeaktivirajKorisnika(int id)
         {
             // TODO: Deaktivacija bilo kojeg korisnika
-            return RedirectToAction("Korisnici");
+            return Task.FromResult<IActionResult>(RedirectToAction("Korisnici"));
         }
     }
 }

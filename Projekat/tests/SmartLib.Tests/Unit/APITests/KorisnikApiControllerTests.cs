@@ -6,6 +6,8 @@ using SmartLib.Core.Interfaces;
 using SmartLib.Core.Models;
 using Xunit;
 using System.ComponentModel.DataAnnotations;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
 
 namespace SmartLib.Tests.Unit.APITests
 {
@@ -29,6 +31,21 @@ namespace SmartLib.Tests.Unit.APITests
         {
             _repoMock = new Mock<IKorisnikRepository>();
             _controller = new KorisnikController(_repoMock.Object);
+        }
+
+        private void SetUser(string role, int userId = 1)
+        {
+            var claims = new List<Claim>
+            {
+                new(ClaimTypes.NameIdentifier, userId.ToString()),
+                new(ClaimTypes.Role, role)
+            };
+
+            var identity = new ClaimsIdentity(claims, "TestAuth");
+            _controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = new ClaimsPrincipal(identity) }
+            };
         }
 
         // Pomoćna metoda
@@ -110,7 +127,7 @@ namespace SmartLib.Tests.Unit.APITests
 
             var obj = result.Result as ObjectResult;
             Assert.NotNull(obj);
-            Assert.Equal(null, obj!.StatusCode);
+            Assert.Null(obj!.StatusCode);
         }
 
         // Lozinka se hešira — ne čuva se u čistom tekstu
@@ -145,6 +162,7 @@ namespace SmartLib.Tests.Unit.APITests
         [Fact]
         public async Task Deactivate_PostojeciKorisnik_SetujujeStatusNaDeaktiviran()
         {
+            SetUser(RoleNames.Bibliotekar);
             var korisnik = new Korisnik { Id = 5, Status = "aktivan" };
             _repoMock.Setup(r => r.GetByIdAsync(5)).ReturnsAsync(korisnik);
             _repoMock.Setup(r => r.UpdateAsync(It.IsAny<Korisnik>())).Returns(Task.CompletedTask);
@@ -158,6 +176,7 @@ namespace SmartLib.Tests.Unit.APITests
         [Fact]
         public async Task Deactivate_NepostojećiId_VracaNotFound()
         {
+            SetUser(RoleNames.Bibliotekar);
             _repoMock.Setup(r => r.GetByIdAsync(999)).ReturnsAsync((Korisnik?)null);
 
             var result = await _controller.Deactivate(999);
@@ -371,7 +390,7 @@ namespace SmartLib.Tests.Unit.APITests
             var result = await _controller.Create(dto);
 
             var badRequest = Assert.IsType<BadRequestObjectResult>(result.Result);
-            Assert.Contains("ne smije sadržavati HTML tagove", badRequest.Value.ToString());
+            Assert.Contains("ne smije sadržavati HTML tagove", badRequest.Value!.ToString());
         }
 
         [Fact]
@@ -389,7 +408,7 @@ namespace SmartLib.Tests.Unit.APITests
             var result = await _controller.Create(dto);
 
             var badRequest = Assert.IsType<BadRequestObjectResult>(result.Result);
-            Assert.Contains("ne smije sadržavati HTML tagove", badRequest.Value.ToString());
+            Assert.Contains("ne smije sadržavati HTML tagove", badRequest.Value!.ToString());
         }
 
         [Fact]
@@ -432,7 +451,7 @@ namespace SmartLib.Tests.Unit.APITests
             var result = _controller.ChangeRole(1);
 
             var ok = Assert.IsType<OkObjectResult>(result);
-            Assert.Contains("TODO", ok.Value.ToString());
+            Assert.Contains("TODO", ok.Value!.ToString());
         }
 
         // Validacija da se lozinke moraju poklapati

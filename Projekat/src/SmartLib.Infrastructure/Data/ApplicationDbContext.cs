@@ -51,6 +51,7 @@ namespace SmartLib.Infrastructure.Data
                 e.Property(k => k.ResetTokenExpiry);
                 e.Property(k => k.Status).IsRequired().HasDefaultValue("aktivan");
                 e.Property(k => k.DatumKreiranja).IsRequired();
+                e.Property(k => k.DatumDeaktivacije);
                 e.HasIndex(k => k.Email).IsUnique();
 
                 e.HasOne(k => k.Uloga)

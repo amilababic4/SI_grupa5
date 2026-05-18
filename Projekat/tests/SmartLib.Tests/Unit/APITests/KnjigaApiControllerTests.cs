@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Moq;
 using Moq.Protected;
@@ -109,7 +109,7 @@ namespace SmartLib.Tests.Unit.APITests
             var result = await _controller.Delete(1);
 
             var badRequest = Assert.IsType<BadRequestObjectResult>(result);
-            Assert.Contains("aktivna zaduženja", badRequest.Value.ToString());
+            Assert.Contains("aktivna zaduženja", badRequest.Value!.ToString());
 
             _knjigaMock.Verify(r => r.DeleteAsync(It.IsAny<int>()), Times.Never);
         }

@@ -4,6 +4,7 @@ using SmartLib.Core.Interfaces;
 using SmartLib.Core.Models;
 using SmartLib.Infrastructure.Data;
 using SmartLib.Infrastructure.Repositories;
+using SmartLib.Infrastructure.Services;
 
 // Load .env file if it exists (for local development)
 var envPath = Path.Combine(Directory.GetCurrentDirectory(), ".env");
@@ -46,6 +47,7 @@ builder.Services.AddScoped<IPrimjerakRepository, PrimjerakRepository>();
 builder.Services.AddScoped<IKategorijaRepository, KategorijaRepository>();
 builder.Services.AddScoped<IZaduzenjeRepository, ZaduzenjeRepository>();
 builder.Services.AddScoped<IClanarinaRepository, ClanarinaRepository>();
+builder.Services.AddHostedService<DeactivatedAccountCleanupService>();
 
 // Services
 builder.Services.AddTransient<IEmailService, SmartLib.Infrastructure.Services.EmailService>();
@@ -79,15 +81,34 @@ using (var scope = app.Services.CreateScope())
     try
     {
         db.Database.ExecuteSqlRaw(@"
-            ALTER TABLE Korisnici ADD COLUMN IF NOT EXISTS ResetToken VARCHAR(256) NULL;
-        ");
-        db.Database.ExecuteSqlRaw(@"
-            ALTER TABLE Korisnici ADD COLUMN IF NOT EXISTS ResetTokenExpiry DATETIME(6) NULL;
+            ALTER TABLE Korisnici ADD COLUMN ResetToken VARCHAR(256) NULL;
         ");
     }
     catch (Exception)
     {
-        // Columns already exist or DB doesn't support IF NOT EXISTS — safe to ignore
+        // Column already exists — safe to ignore
+    }
+
+    try
+    {
+        db.Database.ExecuteSqlRaw(@"
+            ALTER TABLE Korisnici ADD COLUMN ResetTokenExpiry DATETIME(6) NULL;
+        ");
+    }
+    catch (Exception)
+    {
+        // Column already exists — safe to ignore
+    }
+
+    try
+    {
+        db.Database.ExecuteSqlRaw(@"
+            ALTER TABLE Korisnici ADD COLUMN DatumDeaktivacije DATETIME(6) NULL;
+        ");
+    }
+    catch (Exception)
+    {
+        // Column already exists — safe to ignore
     }
 
     // Seed kategorija ako tabela prazna
@@ -105,6 +126,47 @@ using (var scope = app.Services.CreateScope())
             new Kategorija { Naziv = "Ostalo", Opis = "Ostale kategorije" }
         );
         db.SaveChanges();
+    }
+
+    // Seed demo knjiga/primjerak ako nema dostupnih primjeraka (za UI tokove)
+    if (!db.Primjerci.Any(p => p.Status == "dostupan"))
+    {
+        var kategorija = db.Kategorije.FirstOrDefault();
+        if (kategorija == null)
+        {
+            kategorija = new Kategorija { Naziv = "Demo", Opis = "Demo kategorija" };
+            db.Kategorije.Add(kategorija);
+            db.SaveChanges();
+        }
+
+        const string demoIsbn = "9780000000000";
+        var knjiga = db.Knjige.FirstOrDefault(k => k.Isbn == demoIsbn);
+        if (knjiga == null)
+        {
+            knjiga = new Knjiga
+            {
+                Naslov = "Demo knjiga",
+                Autor = "Demo autor",
+                Isbn = demoIsbn,
+                KategorijaId = kategorija.Id,
+                GodinaIzdanja = DateTime.UtcNow.Year
+            };
+            db.Knjige.Add(knjiga);
+            db.SaveChanges();
+        }
+
+        var inv = $"INV-{knjiga.Id}-001";
+        if (!db.Primjerci.Any(p => p.InventarniBroj == inv))
+        {
+            db.Primjerci.Add(new Primjerak
+            {
+                KnjigaId = knjiga.Id,
+                InventarniBroj = inv,
+                Status = "dostupan",
+                DatumNabave = DateTime.UtcNow
+            });
+            db.SaveChanges();
+        }
     }
 }
 
