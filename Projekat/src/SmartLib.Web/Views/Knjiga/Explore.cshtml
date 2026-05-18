@@ -102,6 +102,7 @@
             const recommendation = document.getElementById('explore-recommendation');
             const sidepanelContent = document.getElementById('explore-sidepanel-content');
             const buttons = document.querySelectorAll('[data-swipe]');
+            const sidepanel = document.querySelector('.explore-sidepanel');
             let currentIndex = 0;
 
             if (!cards.length) return;
@@ -158,6 +159,9 @@
                     recommendation.innerHTML = '<p class="explore-reco-empty">Nema dovoljno feedbacka za personalizovanu preporuku. Označi nekoliko knjiga sa "Sviđa mi se".</p>';
                     recommendation.hidden = false;
                     sidepanelContent.hidden = true;
+                    if (controls) controls.hidden = true;
+                    if (progress) progress.hidden = true;
+                    if (sidepanel) sidepanel.classList.add('is-recommendation');
                     return;
                 }
 
@@ -188,11 +192,17 @@
                     `;
                     recommendation.hidden = false;
                     sidepanelContent.hidden = true;
+                    if (controls) controls.hidden = true;
+                    if (progress) progress.hidden = true;
+                    if (sidepanel) sidepanel.classList.add('is-recommendation');
                 } catch (error) {
                     console.error('Error rendering recommendation:', error);
                     recommendation.innerHTML = '<p class="explore-reco-empty">Greška pri učitavanju preporuke. Pokušaj ponovo.</p>';
                     recommendation.hidden = false;
                     sidepanelContent.hidden = true;
+                    if (controls) controls.hidden = true;
+                    if (progress) progress.hidden = true;
+                    if (sidepanel) sidepanel.classList.add('is-recommendation');
                 }
             };
 
@@ -208,6 +218,7 @@
 
                 if (currentIndex >= cards.length) {
                     if (controls) controls.hidden = true;
+                    if (progress) progress.hidden = true;
                     if (endState) endState.hidden = true;
                 }
             };
