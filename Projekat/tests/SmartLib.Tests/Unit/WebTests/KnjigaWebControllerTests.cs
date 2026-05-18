@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Configuration;
 using Moq;
 using Moq.Protected;
 using SmartLib.Core.DTOs;
@@ -20,8 +21,10 @@ namespace SmartLib.Tests.Unit.WebTests
         private readonly Mock<IKnjigaRepository> _knjigaMock;
         private readonly Mock<IPrimjerakRepository> _primjerakMock;
         private readonly Mock<IKategorijaRepository> _kategorijaMock;
+        private readonly Mock<IZaduzenjeRepository> _zaduzenjeMock;
         private readonly Mock<IHttpClientFactory> _httpClientFactoryMock;
         private readonly IMemoryCache _memoryCache;
+        private readonly IConfiguration _configuration;
         private readonly KnjigaController _controller;
 
         public KnjigaWebControllerTests()
@@ -29,7 +32,9 @@ namespace SmartLib.Tests.Unit.WebTests
             _knjigaMock = new Mock<IKnjigaRepository>();
             _primjerakMock = new Mock<IPrimjerakRepository>();
             _kategorijaMock = new Mock<IKategorijaRepository>();
+            _zaduzenjeMock = new Mock<IZaduzenjeRepository>();
             _httpClientFactoryMock = new Mock<IHttpClientFactory>();
+            _configuration = new ConfigurationBuilder().Build();
 
             _memoryCache = new MemoryCache(new MemoryCacheOptions());
 
@@ -37,8 +42,10 @@ namespace SmartLib.Tests.Unit.WebTests
                 _knjigaMock.Object,
                 _primjerakMock.Object,
                 _kategorijaMock.Object,
+                _zaduzenjeMock.Object,
                 _httpClientFactoryMock.Object,
-                _memoryCache
+                _memoryCache,
+                _configuration
             );
 
             var httpContext = new DefaultHttpContext();
@@ -701,8 +708,10 @@ namespace SmartLib.Tests.Unit.WebTests
                 _knjigaMock.Object,
                 _primjerakMock.Object,
                 _kategorijaMock.Object,
+                _zaduzenjeMock.Object,
                 httpClientFactoryMock.Object,
-                _memoryCache);
+                _memoryCache,
+                _configuration);
 
             SetupControllerContext(controller);
 
@@ -735,8 +744,10 @@ namespace SmartLib.Tests.Unit.WebTests
                 _knjigaMock.Object,
                 _primjerakMock.Object,
                 _kategorijaMock.Object,
+                _zaduzenjeMock.Object,
                 httpClientFactoryMock.Object,
-                _memoryCache);
+                _memoryCache,
+                _configuration);
 
             SetupControllerContext(controller);
 
@@ -766,8 +777,10 @@ namespace SmartLib.Tests.Unit.WebTests
                 _knjigaMock.Object,
                 _primjerakMock.Object,
                 _kategorijaMock.Object,
+                _zaduzenjeMock.Object,
                 httpClientFactoryMock.Object,
-                _memoryCache);
+                _memoryCache,
+                _configuration);
 
             SetupControllerContext(controller);
 

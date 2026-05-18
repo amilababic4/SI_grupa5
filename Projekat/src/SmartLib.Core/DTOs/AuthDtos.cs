@@ -43,4 +43,21 @@ namespace SmartLib.Core.DTOs
         [Compare(nameof(NovaLozinka), ErrorMessage = "Lozinka i potvrda lozinke se ne poklapaju.")]
         public string PotvrdaLozinke { get; set; } = string.Empty;
     }
+
+    public class ChangePasswordRequest
+    {
+        [Required(ErrorMessage = "Trenutna lozinka je obavezna.")]
+        [DataType(DataType.Password)]
+        public string TrenutnaLozinka { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Nova lozinka je obavezna.")]
+        [MinLength(8, ErrorMessage = "Lozinka mora imati najmanje 8 znakova.")]
+        [DataType(DataType.Password)]
+        public string NovaLozinka { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Potvrda lozinke je obavezna.")]
+        [DataType(DataType.Password)]
+        [Compare(nameof(NovaLozinka), ErrorMessage = "Lozinka i potvrda lozinke se ne poklapaju.")]
+        public string PotvrdaLozinke { get; set; } = string.Empty;
+    }
 }

@@ -1,0 +1,155 @@
+@model SmartLib.Web.Models.ExploreViewModel
+@{
+    ViewData["Title"] = "Istrazi";
+    ViewData["MainClass"] = "page-shell page-shell--full";
+}
+
+<section class="explore-hero">
+    <div class="explore-hero-inner">
+        <span class="explore-kicker">Novi pravac</span>
+        <h1 class="explore-title">Želiš nešto novo?</h1>
+        <p class="explore-subtitle">
+            Na osnovu tvoje istorije čitanja, pripremili smo miks poznatih žanrova i par iznenađenja.
+        </p>
+        <div class="explore-chip-row">
+            @foreach (var cat in Model.PreferredCategories)
+            {
+                <span class="explore-chip">@cat</span>
+            }
+            @foreach (var cat in Model.SurpriseCategories)
+            {
+                <span class="explore-chip">@cat</span>
+            }
+        </div>
+    </div>
+</section>
+
+<section class="explore-stage">
+    @if (!Model.Cards.Any())
+    {
+        <div class="explore-empty">
+            <h3>Nema preporuka za sada</h3>
+            <p>Dodaj još zaduženja i vrati se po novi set preporuka.</p>
+        </div>
+    }
+    else
+    {
+        <div class="explore-deck-shell">
+            <div>
+                <div class="explore-deck" id="explore-deck">
+                    @for (var i = 0; i < Model.Cards.Count; i++)
+                    {
+                        var card = Model.Cards[i];
+                        <article class="explore-card" style="--i:@i" data-index="@i" aria-hidden="@(i == 0 ? "false" : "true")">
+                            <div class="explore-card-media">
+                                @if (!string.IsNullOrWhiteSpace(card.ThumbnailUrl))
+                                {
+                                    <img src="@card.ThumbnailUrl" alt="@card.Title" loading="lazy" />
+                                }
+                                else
+                                {
+                                    <div class="explore-placeholder">@card.Title</div>
+                                }
+                            </div>
+                            <div class="explore-card-body">
+                                <div class="explore-card-badges">
+                                    <span class="explore-badge">@card.Category</span>
+                                    @if (card.IsWildcard)
+                                    {
+                                        <span class="explore-badge explore-badge--wild">Iznenađenje</span>
+                                    }
+                                </div>
+                                <h3 class="explore-card-title">@card.Title</h3>
+                                <div class="explore-card-author">@card.Authors</div>
+                                <p class="explore-card-desc">@card.Description</p>
+                                <div class="explore-card-links">
+                                    @if (!string.IsNullOrWhiteSpace(card.InfoLink))
+                                    {
+                                        <a href="@card.InfoLink" class="btn btn-secondary" target="_blank" rel="noopener">Detalji</a>
+                                    }
+                                </div>
+                            </div>
+                        </article>
+                    }
+                </div>
+
+                <div class="explore-controls">
+                    <div class="explore-progress" id="explore-progress">1/@Model.Cards.Count</div>
+                    <div class="explore-actions">
+                        <button type="button" class="explore-action-btn explore-action-skip" data-swipe="left">Preskoči</button>
+                        <button type="button" class="explore-action-btn explore-action-like" data-swipe="right">Sviđa mi se</button>
+                    </div>
+                </div>
+            </div>
+
+            <aside class="explore-sidepanel">
+                <h3>Kako radi</h3>
+                <p>Prevuci karticu lijevo za preskakanje ili desno ako ti se sviđa. Ograničili smo set na oko 20 knjiga da ostane brzo i fokusirano.</p>
+                <p>Iznenađenja te guraju van poznatih žanrova, bez gubitka preporuka koje ti već pašu.</p>
+                <p>Ako ti treba još, vrati se kasnije i dobit ćeš novi miks.</p>
+            </aside>
+        </div>
+    }
+</section>
+
+@section Scripts {
+    <script>
+        (function () {
+            const cards = Array.from(document.querySelectorAll('.explore-card'));
+            const progress = document.getElementById('explore-progress');
+            const buttons = document.querySelectorAll('[data-swipe]');
+            let currentIndex = 0;
+
+            if (!cards.length) return;
+
+            const updateActive = () => {
+                cards.forEach((card, idx) => {
+                    const isActive = idx === currentIndex;
+                    card.classList.toggle('is-active', isActive);
+                    card.setAttribute('aria-hidden', isActive ? 'false' : 'true');
+                });
+                if (progress) {
+                    progress.textContent = `${Math.min(currentIndex + 1, cards.length)}/${cards.length}`;
+                }
+            };
+
+            const swipe = (direction) => {
+                const card = cards[currentIndex];
+                if (!card) return;
+                card.classList.add(direction === 'right' ? 'swipe-right' : 'swipe-left');
+                card.addEventListener('transitionend', () => {
+                    card.classList.add('is-gone');
+                    currentIndex += 1;
+                    updateActive();
+                }, { once: true });
+            };
+
+            buttons.forEach((btn) => {
+                btn.addEventListener('click', () => swipe(btn.dataset.swipe));
+            });
+
+            let dragStartX = 0;
+            let isDragging = false;
+
+            cards.forEach((card) => {
+                card.addEventListener('pointerdown', (event) => {
+                    if (!card.classList.contains('is-active')) return;
+                    isDragging = true;
+                    dragStartX = event.clientX;
+                    card.setPointerCapture(event.pointerId);
+                });
+
+                card.addEventListener('pointerup', (event) => {
+                    if (!isDragging) return;
+                    const diff = event.clientX - dragStartX;
+                    isDragging = false;
+                    if (Math.abs(diff) > 80) {
+                        swipe(diff > 0 ? 'right' : 'left');
+                    }
+                });
+            });
+
+            updateActive();
+        })();
+    </script>
+}

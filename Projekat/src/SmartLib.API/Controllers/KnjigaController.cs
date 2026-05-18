@@ -51,7 +51,8 @@ namespace SmartLib.API.Controllers
             try
             {
                 var client = _httpClientFactory.CreateClient();
-                var url = $"https://covers.openlibrary.org/b/isbn/{normalizedIsbn}-{size}.jpg?default=M";
+                var zoom = MapCoverZoom(size);
+                var url = $"https://books.google.com/books/content?vid=ISBN:{normalizedIsbn}&printsec=frontcover&img=1&zoom={zoom}&source=gbs_api";
 
                 var response = await client.GetAsync(url);
                 if (response.IsSuccessStatusCode)
@@ -219,6 +220,13 @@ namespace SmartLib.API.Controllers
 
         private static string NormalizeIsbn(string isbn) =>
             isbn.Replace("-", "").Replace(" ", "").Trim();
+
+        private static int MapCoverZoom(string size) => size switch
+        {
+            "S" => 1,
+            "L" => 3,
+            _ => 2
+        };
 
         private static bool IsValidIsbn(string isbn)
         {

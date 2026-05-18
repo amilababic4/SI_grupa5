@@ -13,10 +13,14 @@ namespace SmartLib.Web.Controllers
     public class ClanarinaController : Controller
     {
         private readonly IClanarinaRepository _clanarinaRepo;
+        private readonly IKorisnikRepository _korisnikRepository;
 
-        public ClanarinaController(IClanarinaRepository clanarinaRepo)
+        public ClanarinaController(
+            IClanarinaRepository clanarinaRepo,
+            IKorisnikRepository korisnikRepository)
         {
             _clanarinaRepo = clanarinaRepo;
+            _korisnikRepository = korisnikRepository;
         }
 
         // ─────────────────────────────────────────────────────────────────────
@@ -66,6 +70,10 @@ namespace SmartLib.Web.Controllers
                 return View(dto);
             }
 
+            var korisnik = await _korisnikRepository.GetByIdAsync(dto.KorisnikId);
+            if (korisnik == null)
+                return NotFound();
+
             var postojeca = await _clanarinaRepo.GetByKorisnikAsync(dto.KorisnikId);
 
             if (postojeca is null)
@@ -84,6 +92,13 @@ namespace SmartLib.Web.Controllers
                 postojeca.DatumPocetka = dto.DatumPocetka;
                 postojeca.DatumIsteka = dto.DatumIsteka;
                 await _clanarinaRepo.UpdateAsync(postojeca);
+            }
+
+            if (!string.Equals(korisnik.Status, "aktivan", StringComparison.OrdinalIgnoreCase))
+            {
+                korisnik.Status = "aktivan";
+                korisnik.DatumDeaktivacije = null;
+                await _korisnikRepository.UpdateAsync(korisnik);
             }
 
             TempData["Uspjeh"] = "Članarina je uspješno spremljena.";

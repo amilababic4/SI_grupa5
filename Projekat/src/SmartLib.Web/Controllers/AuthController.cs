@@ -281,5 +281,49 @@ namespace SmartLib.Web.Controllers
           TempData["SuccessMessage"] = "Nalog je deaktiviran. Kontaktirajte biblioteku ako zelite reaktivaciju.";
           return RedirectToAction("Login", "Auth");
         }
+
+          [Authorize]
+          [HttpGet]
+          public IActionResult ChangePassword()
+          {
+            return View(new ChangePasswordRequest());
+          }
+
+          [Authorize]
+          [HttpPost]
+          [ValidateAntiForgeryToken]
+          public async Task<IActionResult> ChangePassword(ChangePasswordRequest model)
+          {
+            if (!ModelState.IsValid)
+            {
+              return View(model);
+            }
+
+            var idClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (idClaim == null || !int.TryParse(idClaim, out int id))
+            {
+              return RedirectToAction("Login", "Auth");
+            }
+
+            var korisnik = await _korisnikRepository.GetByIdAsync(id);
+            if (korisnik == null)
+            {
+              return NotFound();
+            }
+
+            var validCurrent = PasswordHasher.VerifyPassword(model.TrenutnaLozinka, korisnik.LozinkaHash);
+            if (!validCurrent)
+            {
+              ModelState.AddModelError(nameof(model.TrenutnaLozinka), "Trenutna lozinka nije ispravna.");
+              return View(model);
+            }
+
+            korisnik.LozinkaHash = PasswordHasher.HashPassword(model.NovaLozinka);
+            await _korisnikRepository.UpdateAsync(korisnik);
+
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            TempData["SuccessMessage"] = "Lozinka je promijenjena. Prijavite se ponovo.";
+            return RedirectToAction("Login", "Auth");
+          }
     }
 }
