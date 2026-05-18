@@ -1,7 +1,9 @@
 @model SmartLib.Web.Models.ExploreViewModel
+@using System.Security.Claims
 @{
     ViewData["Title"] = "Istrazi";
     ViewData["MainClass"] = "page-shell page-shell--full";
+    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "anon";
 }
 
 <section class="explore-hero">
@@ -9,18 +11,8 @@
         <span class="explore-kicker">Novi pravac</span>
         <h1 class="explore-title">Želiš nešto novo?</h1>
         <p class="explore-subtitle">
-            Na osnovu tvoje istorije čitanja, pripremili smo miks poznatih žanrova i par iznenađenja.
+            Na osnovu tvoje historije čitanja, pripremili smo miks poznatih žanrova i par iznenađenja.
         </p>
-        <div class="explore-chip-row">
-            @foreach (var cat in Model.PreferredCategories)
-            {
-                <span class="explore-chip">@cat</span>
-            }
-            @foreach (var cat in Model.SurpriseCategories)
-            {
-                <span class="explore-chip">@cat</span>
-            }
-        </div>
     </div>
 </section>
 
@@ -36,21 +28,19 @@
     {
         <div class="explore-deck-shell">
             <div>
-                <div class="explore-deck" id="explore-deck">
+                <div class="explore-deck" id="explore-deck" data-user-id="@userId">
                     @for (var i = 0; i < Model.Cards.Count; i++)
                     {
                         var card = Model.Cards[i];
-                        <article class="explore-card" style="--i:@i" data-index="@i" aria-hidden="@(i == 0 ? "false" : "true")">
-                            <div class="explore-card-media">
-                                @if (!string.IsNullOrWhiteSpace(card.ThumbnailUrl))
-                                {
-                                    <img src="@card.ThumbnailUrl" alt="@card.Title" loading="lazy" />
-                                }
-                                else
-                                {
-                                    <div class="explore-placeholder">@card.Title</div>
-                                }
-                            </div>
+                        <article class="explore-card"
+                                 style="--i:@i"
+                                 data-index="@i"
+                                 data-title="@card.Title"
+                                 data-authors="@card.Authors"
+                                 data-category="@card.Category"
+                                 data-thumbnail="@card.ThumbnailUrl"
+                                 data-info="@card.InfoLink"
+                                 aria-hidden="@(i == 0 ? "false" : "true")">
                             <div class="explore-card-body">
                                 <div class="explore-card-badges">
                                     <span class="explore-badge">@card.Category</span>
@@ -62,31 +52,40 @@
                                 <h3 class="explore-card-title">@card.Title</h3>
                                 <div class="explore-card-author">@card.Authors</div>
                                 <p class="explore-card-desc">@card.Description</p>
-                                <div class="explore-card-links">
-                                    @if (!string.IsNullOrWhiteSpace(card.InfoLink))
-                                    {
-                                        <a href="@card.InfoLink" class="btn btn-secondary" target="_blank" rel="noopener">Detalji</a>
-                                    }
-                                </div>
+                            </div>
+                            <div class="explore-card-media">
+                                @if (!string.IsNullOrWhiteSpace(card.ThumbnailUrl))
+                                {
+                                    <img src="@card.ThumbnailUrl" alt="@card.Title" loading="lazy" />
+                                }
+                                else
+                                {
+                                    <div class="explore-placeholder">@card.Title</div>
+                                }
                             </div>
                         </article>
                     }
                 </div>
 
-                <div class="explore-controls">
+                <div class="explore-controls" id="explore-controls">
                     <div class="explore-progress" id="explore-progress">1/@Model.Cards.Count</div>
                     <div class="explore-actions">
                         <button type="button" class="explore-action-btn explore-action-skip" data-swipe="left">Preskoči</button>
                         <button type="button" class="explore-action-btn explore-action-like" data-swipe="right">Sviđa mi se</button>
                     </div>
                 </div>
+
+                <div class="explore-end" id="explore-end" hidden></div>
             </div>
 
             <aside class="explore-sidepanel">
-                <h3>Kako radi</h3>
-                <p>Prevuci karticu lijevo za preskakanje ili desno ako ti se sviđa. Ograničili smo set na oko 20 knjiga da ostane brzo i fokusirano.</p>
-                <p>Iznenađenja te guraju van poznatih žanrova, bez gubitka preporuka koje ti već pašu.</p>
-                <p>Ako ti treba još, vrati se kasnije i dobit ćeš novi miks.</p>
+                <div id="explore-sidepanel-content">
+                    <h3>Kako radi</h3>
+                    <p>Prevuci karticu lijevo za preskakanje ili desno ako ti se sviđa. Ograničili smo set na oko 20 knjiga da ostane brzo i fokusirano.</p>
+                    <p>Iznenađenja te guraju van poznatih žanrova, bez gubitka preporuka koje ti već pašu.</p>
+                    <p>Ako ti treba još, vrati se kasnije i dobit ćeš novi miks.</p>
+                </div>
+                <div id="explore-recommendation" hidden></div>
             </aside>
         </div>
     }
@@ -95,12 +94,107 @@
 @section Scripts {
     <script>
         (function () {
+            const deck = document.getElementById('explore-deck');
             const cards = Array.from(document.querySelectorAll('.explore-card'));
             const progress = document.getElementById('explore-progress');
+            const controls = document.getElementById('explore-controls');
+            const endState = document.getElementById('explore-end');
+            const recommendation = document.getElementById('explore-recommendation');
+            const sidepanelContent = document.getElementById('explore-sidepanel-content');
             const buttons = document.querySelectorAll('[data-swipe]');
             let currentIndex = 0;
 
             if (!cards.length) return;
+
+            const storageKey = `explore_swipes_v1_${deck?.dataset.userId || 'anon'}`;
+
+            const readState = () => {
+                try {
+                    const raw = localStorage.getItem(storageKey);
+                    if (!raw) return { liked: [], disliked: [] };
+                    const parsed = JSON.parse(raw);
+                    return {
+                        liked: Array.isArray(parsed.liked) ? parsed.liked : [],
+                        disliked: Array.isArray(parsed.disliked) ? parsed.disliked : []
+                    };
+                } catch {
+                    return { liked: [], disliked: [] };
+                }
+            };
+
+            const writeState = (state) => {
+                localStorage.setItem(storageKey, JSON.stringify(state));
+            };
+
+            const getCardData = (card) => ({
+                title: card.dataset.title || '',
+                authors: card.dataset.authors || '',
+                category: card.dataset.category || '',
+                thumbnail: card.dataset.thumbnail || '',
+                infoLink: card.dataset.info || ''
+            });
+
+            const cardKey = (data) => `${data.title}|${data.authors}`.toLowerCase();
+
+            const recordSwipe = (card, liked) => {
+                const data = getCardData(card);
+                const key = cardKey(data);
+                const state = readState();
+                state.liked = state.liked.filter(item => cardKey(item) !== key);
+                state.disliked = state.disliked.filter(item => cardKey(item) !== key);
+                if (liked) {
+                    state.liked.push(data);
+                } else {
+                    state.disliked.push(data);
+                }
+                writeState(state);
+                return state;
+            };
+
+            const renderRecommendation = async (state) => {
+                if (!recommendation || !sidepanelContent) return;
+
+                if (!state.liked.length) {
+                    recommendation.innerHTML = '<p class="explore-reco-empty">Nema dovoljno feedbacka za personalizovanu preporuku. Označi nekoliko knjiga sa "Sviđa mi se".</p>';
+                    recommendation.hidden = false;
+                    sidepanelContent.hidden = true;
+                    return;
+                }
+
+                const category = state.liked[state.liked.length - 1]?.category || '';
+                
+                try {
+                    const response = await fetch(`/Knjiga/GetCatalogRecommendation?category=${encodeURIComponent(category)}`);
+                    if (!response.ok) throw new Error('Failed to fetch recommendation');
+                    
+                    const book = await response.json();
+                    
+                    recommendation.innerHTML = `
+                        <div class="explore-reco-header" style="margin-bottom: 1.5rem;">
+                            <h3>Preporuka iz kataloga</h3>
+                            <p>Na osnovu tvojih sviđanja</p>
+                        </div>
+                        <div class="explore-reco-card">
+                            <div class="explore-reco-body">
+                                <div class="explore-reco-title">${book.title}</div>
+                                <div class="explore-reco-author">${book.authors}</div>
+                                <div class="explore-reco-category">${book.category}</div>
+                                <a class="btn btn-secondary" href="/Knjiga/Details/${book.id}">Detalji</a>
+                            </div>
+                            <div class="explore-reco-media">
+                                <img src="/Knjiga/Korice?isbn=${encodeURIComponent(book.isbn)}&size=L" alt="${book.title}" loading="lazy" />
+                            </div>
+                        </div>
+                    `;
+                    recommendation.hidden = false;
+                    sidepanelContent.hidden = true;
+                } catch (error) {
+                    console.error('Error rendering recommendation:', error);
+                    recommendation.innerHTML = '<p class="explore-reco-empty">Greška pri učitavanju preporuke. Pokušaj ponovo.</p>';
+                    recommendation.hidden = false;
+                    sidepanelContent.hidden = true;
+                }
+            };
 
             const updateActive = () => {
                 cards.forEach((card, idx) => {
@@ -111,16 +205,25 @@
                 if (progress) {
                     progress.textContent = `${Math.min(currentIndex + 1, cards.length)}/${cards.length}`;
                 }
+
+                if (currentIndex >= cards.length) {
+                    if (controls) controls.hidden = true;
+                    if (endState) endState.hidden = true;
+                }
             };
 
             const swipe = (direction) => {
                 const card = cards[currentIndex];
                 if (!card) return;
+                const state = recordSwipe(card, direction === 'right');
                 card.classList.add(direction === 'right' ? 'swipe-right' : 'swipe-left');
                 card.addEventListener('transitionend', () => {
                     card.classList.add('is-gone');
                     currentIndex += 1;
                     updateActive();
+                    if (currentIndex >= cards.length) {
+                        renderRecommendation(state);
+                    }
                 }, { once: true });
             };
 
