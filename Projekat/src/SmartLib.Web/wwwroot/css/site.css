@@ -852,6 +852,11 @@ td {
     line-height: 1.2;
 }
 
+.details-value--center {
+    align-self: center;
+    text-align: center;
+}
+
 .examples-card {
     margin-top: 1rem;
 }

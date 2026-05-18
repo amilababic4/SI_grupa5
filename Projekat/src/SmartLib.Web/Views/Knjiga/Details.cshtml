@@ -74,11 +74,11 @@
                 </div>
                 <div class="details-item">
                     <span class="details-label">Ukupno primjeraka</span>
-                    <span class="details-value">@Model.BrojPrimjeraka</span>
+                    <span class="details-value details-value--center">@Model.BrojPrimjeraka</span>
                 </div>
                 <div class="details-item">
                     <span class="details-label">Dostupno</span>
-                    <span class="@(Model.BrojDostupnih > 0 ? "status-dostupan" : "status-nedostupan")">
+                    <span class="@(Model.BrojDostupnih > 0 ? "status-dostupan" : "status-nedostupan") details-value--center">
                         @Model.BrojDostupnih
                     </span>
                 </div>
