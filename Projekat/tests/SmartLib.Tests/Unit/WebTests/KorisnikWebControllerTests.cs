@@ -13,18 +13,28 @@ namespace SmartLib.Tests.Unit.WebTests
     {
         private readonly Mock<IKorisnikRepository> _repoMock;
         private readonly Mock<IClanarinaRepository> _clanarinaRepoMock;
+        private readonly Mock<IZaduzenjeRepository> _zaduzenjeRepoMock;
         private readonly KorisnikController _controller;
 
         public KorisnikWebControllerTests()
         {
             _repoMock = new Mock<IKorisnikRepository>();
             _clanarinaRepoMock = new Mock<IClanarinaRepository>();
+            _zaduzenjeRepoMock = new Mock<IZaduzenjeRepository>();
 
             var tempDataProvider = new Mock<ITempDataProvider>();
-            var tempData = new TempDataDictionary(new Microsoft.AspNetCore.Http.DefaultHttpContext(), tempDataProvider.Object);
+            var httpContext = new Microsoft.AspNetCore.Http.DefaultHttpContext();
+            var tempData = new TempDataDictionary(httpContext, tempDataProvider.Object);
 
-            _controller = new KorisnikController(_repoMock.Object, _clanarinaRepoMock.Object)
+            _controller = new KorisnikController(
+                _repoMock.Object,
+                _clanarinaRepoMock.Object,
+                _zaduzenjeRepoMock.Object)
             {
+                ControllerContext = new ControllerContext
+                {
+                    HttpContext = httpContext
+                },
                 TempData = tempData
             };
         }
@@ -34,9 +44,22 @@ namespace SmartLib.Tests.Unit.WebTests
         {
             var korisnici = new List<Korisnik>
             {
-                new Korisnik { Ime = "Mujo", Prezime = "Mujic", Uloga = new Uloga { Naziv = "Član" } },
-                new Korisnik { Ime = "Admin", Prezime = "Adminovic", Uloga = new Uloga { Naziv = "Administrator" } }
+                new Korisnik
+                {
+                    Ime = "Mujo",
+                    Prezime = "Mujic",
+                    Status = "aktivan",
+                    Uloga = new Uloga { Naziv = "Član" }
+                },
+                new Korisnik
+                {
+                    Ime = "Admin",
+                    Prezime = "Adminovic",
+                    Status = "aktivan",
+                    Uloga = new Uloga { Naziv = "Administrator" }
+                }
             };
+
             _repoMock.Setup(r => r.GetAllAsync()).ReturnsAsync(korisnici);
 
             var result = await _controller.Index();
@@ -50,8 +73,17 @@ namespace SmartLib.Tests.Unit.WebTests
         [Fact]
         public async Task Create_Post_ValidanModel_RedirectsToIndex()
         {
-            var dto = new KorisnikCreateDto { Email = "novi@test.com", Ime = "Test", Prezime = "User", Lozinka = "12345678", PotvrdaLozinke = "12345678" };
-            _repoMock.Setup(r => r.GetByEmailAsync(dto.Email)).ReturnsAsync((Korisnik?)null);
+            var dto = new KorisnikCreateDto
+            {
+                Email = "novi@test.com",
+                Ime = "Test",
+                Prezime = "User",
+                Lozinka = "12345678",
+                PotvrdaLozinke = "12345678"
+            };
+
+            _repoMock.Setup(r => r.GetByEmailAsync(dto.Email))
+                .ReturnsAsync((Korisnik?)null);
 
             var result = await _controller.Create(dto);
 
@@ -63,12 +95,21 @@ namespace SmartLib.Tests.Unit.WebTests
         [Fact]
         public async Task Create_Post_EmailVecPostoji_VracaViewSaGreskom()
         {
-            var dto = new KorisnikCreateDto { Email = "postojeci@test.com" };
-            _repoMock.Setup(r => r.GetByEmailAsync(dto.Email)).ReturnsAsync(new Korisnik());
+            var dto = new KorisnikCreateDto
+            {
+                Email = "postojeci@test.com",
+                Ime = "Test",
+                Prezime = "User",
+                Lozinka = "12345678",
+                PotvrdaLozinke = "12345678"
+            };
+
+            _repoMock.Setup(r => r.GetByEmailAsync(dto.Email))
+                .ReturnsAsync(new Korisnik());
 
             var result = await _controller.Create(dto);
 
-            var viewResult = Assert.IsType<ViewResult>(result);
+            Assert.IsType<ViewResult>(result);
             Assert.False(_controller.ModelState.IsValid);
             Assert.True(_controller.ModelState.ContainsKey("Email"));
         }
@@ -76,18 +117,28 @@ namespace SmartLib.Tests.Unit.WebTests
         [Fact]
         public async Task Deaktiviraj_PostojeciKorisnik_RedirectsSaPorukom()
         {
-            var korisnik = new Korisnik { Id = 1, Status = "aktivan" };
-            _repoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(korisnik);
+            var korisnik = new Korisnik
+            {
+                Id = 1,
+                Status = "aktivan",
+                Uloga = new Uloga { Naziv = "Član" }
+            };
+
+            _repoMock.Setup(r => r.GetByIdAsync(1))
+                .ReturnsAsync(korisnik);
+
+            _zaduzenjeRepoMock.Setup(r => r.GetByKorisnikAsync(1))
+                .ReturnsAsync(new List<Zaduzenje>());
 
             var result = await _controller.Deaktiviraj(1);
 
             var redirect = Assert.IsType<RedirectToActionResult>(result);
+
             Assert.Equal("Index", redirect.ActionName);
             Assert.Equal("deaktiviran", korisnik.Status);
             Assert.Equal("Nalog člana je deaktiviran.", _controller.TempData["SuccessMessage"]);
         }
 
-        //test napravljen samo da se pokrije pregled profila iako to jos uvijek nije implementirano, bit ce u kasnijim sprintovima
         [Fact]
         public void Create_Get_VracaViewSaPraznimModelom()
         {
@@ -111,7 +162,8 @@ namespace SmartLib.Tests.Unit.WebTests
         [Fact]
         public async Task Deaktiviraj_NepostojeciKorisnik_VracaNotFound()
         {
-            _repoMock.Setup(r => r.GetByIdAsync(99)).ReturnsAsync((Korisnik?)null);
+            _repoMock.Setup(r => r.GetByIdAsync(99))
+                .ReturnsAsync((Korisnik?)null);
 
             var result = await _controller.Deaktiviraj(99);
 
@@ -122,39 +174,64 @@ namespace SmartLib.Tests.Unit.WebTests
         public async Task Index_KorisnikBezUloge_NijeUkljucenUListu()
         {
             var korisnici = new List<Korisnik>
-    {
-        new() { Ime = "Test", Prezime = "Test", Uloga = null } // null uloga
-    };
+            {
+                new Korisnik
+                {
+                    Ime = "Test",
+                    Prezime = "Test",
+                    Status = "aktivan",
+                    Uloga = null
+                }
+            };
+
             _repoMock.Setup(r => r.GetAllAsync()).ReturnsAsync(korisnici);
 
             var result = await _controller.Index();
 
             var view = Assert.IsType<ViewResult>(result);
             var model = Assert.IsAssignableFrom<IEnumerable<KorisnikDto>>(view.Model);
-            Assert.Empty(model); // null uloga != "Član", ne uključuje se
+
+            Assert.Empty(model);
         }
 
         [Fact]
         public async Task Index_SortiranjePoPrezimenu_IspravanRedoslijed()
         {
             var korisnici = new List<Korisnik>
-    {
-        new() { Ime = "Zana",  Prezime = "Zoric",
-                Uloga = new Uloga { Naziv = "Član" } },
-        new() { Ime = "Ana",   Prezime = "Alic",
-                Uloga = new Uloga { Naziv = "Član" } },
-        new() { Ime = "Mujo",  Prezime = "Alic",
-                Uloga = new Uloga { Naziv = "Član" } }
-    };
+            {
+                new Korisnik
+                {
+                    Ime = "Zana",
+                    Prezime = "Zoric",
+                    Status = "aktivan",
+                    Uloga = new Uloga { Naziv = "Član" }
+                },
+                new Korisnik
+                {
+                    Ime = "Ana",
+                    Prezime = "Alic",
+                    Status = "aktivan",
+                    Uloga = new Uloga { Naziv = "Član" }
+                },
+                new Korisnik
+                {
+                    Ime = "Mujo",
+                    Prezime = "Alic",
+                    Status = "aktivan",
+                    Uloga = new Uloga { Naziv = "Član" }
+                }
+            };
+
             _repoMock.Setup(r => r.GetAllAsync()).ReturnsAsync(korisnici);
 
             var result = await _controller.Index();
 
             var view = Assert.IsType<ViewResult>(result);
             var model = Assert.IsAssignableFrom<IEnumerable<KorisnikDto>>(view.Model).ToList();
+
             Assert.Equal(3, model.Count);
             Assert.Equal("Alic", model[0].Prezime);
-            Assert.Equal("Ana", model[0].Ime);   // ThenBy Ime
+            Assert.Equal("Ana", model[0].Ime);
             Assert.Equal("Alic", model[1].Prezime);
             Assert.Equal("Mujo", model[1].Ime);
         }
@@ -162,12 +239,14 @@ namespace SmartLib.Tests.Unit.WebTests
         [Fact]
         public async Task Index_NemaKorisnika_VracaPrazanModel()
         {
-            _repoMock.Setup(r => r.GetAllAsync()).ReturnsAsync(new List<Korisnik>());
+            _repoMock.Setup(r => r.GetAllAsync())
+                .ReturnsAsync(new List<Korisnik>());
 
             var result = await _controller.Index();
 
             var view = Assert.IsType<ViewResult>(result);
             var model = Assert.IsAssignableFrom<IEnumerable<KorisnikDto>>(view.Model);
+
             Assert.Empty(model);
         }
 
@@ -186,9 +265,12 @@ namespace SmartLib.Tests.Unit.WebTests
             var result = await _controller.Create(dto);
 
             var viewResult = Assert.IsType<ViewResult>(result);
+
             Assert.False(_controller.ModelState.IsValid);
             Assert.True(_controller.ModelState.ContainsKey("PotvrdaLozinke"));
+
             var errors = _controller.ModelState["PotvrdaLozinke"]!.Errors;
+
             Assert.Single(errors);
             Assert.Equal("Lozinka i potvrda lozinke se ne poklapaju.", errors[0].ErrorMessage);
             Assert.Equal(dto, viewResult.Model);
@@ -198,9 +280,10 @@ namespace SmartLib.Tests.Unit.WebTests
         public async Task Index_ClanSaSvimPoljima_MapiraSvaPoljaUDto()
         {
             var datum = new DateTime(2025, 1, 15, 10, 30, 0);
+
             var korisnici = new List<Korisnik>
             {
-                new()
+                new Korisnik
                 {
                     Id = 42,
                     Ime = "Ajna",
@@ -211,14 +294,18 @@ namespace SmartLib.Tests.Unit.WebTests
                     Uloga = new Uloga { Naziv = "Član" }
                 }
             };
+
             _repoMock.Setup(r => r.GetAllAsync()).ReturnsAsync(korisnici);
 
             var result = await _controller.Index();
 
             var view = Assert.IsType<ViewResult>(result);
             var model = Assert.IsAssignableFrom<IEnumerable<KorisnikDto>>(view.Model).ToList();
+
             Assert.Single(model);
+
             var dto = model[0];
+
             Assert.Equal(42, dto.Id);
             Assert.Equal("Ajna", dto.Ime);
             Assert.Equal("Bajric", dto.Prezime);
