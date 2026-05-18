@@ -19,19 +19,19 @@
     <div class="details-grid" style="margin-bottom:1.5rem;">
         <div class="details-item">
             <span class="details-label">Knjiga</span>
-            <span><strong>@Model.KnjigaNaslov</strong></span>
+            <span class="details-value"><strong>@Model.KnjigaNaslov</strong></span>
         </div>
         <div class="details-item">
             <span class="details-label">Inventarni broj</span>
-            <span class="katalog-isbn">@Model.InventarniBroj</span>
+            <span class="details-value katalog-isbn">@Model.InventarniBroj</span>
         </div>
         <div class="details-item">
             <span class="details-label">Član</span>
-            <span>@Model.KorisnikIme</span>
+            <span class="details-value">@Model.KorisnikIme</span>
         </div>
         <div class="details-item">
             <span class="details-label">Rok vraćanja</span>
-            <span>@Model.DatumPlaniranogVracanja.ToLocalTime().ToString("dd.MM.yyyy")</span>
+            <span class="details-value">@Model.DatumPlaniranogVracanja.ToLocalTime().ToString("dd.MM.yyyy")</span>
         </div>
     </div>
 

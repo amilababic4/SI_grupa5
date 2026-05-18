@@ -49,7 +49,7 @@
             <div class="details-grid">
                 <div class="details-item">
                     <span class="details-label">ISBN</span>
-                    <span>@Model.Isbn</span>
+                    <span class="details-value katalog-isbn">@Model.Isbn</span>
                 </div>
                 <div class="details-item">
                     <span class="details-label">Kategorija</span>
@@ -66,15 +66,15 @@
                 </div>
                 <div class="details-item">
                     <span class="details-label">Izdavač</span>
-                    <span>@(Model.Izdavac ?? "—")</span>
+                    <span class="details-value">@(Model.Izdavac ?? "—")</span>
                 </div>
                 <div class="details-item">
                     <span class="details-label">Godina izdanja</span>
-                    <span>@(Model.GodinaIzdanja?.ToString() ?? "—")</span>
+                    <span class="details-value">@(Model.GodinaIzdanja?.ToString() ?? "—")</span>
                 </div>
                 <div class="details-item">
                     <span class="details-label">Ukupno primjeraka</span>
-                    <span>@Model.BrojPrimjeraka</span>
+                    <span class="details-value">@Model.BrojPrimjeraka</span>
                 </div>
                 <div class="details-item">
                     <span class="details-label">Dostupno</span>

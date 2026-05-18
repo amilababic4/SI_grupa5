@@ -83,41 +83,39 @@
     <div class="details-grid">
         <div class="details-item">
             <span class="details-label">Član</span>
-            <span>@Model.KorisnikIme</span>
+            <span class="details-value">@Model.KorisnikIme</span>
         </div>
         <div class="details-item">
             <span class="details-label">Email člana</span>
-            <span>@Model.KorisnikEmail</span>
+            <span class="details-value">@Model.KorisnikEmail</span>
         </div>
         <div class="details-item">
             <span class="details-label">Knjiga</span>
-            <span>@Model.KnjigaNaslov</span>
+            <span class="details-value">@Model.KnjigaNaslov</span>
         </div>
         <div class="details-item">
             <span class="details-label">Inventarni broj</span>
-            <span class="katalog-isbn">@Model.InventarniBroj</span>
+            <span class="details-value katalog-isbn">@Model.InventarniBroj</span>
         </div>
         <div class="details-item">
             <span class="details-label">Datum zaduženja</span>
-            <span>@Model.DatumZaduzivanja.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</span>
+            <span class="details-value">@Model.DatumZaduzivanja.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</span>
         </div>
         <div class="details-item">
             <span class="details-label">Rok vraćanja</span>
-            <span>
-                @Model.DatumPlaniranogVracanja.ToLocalTime().ToString("dd.MM.yyyy")
-                @if (Model.JeZakasnilo && Model.Status == "aktivno")
-                {
-                    <span class="status-kasni">Zakašnjelo</span>
-                }
-                else if (Model.RokSeBliži && Model.Status == "aktivno")
-                {
-                    <span class="status-blizi">Uskoro</span>
-                }
-            </span>
+            <span class="details-value">@Model.DatumPlaniranogVracanja.ToLocalTime().ToString("dd.MM.yyyy")</span>
+            @if (Model.JeZakasnilo && Model.Status == "aktivno")
+            {
+                <span class="status-kasni">Zakašnjelo</span>
+            }
+            else if (Model.RokSeBliži && Model.Status == "aktivno")
+            {
+                <span class="status-blizi">Uskoro</span>
+            }
         </div>
         <div class="details-item">
             <span class="details-label">Datum vraćanja</span>
-            <span>
+            <span class="details-value">
                 @if (Model.DatumStvarnogVracanja.HasValue)
                 {
                     @Model.DatumStvarnogVracanja.Value.ToLocalTime().ToString("dd.MM.yyyy HH:mm")
