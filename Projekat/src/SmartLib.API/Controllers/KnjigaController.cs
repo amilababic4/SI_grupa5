@@ -31,16 +31,25 @@ namespace SmartLib.API.Controllers
             _httpClientFactory = httpClientFactory;
             _cache = cache;
         }
-
         // GET: api/Knjiga/Korice?isbn=...&size=M
         [HttpGet("Korice")]
         [AllowAnonymous]
         [ResponseCache(Duration = 86400, Location = ResponseCacheLocation.Any, NoStore = false)]
-        public async Task<IActionResult> Korice([FromQuery] string isbn, [FromQuery] string size = "M")
+        public async Task<IActionResult> Korice([FromQuery] string? isbn, [FromQuery] string size = "M")
         {
-            if (string.IsNullOrEmpty(isbn)) return NotFound();
+            // 1. Primamo nullable string? da izbjegnemo ugrađeni 400 BadRequest,
+            // a IsNullOrWhiteSpace hvata i prazan string "" i samo razmake "   "
+            if (string.IsNullOrWhiteSpace(isbn)) return NotFound();
 
             var normalizedIsbn = NormalizeIsbn(isbn);
+
+            // 2. Ako ISBN nakon normalizacije nema 10 ili 13 znakova,
+            // odmah znamo da nije validan i vraćamo 404 bez cimanja Google API-ja.
+            if ((normalizedIsbn.Length != 10 && normalizedIsbn.Length != 13) ||
+                !System.Text.RegularExpressions.Regex.IsMatch(normalizedIsbn, @"^\d{9}[\dXxf]|\d{13}$"))
+            {
+                return NotFound();
+            }
             var cacheKey = $"cover_{normalizedIsbn}_{size}";
 
             if (_cache.TryGetValue(cacheKey, out byte[] cachedImage))
@@ -58,6 +67,14 @@ namespace SmartLib.API.Controllers
                 if (response.IsSuccessStatusCode)
                 {
                     var imageBytes = await response.Content.ReadAsByteArrayAsync();
+
+                    // 3. Osiguranje za lažni 200 OK: Ako Google vrati prazan piksel (manje od 100 bajtova)
+                    // jer knjiga ne postoji, tretiraj to kao NotFound.
+                    if (imageBytes.Length < 100)
+                    {
+                        return NotFound();
+                    }
+
                     _cache.Set(cacheKey, imageBytes, TimeSpan.FromHours(24));
                     return File(imageBytes, "image/jpeg");
                 }
@@ -92,7 +109,7 @@ namespace SmartLib.API.Controllers
         }
 
         // GET: api/Knjiga/{id}
-        [HttpGet("{id}")]
+        [HttpGet("{id:int}")]
         public async Task<ActionResult<KnjigaDto>> GetById(int id)
         {
             var knjiga = await _knjigaRepository.GetByIdAsync(id);

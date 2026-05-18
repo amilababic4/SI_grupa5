@@ -228,6 +228,79 @@ namespace SmartLib.Tests.Integration
             var doc = JsonDocument.Parse(await resp.Content.ReadAsStringAsync());
             Assert.Equal("deaktiviran", doc.RootElement.GetProperty("status").GetString());
         }
+
+        // ─── GET /api/korisnik/profil ─────────────────────────────────
+
+        [Fact]
+        public async Task Profil_BezAuth_Vraca401()
+        {
+            var resp = await _factory.CreateClient().GetAsync("/api/korisnik/profil");
+            Assert.Equal(HttpStatusCode.Unauthorized, resp.StatusCode);
+        }
+
+        [Fact]
+        public async Task Profil_KaoClan_VracaVlastitiProfil()
+        {
+            var client = await ClanClientAsync();
+            var resp = await client.GetAsync("/api/korisnik/profil");
+
+            Assert.Equal(HttpStatusCode.OK, resp.StatusCode);
+            var doc = JsonDocument.Parse(await resp.Content.ReadAsStringAsync());
+            Assert.Equal("clan@smartlib.ba", doc.RootElement.GetProperty("email").GetString());
+            Assert.Equal("Član", doc.RootElement.GetProperty("uloga").GetString());
+        }
+
+        [Fact]
+        public async Task Profil_KaoBibliotekar_VracaVlastitiProfil()
+        {
+            var client = await BibliotekarClientAsync();
+            var resp = await client.GetAsync("/api/korisnik/profil");
+
+            Assert.Equal(HttpStatusCode.OK, resp.StatusCode);
+            var doc = JsonDocument.Parse(await resp.Content.ReadAsStringAsync());
+            Assert.Equal("bibliotekar@smartlib.ba", doc.RootElement.GetProperty("email").GetString());
+        }
+
+        // ─── GET /api/korisnik/{id}/profil ────────────────────────────
+
+        [Fact]
+        public async Task ProfilClana_BezAuth_Vraca401()
+        {
+            var resp = await _factory.CreateClient().GetAsync("/api/korisnik/2/profil");
+            Assert.Equal(HttpStatusCode.Unauthorized, resp.StatusCode);
+        }
+
+        [Fact]
+        public async Task ProfilClana_KaoClan_Vraca403()
+        {
+            var client = await ClanClientAsync();
+            var resp = await client.GetAsync("/api/korisnik/1/profil");
+            Assert.Equal(HttpStatusCode.Forbidden, resp.StatusCode);
+        }
+
+        [Fact]
+        public async Task ProfilClana_KaoBibliotekar_VracaProfilClana()
+        {
+            using var scope = _factory.Services.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var clan = db.Korisnici.First(k => k.Email == "clan@smartlib.ba");
+
+            var client = await BibliotekarClientAsync();
+            var resp = await client.GetAsync($"/api/korisnik/{clan.Id}/profil");
+
+            Assert.Equal(HttpStatusCode.OK, resp.StatusCode);
+            var doc = JsonDocument.Parse(await resp.Content.ReadAsStringAsync());
+            Assert.Equal("clan@smartlib.ba", doc.RootElement.GetProperty("email").GetString());
+        }
+
+        [Fact]
+        public async Task ProfilClana_NepostojeciId_Vraca404()
+        {
+            var client = await BibliotekarClientAsync();
+            var resp = await client.GetAsync("/api/korisnik/99999/profil");
+            Assert.Equal(HttpStatusCode.NotFound, resp.StatusCode);
+        }
+
         // ─── POST /api/korisnik — US-01, US-02, US-03 ────────────────
 
         [Fact]
@@ -556,6 +629,92 @@ namespace SmartLib.Tests.Integration
             var client = await BibliotekarClientAsync();
             var resp = await client.PutAsync("/api/korisnik/99999/deaktiviraj", null);
             Assert.Equal(HttpStatusCode.NotFound, resp.StatusCode);
+        }
+
+        // ─── PUT /api/korisnik/{id}/aktiviraj ─────────────────────────
+
+        [Fact]
+        public async Task Reactivate_BezAuth_Vraca401()
+        {
+            var resp = await _factory.CreateClient()
+                .PutAsync("/api/korisnik/1/aktiviraj", null);
+            Assert.Equal(HttpStatusCode.Unauthorized, resp.StatusCode);
+        }
+
+        [Fact]
+        public async Task Reactivate_KaoClanDrugiKorisnik_Vraca403()
+        {
+            using var scope = _factory.Services.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var deaktivirani = db.Korisnici.First(k => k.Email == "deaktiviran@smartlib.ba");
+
+            var client = await ClanClientAsync();
+            var resp = await client.PutAsync($"/api/korisnik/{deaktivirani.Id}/aktiviraj", null);
+            Assert.Equal(HttpStatusCode.Forbidden, resp.StatusCode);
+        }
+
+        [Fact]
+        public async Task Reactivate_KaoBibliotekar_Vraca204IAzuriraBazu()
+        {
+            var client = await BibliotekarClientAsync();
+            var email = "reaktivacija-baza@test.com";
+            var id = await KreirajKorisnikaAsync(client, email);
+            await client.PutAsync($"/api/korisnik/{id}/deaktiviraj", null);
+
+            var resp = await client.PutAsync($"/api/korisnik/{id}/aktiviraj", null);
+            Assert.Equal(HttpStatusCode.NoContent, resp.StatusCode);
+
+            using var verifyScope = _factory.Services.CreateScope();
+            var verifyDb = verifyScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var korisnik = verifyDb.Korisnici.Single(k => k.Id == id);
+            Assert.Equal("aktivan", korisnik.Status);
+            Assert.Null(korisnik.DatumDeaktivacije);
+        }
+
+        [Fact]
+        public async Task Reactivate_DeaktiviraniKorisnik_MozeSePonovoPrijaviti()
+        {
+            var bibClient = await BibliotekarClientAsync();
+            var email = "reaktivacija@test.com";
+            var id = await KreirajKorisnikaAsync(bibClient, email);
+
+            await bibClient.PutAsync($"/api/korisnik/{id}/deaktiviraj", null);
+            await bibClient.PutAsync($"/api/korisnik/{id}/aktiviraj", null);
+
+            var loginResp = await _factory.CreateClient()
+                .PostAsJsonAsync("/api/auth/login", new { email, lozinka = "Test123!" });
+            Assert.Equal(HttpStatusCode.OK, loginResp.StatusCode);
+        }
+
+        [Fact]
+        public async Task Reactivate_VecAktivanKorisnik_Vraca204()
+        {
+            using var scope = _factory.Services.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var clan = db.Korisnici.First(k => k.Email == "clan@smartlib.ba");
+
+            var client = await BibliotekarClientAsync();
+            var resp = await client.PutAsync($"/api/korisnik/{clan.Id}/aktiviraj", null);
+            Assert.Equal(HttpStatusCode.NoContent, resp.StatusCode);
+        }
+
+        [Fact]
+        public async Task Reactivate_NepostojeciId_Vraca404()
+        {
+            var client = await BibliotekarClientAsync();
+            var resp = await client.PutAsync("/api/korisnik/99999/aktiviraj", null);
+            Assert.Equal(HttpStatusCode.NotFound, resp.StatusCode);
+        }
+
+        [Fact]
+        public async Task ChangeRole_KaoBibliotekar_Vraca200TODO()
+        {
+            var client = await BibliotekarClientAsync();
+            var resp = await client.PutAsync("/api/korisnik/2/uloga", null);
+
+            Assert.Equal(HttpStatusCode.OK, resp.StatusCode);
+            var doc = JsonDocument.Parse(await resp.Content.ReadAsStringAsync());
+            Assert.Equal("TODO", doc.RootElement.GetProperty("message").GetString());
         }
     }
 

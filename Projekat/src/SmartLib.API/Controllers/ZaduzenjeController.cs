@@ -176,13 +176,8 @@ namespace SmartLib.API.Controllers
                 return Unauthorized(new { poruka = "Korisnik nije identificiran." });
 
             var granica = DateTime.UtcNow.AddYears(-3);
-            var sva = await _zaduzenjeRepo.GetByKorisnikAsync(korisnikId);
-
-            var historija = sva
-                .Where(z => z.Status == "zatvoreno" && z.DatumStvarnogVracanja >= granica)
-                .Select(MapToDto);
-
-            return Ok(historija);
+            var historija = await _zaduzenjeRepo.GetClosedHistoryForKorisnikAsync(korisnikId, granica);
+            return Ok(historija.Select(MapToDto));
         }
         #region Helperi
 

@@ -158,6 +158,37 @@ namespace SmartLib.Tests.Integration
             );
         }
 
+        // ─── GET /api/knjiga/Korice ───────────────────────────────────
+
+        [Fact]
+        public async Task Korice_BezAuth_DozvoljenPristup()
+        {
+            var resp = await _factory.CreateClient().GetAsync("/api/knjiga/Korice?isbn=");
+            Assert.Equal(HttpStatusCode.NotFound, resp.StatusCode);
+        }
+
+        [Fact]
+        public async Task Korice_BezIsbnParametra_Vraca404()
+        {
+            var resp = await _factory.CreateClient().GetAsync("/api/knjiga/Korice");
+            Assert.Equal(HttpStatusCode.NotFound, resp.StatusCode);
+        }
+
+        [Fact]
+        public async Task Korice_NevalidanIsbn_Vraca404()
+        {
+            var resp = await _factory.CreateClient().GetAsync("/api/knjiga/Korice?isbn=nevalidan-isbn");
+            Assert.Equal(HttpStatusCode.NotFound, resp.StatusCode);
+        }
+
+        [Fact]
+        public async Task Korice_SaRazlicitimVelicinama_PrihvacaQueryParametar()
+        {
+            var resp = await _factory.CreateClient().GetAsync("/api/knjiga/Korice?isbn=9781111111111&size=L");
+            Assert.True(
+                resp.StatusCode == HttpStatusCode.OK || resp.StatusCode == HttpStatusCode.NotFound);
+        }
+
         // ─── GET /api/knjiga/{id} ─────────────────────────────────────
 
         [Fact]
