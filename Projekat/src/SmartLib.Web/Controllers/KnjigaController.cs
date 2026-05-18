@@ -61,6 +61,21 @@ namespace SmartLib.Web.Controllers
             try
             {
                 var client = _httpClientFactory.CreateClient();
+                var openLibraryUrl = $"https://covers.openlibrary.org/b/isbn/{normalizedIsbn}-L.jpg?default=false";
+                var olResponse = await client.GetAsync(openLibraryUrl);
+
+                if (olResponse.IsSuccessStatusCode)
+                {
+                    var imageBytes = await olResponse.Content.ReadAsByteArrayAsync();
+                    _cache.Set(cacheKey, imageBytes, TimeSpan.FromHours(24));
+                    return File(imageBytes, "image/jpeg");
+                }
+            }
+            catch { /* Ignoriši i pređi na Google Books */ }
+
+            try
+            {
+                var client = _httpClientFactory.CreateClient();
                 var zoom = MapCoverZoom(size);
                 var url = $"https://books.google.com/books/content?vid=ISBN:{normalizedIsbn}&printsec=frontcover&img=1&zoom={zoom}&source=gbs_api";
                 
@@ -68,16 +83,13 @@ namespace SmartLib.Web.Controllers
                 if (response.IsSuccessStatusCode)
                 {
                     var imageBytes = await response.Content.ReadAsByteArrayAsync();
-                    
-                    // Cache for 24 hours in memory
                     _cache.Set(cacheKey, imageBytes, TimeSpan.FromHours(24));
-                    
                     return File(imageBytes, "image/jpeg");
                 }
             }
             catch
             {
-                // Fallback or just let it fail
+                // Fallback
             }
 
             return NotFound();
