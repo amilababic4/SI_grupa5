@@ -15,13 +15,16 @@ namespace SmartLib.Web.Controllers
     {
         private readonly IKorisnikRepository _korisnikRepository;
         private readonly IClanarinaRepository _clanarinaRepository;
+        private readonly IZaduzenjeRepository _zaduzenjeRepository;
 
         public KorisnikController(
             IKorisnikRepository korisnikRepository,
-            IClanarinaRepository clanarinaRepository)
+            IClanarinaRepository clanarinaRepository,
+            IZaduzenjeRepository zaduzenjeRepository)
         {
             _korisnikRepository = korisnikRepository;
             _clanarinaRepository = clanarinaRepository;
+            _zaduzenjeRepository = zaduzenjeRepository;
         }
 
         public async Task<IActionResult> Index(string? pretraga = null, bool prikaziDeaktivirane = false)
@@ -280,6 +283,14 @@ namespace SmartLib.Web.Controllers
             if (string.Equals(korisnik.Uloga?.Naziv, RoleNames.Administrator, StringComparison.OrdinalIgnoreCase))
             {
                 TempData["ErrorMessage"] = "Administrator ne može biti deaktiviran.";
+                return RedirectToAction(nameof(ProfilClana), new { id });
+            }
+
+            // ── Zabrana deaktivacije ako postoje aktivna zaдуženja ──
+            var aktivnaZaduzenja = await _zaduzenjeRepository.GetByKorisnikAsync(id);
+            if (aktivnaZaduzenja.Any())
+            {
+                TempData["ErrorMessage"] = $"Nije moguće deaktivirati nalog — član ima {aktivnaZaduzenja.Count()} aktivno(ih) zaduženje(a). Knjige moraju biti vraćene prije deaktivacije.";
                 return RedirectToAction(nameof(ProfilClana), new { id });
             }
 
