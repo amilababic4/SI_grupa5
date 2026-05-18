@@ -4,8 +4,11 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using SmartLib.Core.DTOs;
 using SmartLib.Core.Interfaces;
 using SmartLib.Core.Models;
+using SmartLib.Web.Models;
 using Microsoft.Extensions.Caching.Memory;
 using System.Net.Http;
+using System.Security.Claims;
+using System.Text.Json;
 
 namespace SmartLib.Web.Controllers
 {
@@ -15,21 +18,27 @@ namespace SmartLib.Web.Controllers
         private readonly IKnjigaRepository _knjigaRepository;
         private readonly IPrimjerakRepository _primjerakRepository;
         private readonly IKategorijaRepository _kategorijaRepository;
+        private readonly IZaduzenjeRepository _zaduzenjeRepository;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IMemoryCache _cache;
+        private readonly IConfiguration _configuration;
 
         public KnjigaController(
             IKnjigaRepository knjigaRepository,
             IPrimjerakRepository primjerakRepository,
             IKategorijaRepository kategorijaRepository,
+            IZaduzenjeRepository zaduzenjeRepository,
             IHttpClientFactory httpClientFactory,
-            IMemoryCache cache)
+            IMemoryCache cache,
+            IConfiguration configuration)
         {
             _knjigaRepository = knjigaRepository;
             _primjerakRepository = primjerakRepository;
             _kategorijaRepository = kategorijaRepository;
+            _zaduzenjeRepository = zaduzenjeRepository;
             _httpClientFactory = httpClientFactory;
             _cache = cache;
+            _configuration = configuration;
         }
 
         [AllowAnonymous]
@@ -49,7 +58,8 @@ namespace SmartLib.Web.Controllers
             try
             {
                 var client = _httpClientFactory.CreateClient();
-                var url = $"https://covers.openlibrary.org/b/isbn/{normalizedIsbn}-{size}.jpg?default=M";
+                var zoom = MapCoverZoom(size);
+                var url = $"https://books.google.com/books/content?vid=ISBN:{normalizedIsbn}&printsec=frontcover&img=1&zoom={zoom}&source=gbs_api";
                 
                 var response = await client.GetAsync(url);
                 if (response.IsSuccessStatusCode)
@@ -101,6 +111,95 @@ namespace SmartLib.Web.Controllers
                 VelicinaStrane = pageSize,
                 Naslov = naslov,
                 Autor = autor
+            };
+
+            return View(model);
+        }
+
+        public async Task<IActionResult> Explore()
+        {
+            var userId = GetUserId();
+            if (userId == null) return Forbid();
+
+            var history = await _zaduzenjeRepository.GetHistoryByKorisnikAsync(userId.Value);
+            var historyCategories = history
+                .Select(z => z.Primjerak?.Knjiga?.Kategorija?.Naziv)
+                .Where(n => !string.IsNullOrWhiteSpace(n))
+                .Select(n => n!.Trim())
+                .ToList();
+
+            var preferredCategories = historyCategories
+                .GroupBy(n => n)
+                .OrderByDescending(g => g.Count())
+                .Select(g => g.Key)
+                .Take(3)
+                .ToList();
+
+            var allCategories = (await _kategorijaRepository.GetAllAsync())
+                .Select(k => k.Naziv)
+                .Where(n => !string.IsNullOrWhiteSpace(n))
+                .Select(n => n!.Trim())
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            if (!preferredCategories.Any())
+            {
+                preferredCategories = allCategories
+                    .OrderBy(_ => Guid.NewGuid())
+                    .Take(Math.Min(2, allCategories.Count))
+                    .ToList();
+            }
+
+            var surpriseCategories = allCategories
+                .Except(preferredCategories, StringComparer.OrdinalIgnoreCase)
+                .OrderBy(_ => Guid.NewGuid())
+                .Take(Math.Min(2, allCategories.Count))
+                .ToList();
+
+            const int totalTarget = 20;
+            var preferredBudget = (int)Math.Ceiling(totalTarget * 0.8);
+            var surpriseBudget = totalTarget - preferredBudget;
+
+            var perPreferred = preferredCategories.Count == 0 ? preferredBudget : Math.Max(4, preferredBudget / preferredCategories.Count);
+            var perSurprise = surpriseCategories.Count == 0 ? 0 : Math.Max(3, surpriseBudget / surpriseCategories.Count);
+
+            var fetchTasks = new List<Task<List<ExploreCardViewModel>>>();
+            foreach (var category in preferredCategories)
+            {
+                fetchTasks.Add(FetchGoogleBooksAsync(category, false, perPreferred));
+            }
+            foreach (var category in surpriseCategories)
+            {
+                fetchTasks.Add(FetchGoogleBooksAsync(category, true, perSurprise));
+            }
+
+            var fetched = await Task.WhenAll(fetchTasks);
+            var rawCards = fetched.SelectMany(cards => cards).ToList();
+
+            if (rawCards.Count < totalTarget / 2)
+            {
+                var fallback = await FetchGoogleBooksAsync("Ostalo", true, totalTarget);
+                rawCards.AddRange(fallback);
+            }
+
+            var uniqueCards = new List<ExploreCardViewModel>();
+            var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var card in rawCards)
+            {
+                var key = $"{card.Title}|{card.Authors}";
+                if (seen.Add(key)) uniqueCards.Add(card);
+            }
+
+            var finalCards = uniqueCards
+                .OrderBy(_ => Random.Shared.Next())
+                .Take(totalTarget)
+                .ToList();
+
+            var model = new ExploreViewModel
+            {
+                Cards = finalCards,
+                PreferredCategories = preferredCategories,
+                SurpriseCategories = surpriseCategories
             };
 
             return View(model);
@@ -290,6 +389,154 @@ namespace SmartLib.Web.Controllers
         {
             var kategorije = await _kategorijaRepository.GetAllAsync();
             ViewBag.Kategorije = new SelectList(kategorije, "Id", "Naziv", selectedId);
+        }
+
+        private int? GetUserId()
+        {
+            var idValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (int.TryParse(idValue, out var id)) return id;
+            return null;
+        }
+
+        private async Task<List<ExploreCardViewModel>> FetchGoogleBooksAsync(string localCategory, bool isWildcard, int maxResults)
+        {
+            if (maxResults <= 0) return new List<ExploreCardViewModel>();
+
+            var subject = MapLocalCategoryToGoogleSubject(localCategory);
+            var query = $"subject:{subject}";
+            var apiKey = _configuration["GOOGLE_BOOKS_API_KEY"] ?? _configuration["GoogleBooks:ApiKey"];
+
+            var url = $"https://www.googleapis.com/books/v1/volumes?q={Uri.EscapeDataString(query)}&maxResults={Math.Min(maxResults, 40)}&printType=books&projection=lite";
+            if (!string.IsNullOrWhiteSpace(apiKey))
+            {
+                url += $"&key={Uri.EscapeDataString(apiKey)}";
+            }
+
+            try
+            {
+                var client = _httpClientFactory.CreateClient();
+                var response = await client.GetAsync(url);
+                if (!response.IsSuccessStatusCode) return new List<ExploreCardViewModel>();
+
+                var json = await response.Content.ReadAsStringAsync();
+                using var doc = JsonDocument.Parse(json);
+                if (!doc.RootElement.TryGetProperty("items", out var items))
+                    return new List<ExploreCardViewModel>();
+
+                var results = new List<ExploreCardViewModel>();
+                foreach (var item in items.EnumerateArray())
+                {
+                    if (!item.TryGetProperty("volumeInfo", out var volumeInfo)) continue;
+
+                    var title = GetJsonString(volumeInfo, "title") ?? "Nepoznat naslov";
+                    var authors = GetJsonArray(volumeInfo, "authors");
+                    var authorsText = authors.Count > 0 ? string.Join(", ", authors) : "Nepoznat autor";
+                    var description = TrimText(GetJsonString(volumeInfo, "description"), 260);
+                    var infoLink = GetJsonString(volumeInfo, "infoLink") ?? string.Empty;
+                    var thumbnail = GetThumbnailUrl(volumeInfo);
+
+                    if (string.IsNullOrWhiteSpace(thumbnail))
+                    {
+                        var isbn = GetIsbn(volumeInfo);
+                        if (!string.IsNullOrWhiteSpace(isbn))
+                        {
+                            thumbnail = Url.Action("Korice", "Knjiga", new { isbn, size = "L" }) ?? string.Empty;
+                        }
+                    }
+
+                    results.Add(new ExploreCardViewModel
+                    {
+                        Title = title,
+                        Authors = authorsText,
+                        Category = localCategory,
+                        Description = description,
+                        ThumbnailUrl = thumbnail,
+                        InfoLink = infoLink,
+                        IsWildcard = isWildcard
+                    });
+                }
+
+                return results;
+            }
+            catch
+            {
+                return new List<ExploreCardViewModel>();
+            }
+        }
+
+        private static string MapLocalCategoryToGoogleSubject(string category)
+        {
+            if (string.IsNullOrWhiteSpace(category)) return "General";
+
+            return category.Trim() switch
+            {
+                "Beletristika" => "Fiction",
+                "Naučna fantastika" => "Science Fiction",
+                "Historija" => "History",
+                "Nauka i tehnika" => "Science",
+                "Filozofija" => "Philosophy",
+                "Biografija" => "Biography",
+                "Dječija literatura" => "Juvenile Fiction",
+                "Udžbenici" => "Textbooks",
+                "Ostalo" => "General",
+                _ => category
+            };
+        }
+
+        private static int MapCoverZoom(string size) => size switch
+        {
+            "S" => 1,
+            "L" => 3,
+            _ => 2
+        };
+
+        private static string? GetJsonString(JsonElement element, string propertyName)
+            => element.TryGetProperty(propertyName, out var prop) && prop.ValueKind == JsonValueKind.String
+                ? prop.GetString()
+                : null;
+
+        private static List<string> GetJsonArray(JsonElement element, string propertyName)
+        {
+            if (!element.TryGetProperty(propertyName, out var prop) || prop.ValueKind != JsonValueKind.Array)
+                return new List<string>();
+
+            return prop.EnumerateArray()
+                .Where(item => item.ValueKind == JsonValueKind.String)
+                .Select(item => item.GetString())
+                .Where(s => !string.IsNullOrWhiteSpace(s))
+                .Select(s => s!)
+                .ToList();
+        }
+
+        private static string TrimText(string? text, int maxLength)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return "Opis nije dostupan.";
+            var trimmed = text.Trim();
+            return trimmed.Length <= maxLength ? trimmed : trimmed[..maxLength].TrimEnd() + "...";
+        }
+
+        private static string GetThumbnailUrl(JsonElement volumeInfo)
+        {
+            if (!volumeInfo.TryGetProperty("imageLinks", out var links)) return string.Empty;
+            var url = GetJsonString(links, "thumbnail") ?? GetJsonString(links, "smallThumbnail") ?? string.Empty;
+            return url.Replace("http://", "https://");
+        }
+
+        private static string? GetIsbn(JsonElement volumeInfo)
+        {
+            if (!volumeInfo.TryGetProperty("industryIdentifiers", out var ids) || ids.ValueKind != JsonValueKind.Array)
+                return null;
+
+            foreach (var item in ids.EnumerateArray())
+            {
+                var type = GetJsonString(item, "type");
+                var identifier = GetJsonString(item, "identifier");
+                if (string.IsNullOrWhiteSpace(identifier)) continue;
+                if (type == "ISBN_13") return identifier;
+                if (type == "ISBN_10") return identifier;
+            }
+
+            return null;
         }
 
         private static string NormalizeIsbn(string isbn)
