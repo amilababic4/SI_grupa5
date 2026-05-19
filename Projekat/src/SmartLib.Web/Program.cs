@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 using SmartLib.Core.Interfaces;
 using SmartLib.Core.Models;
 using SmartLib.Infrastructure.Data;
@@ -53,6 +54,28 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddHttpClient();
 builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<CacheVersionStore>();
+
+// Distributed Cache — Upstash Redis u produkciji, memorija lokalno
+var upstashUrl = Environment.GetEnvironmentVariable("UPSTASH_REDIS_REST_URL");
+var upstashToken = Environment.GetEnvironmentVariable("UPSTASH_REDIS_REST_TOKEN");
+if (builder.Environment.IsProduction() &&
+    !string.IsNullOrWhiteSpace(upstashUrl) &&
+    !string.IsNullOrWhiteSpace(upstashToken) &&
+    Uri.TryCreate(upstashUrl, UriKind.Absolute, out var upstashUri))
+{
+    var redisConfig = $"{upstashUri.Host}:6379,password={upstashToken},ssl=True,abortConnect=False";
+    builder.Services.AddStackExchangeRedisCache(options =>
+    {
+        options.Configuration = redisConfig;
+        options.InstanceName = "smartlib_web:";
+    });
+    Console.WriteLine($"[Redis] Connected to Upstash Redis at {upstashUri.Host}");
+}
+else
+{
+    builder.Services.AddDistributedMemoryCache();
+    Console.WriteLine("[Redis] Using in-memory distributed cache (non-production or missing credentials)");
+}
 
 // Repositories
 builder.Services.AddScoped<IKorisnikRepository, KorisnikRepository>();
@@ -248,5 +271,33 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+// Redis Health Check Endpoint
+app.MapGet("/health/redis", async (IDistributedCache cache) =>
+{
+    try
+    {
+        var testKey = "health_check_web";
+        var testValue = DateTime.UtcNow.ToString("o");
+        await cache.SetStringAsync(testKey, testValue, new DistributedCacheEntryOptions
+        {
+            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(1)
+        });
+
+        var retrieved = await cache.GetStringAsync(testKey);
+        var isRedis = !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("UPSTASH_REDIS_REST_URL"));
+        return Results.Ok(new
+        {
+            status = "Healthy",
+            backend = isRedis ? "Upstash Redis" : "In-Memory",
+            writeReadOk = retrieved == testValue,
+            time = testValue
+        });
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem(detail: ex.Message, title: "Redis connection failed");
+    }
+});
 
 app.Run();
