@@ -239,3 +239,34 @@ Aktivna
 
 **Povezani PB:**  
 PB-32
+
+
+## DL-09
+**Datum**: 20.05.2026.  
+**Naziv odluke:** Uvođenje Upstash Redis distribuiranog keširanja za produkciju
+
+**Opis problema:**  
+Aplikacija je inicijalno koristila isključivo lokalno in-memory keširanje (`IMemoryCache`). U produkcijskom okruženju (Render) ovo dovodi do gubitka keširanih podataka prilikom svakog restarta kontejnera, što nepotrebno opterećuje eksterne API-je (Google Books, OpenLibrary, prevodilac) i može uzrokovati probijanje *rate limita*. Bilo je potrebno trajno i distribuirano rješenje za keširanje.
+
+**Razmatrane opcije:**  
+- Zadržavanje in-memory keširanja
+- Pokretanje lokalnog Redis kontejnera uz aplikaciju
+- Upotreba cloud-based rješenja (Upstash Redis) uz fallback na in-memory za lokalni razvoj
+
+**Odabrana opcija:**  
+Upotreba cloud-based Upstash Redis servisa za produkcijsko okruženje uz in-memory fallback za lokalni razvoj.
+
+**Razlog izbora:**  
+Upstash pruža *managed* Redis kojem se može pristupiti direktno putem sigurne TLS/TCP konekcije, eliminišući potrebu za konfigurisanjem i održavanjem lokalnog Redis kontejnera u infrastrukturi. Dodavanjem fallback mehanizma zadržali smo jednostavnost lokalnog razvoja (programeri ne moraju imati instaliran Redis da bi radili na projektu), dok produkcija dobija trajan i brz distribuirani keš ulančavanjem `IDistributedCache` i `StackExchange.Redis`.
+
+**Posljedice odluke:**  
+- Značajno poboljšane performanse i otpornost keša u produkciji
+- Izbjegnuto probijanje *rate limita* prema eksternim API-jima
+- Uvedena potreba za dodavanjem `UPSTASH_REDIS_REST_URL` i `UPSTASH_REDIS_REST_TOKEN` environment varijabli na produkcijskom hostingu
+- Poboljšana i promijenjena arhitektura aplikacije (uveden `IDistributedCache`)
+
+**Status:**  
+Aktivna  
+
+**Povezani PB:**  
+Tehničko unaprjeđenje (Van okvira originalnog backloga)
