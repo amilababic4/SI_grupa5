@@ -409,8 +409,36 @@ Odbačeni su prijedlozi koji su uvodili nepotrebno složene statuse zaduženja i
 **Rizici, problemi ili greške koje su uočene:**  
 Glavni rizik bio je mogućnost da se isti primjerak knjige zaduži više puta dok prethodno zaduženje još nije zaključeno. Zbog toga je posebna pažnja posvećena provjeri aktivnih zaduženja prije kreiranja novog zapisa.
 
+## AI Log 15: Implementacija upravljanja članarinama i prikaza statusa članstva
 
-## AI Log 15: Implementacija UI testova za kategorije, knjige i primjerke
+**Datum:** 17.05.2026.  
+**Sprint broj:** Sprint 8  
+**Alat koji je korišten:** Claude  
+**Ko je koristio alat:** Muhamed
+
+**Svrha korištenja:**  
+Implementacija funkcionalnosti za upravljanje članarinama i prikaz statusa članstva unutar SmartLib sistema.
+
+**Kratak opis zadatka ili upita:**  
+Od AI alata je zatraženo da pomogne u implementaciji funkcionalnosti koje omogućavaju bibliotekaru pregled, evidentiranje i ažuriranje članarina članova biblioteke, kao i članovima biblioteke pregled vlastitog statusa članarine i datuma isteka.
+
+**Šta je AI predložio ili generisao:**  
+AI je predložio strukturu backend logike za kreiranje i ažuriranje članarina, validaciju datuma početka i isteka, prikaz statusa članarine na korisničkom profilu, te vizuelne indikatore za aktivnu i isteklog članarinu. Također su generisani prijedlozi za View modele, validacione poruke i prikaz članarine unutar postojećeg profila člana.
+
+**Šta je tim prihvatio:**  
+Tim je prihvatio logiku validacije datuma, prikaz statusa članarine kroz jasne vizuelne oznake, te integraciju funkcionalnosti članarine direktno unutar profila korisnika.
+
+**Šta je tim izmijenio:**  
+Tim je prilagodio nazive ruta, View modela i prikaz statusnih oznaka postojećem dizajnu i arhitekturi SmartLib sistema. Dodatno su prilagođene validacione poruke i format prikaza datuma (`DD.MM.YYYY`) kako bi bili konzistentni sa ostatkom aplikacije.
+
+**Šta je tim odbacio:**  
+Odbačeni su prijedlozi koji su uvodili kompleksniji sistem nivoa članstva i automatskog obračuna članarina, jer nisu bili dio planiranog opsega Sprinta 8.
+
+**Rizici, problemi ili greške koje su uočene:**  
+Glavni rizik bio je unos neispravnih datuma članarine i mogućnost prikaza netačnog statusa članstva. Zbog toga je implementirana dodatna validacija kojom se sprječava unos datuma isteka koji je prije datuma početka članarine.
+
+
+## AI Log 16: Implementacija UI testova za kategorije, knjige i primjerke
 
 **Datum:** 18.05.2026.  
 **Sprint broj:** Sprint 8  

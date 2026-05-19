@@ -9,7 +9,7 @@ Ovaj dokument predstavlja ažurirani Product Backlog projekta **Bibliotečki inf
 > U Product Backlogu su ažurirani statusi stavki koje odgovaraju deliverable-ima **Sprinta 8**.  
 > Konkretno, sljedeće stavke:
 > - **Sprint Backlog**
-> - **Četvrti implementirani inkrement: pregled profila, evidencija vraćanja knjiga, pregled historije zaduženja, upravljanje korisnicima, upravljanje i pregled članarine člana.**
+> - **Četvrti implementirani inkrement: pregled profila, evidencija vraćanja knjiga, pregled historije zaduženja, upravljanje korisnicima, upravljanje i pregled članarine člana, reset lozinke.**
 > - **Dokaz o testiranju**
 > - **Decision Log**
 > - **AI Usage Log**
@@ -71,6 +71,7 @@ Ovaj dokument predstavlja ažurirani Product Backlog projekta **Bibliotečki inf
 | PB-47 | Kazne za kasno vraćanje | Evidencija i obračun kazni za prekoračenje roka vraćanja | Feature | Nizak | M | U backlogu | Sprint 10 | Ovisi o notifikacionom sistemu i poslovnoj politici |
 | PB-48 | Online produžetak članarine | Omogućiti korisniku produženje članarine putem sistema | Feature | Nizak | M | U backlogu | Sprint 10 | Zahtijeva integraciju sistema za online plaćanje |
 | PB-49 | Integracija sa distributerom knjiga | Povezivanje sistema sa vanjskim servisom za nabavku knjiga | Technical Task | Nizak | L | U backlogu | Sprint 10 |  |
+| PB-56 | Upravljanje lozinkom korisničkog naloga | Reset zaboravljene lozinke putem emaila i promjena postojeće lozinke | Feature | Visok | L | Završeno u Sprintu 8 | Sprint 8 |
 | PB-50 | Stabilizacija sistema | Bug fixing i optimizacija | Technical Task | Visok | M | U backlogu | Sprint 11 | Nakon početnog testiranja |
 | PB-51 | Izrada liste poznatih ograničenja i tehničkog duga | Popis ograničenja i nedovršenih dijelova | Documentation | Visok | M | U backlogu | Sprint 11 |  |
 | PB-52 | Release Notes | Opis funkcionalnosti kroz verzije | Documentation | Visok | M | U backlogu | Sprint 12 |  |

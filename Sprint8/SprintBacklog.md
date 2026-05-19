@@ -24,6 +24,7 @@ Tokom ovog sprinta implementiraju se funkcionalnosti vezane za:
 | PB-32 | Upravljanje korisnicima od strane admina | Administrator može pregledati, pretraživati i upravljati korisničkim nalozima i ulogama. | Srednji | L | **Završeno** |
 | PB-33 | Upravljanje statusom članarine | Bibliotekar može evidentirati i ažurirati članarine članova biblioteke. | Srednji | M | **Završeno** |
 | PB-34 | Pregled statusa članarina za člana | Član biblioteke može vidjeti status i datum isteka svoje članarine. | Srednji | S | **Završeno** |
+| PB-56 | Upravljanje lozinkom korisničkog naloga | Reset zaboravljene lozinke putem emaila i sigurna promjena postojeće lozinke korisnika. | Srednji | L | **Završeno** |
 
 <br>
 
@@ -269,3 +270,41 @@ Tokom ovog sprinta implementiraju se funkcionalnosti vezane za:
 | **Poslovna vrijednost** | Omogućava članovima biblioteke jasan uvid u status i trajanje članarine, čime se povećava transparentnost i smanjuje potreba za kontaktiranjem bibliotekara. |
 | **Pretpostavke / Otvorena pitanja** | Sistem vodi evidenciju članarine sa datumom isteka. |
  **Veze i zavisnosti** | PB-33 Upravljanje statusom članarine. <br> PB-20 Pregled profila člana. |
+ ---
+
+ <br>
+
+ ## PB-56: Upravljanje lozinkom korisničkog naloga
+
+### Naziv: Reset zaboravljene lozinke
+### US-110: Kao korisnik sistema, želim resetovati zaboravljenu lozinku putem email adrese kako bih ponovo mogao pristupiti svom nalogu.
+**Acceptance Criteria:**
+- Kada korisnik na stranici za prijavu klikne na link "Zaboravili ste lozinku?", tada sistem otvara formu za unos email adrese.
+- Kada korisnik unese registrovanu email adresu i klikne na dugme "Pošalji link za resetovanje", tada sistem šalje email sa linkom za reset lozinke.
+- Kada korisnik otvori link iz email poruke, tada sistem prikazuje formu za unos nove lozinke.
+- Kada korisnik unese novu lozinku i potvrdu lozinke, tada sistem validira da se lozinke podudaraju.
+- Nakon uspješnog resetovanja, korisnik može pristupiti sistemu koristeći novu lozinku.
+
+<br>
+
+---
+
+### Naziv: Promjena postojeće lozinke
+### US-111: Kao prijavljeni korisnik, želim promijeniti svoju trenutnu lozinku kako bih povećao sigurnost svog naloga.
+**Acceptance Criteria:**
+- Kada prijavljeni korisnik otvori svoj profil, tada sistem prikazuje opciju "Promjena lozinke".
+- Kada korisnik otvori formu za promjenu lozinke, tada sistem prikazuje polja za unos trenutne lozinke, nove lozinke i potvrde nove lozinke.
+- Kada korisnik unese trenutnu lozinku, tada sistem provjerava da li se podudara sa postojećom lozinkom.
+- Kada korisnik unese novu lozinku i potvrdu nove lozinke, tada sistem validira da su unesene lozinke identične.
+- Ako validacija uspije, tada sistem sprema novu lozinku.
+- Nakon uspješne promjene, korisnik može koristiti novu lozinku prilikom naredne prijave.
+- Ako trenutna lozinka nije ispravna ili se nove lozinke ne podudaraju, tada sistem prikazuje odgovarajuću poruku o grešci.
+
+<br>
+
+---
+| **Prioritet** | Srednji |
+|---------------|-------|
+| **Poslovna vrijednost** | Omogućava korisnicima sigurno upravljanje pristupom vlastitom nalogu i smanjuje potrebu za administratorskom intervencijom prilikom problema sa pristupom sistemu. |
+| **Pretpostavke / Otvorena pitanja** | Sistem podržava slanje email poruka i sigurno čuvanje lozinki. <br> Korisnik mora imati registrovanu email adresu povezanu sa nalogom. |
+ **Veze i zavisnosti** | PB-17 Sistem prijave. <br> PB-20 Pregled profila člana. <br> Modul autentifikacije i autorizacije. |
