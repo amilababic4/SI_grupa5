@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using SmartLib.Core.DTOs;
 using SmartLib.Core.Interfaces;
 using SmartLib.Core.Models;
+using SmartLib.Infrastructure.Services;
 
 namespace SmartLib.Web.Controllers
 {
@@ -16,17 +17,20 @@ namespace SmartLib.Web.Controllers
         private readonly IKorisnikRepository _korisnikRepo;
         private readonly IKnjigaRepository _knjigaRepo;
         private readonly IPrimjerakRepository _primjerakRepo;
+        private readonly CacheVersionStore _cacheVersions;
 
         public ZaduzenjeController(
             IZaduzenjeRepository zaduzenjeRepo,
             IKorisnikRepository korisnikRepo,
             IKnjigaRepository knjigaRepo,
-            IPrimjerakRepository primjerakRepo)
+            IPrimjerakRepository primjerakRepo,
+            CacheVersionStore cacheVersions)
         {
             _zaduzenjeRepo = zaduzenjeRepo;
             _korisnikRepo = korisnikRepo;
             _knjigaRepo = knjigaRepo;
             _primjerakRepo = primjerakRepo;
+            _cacheVersions = cacheVersions;
         }
 
         // US-65, US-66, US-68: Aktivna zaduženja (bibliotekar)
@@ -146,6 +150,7 @@ namespace SmartLib.Web.Controllers
             await _zaduzenjeRepo.CreateAsync(zaduzenje);
             await _primjerakRepo.UpdateStatusAsync(model.PrimjerakId, "zadužen");
 
+            _cacheVersions.BumpBooksVersion();
             TempData["SuccessMessage"] = "Zaduživanje je uspješno evidentirano.";
             return RedirectToAction(nameof(Index));
         }
@@ -181,6 +186,7 @@ namespace SmartLib.Web.Controllers
             await _zaduzenjeRepo.UpdateAsync(z);
             await _primjerakRepo.UpdateStatusAsync(z.PrimjerakId, "dostupan");
 
+            _cacheVersions.BumpBooksVersion();
             TempData["SuccessMessage"] = "Vraćanje knjige je uspješno evidentirano.";
             return RedirectToAction(nameof(Details), new { id });
         }

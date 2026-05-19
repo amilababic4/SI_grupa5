@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using Moq;
 using SmartLib.API.Controllers;
 using SmartLib.Core.Interfaces;
 using SmartLib.Core.Models;
+using SmartLib.Infrastructure.Services;
 using Xunit;
 
 namespace SmartLib.Tests.Unit.APITests
@@ -19,11 +21,18 @@ namespace SmartLib.Tests.Unit.APITests
     {
         private readonly Mock<IKategorijaRepository> _kategorijaMock;
         private readonly KategorijaController _controller;
+        private readonly IMemoryCache _memoryCache;
+        private readonly CacheVersionStore _cacheVersions;
 
         public KategorijaApiControllerTests()
         {
             _kategorijaMock = new Mock<IKategorijaRepository>();
-            _controller = new KategorijaController(_kategorijaMock.Object);
+            _memoryCache = new MemoryCache(new MemoryCacheOptions());
+            _cacheVersions = new CacheVersionStore();
+            _controller = new KategorijaController(
+                _kategorijaMock.Object,
+                _memoryCache,
+                _cacheVersions);
         }
 
         // Pomoćne metode 

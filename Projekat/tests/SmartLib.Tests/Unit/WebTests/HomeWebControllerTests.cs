@@ -1,9 +1,11 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using Moq;
 using SmartLib.Core.Interfaces;
 using SmartLib.Core.Models;
+using SmartLib.Infrastructure.Services;
 using SmartLib.Web.Controllers;
 using SmartLib.Web.Models;
 using Xunit;
@@ -14,16 +16,22 @@ namespace SmartLib.Tests.Unit.WebTests
     {
         private readonly Mock<IKnjigaRepository> _knjigaMock;
         private readonly Mock<IBookRecommender> _recommenderMock;
+        private readonly IMemoryCache _memoryCache;
+        private readonly CacheVersionStore _cacheVersions;
         private readonly HomeController _controller;
 
         public HomeWebControllerTests()
         {
             _knjigaMock = new Mock<IKnjigaRepository>();
             _recommenderMock = new Mock<IBookRecommender>();
+            _memoryCache = new MemoryCache(new MemoryCacheOptions());
+            _cacheVersions = new CacheVersionStore();
 
             _controller = new HomeController(
                 _knjigaMock.Object,
-                _recommenderMock.Object);
+                _recommenderMock.Object,
+                _memoryCache,
+                _cacheVersions);
 
             var httpContext = new DefaultHttpContext();
             _controller.ControllerContext = new ControllerContext

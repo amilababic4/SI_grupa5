@@ -6,6 +6,7 @@ using Moq;
 using SmartLib.Core.DTOs;
 using SmartLib.Core.Interfaces;
 using SmartLib.Core.Models;
+using SmartLib.Infrastructure.Services;
 using SmartLib.Web.Controllers;
 using Xunit;
 
@@ -17,6 +18,7 @@ namespace SmartLib.Tests.Unit.WebTests
         private readonly Mock<IKorisnikRepository> _korisnikRepo;
         private readonly Mock<IKnjigaRepository> _knjigaRepo;
         private readonly Mock<IPrimjerakRepository> _primjerakRepo;
+        private readonly CacheVersionStore _cacheVersions;
         private readonly ZaduzenjeController _controller;
 
         public ZaduzenjeWebControllerTests()
@@ -25,12 +27,14 @@ namespace SmartLib.Tests.Unit.WebTests
             _korisnikRepo = new Mock<IKorisnikRepository>();
             _knjigaRepo = new Mock<IKnjigaRepository>();
             _primjerakRepo = new Mock<IPrimjerakRepository>();
+            _cacheVersions = new CacheVersionStore();
 
             _controller = new ZaduzenjeController(
                 _zaduzenjeRepo.Object,
                 _korisnikRepo.Object,
                 _knjigaRepo.Object,
-                _primjerakRepo.Object);
+                _primjerakRepo.Object,
+                _cacheVersions);
 
             var httpContext = new DefaultHttpContext();
             _controller.ControllerContext = new ControllerContext { HttpContext = httpContext };

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using SmartLib.Core.DTOs;
 using SmartLib.Core.Interfaces;
 using SmartLib.Core.Models;
+using SmartLib.Infrastructure.Services;
 
 namespace SmartLib.API.Controllers
 {
@@ -20,17 +21,20 @@ namespace SmartLib.API.Controllers
         private readonly IKorisnikRepository _korisnikRepo;
         private readonly IKnjigaRepository _knjigaRepo;
         private readonly IPrimjerakRepository _primjerakRepo;
+        private readonly CacheVersionStore _cacheVersions;
 
         public ZaduzenjeController(
             IZaduzenjeRepository zaduzenjeRepo,
             IKorisnikRepository korisnikRepo,
             IKnjigaRepository knjigaRepo,
-            IPrimjerakRepository primjerakRepo)
+            IPrimjerakRepository primjerakRepo,
+            CacheVersionStore cacheVersions)
         {
             _zaduzenjeRepo = zaduzenjeRepo;
             _korisnikRepo = korisnikRepo;
             _knjigaRepo = knjigaRepo;
             _primjerakRepo = primjerakRepo;
+            _cacheVersions = cacheVersions;
         }
 
         [HttpGet]
@@ -124,6 +128,8 @@ namespace SmartLib.API.Controllers
             await _zaduzenjeRepo.CreateAsync(zaduzenje);
             await _primjerakRepo.UpdateStatusAsync(model.PrimjerakId, "zadužen");
 
+            _cacheVersions.BumpBooksVersion();
+
             var kreirano = await _zaduzenjeRepo.GetByIdAsync(zaduzenje.Id);
             return CreatedAtAction(nameof(GetById), new { id = zaduzenje.Id }, MapToDto(kreirano!));
         }
@@ -144,6 +150,8 @@ namespace SmartLib.API.Controllers
             z.DatumStvarnogVracanja = DateTime.UtcNow;
             await _zaduzenjeRepo.UpdateAsync(z);
             await _primjerakRepo.UpdateStatusAsync(z.PrimjerakId, "dostupan");
+
+            _cacheVersions.BumpBooksVersion();
 
             return Ok(MapToDto(z));
         }

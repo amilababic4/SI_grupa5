@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Caching.Memory;
 using SmartLib.Core.Interfaces;
 using SmartLib.Core.Models;
+using SmartLib.Infrastructure.Services;
 
 namespace SmartLib.Web.Controllers
 {
@@ -9,16 +11,31 @@ namespace SmartLib.Web.Controllers
     public class KategorijaController : Controller
     {
         private readonly IKategorijaRepository _kategorijaRepository;
+        private readonly IMemoryCache _cache;
+        private readonly CacheVersionStore _cacheVersions;
+        private static readonly TimeSpan CategoriesCacheTtl = TimeSpan.FromMinutes(5);
 
-        public KategorijaController(IKategorijaRepository kategorijaRepository)
+        public KategorijaController(
+            IKategorijaRepository kategorijaRepository,
+            IMemoryCache cache,
+            CacheVersionStore cacheVersions)
         {
             _kategorijaRepository = kategorijaRepository;
+            _cache = cache;
+            _cacheVersions = cacheVersions;
         }
 
         // US-31: Prikaz liste svih kategorija
         public async Task<IActionResult> Index()
         {
-            var kategorije = await _kategorijaRepository.GetAllAsync();
+            var cacheKey = $"categories_v1_{_cacheVersions.CategoriesVersion}_{_cacheVersions.BooksVersion}";
+            if (_cache.TryGetValue(cacheKey, out List<Kategorija>? cached) && cached != null)
+            {
+                return View(cached);
+            }
+
+            var kategorije = (await _kategorijaRepository.GetAllAsync()).ToList();
+            _cache.Set(cacheKey, kategorije, CategoriesCacheTtl);
             return View(kategorije);
         }
 
@@ -52,6 +69,8 @@ namespace SmartLib.Web.Controllers
                 });
 
                 TempData["SuccessMessage"] = $"Kategorija \"{naziv}\" je uspješno dodana.";
+                _cacheVersions.BumpCategoriesVersion();
+                _cacheVersions.BumpBooksVersion();
             }
             catch (Exception ex)
             {
@@ -103,6 +122,8 @@ namespace SmartLib.Web.Controllers
                 await _kategorijaRepository.UpdateAsync(kategorija);
 
                 TempData["SuccessMessage"] = $"Kategorija \"{naziv}\" je uspješno ažurirana.";
+                _cacheVersions.BumpCategoriesVersion();
+                _cacheVersions.BumpBooksVersion();
             }
             catch (Exception ex)
             {
@@ -138,6 +159,8 @@ namespace SmartLib.Web.Controllers
             {
                 await _kategorijaRepository.DeleteAsync(id);
                 TempData["SuccessMessage"] = $"Kategorija \"{kategorija.Naziv}\" je uspješno obrisana.";
+                _cacheVersions.BumpCategoriesVersion();
+                _cacheVersions.BumpBooksVersion();
             }
             catch (Exception ex)
             {

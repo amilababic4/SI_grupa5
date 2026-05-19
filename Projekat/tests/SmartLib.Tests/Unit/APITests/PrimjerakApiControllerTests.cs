@@ -3,6 +3,7 @@ using Moq;
 using SmartLib.API.Controllers;
 using SmartLib.Core.Interfaces;
 using SmartLib.Core.Models;
+using SmartLib.Infrastructure.Services;
 using Xunit;
 
 namespace SmartLib.Tests.Unit.APITests
@@ -19,15 +20,18 @@ namespace SmartLib.Tests.Unit.APITests
         private readonly Mock<IPrimjerakRepository> _primjerakMock;
         private readonly Mock<IKnjigaRepository> _knjigaMock;
         private readonly PrimjerakController _controller;
+        private readonly CacheVersionStore _cacheVersions;
 
         public PrimjerakApiControllerTests()
         {
             _primjerakMock = new Mock<IPrimjerakRepository>();
             _knjigaMock = new Mock<IKnjigaRepository>();
+            _cacheVersions = new CacheVersionStore();
 
             _controller = new PrimjerakController(
                 _primjerakMock.Object,
-                _knjigaMock.Object);
+                _knjigaMock.Object,
+                _cacheVersions);
         }
 
         // Pomoćne metode 

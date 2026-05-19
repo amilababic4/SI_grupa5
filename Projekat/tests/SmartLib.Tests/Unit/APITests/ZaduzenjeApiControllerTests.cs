@@ -6,6 +6,7 @@ using SmartLib.API.Controllers;
 using SmartLib.Core.DTOs;
 using SmartLib.Core.Interfaces;
 using SmartLib.Core.Models;
+using SmartLib.Infrastructure.Services;
 using Xunit;
 
 namespace SmartLib.Tests.Unit.APITests
@@ -24,6 +25,7 @@ namespace SmartLib.Tests.Unit.APITests
         private readonly Mock<IKnjigaRepository> _knjigaRepoMock;
         private readonly Mock<IPrimjerakRepository> _primjerakRepoMock;
         private readonly ZaduzenjeController _controller;
+        private readonly CacheVersionStore _cacheVersions;
 
         public ZaduzenjeApiControllerTests()
         {
@@ -31,12 +33,14 @@ namespace SmartLib.Tests.Unit.APITests
             _korisnikRepoMock = new Mock<IKorisnikRepository>();
             _knjigaRepoMock = new Mock<IKnjigaRepository>();
             _primjerakRepoMock = new Mock<IPrimjerakRepository>();
+            _cacheVersions = new CacheVersionStore();
 
             _controller = new ZaduzenjeController(
                 _zaduzenjeRepoMock.Object,
                 _korisnikRepoMock.Object,
                 _knjigaRepoMock.Object,
-                _primjerakRepoMock.Object);
+                _primjerakRepoMock.Object,
+                _cacheVersions);
         }
 
         // ── Pomoćne metode ────────────────────────────────────────────

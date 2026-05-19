@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using SmartLib.Core.Interfaces;
 using SmartLib.Core.Models;
+using SmartLib.Infrastructure.Services;
 
 namespace SmartLib.API.Controllers
 {
@@ -16,13 +17,16 @@ namespace SmartLib.API.Controllers
     {
         private readonly IPrimjerakRepository _primjerakRepository;
         private readonly IKnjigaRepository _knjigaRepository;
+        private readonly CacheVersionStore _cacheVersions;
 
         public PrimjerakController(
             IPrimjerakRepository primjerakRepository,
-            IKnjigaRepository knjigaRepository)
+            IKnjigaRepository knjigaRepository,
+            CacheVersionStore cacheVersions)
         {
             _primjerakRepository = primjerakRepository;
             _knjigaRepository = knjigaRepository;
+            _cacheVersions = cacheVersions;
         }
 
         // US-22 + US-23: Pregled svih primjeraka knjige sa statusima
@@ -104,6 +108,8 @@ namespace SmartLib.API.Controllers
                 });
             }
 
+            _cacheVersions.BumpBooksVersion();
+
             return CreatedAtAction(
                 nameof(GetByKnjiga),
                 new { knjigaId = request.KnjigaId },
@@ -133,6 +139,8 @@ namespace SmartLib.API.Controllers
                 });
 
             await _primjerakRepository.DeactivateAsync(id);
+
+            _cacheVersions.BumpBooksVersion();
 
             return Ok(new
             {

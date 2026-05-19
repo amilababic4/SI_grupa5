@@ -9,6 +9,7 @@ using Moq.Protected;
 using SmartLib.Core.DTOs;
 using SmartLib.Core.Interfaces;
 using SmartLib.Core.Models;
+using SmartLib.Infrastructure.Services;
 using SmartLib.Web.Controllers;
 using Xunit;
 
@@ -27,6 +28,7 @@ namespace SmartLib.Tests.Unit.WebTests
         private readonly Mock<ILogger<KnjigaController>> _loggerMock;
         private readonly IMemoryCache _memoryCache;
         private readonly IConfiguration _configuration;
+        private readonly CacheVersionStore _cacheVersions;
         private readonly KnjigaController _controller;
 
         public KnjigaWebControllerTests()
@@ -40,6 +42,7 @@ namespace SmartLib.Tests.Unit.WebTests
             _configuration = new ConfigurationBuilder().Build();
 
             _memoryCache = new MemoryCache(new MemoryCacheOptions());
+            _cacheVersions = new CacheVersionStore();
 
             _controller = new KnjigaController(
                 _knjigaMock.Object,
@@ -49,7 +52,8 @@ namespace SmartLib.Tests.Unit.WebTests
                 _httpClientFactoryMock.Object,
                 _memoryCache,
                 _configuration,
-                _loggerMock.Object
+                _loggerMock.Object,
+                _cacheVersions
             );
 
             var httpContext = new DefaultHttpContext();
@@ -716,7 +720,8 @@ namespace SmartLib.Tests.Unit.WebTests
                 httpClientFactoryMock.Object,
                 _memoryCache,
                 _configuration,
-                _loggerMock.Object);
+                _loggerMock.Object,
+                _cacheVersions);
 
             SetupControllerContext(controller);
 
@@ -753,7 +758,8 @@ namespace SmartLib.Tests.Unit.WebTests
                 httpClientFactoryMock.Object,
                 _memoryCache,
                 _configuration,
-                _loggerMock.Object);
+                _loggerMock.Object,
+                _cacheVersions);
 
             SetupControllerContext(controller);
 
@@ -787,7 +793,8 @@ namespace SmartLib.Tests.Unit.WebTests
                 httpClientFactoryMock.Object,
                 _memoryCache,
                 _configuration,
-                _loggerMock.Object);
+                _loggerMock.Object,
+                _cacheVersions);
 
             SetupControllerContext(controller);
 

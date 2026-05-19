@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Caching.Memory;
 using SmartLib.Core.Interfaces;
 using SmartLib.Core.Models;
+using SmartLib.Infrastructure.Services;
 using System.Text.RegularExpressions;
 
 namespace SmartLib.API.Controllers
@@ -16,26 +18,40 @@ namespace SmartLib.API.Controllers
     public class KategorijaController : ControllerBase
     {
         private readonly IKategorijaRepository _kategorijaRepository;
+        private readonly IMemoryCache _cache;
+        private readonly CacheVersionStore _cacheVersions;
+        private static readonly TimeSpan CategoriesCacheTtl = TimeSpan.FromMinutes(5);
 
-        public KategorijaController(IKategorijaRepository kategorijaRepository)
+        public KategorijaController(
+            IKategorijaRepository kategorijaRepository,
+            IMemoryCache cache,
+            CacheVersionStore cacheVersions)
         {
             _kategorijaRepository = kategorijaRepository;
+            _cache = cache;
+            _cacheVersions = cacheVersions;
         }
 
         // US-31: Pregled svih kategorija
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var kategorije = await _kategorijaRepository.GetAllAsync();
-
-            var result = kategorije.Select(k => new
+            var cacheKey = $"api_categories_v1_{_cacheVersions.CategoriesVersion}_{_cacheVersions.BooksVersion}";
+            if (_cache.TryGetValue(cacheKey, out List<KategorijaResponse>? cached) && cached != null)
             {
-                k.Id,
-                k.Naziv,
-                k.Opis,
-                BrojKnjiga = k.Knjige.Count
-            });
+                return Ok(cached);
+            }
 
+            var kategorije = await _kategorijaRepository.GetAllAsync();
+            var result = kategorije.Select(k => new KategorijaResponse
+            {
+                Id = k.Id,
+                Naziv = k.Naziv,
+                Opis = k.Opis,
+                BrojKnjiga = k.Knjige.Count
+            }).ToList();
+
+            _cache.Set(cacheKey, result, CategoriesCacheTtl);
             return Ok(result);
         }
 
@@ -43,17 +59,26 @@ namespace SmartLib.API.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
+            var cacheKey = $"api_category_{id}_v1_{_cacheVersions.CategoriesVersion}_{_cacheVersions.BooksVersion}";
+            if (_cache.TryGetValue(cacheKey, out KategorijaResponse? cached) && cached != null)
+            {
+                return Ok(cached);
+            }
+
             var k = await _kategorijaRepository.GetByIdAsync(id);
             if (k == null)
                 return NotFound(new { message = $"Kategorija sa ID {id} nije pronađena." });
 
-            return Ok(new
+            var result = new KategorijaResponse
             {
-                k.Id,
-                k.Naziv,
-                k.Opis,
+                Id = k.Id,
+                Naziv = k.Naziv,
+                Opis = k.Opis,
                 BrojKnjiga = k.Knjige.Count
-            });
+            };
+
+            _cache.Set(cacheKey, result, CategoriesCacheTtl);
+            return Ok(result);
         }
 
         // US-30: Dodavanje nove kategorije
@@ -81,6 +106,9 @@ namespace SmartLib.API.Controllers
                 Naziv = naziv,
                 Opis = string.IsNullOrWhiteSpace(request.Opis) ? null : request.Opis.Trim()
             });
+
+            _cacheVersions.BumpCategoriesVersion();
+            _cacheVersions.BumpBooksVersion();
 
             return CreatedAtAction(nameof(GetById), new { id = kategorija.Id }, new
             {
@@ -116,6 +144,9 @@ namespace SmartLib.API.Controllers
             kategorija.Opis = string.IsNullOrWhiteSpace(request.Opis) ? null : request.Opis.Trim();
             await _kategorijaRepository.UpdateAsync(kategorija);
 
+            _cacheVersions.BumpCategoriesVersion();
+            _cacheVersions.BumpBooksVersion();
+
             return Ok(new
             {
                 kategorija.Id,
@@ -143,6 +174,9 @@ namespace SmartLib.API.Controllers
 
             await _kategorijaRepository.DeleteAsync(id);
 
+            _cacheVersions.BumpCategoriesVersion();
+            _cacheVersions.BumpBooksVersion();
+
             return Ok(new
             {
                 message = $"Kategorija \"{kategorija.Naziv}\" je uspješno obrisana.",
@@ -162,5 +196,13 @@ namespace SmartLib.API.Controllers
     {
         public string Naziv { get; set; } = string.Empty;
         public string? Opis { get; set; }
+    }
+
+    public class KategorijaResponse
+    {
+        public int Id { get; set; }
+        public string Naziv { get; set; } = string.Empty;
+        public string? Opis { get; set; }
+        public int BrojKnjiga { get; set; }
     }
 }

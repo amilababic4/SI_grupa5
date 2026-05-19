@@ -14,6 +14,7 @@ namespace SmartLib.Core.Interfaces
         Task<(IEnumerable<Knjiga> Knjige, int UkupnoBroj)> GetPagedAsync(string? naslov, string? autor, int page, int pageSize);
         Task<Knjiga?> GetByIsbnAsync(string isbn);
         Task<IEnumerable<Knjiga>> GetRandomAsync(int count);
+        Task<bool> TryUpdateOpisByIsbnAsync(string isbn, string opis);
     }
 }
 

@@ -6,6 +6,7 @@ using SmartLib.API.Controllers;
 using SmartLib.Core.DTOs;
 using SmartLib.Core.Interfaces;
 using SmartLib.Core.Models;
+using SmartLib.Infrastructure.Services;
 using Xunit;
 
 namespace SmartLib.Tests.Unit.APITests
@@ -16,19 +17,22 @@ namespace SmartLib.Tests.Unit.APITests
         private readonly Mock<IPrimjerakRepository> _primjerakMock;
         private readonly Mock<IKategorijaRepository> _kategorijaMock;
         private readonly KnjigaController _controller;
+        private readonly CacheVersionStore _cacheVersions;
 
         public KnjigaApiControllerTests()
         {
             _knjigaMock = new Mock<IKnjigaRepository>();
             _primjerakMock = new Mock<IPrimjerakRepository>();
             _kategorijaMock = new Mock<IKategorijaRepository>();
+            _cacheVersions = new CacheVersionStore();
 
             _controller = new KnjigaController(
                 _knjigaMock.Object,
                 _primjerakMock.Object,
                 _kategorijaMock.Object,
                 new Mock<IHttpClientFactory>().Object,
-                new Mock<IMemoryCache>().Object);
+                new Mock<IMemoryCache>().Object,
+                _cacheVersions);
         }
 
         // Pomoćne metode za testne podatke
@@ -517,7 +521,8 @@ namespace SmartLib.Tests.Unit.APITests
                 _primjerakMock.Object,
                 _kategorijaMock.Object,
                 httpClientFactoryMock.Object,
-                cacheMock.Object);
+                cacheMock.Object,
+                _cacheVersions);
 
             var result = await controller.Korice("1234567890");
 
@@ -550,7 +555,8 @@ namespace SmartLib.Tests.Unit.APITests
                 _primjerakMock.Object,
                 _kategorijaMock.Object,
                 httpClientFactoryMock.Object,
-                cacheMock.Object);
+                cacheMock.Object,
+                _cacheVersions);
 
             var result = await controller.Korice("1234567890");
 
@@ -574,7 +580,8 @@ namespace SmartLib.Tests.Unit.APITests
                 _primjerakMock.Object,
                 _kategorijaMock.Object,
                 new Mock<IHttpClientFactory>().Object,
-                cacheMock.Object);
+                cacheMock.Object,
+                _cacheVersions);
 
             var result = await controller.Korice("1234567890");
 
@@ -617,7 +624,8 @@ namespace SmartLib.Tests.Unit.APITests
                 _primjerakMock.Object,
                 _kategorijaMock.Object,
                 httpClientFactoryMock.Object,
-                cacheMock.Object);
+                cacheMock.Object,
+                _cacheVersions);
 
             var result = await controller.Korice("1234567890");
 

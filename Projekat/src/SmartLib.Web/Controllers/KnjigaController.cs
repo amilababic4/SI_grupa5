@@ -9,6 +9,7 @@ using Microsoft.Extensions.Caching.Memory;
 using System.Net.Http;
 using System.Security.Claims;
 using System.Text.Json;
+using SmartLib.Infrastructure.Services;
 
 namespace SmartLib.Web.Controllers
 {
@@ -23,6 +24,11 @@ namespace SmartLib.Web.Controllers
         private readonly IMemoryCache _cache;
         private readonly IConfiguration _configuration;
         private readonly ILogger<KnjigaController> _logger;
+        private readonly CacheVersionStore _cacheVersions;
+        private static readonly TimeSpan ExploreCacheTtl = TimeSpan.FromMinutes(10);
+        private static readonly TimeSpan CatalogRecommendationCacheTtl = TimeSpan.FromMinutes(2);
+        private static readonly TimeSpan BookIndexCacheTtl = TimeSpan.FromMinutes(2);
+        private static readonly TimeSpan BookDetailsCacheTtl = TimeSpan.FromMinutes(2);
 
         public KnjigaController(
             IKnjigaRepository knjigaRepository,
@@ -32,7 +38,8 @@ namespace SmartLib.Web.Controllers
             IHttpClientFactory httpClientFactory,
             IMemoryCache cache,
             IConfiguration configuration,
-            ILogger<KnjigaController> logger)
+            ILogger<KnjigaController> logger,
+            CacheVersionStore cacheVersions)
         {
             _knjigaRepository = knjigaRepository;
             _primjerakRepository = primjerakRepository;
@@ -42,6 +49,7 @@ namespace SmartLib.Web.Controllers
             _cache = cache;
             _configuration = configuration;
             _logger = logger;
+            _cacheVersions = cacheVersions;
         }
 
         [AllowAnonymous]
@@ -93,6 +101,17 @@ namespace SmartLib.Web.Controllers
             const int pageSize = 16;
             if (page < 1) page = 1;
 
+            var booksVersion = _cacheVersions.BooksVersion;
+            var categoriesVersion = _cacheVersions.CategoriesVersion;
+            var titleKey = NormalizeCachePart(naslov);
+            var authorKey = NormalizeCachePart(autor);
+            var cacheKey = $"books_index_v1_{booksVersion}_{categoriesVersion}_{titleKey}_{authorKey}_{page}_{pageSize}";
+
+            if (_cache.TryGetValue(cacheKey, out KatalogViewModel? cachedModel) && cachedModel != null)
+            {
+                return View(cachedModel);
+            }
+
             var (knjige, ukupno) = await _knjigaRepository.GetPagedAsync(naslov, autor, page, pageSize);
 
             var dtos = knjige.Select(k => new KnjigaDto
@@ -121,6 +140,8 @@ namespace SmartLib.Web.Controllers
                 Autor = autor
             };
 
+            _cache.Set(cacheKey, model, BookIndexCacheTtl);
+
             return View(model);
         }
 
@@ -128,6 +149,12 @@ namespace SmartLib.Web.Controllers
         {
             var userId = GetUserId();
             if (userId == null) return Forbid();
+
+            var cacheKey = $"explore_v1_{userId.Value}_{_cacheVersions.BooksVersion}_{_cacheVersions.CategoriesVersion}";
+            if (_cache.TryGetValue(cacheKey, out ExploreViewModel? cachedModel) && cachedModel != null)
+            {
+                return View(cachedModel);
+            }
 
             var history = await _zaduzenjeRepository.GetHistoryByKorisnikAsync(userId.Value);
             var historyCategories = history
@@ -271,6 +298,8 @@ namespace SmartLib.Web.Controllers
                 SurpriseCategories = surpriseCategories
             };
 
+            _cache.Set(cacheKey, model, ExploreCacheTtl);
+
             return View(model);
         }
 
@@ -280,6 +309,16 @@ namespace SmartLib.Web.Controllers
         {
             try
             {
+                var normalizedCategory = string.IsNullOrWhiteSpace(category)
+                    ? "all"
+                    : category.Trim().ToLowerInvariant();
+                var cacheKey = $"catalog_reco_{normalizedCategory}_{_cacheVersions.BooksVersion}_{_cacheVersions.CategoriesVersion}";
+
+                if (_cache.TryGetValue(cacheKey, out CatalogRecommendationResponse? cached) && cached != null)
+                {
+                    return Json(cached);
+                }
+
                 var books = await _knjigaRepository.GetRandomAsync(50);
                 if (!books.Any()) return NotFound();
 
@@ -303,14 +342,17 @@ namespace SmartLib.Web.Controllers
 
                 if (book == null) return NotFound();
 
-                return Json(new
+                var response = new CatalogRecommendationResponse
                 {
-                    id = book.Id,
-                    title = book.Naslov,
-                    authors = book.Autor,
-                    category = book.Kategorija?.Naziv ?? "Ostalo",
-                    isbn = book.Isbn
-                });
+                    Id = book.Id,
+                    Title = book.Naslov,
+                    Authors = book.Autor,
+                    Category = book.Kategorija?.Naziv ?? "Ostalo",
+                    Isbn = book.Isbn
+                };
+
+                _cache.Set(cacheKey, response, CatalogRecommendationCacheTtl);
+                return Json(response);
             }
             catch (Exception ex)
             {
@@ -321,6 +363,13 @@ namespace SmartLib.Web.Controllers
 
         public async Task<IActionResult> Details(int id)
         {
+            var cacheKey = $"book_details_v1_{_cacheVersions.BooksVersion}_{_cacheVersions.CategoriesVersion}_{id}";
+            if (_cache.TryGetValue(cacheKey, out KnjigaDetailsCacheEntry? cachedEntry) && cachedEntry != null)
+            {
+                ViewBag.Primjerci = cachedEntry.Primjerci;
+                return View(cachedEntry.Dto);
+            }
+
             var knjiga = await _knjigaRepository.GetByIdAsync(id);
             if (knjiga == null) return NotFound();
 
@@ -337,7 +386,14 @@ namespace SmartLib.Web.Controllers
                 BrojDostupnih = knjiga.Primjerci.Count(p => p.Status == "dostupan")
             };
 
-            ViewBag.Primjerci = knjiga.Primjerci.OrderBy(p => p.InventarniBroj).ToList();
+            var primjerci = knjiga.Primjerci.OrderBy(p => p.InventarniBroj).ToList();
+            ViewBag.Primjerci = primjerci;
+
+            _cache.Set(cacheKey, new KnjigaDetailsCacheEntry
+            {
+                Dto = dto,
+                Primjerci = primjerci
+            }, BookDetailsCacheTtl);
 
             return View(dto);
         }
@@ -408,6 +464,8 @@ namespace SmartLib.Web.Controllers
             }
 
             TempData["SuccessMessage"] = $"Knjiga \"{savedKnjiga.Naslov}\" je uspješno dodana u katalog.";
+            _cacheVersions.BumpBooksVersion();
+            _cacheVersions.BumpCategoriesVersion();
             return RedirectToAction(nameof(Index));
         }
 
@@ -463,6 +521,8 @@ namespace SmartLib.Web.Controllers
             await _knjigaRepository.UpdateAsync(knjiga);
 
             TempData["SuccessMessage"] = $"Podaci knjige \"{knjiga.Naslov}\" su uspješno ažurirani.";
+            _cacheVersions.BumpBooksVersion();
+            _cacheVersions.BumpCategoriesVersion();
             return RedirectToAction(nameof(Index));
         }
 
@@ -478,6 +538,7 @@ namespace SmartLib.Web.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            var changed = false;
             try
             {
                 var success = await _knjigaRepository.DeleteAsync(id);
@@ -485,6 +546,7 @@ namespace SmartLib.Web.Controllers
                 if (success)
                 {
                     TempData["SuccessMessage"] = "Knjiga je uspješno obrisana iz kataloga."; // US-25
+                    changed = true;
                 }
                 else
                 {
@@ -496,6 +558,11 @@ namespace SmartLib.Web.Controllers
                 TempData["ErrorMessage"] = "Sistemska greška: " + ex.Message;
             }
 
+            if (changed)
+            {
+                _cacheVersions.BumpBooksVersion();
+                _cacheVersions.BumpCategoriesVersion();
+            }
             return RedirectToAction(nameof(Index)); // US-29 (Osvježavanje liste)
         }
 
@@ -562,8 +629,21 @@ namespace SmartLib.Web.Controllers
                             if (trimmed != "Opis nije dostupan.")
                             {
                                 var translated = await TranslateToBosnianAsync(trimmed);
-                                _cache.Set(cacheKey, translated, TimeSpan.FromHours(24));
-                                return translated;
+                                var finalText = string.IsNullOrWhiteSpace(translated) ? trimmed : translated;
+
+                                _cache.Set(cacheKey, finalText, TimeSpan.FromHours(24));
+                                try
+                                {
+                                    await _knjigaRepository.TryUpdateOpisByIsbnAsync(normalizedIsbn, finalText);
+                                    // Ne bumpamo BooksVersion jer bi to stalno invalidiralo keš za sve korisnike 
+                                    // dok se u pozadini prevode opisi knjiga.
+                                }
+                                catch (Exception ex)
+                                {
+                                    _logger.LogWarning("Greška pri snimanju opisa u bazu za ISBN {Isbn}: {Message}", normalizedIsbn, ex.Message);
+                                }
+
+                                return finalText;
                             }
                             return trimmed;
                         }
@@ -646,6 +726,24 @@ namespace SmartLib.Web.Controllers
 
         private static string NormalizeIsbn(string isbn)
             => isbn.Replace("-", "").Replace(" ", "").Trim();
+
+        private static string NormalizeCachePart(string? value)
+            => string.IsNullOrWhiteSpace(value) ? "all" : value.Trim().ToLowerInvariant();
+
+        private sealed class CatalogRecommendationResponse
+        {
+            public int Id { get; set; }
+            public string Title { get; set; } = string.Empty;
+            public string Authors { get; set; } = string.Empty;
+            public string Category { get; set; } = string.Empty;
+            public string Isbn { get; set; } = string.Empty;
+        }
+
+        private sealed class KnjigaDetailsCacheEntry
+        {
+            public KnjigaDto Dto { get; set; } = new();
+            public List<Primjerak> Primjerci { get; set; } = new();
+        }
 
         private static bool IsValidIsbn(string isbn)
         {

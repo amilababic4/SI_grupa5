@@ -21,6 +21,7 @@ namespace SmartLib.Infrastructure.Services
 
             // Placeholder logic: Return top 4 popular or recently added books.
             return await _dbContext.Knjige
+                .AsNoTracking()
                 .OrderByDescending(k => k.Id) // Fallback to newly added books
                 .Take(4)
                 .ToListAsync();

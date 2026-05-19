@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SmartLib.Core.Interfaces;
 using SmartLib.Core.Models;
+using SmartLib.Infrastructure.Services;
 
 namespace SmartLib.Web.Controllers
 {
@@ -10,13 +11,16 @@ namespace SmartLib.Web.Controllers
     {
         private readonly IPrimjerakRepository _primjerakRepository;
         private readonly IKnjigaRepository _knjigaRepository;
+        private readonly CacheVersionStore _cacheVersions;
 
         public PrimjerakController(
             IPrimjerakRepository primjerakRepository,
-            IKnjigaRepository knjigaRepository)
+            IKnjigaRepository knjigaRepository,
+            CacheVersionStore cacheVersions)
         {
             _primjerakRepository = primjerakRepository;
             _knjigaRepository = knjigaRepository;
+            _cacheVersions = cacheVersions;
         }
 
         // US-21: Dodavanje novog primjerka postojećoj knjizi (GET forma)
@@ -64,6 +68,7 @@ namespace SmartLib.Web.Controllers
                 });
             }
 
+            _cacheVersions.BumpBooksVersion();
             TempData["SuccessMessage"] = $"Uspješno dodano {brojNovih} novi{(brojNovih == 1 ? "" : "h")} primjerak{(brojNovih == 1 ? "" : "a")}.";
             return RedirectToAction("Details", "Knjiga", new { id = knjigaId });
         }
@@ -96,6 +101,7 @@ namespace SmartLib.Web.Controllers
 
             await _primjerakRepository.DeactivateAsync(id);
 
+            _cacheVersions.BumpBooksVersion();
             TempData["SuccessMessage"] =
                 $"Primjerak {primjerak.InventarniBroj} je uspješno deaktiviran i više nije dostupan za zaduživanje.";
             return RedirectToAction("Details", "Knjiga", new { id = primjerak.KnjigaId });

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Moq;
 using SmartLib.Core.Interfaces;
 using SmartLib.Core.Models;
+using SmartLib.Infrastructure.Services;
 using SmartLib.Web.Controllers;
 using Xunit;
 
@@ -18,16 +19,19 @@ namespace SmartLib.Tests.Unit.WebTests
     {
         private readonly Mock<IPrimjerakRepository> _primjerakMock;
         private readonly Mock<IKnjigaRepository> _knjigaMock;
+        private readonly CacheVersionStore _cacheVersions;
         private readonly PrimjerakController _controller;
 
         public PrimjerakWebControllerTests()
         {
             _primjerakMock = new Mock<IPrimjerakRepository>();
             _knjigaMock = new Mock<IKnjigaRepository>();
+            _cacheVersions = new CacheVersionStore();
 
             _controller = new PrimjerakController(
                 _primjerakMock.Object,
-                _knjigaMock.Object);
+                _knjigaMock.Object,
+                _cacheVersions);
 
             var httpContext = new DefaultHttpContext();
             _controller.ControllerContext = new ControllerContext { HttpContext = httpContext };

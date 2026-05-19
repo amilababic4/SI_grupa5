@@ -19,6 +19,7 @@ namespace SmartLib.Infrastructure.Repositories
             return await _db.Knjige
                 .Include(k => k.Kategorija)
                 .Include(k => k.Primjerci)
+                .AsNoTracking()
                 .OrderBy(k => k.Naslov)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
@@ -30,6 +31,7 @@ namespace SmartLib.Infrastructure.Repositories
             return await _db.Knjige
                 .Include(k => k.Kategorija)
                 .Include(k => k.Primjerci)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(k => k.Id == id);
         }
 
@@ -38,6 +40,7 @@ namespace SmartLib.Infrastructure.Repositories
             var query = _db.Knjige
                 .Include(k => k.Kategorija)
                 .Include(k => k.Primjerci)
+                .AsNoTracking()
                 .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(naslov))
@@ -55,6 +58,7 @@ namespace SmartLib.Infrastructure.Repositories
             var query = _db.Knjige
                 .Include(k => k.Kategorija)
                 .Include(k => k.Primjerci)
+                .AsNoTracking()
                 .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(naslov))
@@ -76,7 +80,9 @@ namespace SmartLib.Infrastructure.Repositories
         public async Task<Knjiga?> GetByIsbnAsync(string isbn)
         {
             if (string.IsNullOrWhiteSpace(isbn)) return null;
-            return await _db.Knjige.FirstOrDefaultAsync(k => k.Isbn == isbn);
+            return await _db.Knjige
+                .AsNoTracking()
+                .FirstOrDefaultAsync(k => k.Isbn == isbn);
         }
 
         public async Task<Knjiga> CreateAsync(Knjiga knjiga)
@@ -123,11 +129,76 @@ namespace SmartLib.Infrastructure.Repositories
 
         public async Task<IEnumerable<Knjiga>> GetRandomAsync(int count)
         {
-            return await _db.Knjige
+            if (count <= 0)
+            {
+                return Array.Empty<Knjiga>();
+            }
+
+            var total = await _db.Knjige.CountAsync();
+            if (total == 0)
+            {
+                return Array.Empty<Knjiga>();
+            }
+
+            var take = Math.Min(count, total);
+            if (take == total)
+            {
+                return await _db.Knjige
+                    .Include(k => k.Kategorija)
+                    .AsNoTracking()
+                    .ToListAsync();
+            }
+
+            var minId = await _db.Knjige.MinAsync(k => k.Id);
+            var maxId = await _db.Knjige.MaxAsync(k => k.Id);
+            if (minId == maxId)
+            {
+                return await _db.Knjige
+                    .Include(k => k.Kategorija)
+                    .AsNoTracking()
+                    .Where(k => k.Id == minId)
+                    .ToListAsync();
+            }
+
+            var upperBound = maxId == int.MaxValue ? maxId : maxId + 1;
+            var startId = Random.Shared.Next(minId, upperBound);
+            var firstBatch = await _db.Knjige
                 .Include(k => k.Kategorija)
-                .OrderBy(k => Guid.NewGuid())
-                .Take(count)
+                .AsNoTracking()
+                .Where(k => k.Id >= startId)
+                .OrderBy(k => k.Id)
+                .Take(take)
                 .ToListAsync();
+
+            if (firstBatch.Count < take)
+            {
+                var remaining = take - firstBatch.Count;
+                var secondBatch = await _db.Knjige
+                    .Include(k => k.Kategorija)
+                    .AsNoTracking()
+                    .Where(k => k.Id < startId)
+                    .OrderBy(k => k.Id)
+                    .Take(remaining)
+                    .ToListAsync();
+                firstBatch.AddRange(secondBatch);
+            }
+
+            return firstBatch
+                .OrderBy(_ => Random.Shared.Next())
+                .ToList();
+        }
+
+        public async Task<bool> TryUpdateOpisByIsbnAsync(string isbn, string opis)
+        {
+            if (string.IsNullOrWhiteSpace(isbn) || string.IsNullOrWhiteSpace(opis)) return false;
+
+            var knjiga = await _db.Knjige.FirstOrDefaultAsync(k => k.Isbn == isbn);
+            if (knjiga == null) return false;
+            if (!string.IsNullOrWhiteSpace(knjiga.Opis)) return false;
+
+            knjiga.Opis = opis.Trim();
+            await _db.SaveChangesAsync();
+            return true;
         }
     }
 }

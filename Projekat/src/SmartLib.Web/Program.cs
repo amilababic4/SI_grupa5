@@ -44,6 +44,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpClient();
 builder.Services.AddMemoryCache();
+builder.Services.AddSingleton<CacheVersionStore>();
 
 // Repositories
 builder.Services.AddScoped<IKorisnikRepository, KorisnikRepository>();

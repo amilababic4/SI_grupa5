@@ -4,6 +4,7 @@ using Microsoft.Extensions.Caching.Memory;
 using SmartLib.Core.DTOs;
 using SmartLib.Core.Interfaces;
 using SmartLib.Core.Models;
+using SmartLib.Infrastructure.Services;
 
 namespace SmartLib.API.Controllers
 {
@@ -17,19 +18,23 @@ namespace SmartLib.API.Controllers
         private readonly IKategorijaRepository _kategorijaRepository;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IMemoryCache _cache;
+        private readonly CacheVersionStore _cacheVersions;
+        private static readonly TimeSpan ApiBooksCacheTtl = TimeSpan.FromMinutes(2);
 
         public KnjigaController(
             IKnjigaRepository knjigaRepository,
             IPrimjerakRepository primjerakRepository,
             IKategorijaRepository kategorijaRepository,
             IHttpClientFactory httpClientFactory,
-            IMemoryCache cache)
+            IMemoryCache cache,
+            CacheVersionStore cacheVersions)
         {
             _knjigaRepository = knjigaRepository;
             _primjerakRepository = primjerakRepository;
             _kategorijaRepository = kategorijaRepository;
             _httpClientFactory = httpClientFactory;
             _cache = cache;
+            _cacheVersions = cacheVersions;
         }
         // GET: api/Knjiga/Korice?isbn=...&size=M
         [HttpGet("Korice")]
@@ -97,27 +102,46 @@ namespace SmartLib.API.Controllers
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 16)
         {
-            var (knjige, ukupno) = await _knjigaRepository.GetPagedAsync(naslov, autor, page, pageSize);
+            var titleKey = NormalizeCachePart(naslov);
+            var authorKey = NormalizeCachePart(autor);
+            var cacheKey = $"api_books_v1_{_cacheVersions.BooksVersion}_{_cacheVersions.CategoriesVersion}_{titleKey}_{authorKey}_{page}_{pageSize}";
 
+            if (_cache.TryGetValue(cacheKey, out KnjigaListResponse? cached) && cached != null)
+            {
+                return Ok(cached);
+            }
+
+            var (knjige, ukupno) = await _knjigaRepository.GetPagedAsync(naslov, autor, page, pageSize);
             var dtos = knjige.Select(MapToDto).ToList();
 
-            return Ok(new
+            var response = new KnjigaListResponse
             {
                 Podaci = dtos,
                 UkupnoStavki = ukupno,
                 Stranica = page,
                 UkupnoStranica = (int)Math.Ceiling((double)ukupno / pageSize)
-            });
+            };
+
+            _cache.Set(cacheKey, response, ApiBooksCacheTtl);
+            return Ok(response);
         }
 
         // GET: api/Knjiga/{id}
         [HttpGet("{id:int}")]
         public async Task<ActionResult<KnjigaDto>> GetById(int id)
         {
+            var cacheKey = $"api_book_{id}_v1_{_cacheVersions.BooksVersion}_{_cacheVersions.CategoriesVersion}";
+            if (_cache.TryGetValue(cacheKey, out KnjigaDto? cached) && cached != null)
+            {
+                return Ok(cached);
+            }
+
             var knjiga = await _knjigaRepository.GetByIdAsync(id);
             if (knjiga == null) return NotFound();
 
-            return Ok(MapToDto(knjiga));
+            var dto = MapToDto(knjiga);
+            _cache.Set(cacheKey, dto, ApiBooksCacheTtl);
+            return Ok(dto);
         }
 
         // POST: api/Knjiga
@@ -167,6 +191,9 @@ namespace SmartLib.API.Controllers
                 });
             }
 
+            _cacheVersions.BumpBooksVersion();
+            _cacheVersions.BumpCategoriesVersion();
+
             var result = await _knjigaRepository.GetByIdAsync(savedKnjiga.Id);
             return CreatedAtAction(nameof(GetById), new { id = savedKnjiga.Id }, MapToDto(result!));
         }
@@ -192,6 +219,8 @@ namespace SmartLib.API.Controllers
             knjiga.GodinaIzdanja = model.GodinaIzdanja;
 
             await _knjigaRepository.UpdateAsync(knjiga);
+            _cacheVersions.BumpBooksVersion();
+            _cacheVersions.BumpCategoriesVersion();
             return NoContent();
         }
 
@@ -214,6 +243,8 @@ namespace SmartLib.API.Controllers
                 if (!success)
                     return NotFound(new { poruka = "Knjiga sa tim ID-om nije pronađena." });
 
+                _cacheVersions.BumpBooksVersion();
+                _cacheVersions.BumpCategoriesVersion();
                 return NoContent();
             }
             catch (Exception ex)
@@ -253,6 +284,17 @@ namespace SmartLib.API.Controllers
             if (isbn.Length == 13) return isbn.All(char.IsDigit);
             if (isbn.Length == 10) return isbn[..9].All(char.IsDigit) && (char.IsDigit(isbn[9]) || isbn[9] == 'X');
             return false;
+        }
+
+        private static string NormalizeCachePart(string? value)
+            => string.IsNullOrWhiteSpace(value) ? "all" : value.Trim().ToLowerInvariant();
+
+        private sealed class KnjigaListResponse
+        {
+            public List<KnjigaDto> Podaci { get; set; } = new();
+            public int UkupnoStavki { get; set; }
+            public int Stranica { get; set; }
+            public int UkupnoStranica { get; set; }
         }
 
         #endregion
