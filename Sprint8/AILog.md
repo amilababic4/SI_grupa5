@@ -408,3 +408,33 @@ Odbačeni su prijedlozi koji su uvodili nepotrebno složene statuse zaduženja i
 
 **Rizici, problemi ili greške koje su uočene:**  
 Glavni rizik bio je mogućnost da se isti primjerak knjige zaduži više puta dok prethodno zaduženje još nije zaključeno. Zbog toga je posebna pažnja posvećena provjeri aktivnih zaduženja prije kreiranja novog zapisa.
+
+
+## AI Log 15: Implementacija UI testova za kategorije, knjige i primjerke
+
+**Datum:** 18.05.2026.  
+**Sprint broj:** Sprint 8  
+**Alat koji je korišten:** Claude  
+**Ko je koristio alat:** Esma
+
+**Svrha korištenja:**  
+Implementacija automatiziranih Playwright UI testova za funkcionalnosti upravljanja kategorijama, knjigama i primjercima kroz web interfejs SmartLib sistema.
+
+**Kratak opis zadatka ili upita:**  
+Od AI alata je zatraženo kreiranje i prilagođavanje Playwright UI testova za module kategorija, knjiga i primjeraka knjiga. AI je analizirao Razor View fajlove i kontrolere kako bi testovi odgovarali stvarnoj implementaciji interfejsa, rutama, validacijama i korisničkim tokovima.
+
+**Šta je AI predložio ili generisao:**  
+AI je generisao tri Playwright test klase — `KategorijaUiTests`, `KnjigaUiTests` i `PrimjerakUiTests` — koje nasljeđuju zajedničku baznu klasu `SmartLibUiTest`. Implementirani su testovi za: prikaz i kreiranje kategorije, validaciju duplih kategorija, inline uređivanje kategorije, dodavanje knjige, uređivanje knjige, pretragu kataloga, prikaz funkcionalnosti ovisno o ulozi korisnika, dodavanje primjeraka knjige, validaciju broja primjeraka, deaktivaciju primjerka, te prikaz statusa deaktiviranog primjerka.
+
+**Šta je tim prihvatio:**  
+Tim je prihvatio kompletnu strukturu Playwright testova, te pristup organizaciji testnih helper metoda.
+
+**Šta je tim izmijenio:**  
+Tim je uskladio tekstove headinga, dugmadi, validacijskih poruka i URL pattern-a sa stvarnim Razor View implementacijama i `TempData` porukama iz kontrolera. Zamijenjeni su nepouzdani `GetByLabel` selektori sa direktnim CSS locatorima (`#naziv-novi`, `input[name='Naslov']`, `select[name='KategorijaId']`) kako bi testovi stabilno radili sa skrivenim i dinamički prikazanim formama. 
+
+**Šta je tim odbacio:**  
+Odbačena je upotreba `GetByLabel` pristupa za forme čiji inputi nisu eksplicitno povezani sa label elementima, kao i navigacija klikom na `a.stretched-link` elemente jer ih Playwright tretira kao nevidljive zbog nedostatka dimenzija.
+
+**Rizici, problemi ili greške koje su uočene:**  
+Uočeno je da browser-side HTML validacija (min="1") ne odobrava submit nevažećih vrijednosti, pa je za test validacije bilo potrebno ukloniti atribut putem page.EvaluateAsync prije slanja forme.
+
