@@ -53,7 +53,7 @@ namespace SmartLib.Web.Controllers
         }
 
         [AllowAnonymous]
-        [ResponseCache(Duration = 86400, Location = ResponseCacheLocation.Any, NoStore = false)]
+        [ResponseCache(Duration = 3600, Location = ResponseCacheLocation.Any, NoStore = false)]
         public async Task<IActionResult> Korice(string isbn, string size = "M")
         {
             if (string.IsNullOrEmpty(isbn)) return NotFound();
@@ -93,7 +93,13 @@ namespace SmartLib.Web.Controllers
                 }
 
                 // Pokušaj 2: Google Books API
+                var apiKey = _configuration["GOOGLE_BOOKS_API_KEY"] ?? _configuration["GoogleBooks:ApiKey"];
                 var googleUrl = $"https://www.googleapis.com/books/v1/volumes?q=isbn:{normalizedIsbn}";
+                if (!string.IsNullOrWhiteSpace(apiKey))
+                {
+                    googleUrl += $"&key={Uri.EscapeDataString(apiKey)}";
+                }
+
                 var googleResponse = await client.GetAsync(googleUrl);
                 if (googleResponse.IsSuccessStatusCode)
                 {
@@ -113,7 +119,9 @@ namespace SmartLib.Web.Controllers
                                     if (gbResponse.IsSuccessStatusCode)
                                     {
                                         var gbBytes = await gbResponse.Content.ReadAsByteArrayAsync();
-                                        if (gbBytes != null && gbBytes.Length > 100)
+                                        // Google Books vraća onaj sivi placeholder sa linijama koji je obično oko 2-3 KB.
+                                        // Odbacujemo sve ispod 4500 bajtova kako bismo izbjegli placeholder.
+                                        if (gbBytes != null && gbBytes.Length > 4500)
                                         {
                                             _cache.Set(cacheKey, gbBytes, TimeSpan.FromHours(24));
                                             return File(gbBytes, "image/jpeg");

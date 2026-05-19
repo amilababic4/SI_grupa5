@@ -82,7 +82,7 @@ else
                 <div class="katalog-list-item">
                     <a asp-action="Details" asp-route-id="@knjiga.Id" class="stretched-link"></a>
                     <div class="list-cover-wrapper">
-                        <img src="@Url.Action("Korice", "Knjiga", new { isbn = knjiga.Isbn, size = "L" })" 
+                        <img src="@Url.Action("Korice", "Knjiga", new { isbn = knjiga.Isbn, size = "L", v = 3 })" 
                              alt="@knjiga.Naslov" 
                              class="katalog-cover-img-large" 
                              loading="lazy" />
