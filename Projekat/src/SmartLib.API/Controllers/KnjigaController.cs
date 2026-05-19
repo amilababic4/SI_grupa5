@@ -44,7 +44,7 @@ namespace SmartLib.API.Controllers
             var normalizedIsbn = NormalizeIsbn(isbn);
 
             // 2. Ako ISBN nakon normalizacije nema 10 ili 13 znakova,
-            // odmah znamo da nije validan i vraćamo 404 bez cimanja Google API-ja.
+            // odmah znamo da nije validan i vraćamo 404 bez cimanja API-ja.
             if ((normalizedIsbn.Length != 10 && normalizedIsbn.Length != 13) ||
                 !System.Text.RegularExpressions.Regex.IsMatch(normalizedIsbn, @"^\d{9}[\dXxf]|\d{13}$"))
             {
@@ -59,24 +59,26 @@ namespace SmartLib.API.Controllers
 
             try
             {
-                var client = _httpClientFactory.CreateClient();
-                var zoom = MapCoverZoom(size);
-                var url = $"https://books.google.com/books/content?vid=ISBN:{normalizedIsbn}&printsec=frontcover&img=1&zoom={zoom}&source=gbs_api";
+                var upperSize = string.IsNullOrEmpty(size) ? "M" : size.ToUpper();
+                if (upperSize != "S" && upperSize != "M" && upperSize != "L")
+                {
+                    upperSize = "M";
+                }
 
-                var response = await client.GetAsync(url);
+                var client = _httpClientFactory.CreateClient();
+                var openLibraryUrl = $"https://covers.openlibrary.org/b/isbn/{normalizedIsbn}-{upperSize}.jpg?default=false";
+                var response = await client.GetAsync(openLibraryUrl);
+
                 if (response.IsSuccessStatusCode)
                 {
                     var imageBytes = await response.Content.ReadAsByteArrayAsync();
 
-                    // 3. Osiguranje za lažni 200 OK: Ako Google vrati prazan piksel (manje od 100 bajtova)
-                    // jer knjiga ne postoji, tretiraj to kao NotFound.
-                    if (imageBytes.Length < 100)
+                    // Osiguranje za lažni 200 OK: ako je slika prazna ili premala
+                    if (imageBytes != null && imageBytes.Length > 100)
                     {
-                        return NotFound();
+                        _cache.Set(cacheKey, imageBytes, TimeSpan.FromHours(24));
+                        return File(imageBytes, "image/jpeg");
                     }
-
-                    _cache.Set(cacheKey, imageBytes, TimeSpan.FromHours(24));
-                    return File(imageBytes, "image/jpeg");
                 }
             }
             catch

@@ -60,36 +60,29 @@ namespace SmartLib.Web.Controllers
 
             try
             {
+                var upperSize = string.IsNullOrEmpty(size) ? "M" : size.ToUpper();
+                if (upperSize != "S" && upperSize != "M" && upperSize != "L")
+                {
+                    upperSize = "M";
+                }
+
                 var client = _httpClientFactory.CreateClient();
-                var openLibraryUrl = $"https://covers.openlibrary.org/b/isbn/{normalizedIsbn}-L.jpg?default=false";
+                var openLibraryUrl = $"https://covers.openlibrary.org/b/isbn/{normalizedIsbn}-{upperSize}.jpg?default=false";
                 var olResponse = await client.GetAsync(openLibraryUrl);
 
                 if (olResponse.IsSuccessStatusCode)
                 {
                     var imageBytes = await olResponse.Content.ReadAsByteArrayAsync();
-                    _cache.Set(cacheKey, imageBytes, TimeSpan.FromHours(24));
-                    return File(imageBytes, "image/jpeg");
+                    if (imageBytes != null && imageBytes.Length > 100)
+                    {
+                        _cache.Set(cacheKey, imageBytes, TimeSpan.FromHours(24));
+                        return File(imageBytes, "image/jpeg");
+                    }
                 }
             }
-            catch { /* Ignoriši i pređi na Google Books */ }
-
-            try
+            catch (Exception ex)
             {
-                var client = _httpClientFactory.CreateClient();
-                var zoom = MapCoverZoom(size);
-                var url = $"https://books.google.com/books/content?vid=ISBN:{normalizedIsbn}&printsec=frontcover&img=1&zoom={zoom}&source=gbs_api";
-                
-                var response = await client.GetAsync(url);
-                if (response.IsSuccessStatusCode)
-                {
-                    var imageBytes = await response.Content.ReadAsByteArrayAsync();
-                    _cache.Set(cacheKey, imageBytes, TimeSpan.FromHours(24));
-                    return File(imageBytes, "image/jpeg");
-                }
-            }
-            catch
-            {
-                // Fallback
+                _logger.LogWarning("Greška prilikom dohvatanja korice sa Open Library za ISBN {Isbn}: {Message}", normalizedIsbn, ex.Message);
             }
 
             return NotFound();
@@ -171,20 +164,45 @@ namespace SmartLib.Web.Controllers
                 .Take(Math.Min(2, allCategories.Count))
                 .ToList();
 
-            const int totalTarget = 20;
+            const int totalTarget = 10;
             var preferredBudget = (int)Math.Ceiling(totalTarget * 0.8);
             var surpriseBudget = totalTarget - preferredBudget;
 
-            var perPreferred = preferredCategories.Count == 0 ? preferredBudget : Math.Max(4, preferredBudget / preferredCategories.Count);
-            var allRandom = await _knjigaRepository.GetRandomAsync(totalTarget * 2);
-            var preferredBooks = allRandom.Where(b => b.Kategorija != null && preferredCategories.Contains(b.Kategorija.Naziv, StringComparer.OrdinalIgnoreCase)).Take(preferredBudget).ToList();
-            var surpriseBooks = allRandom.Where(b => b.Kategorija != null && surpriseCategories.Contains(b.Kategorija.Naziv, StringComparer.OrdinalIgnoreCase)).Take(surpriseBudget).ToList();
+            // Dohvatamo veći skup random knjiga iz baze da bismo imali bogat izbor unikatnih knjiga
+            var allRandom = await _knjigaRepository.GetRandomAsync(50);
+            
+            // Osiguravamo unikatnost knjiga po Naslovu i Autoru u samom poolu
+            var uniquePool = new List<Knjiga>();
+            var seenPool = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var b in allRandom)
+            {
+                if (string.IsNullOrWhiteSpace(b.Naslov) || string.IsNullOrWhiteSpace(b.Autor)) continue;
+                var key = $"{b.Naslov.Trim()}|{b.Autor.Trim()}";
+                if (seenPool.Add(key))
+                {
+                    uniquePool.Add(b);
+                }
+            }
+
+            var preferredBooks = uniquePool
+                .Where(b => b.Kategorija != null && preferredCategories.Contains(b.Kategorija.Naziv, StringComparer.OrdinalIgnoreCase))
+                .Take(preferredBudget)
+                .ToList();
+
+            var surpriseBooks = uniquePool
+                .Except(preferredBooks)
+                .Where(b => b.Kategorija != null && surpriseCategories.Contains(b.Kategorija.Naziv, StringComparer.OrdinalIgnoreCase))
+                .Take(surpriseBudget)
+                .ToList();
 
             var selectedBooks = new List<Knjiga>();
             selectedBooks.AddRange(preferredBooks);
             selectedBooks.AddRange(surpriseBooks);
 
-            var remaining = allRandom.Except(selectedBooks).Take(totalTarget - selectedBooks.Count).ToList();
+            var remaining = uniquePool
+                .Except(selectedBooks)
+                .Take(totalTarget - selectedBooks.Count)
+                .ToList();
             selectedBooks.AddRange(remaining);
 
             var descriptions = new List<string>();
@@ -543,7 +561,9 @@ namespace SmartLib.Web.Controllers
                             
                             if (trimmed != "Opis nije dostupan.")
                             {
-                                _cache.Set(cacheKey, trimmed, TimeSpan.FromHours(24));
+                                var translated = await TranslateToBosnianAsync(trimmed);
+                                _cache.Set(cacheKey, translated, TimeSpan.FromHours(24));
+                                return translated;
                             }
                             return trimmed;
                         }
@@ -557,6 +577,59 @@ namespace SmartLib.Web.Controllers
 
             _cache.Set(cacheKey, "Opis nije dostupan.", TimeSpan.FromMinutes(10));
             return "Opis nije dostupan.";
+        }
+
+        private async Task<string> TranslateToBosnianAsync(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text) || text == "Opis nije dostupan.") return text;
+
+            try
+            {
+                var client = _httpClientFactory.CreateClient();
+                
+                // Postavljamo User-Agent jer Google Translate blokira zahtjeve bez njega (403 Forbidden)
+                client.DefaultRequestHeaders.UserAgent.Clear();
+                client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
+
+                var url = $"https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=bs&dt=t&q={Uri.EscapeDataString(text)}";
+                var response = await client.GetAsync(url);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var json = await response.Content.ReadAsStringAsync();
+                    using var doc = JsonDocument.Parse(json);
+                    var root = doc.RootElement;
+                    if (root.ValueKind == JsonValueKind.Array && root.GetArrayLength() > 0)
+                    {
+                        var firstArray = root[0];
+                        if (firstArray.ValueKind == JsonValueKind.Array)
+                        {
+                            var translatedParts = new List<string>();
+                            foreach (var element in firstArray.EnumerateArray())
+                            {
+                                if (element.ValueKind == JsonValueKind.Array && element.GetArrayLength() > 0)
+                                {
+                                    var part = element[0].GetString();
+                                    if (!string.IsNullOrEmpty(part))
+                                    {
+                                        translatedParts.Add(part);
+                                    }
+                                }
+                            }
+                            if (translatedParts.Any())
+                            {
+                                return string.Join(" ", translatedParts).Trim();
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning("Greška pri prevođenju teksta na bosanski: {Message}", ex.Message);
+            }
+
+            return text; // Vrati originalni tekst ako prevođenje ne uspije
         }
 
         private static string? GetJsonString(JsonElement element, string propertyName)
