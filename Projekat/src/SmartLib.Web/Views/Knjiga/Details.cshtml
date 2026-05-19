@@ -21,10 +21,10 @@
 
 <div class="card">
     <div class="details-book-layout">
-        <div class="details-cover-wrapper">
+        <div class="details-cover-wrapper" style="cursor: pointer;" onclick="openImageModal()" title="Klikni za prikaz">
             <img src="@Url.Action("Korice", "Knjiga", new { isbn = Model.Isbn, size = "L" })"
                  alt="@Model.Naslov"
-                 class="details-cover-img" />
+                 class="details-cover-img" id="mainCoverImage" />
         </div>
 
         <div class="details-info-content">
@@ -45,6 +45,13 @@
                     </div>
                 }
             </div>
+
+            @if (!string.IsNullOrWhiteSpace(Model.Opis))
+            {
+                <div class="details-description" style="margin-top: 1.5rem; margin-bottom: 1.5rem; line-height: 1.6; color: var(--text-secondary);">
+                    @Model.Opis
+                </div>
+            }
 
             <div class="details-grid">
                 <div class="details-item">
@@ -86,6 +93,40 @@
         </div>
     </div>
 </div>
+
+<div id="imageModal" class="image-modal-overlay" onclick="closeImageModal()" style="display:none;">
+    <div class="image-modal-content">
+        <span class="image-modal-close" onclick="closeImageModal()">&times;</span>
+        <img id="modalImage" class="image-modal-img" src="" alt="Prikaz korica" />
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function openImageModal() {
+            var modal = document.getElementById('imageModal');
+            var modalImg = document.getElementById('modalImage');
+            var srcImg = document.getElementById('mainCoverImage');
+            
+            modalImg.src = srcImg.src;
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeImageModal() {
+            var modal = document.getElementById('imageModal');
+            modal.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+
+        // Close on Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === "Escape") {
+                closeImageModal();
+            }
+        });
+    </script>
+}
 
 <div class="card examples-card">
     <div class="examples-header">

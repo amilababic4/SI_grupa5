@@ -11,6 +11,7 @@ namespace SmartLib.Core.DTOs
         public string? Kategorija { get; set; }
         public string? Izdavac { get; set; }
         public int? GodinaIzdanja { get; set; }
+        public string? Opis { get; set; }
         public int BrojPrimjeraka { get; set; }
         public int BrojDostupnih { get; set; }
     }
