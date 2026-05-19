@@ -1,74 +1,20 @@
 # SmartLib — Bibliotečki informacioni sistem
 ## Izvještaj o testiranju
 
-**Datum kreiranja izvještaja:** 12.05.2026.  
+**Datum kreiranja izvještaja:** 19.05.2026.  
 **Okruženje:** Development / Test (In-Memory DB), Chrome (za UI testove)  
 **Alati:** xUnit, WebApplicationFactory, Browser DevTools, Playwright, Fine Code Coverage 
 
 ---
 
-> ## NAPOMENA: Sprint 7 — Pregled novododanih testnih aktivnosti
->
-> U okviru Sprinta 7 provedeno je testiranje novih funkcionalnosti u skladu sa definiranom test strategijom. Svi prethodno implementirani testovi uspješno su zadržali status *Prošao* kroz kontinuirano regresiono testiranje. Pregled svih testnih slučajeva dodanih u okviru Sprinta 7 dat je u nastavku.
->
-> ---
->
-> ### Zaduživanje i vraćanje knjiga
->
-> - **Unit testovi — API kontroler** (`ZaduzenjeApiControllerTests`, 39 testova): pokrivaju kreiranje zaduženja, evidenciju vraćanja, pregled aktivnih i vlastitih zaduženja, filtriranje, computed polja (kašnjenje, blizina roka) te granične slučajeve poput duplikata i nedostupnih primjeraka.
-> - **Unit testovi — Web kontroler** (`ZaduzenjeWebControllerTests`, 29 testova): validiraju iste tokove kroz MVC layer, uključujući redirect logiku, TempData poruke i ispravnost ViewBag dropdownova.
-> - **Integracijski testovi** (`ZaduzenjeIntegrationTests`, 17 testova): kroz realni HTTP pipeline i in-memory bazu validiraju autorizaciju, kreiranje zaduženja, filtriranje, historiju te proces vraćanja knjige.
-> - **UI testovi** (2 testa): Playwright scenariji koji pokrivaju kompletan E2E tok kreiranja novog zaduženja i evidentiranja vraćanja knjige kroz browser.
->
-> ---
->
-> ### Pretraga i prikaz knjiga
->
-> Implementirane i testirane su sljedeće funkcionalnosti:
-> - pretraga knjiga po naslovu i autoru uz mogućnost reseta pretrage,
-> - prikaz stranice sa detaljnim informacijama o knjizi (uključujući obradu slučaja kada knjiga ne postoji),
-> - prikaz dostupnosti i broja slobodnih primjeraka u realnom vremenu.
->
-> Za sve navedene funkcionalnosti dodani su **unit testovi** (API i Web kontroleri), **integracijski testovi**, **sigurnosni / penetracijski testovi** te **UI testovi** — čime je pokrivenost ovih funkcionalnosti usklađena s ostalim modulima sistema.
->
-> ---
->
-> ### Dopuna Web unit testova za preostale kontrolere
->
-> U okviru ovog sprinta dodatno je proširena pokrivenost Web/MVC unit testovima. U folderu `tests/SmartLib.Tests/Unit/WebTests` dodani su testovi za kontrolere koji prethodno nisu bili pokriveni:
->
-> - `AdminController`
-> - `ClanarinaController`
-> - `HomeController`
-> - `RezervacijaController`
->
-> Dodani testovi validiraju osnovno MVC ponašanje kontrolera: vraćanje odgovarajućih `ViewResult` rezultata, ispravnu redirect logiku, rad sa `TempData` porukama, mapiranje podataka u ViewModel/DTO objekte i pozivanje odgovarajućih mock repozitorija/servisa gdje je primjenjivo.
->
-> Također je ažuriran postojeći `KorisnikWebControllerTests.cs`, jer trenutni `KorisnikController` koristi dodatni dependency `IZaduzenjeRepository`. Produkcijski kod kontrolera nije mijenjan; ažuriran je samo test kako bi odgovarao stvarnom konstruktoru kontrolera.
-> 
-> ---
->
-> ### UAT testiranje
->
-> Manuelno prihvatno testiranje provedeno je od strane svih članova tima. Dodani su novi UAT scenariji koji pokrivaju:
-> - zaduživanje knjige — uspješan tok (UAT-23) i slučaj nedostupnog primjerka (UAT-24),
-> - vraćanje knjige (UAT-25),
-> - pregled vlastitih zaduženja od strane člana (UAT-26).
->
-> ---
->
-> ### Regresiono testiranje
->
-> Nakon implementacije svih novih funkcionalnosti izvršeno je regresiono testiranje kompletnog test seta. Posebna pažnja posvećena je modulu zaduživanja i vraćanja knjiga — verificirano je da nove operacije ne narušavaju postojeću logiku upravljanja knjigama, primjercima i korisnicima, te da se statusi primjeraka i svi povezani zapisi konzistentno ažuriraju bez uticaja na ostatak sistema.
 
----
 
 ## 1. Pregled testiranja
-Ovaj dokument predstavlja formalni izvještaj o testiranju provedenom tokom svih razvojnih faza zaključno sa Sprintom 7. Testiranje je provedeno u skladu sa definiranom Test strategijom (Sprint 3) i obuhvata sve funkcionalnosti implementirane u okviru Sprintova 5, 6 i 7 projekta SmartLib.
+Ovaj dokument predstavlja formalni izvještaj o testiranju provedenom tokom svih razvojnih faza zaključno sa Sprintom 8. Testiranje je provedeno u skladu sa definiranom Test strategijom (Sprint 3) i obuhvata sve funkcionalnosti implementirane u okviru Sprintova 5, 6, 7 i 8 projekta SmartLib.
 
 | Ukupno testova | Prošlo  | Preskočeno (Skip) | Greška |
 | :------------- | :------ | :---------------- | :----- |
-| **486**        | **486** | **0**             | **0**  |
+| **593**        | **593** | **0**             | **0**  |
 
 ---
 
