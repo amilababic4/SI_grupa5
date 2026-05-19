@@ -3,6 +3,7 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.IdentityModel.Tokens;
 using SmartLib.Core.Interfaces;
 using SmartLib.Infrastructure.Data;
@@ -23,6 +24,14 @@ if (File.Exists(envPath))
         if (idx <= 0) continue;
         var key = line[..idx].Trim();
         var value = line[(idx + 1)..].Trim();
+
+        // Remove surrounding single/double quotes if present (common in .env files)
+        if ((value.StartsWith("\"") && value.EndsWith("\"")) ||
+            (value.StartsWith("'") && value.EndsWith("'")))
+        {
+            value = value[1..^1];
+        }
+
         Environment.SetEnvironmentVariable(key, value);
     }
 }
@@ -42,6 +51,25 @@ builder.Services.AddControllers();
 builder.Services.AddHttpClient();
 builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<CacheVersionStore>();
+
+var upstashUrl = Environment.GetEnvironmentVariable("UPSTASH_REDIS_REST_URL");
+var upstashToken = Environment.GetEnvironmentVariable("UPSTASH_REDIS_REST_TOKEN");
+if (builder.Environment.IsProduction() &&
+    !string.IsNullOrWhiteSpace(upstashUrl) &&
+    !string.IsNullOrWhiteSpace(upstashToken) &&
+    Uri.TryCreate(upstashUrl, UriKind.Absolute, out var upstashUri))
+{
+    var redisConfig = $"{upstashUri.Host}:6379,password={upstashToken},ssl=True,abortConnect=False";
+    builder.Services.AddStackExchangeRedisCache(options =>
+    {
+        options.Configuration = redisConfig;
+        options.InstanceName = "smartlib:";
+    });
+}
+else
+{
+    builder.Services.AddDistributedMemoryCache();
+}
 
 builder.Services.AddScoped<IKorisnikRepository, KorisnikRepository>();
 builder.Services.AddScoped<IKorisnikRepository, KorisnikRepository>();
@@ -103,6 +131,31 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Redis Health Check Endpoint
+app.MapGet("/api/health/redis", async (Microsoft.Extensions.Caching.Distributed.IDistributedCache cache) =>
+{
+    try
+    {
+        var testKey = "health_check_time";
+        var testValue = DateTime.UtcNow.ToString();
+        await cache.SetStringAsync(testKey, testValue, new Microsoft.Extensions.Caching.Distributed.DistributedCacheEntryOptions
+        {
+            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(1)
+        });
+        
+        var retrievedValue = await cache.GetStringAsync(testKey);
+        if (retrievedValue == testValue)
+        {
+            return Results.Ok(new { status = "Healthy", message = "Redis connection successful.", time = testValue });
+        }
+        return Results.StatusCode(500);
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem(detail: ex.Message, title: "Redis connection failed.");
+    }
+});
 
 app.Run();
 

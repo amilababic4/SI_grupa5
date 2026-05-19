@@ -25,6 +25,14 @@ if (envPath != null)
         if (idx <= 0) continue;
         var key = line[..idx].Trim();
         var value = line[(idx + 1)..].Trim();
+
+        // Remove surrounding single/double quotes if present (common in .env files)
+        if ((value.StartsWith("\"") && value.EndsWith("\"")) ||
+            (value.StartsWith("'") && value.EndsWith("'")))
+        {
+            value = value[1..^1];
+        }
+
         Environment.SetEnvironmentVariable(key, value);
     }
 }

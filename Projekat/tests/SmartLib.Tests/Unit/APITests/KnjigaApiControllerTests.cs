@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Options;
 using Moq;
 using Moq.Protected;
 using SmartLib.API.Controllers;
@@ -18,6 +19,7 @@ namespace SmartLib.Tests.Unit.APITests
         private readonly Mock<IKategorijaRepository> _kategorijaMock;
         private readonly KnjigaController _controller;
         private readonly CacheVersionStore _cacheVersions;
+        private readonly IDistributedCache _cache;
 
         public KnjigaApiControllerTests()
         {
@@ -25,13 +27,14 @@ namespace SmartLib.Tests.Unit.APITests
             _primjerakMock = new Mock<IPrimjerakRepository>();
             _kategorijaMock = new Mock<IKategorijaRepository>();
             _cacheVersions = new CacheVersionStore();
+            _cache = new MemoryDistributedCache(Options.Create(new MemoryDistributedCacheOptions()));
 
             _controller = new KnjigaController(
                 _knjigaMock.Object,
                 _primjerakMock.Object,
                 _kategorijaMock.Object,
                 new Mock<IHttpClientFactory>().Object,
-                new Mock<IMemoryCache>().Object,
+                _cache,
                 _cacheVersions);
         }
 
@@ -512,16 +515,12 @@ namespace SmartLib.Tests.Unit.APITests
             var httpClientFactoryMock = new Mock<IHttpClientFactory>();
             httpClientFactoryMock.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(httpClient);
 
-            var cacheMock = new Mock<IMemoryCache>();
-            object? cacheOut = null;
-            cacheMock.Setup(c => c.TryGetValue(It.IsAny<object>(), out cacheOut)).Returns(false);
-
             var controller = new KnjigaController(
                 _knjigaMock.Object,
                 _primjerakMock.Object,
                 _kategorijaMock.Object,
                 httpClientFactoryMock.Object,
-                cacheMock.Object,
+                new MemoryDistributedCache(Options.Create(new MemoryDistributedCacheOptions())),
                 _cacheVersions);
 
             var result = await controller.Korice("1234567890");
@@ -546,16 +545,12 @@ namespace SmartLib.Tests.Unit.APITests
             var httpClientFactoryMock = new Mock<IHttpClientFactory>();
             httpClientFactoryMock.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(httpClient);
 
-            var cacheMock = new Mock<IMemoryCache>();
-            object? cacheOut = null;
-            cacheMock.Setup(c => c.TryGetValue(It.IsAny<object>(), out cacheOut)).Returns(false);
-
             var controller = new KnjigaController(
                 _knjigaMock.Object,
                 _primjerakMock.Object,
                 _kategorijaMock.Object,
                 httpClientFactoryMock.Object,
-                cacheMock.Object,
+                new MemoryDistributedCache(Options.Create(new MemoryDistributedCacheOptions())),
                 _cacheVersions);
 
             var result = await controller.Korice("1234567890");
@@ -568,19 +563,15 @@ namespace SmartLib.Tests.Unit.APITests
         {
             // Pokriva: if (_cache.TryGetValue(...)) return File(...)
             var imageBytes = new byte[] { 1, 2, 3 };
-            object? cacheOut = (object)imageBytes;
-
-            var cacheMock = new Mock<IMemoryCache>();
-            cacheMock
-                .Setup(c => c.TryGetValue(It.IsAny<object>(), out cacheOut))
-                .Returns(true);
+            var cache = new MemoryDistributedCache(Options.Create(new MemoryDistributedCacheOptions()));
+            await cache.SetBytesAsync("cover_1234567890_M", imageBytes, TimeSpan.FromHours(1));
 
             var controller = new KnjigaController(
                 _knjigaMock.Object,
                 _primjerakMock.Object,
                 _kategorijaMock.Object,
                 new Mock<IHttpClientFactory>().Object,
-                cacheMock.Object,
+                cache,
                 _cacheVersions);
 
             var result = await controller.Korice("1234567890");
@@ -610,27 +601,21 @@ namespace SmartLib.Tests.Unit.APITests
             var httpClientFactoryMock = new Mock<IHttpClientFactory>();
             httpClientFactoryMock.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(httpClient);
 
-            var cacheMock = new Mock<IMemoryCache>();
-            object? cacheOut = null;
-            cacheMock.Setup(c => c.TryGetValue(It.IsAny<object>(), out cacheOut)).Returns(false);
-
-            // IMemoryCache.Set je extension metoda, trebamo mockovati CreateEntry
-            var cacheEntryMock = new Mock<ICacheEntry>();
-            cacheEntryMock.SetupAllProperties();
-            cacheMock.Setup(c => c.CreateEntry(It.IsAny<object>())).Returns(cacheEntryMock.Object);
+            var cache = new MemoryDistributedCache(Options.Create(new MemoryDistributedCacheOptions()));
 
             var controller = new KnjigaController(
                 _knjigaMock.Object,
                 _primjerakMock.Object,
                 _kategorijaMock.Object,
                 httpClientFactoryMock.Object,
-                cacheMock.Object,
+                cache,
                 _cacheVersions);
 
             var result = await controller.Korice("1234567890");
 
             Assert.IsType<FileContentResult>(result);
-            cacheMock.Verify(c => c.CreateEntry(It.IsAny<object>()), Times.Once);
+            var cached = await cache.GetAsync("cover_1234567890_M");
+            Assert.NotNull(cached);
         }
 
         // ── Create — ModelState invalid ───────────────────────────────────────────

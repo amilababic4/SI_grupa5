@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Caching.Distributed;
 using SmartLib.Core.DTOs;
 using SmartLib.Core.Interfaces;
 using SmartLib.Core.Models;
@@ -17,16 +17,17 @@ namespace SmartLib.API.Controllers
         private readonly IPrimjerakRepository _primjerakRepository;
         private readonly IKategorijaRepository _kategorijaRepository;
         private readonly IHttpClientFactory _httpClientFactory;
-        private readonly IMemoryCache _cache;
+        private readonly IDistributedCache _cache;
         private readonly CacheVersionStore _cacheVersions;
-        private static readonly TimeSpan ApiBooksCacheTtl = TimeSpan.FromMinutes(2);
+        private static readonly TimeSpan ApiBooksCacheTtl = TimeSpan.FromHours(1);
+        private static readonly TimeSpan CoverCacheTtl = TimeSpan.FromHours(1);
 
         public KnjigaController(
             IKnjigaRepository knjigaRepository,
             IPrimjerakRepository primjerakRepository,
             IKategorijaRepository kategorijaRepository,
             IHttpClientFactory httpClientFactory,
-            IMemoryCache cache,
+            IDistributedCache cache,
             CacheVersionStore cacheVersions)
         {
             _knjigaRepository = knjigaRepository;
@@ -57,7 +58,8 @@ namespace SmartLib.API.Controllers
             }
             var cacheKey = $"cover_{normalizedIsbn}_{size}";
 
-            if (_cache.TryGetValue(cacheKey, out byte[] cachedImage))
+            var cachedImage = await _cache.GetBytesAsync(cacheKey);
+            if (cachedImage != null && cachedImage.Length > 0)
             {
                 return File(cachedImage, "image/jpeg");
             }
@@ -81,7 +83,7 @@ namespace SmartLib.API.Controllers
                     // Osiguranje za lažni 200 OK: ako je slika prazna ili premala
                     if (imageBytes != null && imageBytes.Length > 100)
                     {
-                        _cache.Set(cacheKey, imageBytes, TimeSpan.FromHours(24));
+                        await _cache.SetBytesAsync(cacheKey, imageBytes, CoverCacheTtl);
                         return File(imageBytes, "image/jpeg");
                     }
                 }
@@ -106,7 +108,8 @@ namespace SmartLib.API.Controllers
             var authorKey = NormalizeCachePart(autor);
             var cacheKey = $"api_books_v1_{_cacheVersions.BooksVersion}_{_cacheVersions.CategoriesVersion}_{titleKey}_{authorKey}_{page}_{pageSize}";
 
-            if (_cache.TryGetValue(cacheKey, out KnjigaListResponse? cached) && cached != null)
+            var cached = await _cache.GetRecordAsync<KnjigaListResponse>(cacheKey);
+            if (cached != null)
             {
                 return Ok(cached);
             }
@@ -122,7 +125,7 @@ namespace SmartLib.API.Controllers
                 UkupnoStranica = (int)Math.Ceiling((double)ukupno / pageSize)
             };
 
-            _cache.Set(cacheKey, response, ApiBooksCacheTtl);
+            await _cache.SetRecordAsync(cacheKey, response, ApiBooksCacheTtl);
             return Ok(response);
         }
 
@@ -131,7 +134,8 @@ namespace SmartLib.API.Controllers
         public async Task<ActionResult<KnjigaDto>> GetById(int id)
         {
             var cacheKey = $"api_book_{id}_v1_{_cacheVersions.BooksVersion}_{_cacheVersions.CategoriesVersion}";
-            if (_cache.TryGetValue(cacheKey, out KnjigaDto? cached) && cached != null)
+            var cached = await _cache.GetRecordAsync<KnjigaDto>(cacheKey);
+            if (cached != null)
             {
                 return Ok(cached);
             }
@@ -140,7 +144,7 @@ namespace SmartLib.API.Controllers
             if (knjiga == null) return NotFound();
 
             var dto = MapToDto(knjiga);
-            _cache.Set(cacheKey, dto, ApiBooksCacheTtl);
+            await _cache.SetRecordAsync(cacheKey, dto, ApiBooksCacheTtl);
             return Ok(dto);
         }
 
