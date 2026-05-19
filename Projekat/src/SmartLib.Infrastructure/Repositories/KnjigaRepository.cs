@@ -143,10 +143,17 @@ namespace SmartLib.Infrastructure.Repositories
             var take = Math.Min(count, total);
             if (take == total)
             {
-                return await _db.Knjige
+                var all = await _db.Knjige
                     .Include(k => k.Kategorija)
                     .AsNoTracking()
                     .ToListAsync();
+                // Fisher-Yates shuffle za pravu randomizaciju
+                for (int i = all.Count - 1; i > 0; i--)
+                {
+                    int j = Random.Shared.Next(i + 1);
+                    (all[i], all[j]) = (all[j], all[i]);
+                }
+                return all;
             }
 
             var minId = await _db.Knjige.MinAsync(k => k.Id);

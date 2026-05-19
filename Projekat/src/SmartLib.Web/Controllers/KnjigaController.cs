@@ -203,12 +203,6 @@ namespace SmartLib.Web.Controllers
             var userId = GetUserId();
             if (userId == null) return Forbid();
 
-            var cacheKey = $"explore_v1_{userId.Value}_{_cacheVersions.BooksVersion}_{_cacheVersions.CategoriesVersion}";
-            if (_cache.TryGetValue(cacheKey, out ExploreViewModel? cachedModel) && cachedModel != null)
-            {
-                return View(cachedModel);
-            }
-
             var history = await _zaduzenjeRepository.GetHistoryByKorisnikAsync(userId.Value);
             var historyCategories = history
                 .Select(z => z.Primjerak?.Knjiga?.Kategorija?.Naziv)
@@ -248,10 +242,10 @@ namespace SmartLib.Web.Controllers
             var preferredBudget = (int)Math.Ceiling(totalTarget * 0.8);
             var surpriseBudget = totalTarget - preferredBudget;
 
-            // Dohvatamo veći skup random knjiga iz baze da bismo imali bogat izbor unikatnih knjiga
+            // Dohvatamo sve knjige i shufflujemo ih svježe svaki put
             var allRandom = await _knjigaRepository.GetRandomAsync(50);
             
-            // Osiguravamo unikatnost knjiga po Naslovu i Autoru u samom poolu
+            // Osiguravamo unikatnost knjiga po Naslovu i Autoru
             var uniquePool = new List<Knjiga>();
             var seenPool = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             foreach (var b in allRandom)
@@ -262,6 +256,13 @@ namespace SmartLib.Web.Controllers
                 {
                     uniquePool.Add(b);
                 }
+            }
+
+            // Pravi shuffle (Fisher-Yates) za potpunu randomizaciju svakog zahtjeva
+            for (int i = uniquePool.Count - 1; i > 0; i--)
+            {
+                int j = Random.Shared.Next(i + 1);
+                (uniquePool[i], uniquePool[j]) = (uniquePool[j], uniquePool[i]);
             }
 
             var preferredBooks = uniquePool
@@ -362,8 +363,6 @@ namespace SmartLib.Web.Controllers
                 PreferredCategories = preferredCategories,
                 SurpriseCategories = surpriseCategories
             };
-
-            _cache.Set(cacheKey, model, ExploreCacheTtl);
 
             return View(model);
         }
