@@ -1,4 +1,4 @@
-using Microsoft.Playwright;
+﻿using Microsoft.Playwright;
 using Microsoft.Playwright.NUnit;
 using NUnit.Framework;
 
@@ -12,7 +12,7 @@ public sealed class KatalogUiTests : SmartLibUiTest
         await Page.GotoAsync("/Auth/Login");
         await Page.GetByLabel("Email").FillAsync(UiTestSettings.MemberEmail);
         await Page.GetByLabel("Lozinka").FillAsync(UiTestSettings.SharedSeedPassword);
-        await Page.GetByRole(AriaRole.Button, new() { Name = "Prijavi se" }).ClickAsync();
+        await Page.RunAndWaitForNavigationAsync(async () => { await Page.GetByRole(AriaRole.Button, new() { Name = "Prijavi se" }).ClickAsync(); });
 
         await Page.GotoAsync("/Knjiga");
 

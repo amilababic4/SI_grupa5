@@ -13,7 +13,7 @@ public sealed class HomeUiTests : SmartLibUiTest
         await Page.GotoAsync("/");
 
         await Expect(Page).ToHaveTitleAsync(new Regex("SmartLib", RegexOptions.IgnoreCase));
-        await Expect(Page.GetByRole(AriaRole.Heading, new() { Name = "SmartLib" })).ToBeVisibleAsync();
+        await Expect(Page.GetByRole(AriaRole.Heading, new() { Name = "SmartLib", Exact = true })).ToBeVisibleAsync();
         // "Prijava" substring-matches "Prijava u sistem" unless Exact = true
         await Expect(Page.GetByRole(AriaRole.Link, new() { Name = "Prijava", Exact = true })).ToBeVisibleAsync();
         await Expect(Page.GetByRole(AriaRole.Link, new() { Name = "Prijava u sistem" })).ToBeVisibleAsync();

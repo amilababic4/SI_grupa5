@@ -19,6 +19,7 @@ namespace SmartLib.Infrastructure.Repositories
         {
             return await _db.Kategorije
                 .Include(k => k.Knjige)
+                .AsNoTracking()
                 .OrderBy(k => k.Naziv)
                 .ToListAsync();
         }
@@ -27,6 +28,7 @@ namespace SmartLib.Infrastructure.Repositories
         {
             return await _db.Kategorije
                 .Include(k => k.Knjige)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(k => k.Id == id);
         }
 
@@ -43,7 +45,7 @@ namespace SmartLib.Infrastructure.Repositories
             await _db.SaveChangesAsync();
         }
 
-        // US-32 + US-34: Vraæa false ako kategorija ima knjige
+        // US-32 + US-34: Vraï¿½a false ako kategorija ima knjige
         public async Task<bool> DeleteAsync(int id)
         {
             var kategorija = await _db.Kategorije.FindAsync(id);

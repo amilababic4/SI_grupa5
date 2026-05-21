@@ -18,6 +18,7 @@ namespace SmartLib.Tests.Unit.WebTests
         private readonly Mock<IKorisnikRepository> _korisnikRepo;
         private readonly Mock<IKnjigaRepository> _knjigaRepo;
         private readonly Mock<IPrimjerakRepository> _primjerakRepo;
+        private readonly Mock<IRezervacijaRepository> _rezervacijaRepo;
         private readonly CacheVersionStore _cacheVersions;
         private readonly ZaduzenjeController _controller;
 
@@ -27,6 +28,7 @@ namespace SmartLib.Tests.Unit.WebTests
             _korisnikRepo = new Mock<IKorisnikRepository>();
             _knjigaRepo = new Mock<IKnjigaRepository>();
             _primjerakRepo = new Mock<IPrimjerakRepository>();
+            _rezervacijaRepo = new Mock<IRezervacijaRepository>();
             _cacheVersions = new CacheVersionStore();
 
             _controller = new ZaduzenjeController(
@@ -34,6 +36,7 @@ namespace SmartLib.Tests.Unit.WebTests
                 _korisnikRepo.Object,
                 _knjigaRepo.Object,
                 _primjerakRepo.Object,
+                _rezervacijaRepo.Object,
                 _cacheVersions);
 
             var httpContext = new DefaultHttpContext();

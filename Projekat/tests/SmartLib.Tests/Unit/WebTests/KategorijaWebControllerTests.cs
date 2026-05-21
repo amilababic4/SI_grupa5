@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
 using Moq;
 using SmartLib.Core.Interfaces;
 using SmartLib.Core.Models;
@@ -22,19 +24,19 @@ namespace SmartLib.Tests.Unit.WebTests
     public class KategorijaWebControllerTests
     {
         private readonly Mock<IKategorijaRepository> _kategorijaMock;
-        private readonly IMemoryCache _memoryCache;
+        private readonly IDistributedCache _cache;
         private readonly CacheVersionStore _cacheVersions;
         private readonly KategorijaController _controller;
 
         public KategorijaWebControllerTests()
         {
             _kategorijaMock = new Mock<IKategorijaRepository>();
-            _memoryCache = new MemoryCache(new MemoryCacheOptions());
+            _cache = new MemoryDistributedCache(Options.Create(new MemoryDistributedCacheOptions()));
             _cacheVersions = new CacheVersionStore();
 
             _controller = new KategorijaController(
                 _kategorijaMock.Object,
-                _memoryCache,
+                _cache,
                 _cacheVersions);
 
             var httpContext = new DefaultHttpContext();

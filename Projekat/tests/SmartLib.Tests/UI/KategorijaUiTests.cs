@@ -13,7 +13,7 @@ public sealed class KategorijaUiTests : SmartLibUiTest
         await Page.GotoAsync("/Auth/Login");
         await Page.GetByLabel("Email").FillAsync(UiTestSettings.LibrarianEmail);
         await Page.GetByLabel("Lozinka").FillAsync(UiTestSettings.SharedSeedPassword);
-        await Page.GetByRole(AriaRole.Button, new() { Name = "Prijavi se" }).ClickAsync();
+        await Page.RunAndWaitForNavigationAsync(async () => { await Page.GetByRole(AriaRole.Button, new() { Name = "Prijavi se" }).ClickAsync(); });
     }
 
     /// <summary>

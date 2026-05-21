@@ -64,11 +64,11 @@
     <div class="katalog-page-size">
         <label for="pageSizeSelect">📖 Prikaži:</label>
         <select id="pageSizeSelect" aria-label="Broj knjiga po stranici">
-            <option value="8" @(Model.VelicinaStrane == 8 ? "selected" : "")>8 knjiga</option>
-            <option value="12" @(Model.VelicinaStrane == 12 ? "selected" : "")>12 knjiga</option>
-            <option value="16" @(Model.VelicinaStrane == 16 ? "selected" : "")>16 knjiga</option>
-            <option value="20" @(Model.VelicinaStrane == 20 ? "selected" : "")>20 knjiga</option>
-            <option value="24" @(Model.VelicinaStrane == 24 ? "selected" : "")>24 knjiga</option>
+            <option value="8" selected="@(Model.VelicinaStrane == 8)">8 knjiga</option>
+            <option value="12" selected="@(Model.VelicinaStrane == 12)">12 knjiga</option>
+            <option value="16" selected="@(Model.VelicinaStrane == 16)">16 knjiga</option>
+            <option value="20" selected="@(Model.VelicinaStrane == 20)">20 knjiga</option>
+            <option value="24" selected="@(Model.VelicinaStrane == 24)">24 knjiga</option>
         </select>
     </div>
 </div>

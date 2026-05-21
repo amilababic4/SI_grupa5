@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
@@ -24,6 +24,7 @@ namespace SmartLib.Tests.Unit.APITests
         private readonly Mock<IKorisnikRepository> _korisnikRepoMock;
         private readonly Mock<IKnjigaRepository> _knjigaRepoMock;
         private readonly Mock<IPrimjerakRepository> _primjerakRepoMock;
+        private readonly Mock<IRezervacijaRepository> _rezervacijaRepoMock;
         private readonly ZaduzenjeController _controller;
         private readonly CacheVersionStore _cacheVersions;
 
@@ -33,6 +34,7 @@ namespace SmartLib.Tests.Unit.APITests
             _korisnikRepoMock = new Mock<IKorisnikRepository>();
             _knjigaRepoMock = new Mock<IKnjigaRepository>();
             _primjerakRepoMock = new Mock<IPrimjerakRepository>();
+            _rezervacijaRepoMock = new Mock<IRezervacijaRepository>();
             _cacheVersions = new CacheVersionStore();
 
             _controller = new ZaduzenjeController(
@@ -40,6 +42,7 @@ namespace SmartLib.Tests.Unit.APITests
                 _korisnikRepoMock.Object,
                 _knjigaRepoMock.Object,
                 _primjerakRepoMock.Object,
+                _rezervacijaRepoMock.Object,
                 _cacheVersions);
         }
 

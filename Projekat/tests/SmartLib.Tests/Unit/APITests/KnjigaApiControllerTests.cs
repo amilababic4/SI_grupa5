@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using Moq;
 using Moq.Protected;
@@ -173,7 +174,7 @@ namespace SmartLib.Tests.Unit.APITests
             var result = await _controller.GetAll(null, null, 2, 10);
 
             var ok = Assert.IsType<OkObjectResult>(result.Result);
-            var json = ok.Value!.ToString();
+            var json = System.Text.Json.JsonSerializer.Serialize(ok.Value);
             Assert.Contains("25", json); // UkupnoStavki
         }
 

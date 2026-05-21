@@ -104,7 +104,7 @@ namespace SmartLib.Tests.Integration
 
         private async Task<HttpClient> DrugiclanClientAsync()
         {
-            var token = await GetTokenAsync("drugiClan@testlib.ba", "Test123!");
+            var token = await GetTokenAsync("drugiclan@testlib.ba", "Test123!");
             var client = _factory.CreateClient();
             client.DefaultRequestHeaders.Authorization =
                 new AuthenticationHeaderValue("Bearer", token);
@@ -242,14 +242,14 @@ namespace SmartLib.Tests.Integration
             IntegrationTestAccountSeeder.EnsureTestAccounts(db);
 
             // Dodaj drugog clana za testove tuđe rezervacije
-            if (!db.Korisnici.Any(k => k.Email == "drugiClan@testlib.ba"))
+            if (!db.Korisnici.Any(k => k.Email == "drugiclan@testlib.ba"))
             {
                 var hash = SmartLib.Infrastructure.Security.PasswordHasher.HashPassword("Test123!");
                 db.Korisnici.Add(new Korisnik
                 {
                     Ime = "Drugi",
                     Prezime = "Clan",
-                    Email = "drugiClan@testlib.ba",
+                    Email = "drugiclan@testlib.ba",
                     LozinkaHash = hash,
                     UlogaId = 1,
                     Status = "aktivan",

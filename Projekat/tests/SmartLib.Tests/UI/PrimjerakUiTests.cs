@@ -15,7 +15,7 @@ public sealed class PrimjerakUiTests : SmartLibUiTest
         await Page.GotoAsync("/Auth/Login");
         await Page.GetByLabel("Email").FillAsync(UiTestSettings.LibrarianEmail);
         await Page.GetByLabel("Lozinka").FillAsync(UiTestSettings.SharedSeedPassword);
-        await Page.GetByRole(AriaRole.Button, new() { Name = "Prijavi se" }).ClickAsync();
+        await Page.RunAndWaitForNavigationAsync(async () => { await Page.GetByRole(AriaRole.Button, new() { Name = "Prijavi se" }).ClickAsync(); });
     }
 
     private async Task LoginAsMember()
@@ -23,7 +23,7 @@ public sealed class PrimjerakUiTests : SmartLibUiTest
         await Page.GotoAsync("/Auth/Login");
         await Page.GetByLabel("Email").FillAsync(UiTestSettings.MemberEmail);
         await Page.GetByLabel("Lozinka").FillAsync(UiTestSettings.SharedSeedPassword);
-        await Page.GetByRole(AriaRole.Button, new() { Name = "Prijavi se" }).ClickAsync();
+        await Page.RunAndWaitForNavigationAsync(async () => { await Page.GetByRole(AriaRole.Button, new() { Name = "Prijavi se" }).ClickAsync(); });
     }
 
     /// <summary>
