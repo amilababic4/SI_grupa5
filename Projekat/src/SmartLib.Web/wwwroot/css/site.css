@@ -3947,6 +3947,21 @@ body.home-page footer {
     background: rgba(255, 255, 255, 0.03);
 }
 
+[data-theme="dark"] .uredi-section--lozinka {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+}
+
+[data-theme="dark"] .uredi-section--lozinka .uredi-section-title {
+    color: #e2e8f0;
+}
+
+[data-theme="dark"] .uredi-section--lozinka .uredi-optional,
+[data-theme="dark"] .uredi-section--lozinka .uredi-hint {
+    color: #64748b;
+}
+
 [data-theme="dark"] .details-label {
     color: #64748b;
 }
@@ -4000,6 +4015,15 @@ body.home-page footer {
 [data-theme="dark"] .form-group textarea {
     background: rgba(255, 255, 255, 0.05);
     border-color: rgba(255, 255, 255, 0.1);
+    color: #e2e8f0;
+}
+
+[data-theme="dark"] .form-group select {
+    color-scheme: dark;
+}
+
+[data-theme="dark"] .form-group select option {
+    background: #0f172a;
     color: #e2e8f0;
 }
 
