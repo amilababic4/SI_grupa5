@@ -1,0 +1,91 @@
+@model IEnumerable<SmartLib.Core.DTOs.RezervacijaViewModel>
+@{
+    ViewData["Title"] = "Moje rezervacije";
+}
+
+<div class="katalog-header">
+    <h2>Moje rezervacije</h2>
+    <a asp-controller="Knjiga" asp-action="Index" class="btn btn-secondary">Katalog knjiga</a>
+</div>
+
+@if (TempData["SuccessMessage"] is string successMsg)
+{
+    <div class="alert alert-success">@successMsg</div>
+}
+@if (TempData["ErrorMessage"] is string errorMsg)
+{
+    <div class="alert alert-error">@errorMsg</div>
+}
+@if (Model.Any(r => r.KnjigaDostupna))
+{
+    <div class="alert alert-success">
+        Jedna ili više rezervisanih knjiga je sada dostupna za preuzimanje. Posjetite biblioteku što prije.
+    </div>
+}
+
+@if (!Model.Any())
+{
+    <div class="card katalog-empty">
+        <p>Nema aktivnih rezervacija.</p>
+    </div>
+}
+else
+{
+    <div class="card katalog-card">
+        <div class="katalog-table-wrap">
+            <table class="katalog-table">
+                <thead>
+                    <tr>
+                        <th>Knjiga</th>
+                        <th>Rezervisano</th>
+                        <th>Važi do</th>
+                        <th>Status</th>
+                        <th>Akcije</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var r in Model)
+                    {
+                        var jeIstekla = r.DatumIsteka.HasValue && r.DatumIsteka.Value < DateTime.UtcNow;
+                        <tr>
+                            <td data-label="Knjiga"><strong>@r.KnjigaNaslov</strong></td>
+                            <td data-label="Rezervisano">@r.DatumRezervacije.ToLocalTime().ToString("dd.MM.yyyy")</td>
+                            <td data-label="Važi do">
+                                @if (r.DatumIsteka.HasValue)
+                                {
+                                    <span class="@(jeIstekla ? "status-kasni" : "")">
+                                        @r.DatumIsteka.Value.ToLocalTime().ToString("dd.MM.yyyy")
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span>—</span>
+                                }
+                            </td>
+                            <td data-label="Status">
+                                @if (r.KnjigaDostupna)
+                                {
+                                    <span class="status-dostupan" title="Knjiga je dostupna za preuzimanje">
+                                        Dostupna za preuzimanje
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="status-blizi">čeka se</span>
+                                }
+                            </td>
+                            <td data-label="Akcije" class="katalog-actions">
+                                <form asp-action="Otkazi" method="post"
+                                      onsubmit="return confirm('Otkazati rezervaciju za knjigu: @r.KnjigaNaslov?');">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@r.Id" />
+                                    <button type="submit" class="btn btn-danger btn-sm">Otkaži</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

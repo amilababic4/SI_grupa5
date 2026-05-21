@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using SmartLib.Core.Models;
 using SmartLib.Infrastructure.Data;
 using Xunit;
 
@@ -16,6 +17,14 @@ namespace SmartLib.Tests.Integration
     public class RezervacijaTestFixture : WebApplicationFactory<Program>
     {
         private readonly string _dbName = "RezervacijaTestDb_" + Guid.NewGuid();
+
+        public int KnjigaBezDostupnihId { get; private set; }
+        public int KnjigaSaDostupnimId { get; private set; }
+        public int KnjigaSaRezervacijomId { get; private set; }
+        // Rezervacija na KnjigaSaRezervacijomId — koristi se samo za duplikat test, NE otkazivati
+        public int DuplikatRezervacijaId { get; private set; }
+        // Rezervacija na posebnoj knjizi — koristi se za testove otkazivanja
+        public int OtkazRezervacijaId { get; private set; }
 
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
@@ -46,7 +55,12 @@ namespace SmartLib.Tests.Integration
             using var scope = host.Services.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             db.Database.EnsureCreated();
-            RezervacijaDbSeeder.Seed(db);
+            var ids = RezervacijaDbSeeder.Seed(db);
+            KnjigaBezDostupnihId = ids.knjigaBezDostupnihId;
+            KnjigaSaDostupnimId = ids.knjigaSaDostupnimId;
+            KnjigaSaRezervacijomId = ids.knjigaSaRezervacijomId;
+            DuplikatRezervacijaId = ids.duplikatRezervacijaId;
+            OtkazRezervacijaId = ids.otkazRezervacijaId;
 
             return host;
         }
@@ -88,11 +102,13 @@ namespace SmartLib.Tests.Integration
             return client;
         }
 
-        private static async Task AssertTodoResponseAsync(HttpResponseMessage resp)
+        private async Task<HttpClient> DrugiclanClientAsync()
         {
-            Assert.Equal(HttpStatusCode.OK, resp.StatusCode);
-            var doc = JsonDocument.Parse(await resp.Content.ReadAsStringAsync());
-            Assert.Equal("TODO", doc.RootElement.GetProperty("message").GetString());
+            var token = await GetTokenAsync("drugiClan@testlib.ba", "Test123!");
+            var client = _factory.CreateClient();
+            client.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("Bearer", token);
+            return client;
         }
 
         // ─── GET /api/rezervacija ──────────────────────────────────────
@@ -105,19 +121,21 @@ namespace SmartLib.Tests.Integration
         }
 
         [Fact]
-        public async Task GetActive_KaoClan_Vraca200TODO()
-        {
-            var client = await ClanClientAsync();
-            var resp = await client.GetAsync("/api/rezervacija");
-            await AssertTodoResponseAsync(resp);
-        }
-
-        [Fact]
-        public async Task GetActive_KaoBibliotekar_Vraca200TODO()
+        public async Task GetActive_KaoBibliotekar_VracaAktivneRezervacije()
         {
             var client = await BibliotekarClientAsync();
             var resp = await client.GetAsync("/api/rezervacija");
-            await AssertTodoResponseAsync(resp);
+            Assert.Equal(HttpStatusCode.OK, resp.StatusCode);
+            var doc = JsonDocument.Parse(await resp.Content.ReadAsStringAsync());
+            Assert.Equal(JsonValueKind.Array, doc.RootElement.ValueKind);
+        }
+
+        [Fact]
+        public async Task GetActive_KaoClan_Vraca403()
+        {
+            var client = await ClanClientAsync();
+            var resp = await client.GetAsync("/api/rezervacija");
+            Assert.Equal(HttpStatusCode.Forbidden, resp.StatusCode);
         }
 
         // ─── GET /api/rezervacija/moje ────────────────────────────────
@@ -130,11 +148,15 @@ namespace SmartLib.Tests.Integration
         }
 
         [Fact]
-        public async Task GetMine_KaoClan_Vraca200TODO()
+        public async Task GetMine_KaoClan_VracaSamoVlastiteRezervacije()
         {
             var client = await ClanClientAsync();
             var resp = await client.GetAsync("/api/rezervacija/moje");
-            await AssertTodoResponseAsync(resp);
+            Assert.Equal(HttpStatusCode.OK, resp.StatusCode);
+            var doc = JsonDocument.Parse(await resp.Content.ReadAsStringAsync());
+            Assert.Equal(JsonValueKind.Array, doc.RootElement.ValueKind);
+            // Clan ima jednu aktivnu rezervaciju (za KnjigaSaRezervacijomId)
+            Assert.True(doc.RootElement.GetArrayLength() >= 1);
         }
 
         // ─── POST /api/rezervacija ──────────────────────────────────────
@@ -147,11 +169,33 @@ namespace SmartLib.Tests.Integration
         }
 
         [Fact]
-        public async Task Create_KaoClan_Vraca200TODO()
+        public async Task Create_KnjigaSaDostupnimPrimjercima_Vraca400()
         {
             var client = await ClanClientAsync();
-            var resp = await client.PostAsync("/api/rezervacija", null);
-            await AssertTodoResponseAsync(resp);
+            var resp = await client.PostAsJsonAsync("/api/rezervacija",
+                new { knjigaId = _factory.KnjigaSaDostupnimId });
+            Assert.Equal(HttpStatusCode.BadRequest, resp.StatusCode);
+        }
+
+        [Fact]
+        public async Task Create_KnjigaBezDostupnih_Vraca201()
+        {
+            var client = await ClanClientAsync();
+            var resp = await client.PostAsJsonAsync("/api/rezervacija",
+                new { knjigaId = _factory.KnjigaBezDostupnihId });
+            Assert.Equal(HttpStatusCode.Created, resp.StatusCode);
+            var doc = JsonDocument.Parse(await resp.Content.ReadAsStringAsync());
+            Assert.True(doc.RootElement.GetProperty("id").GetInt32() > 0);
+        }
+
+        [Fact]
+        public async Task Create_DuplikatAktivneRezervacije_Vraca409()
+        {
+            var client = await ClanClientAsync();
+            // KnjigaSaRezervacijomId već ima aktivnu rezervaciju od ovog člana (seeded)
+            var resp = await client.PostAsJsonAsync("/api/rezervacija",
+                new { knjigaId = _factory.KnjigaSaRezervacijomId });
+            Assert.Equal(HttpStatusCode.Conflict, resp.StatusCode);
         }
 
         // ─── DELETE /api/rezervacija/{id} ───────────────────────────────
@@ -164,19 +208,144 @@ namespace SmartLib.Tests.Integration
         }
 
         [Fact]
-        public async Task Cancel_KaoClan_Vraca200TODO()
+        public async Task Cancel_VlastikaRezervacija_Vraca200()
         {
             var client = await ClanClientAsync();
-            var resp = await client.DeleteAsync("/api/rezervacija/1");
-            await AssertTodoResponseAsync(resp);
+            var resp = await client.DeleteAsync($"/api/rezervacija/{_factory.OtkazRezervacijaId}");
+            Assert.Equal(HttpStatusCode.OK, resp.StatusCode);
+            var doc = JsonDocument.Parse(await resp.Content.ReadAsStringAsync());
+            Assert.NotNull(doc.RootElement.GetProperty("poruka").GetString());
+        }
+
+        [Fact]
+        public async Task Cancel_TudaRezervacija_Vraca403()
+        {
+            // Drugi clan pokušava otkazati rezervaciju prvog clana
+            var client = await DrugiclanClientAsync();
+            var resp = await client.DeleteAsync($"/api/rezervacija/{_factory.OtkazRezervacijaId}");
+            Assert.Equal(HttpStatusCode.Forbidden, resp.StatusCode);
+        }
+
+        [Fact]
+        public async Task Cancel_NepostojecaRezervacija_Vraca404()
+        {
+            var client = await ClanClientAsync();
+            var resp = await client.DeleteAsync("/api/rezervacija/999999");
+            Assert.Equal(HttpStatusCode.NotFound, resp.StatusCode);
         }
     }
 
     internal static class RezervacijaDbSeeder
     {
-        public static void Seed(ApplicationDbContext db)
+        public static (int knjigaBezDostupnihId, int knjigaSaDostupnimId, int knjigaSaRezervacijomId, int duplikatRezervacijaId, int otkazRezervacijaId) Seed(ApplicationDbContext db)
         {
             IntegrationTestAccountSeeder.EnsureTestAccounts(db);
+
+            // Dodaj drugog clana za testove tuđe rezervacije
+            if (!db.Korisnici.Any(k => k.Email == "drugiClan@testlib.ba"))
+            {
+                var hash = SmartLib.Infrastructure.Security.PasswordHasher.HashPassword("Test123!");
+                db.Korisnici.Add(new Korisnik
+                {
+                    Ime = "Drugi",
+                    Prezime = "Clan",
+                    Email = "drugiClan@testlib.ba",
+                    LozinkaHash = hash,
+                    UlogaId = 1,
+                    Status = "aktivan",
+                    DatumKreiranja = DateTime.UtcNow
+                });
+                db.SaveChanges();
+            }
+
+            var clan = db.Korisnici.First(k => k.Email == "clan@smartlib.ba");
+
+            // Kategorija
+            var kat = db.Kategorije.FirstOrDefault();
+            if (kat == null)
+            {
+                kat = new Kategorija { Naziv = "Test kategorija", Opis = "Za testove" };
+                db.Kategorije.Add(kat);
+                db.SaveChanges();
+            }
+
+            // Knjiga 1: nema dostupnih primjeraka, bez rezervacije — za kreiranje
+            var knjiga1 = new Knjiga
+            {
+                Naslov = "Test knjiga bez dostupnih",
+                Autor = "Test autor",
+                Isbn = "9780000000001",
+                KategorijaId = kat.Id,
+                GodinaIzdanja = 2024
+            };
+            db.Knjige.Add(knjiga1);
+            db.SaveChanges();
+            db.Primjerci.Add(new Primjerak { KnjigaId = knjiga1.Id, InventarniBroj = "INV-T-001", Status = "zadužen" });
+            db.SaveChanges();
+
+            // Knjiga 2: ima dostupan primjerak — za test odbijanja
+            var knjiga2 = new Knjiga
+            {
+                Naslov = "Test knjiga sa dostupnim",
+                Autor = "Test autor",
+                Isbn = "9780000000002",
+                KategorijaId = kat.Id,
+                GodinaIzdanja = 2024
+            };
+            db.Knjige.Add(knjiga2);
+            db.SaveChanges();
+            db.Primjerci.Add(new Primjerak { KnjigaId = knjiga2.Id, InventarniBroj = "INV-T-002", Status = "dostupan" });
+            db.SaveChanges();
+
+            // Knjiga 3: nema dostupnih, ima rezervaciju od clana — za duplikat test (NE otkazivati)
+            var knjiga3 = new Knjiga
+            {
+                Naslov = "Test knjiga sa rezervacijom (duplikat)",
+                Autor = "Test autor",
+                Isbn = "9780000000003",
+                KategorijaId = kat.Id,
+                GodinaIzdanja = 2024
+            };
+            db.Knjige.Add(knjiga3);
+            db.SaveChanges();
+            db.Primjerci.Add(new Primjerak { KnjigaId = knjiga3.Id, InventarniBroj = "INV-T-003", Status = "zadužen" });
+            db.SaveChanges();
+            var duplikatRez = new Rezervacija
+            {
+                KorisnikId = clan.Id,
+                KnjigaId = knjiga3.Id,
+                DatumRezervacije = DateTime.UtcNow,
+                DatumIsteka = DateTime.UtcNow.AddDays(7),
+                Status = "aktivna"
+            };
+            db.Rezervacije.Add(duplikatRez);
+            db.SaveChanges();
+
+            // Knjiga 4: nema dostupnih, ima rezervaciju od clana — isključivo za testove otkazivanja
+            var knjiga4 = new Knjiga
+            {
+                Naslov = "Test knjiga za otkazivanje",
+                Autor = "Test autor",
+                Isbn = "9780000000004",
+                KategorijaId = kat.Id,
+                GodinaIzdanja = 2024
+            };
+            db.Knjige.Add(knjiga4);
+            db.SaveChanges();
+            db.Primjerci.Add(new Primjerak { KnjigaId = knjiga4.Id, InventarniBroj = "INV-T-004", Status = "zadužen" });
+            db.SaveChanges();
+            var otkazRez = new Rezervacija
+            {
+                KorisnikId = clan.Id,
+                KnjigaId = knjiga4.Id,
+                DatumRezervacije = DateTime.UtcNow,
+                DatumIsteka = DateTime.UtcNow.AddDays(7),
+                Status = "aktivna"
+            };
+            db.Rezervacije.Add(otkazRez);
+            db.SaveChanges();
+
+            return (knjiga1.Id, knjiga2.Id, knjiga3.Id, duplikatRez.Id, otkazRez.Id);
         }
     }
 }

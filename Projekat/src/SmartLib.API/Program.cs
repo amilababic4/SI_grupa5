@@ -100,6 +100,7 @@ builder.Services.AddScoped<IKnjigaRepository, KnjigaRepository>();
 builder.Services.AddScoped<IPrimjerakRepository, PrimjerakRepository>();
 builder.Services.AddScoped<IKategorijaRepository, KategorijaRepository>();
 builder.Services.AddScoped<IZaduzenjeRepository, ZaduzenjeRepository>();
+builder.Services.AddScoped<IRezervacijaRepository, RezervacijaRepository>();
 builder.Services.AddHostedService<DeactivatedAccountCleanupService>();
 
 // JWT Authentication - US-07, US-08

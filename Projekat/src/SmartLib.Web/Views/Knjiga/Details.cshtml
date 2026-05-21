@@ -4,6 +4,8 @@
     ViewData["Title"] = Model.Naslov;
     var primjerci = ViewBag.Primjerci as List<Primjerak> ?? new List<Primjerak>();
     bool jeOsoblje = User.IsInRole("Bibliotekar") || User.IsInRole("Administrator");
+    bool jeClan = User.IsInRole("Član");
+    bool imaAktivnuRezervaciju = ViewBag.ImaAktivnuRezervaciju is true;
 }
 
 <div class="details-topbar">
@@ -42,6 +44,28 @@
                             @Html.AntiForgeryToken()
                             <button type="submit" class="btn btn-danger">Obriši</button>
                         </form>
+                    </div>
+                }
+                @if (jeClan && Model.BrojDostupnih == 0)
+                {
+                    <div class="details-actions">
+                        @if (imaAktivnuRezervaciju)
+                        {
+                            <button class="btn btn-secondary" disabled title="Već imate aktivnu rezervaciju za ovu knjigu">
+                                Rezervisano
+                            </button>
+                        }
+                        else
+                        {
+                            <form asp-controller="Rezervacija" asp-action="Create" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="knjigaId" value="@Model.Id" />
+                                <button type="submit" class="btn btn-primary"
+                                        onclick="return confirm('Rezervisati knjigu: @Model.Naslov?')">
+                                    Rezerviši
+                                </button>
+                            </form>
+                        }
                     </div>
                 }
             </div>
