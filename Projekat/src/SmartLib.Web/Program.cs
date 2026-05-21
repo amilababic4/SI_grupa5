@@ -38,6 +38,34 @@ if (envPath != null)
     }
 }
 
+static string? BuildRedisConfiguration()
+{
+    var connString = Environment.GetEnvironmentVariable("UPSTASH_REDIS_CONNECTION_STRING");
+    if (!string.IsNullOrWhiteSpace(connString))
+        return connString;
+
+    var redisUrl = Environment.GetEnvironmentVariable("UPSTASH_REDIS_URL");
+    if (string.IsNullOrWhiteSpace(redisUrl))
+        return null;
+
+    if (!Uri.TryCreate(redisUrl, UriKind.Absolute, out var redisUri))
+        return null;
+
+    var password = Environment.GetEnvironmentVariable("UPSTASH_REDIS_PASSWORD");
+    if (string.IsNullOrWhiteSpace(password) && !string.IsNullOrWhiteSpace(redisUri.UserInfo))
+    {
+        var parts = redisUri.UserInfo.Split(':', 2);
+        if (parts.Length == 2)
+            password = parts[1];
+    }
+
+    if (string.IsNullOrWhiteSpace(password))
+        return null;
+
+    var port = redisUri.Port > 0 ? redisUri.Port : 6379;
+    return $"{redisUri.Host}:{port},password={password},ssl=True,abortConnect=False";
+}
+
 var builder = WebApplication.CreateBuilder(args);
 
 // --------------------
@@ -55,26 +83,21 @@ builder.Services.AddHttpClient();
 builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<CacheVersionStore>();
 
-// Distributed Cache — Upstash Redis u produkciji, memorija lokalno
-var upstashUrl = Environment.GetEnvironmentVariable("UPSTASH_REDIS_REST_URL");
-var upstashToken = Environment.GetEnvironmentVariable("UPSTASH_REDIS_REST_TOKEN");
-if (builder.Environment.IsProduction() &&
-    !string.IsNullOrWhiteSpace(upstashUrl) &&
-    !string.IsNullOrWhiteSpace(upstashToken) &&
-    Uri.TryCreate(upstashUrl, UriKind.Absolute, out var upstashUri))
+// Distributed Cache — Upstash Redis kad su dostupne TCP varijable, memorija lokalno kao fallback
+var redisConfig = BuildRedisConfiguration();
+if (!string.IsNullOrWhiteSpace(redisConfig))
 {
-    var redisConfig = $"{upstashUri.Host}:6379,password={upstashToken},ssl=True,abortConnect=False";
     builder.Services.AddStackExchangeRedisCache(options =>
     {
         options.Configuration = redisConfig;
         options.InstanceName = "smartlib_web:";
     });
-    Console.WriteLine($"[Redis] Connected to Upstash Redis at {upstashUri.Host}");
+    Console.WriteLine("[Redis] Using Upstash Redis distributed cache");
 }
 else
 {
     builder.Services.AddDistributedMemoryCache();
-    Console.WriteLine("[Redis] Using in-memory distributed cache (non-production or missing credentials)");
+    Console.WriteLine("[Redis] Using in-memory distributed cache (missing Redis TCP credentials)");
 }
 
 // Repositories
@@ -285,7 +308,7 @@ app.MapGet("/health/redis", async (IDistributedCache cache) =>
         });
 
         var retrieved = await cache.GetStringAsync(testKey);
-        var isRedis = !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("UPSTASH_REDIS_REST_URL"));
+        var isRedis = !string.IsNullOrWhiteSpace(BuildRedisConfiguration());
         return Results.Ok(new
         {
             status = "Healthy",

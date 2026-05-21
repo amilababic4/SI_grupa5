@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Caching.Distributed;
 using SmartLib.Core.Interfaces;
 using SmartLib.Core.Models;
 using SmartLib.Infrastructure.Services;
@@ -11,13 +11,13 @@ namespace SmartLib.Web.Controllers
     public class KategorijaController : Controller
     {
         private readonly IKategorijaRepository _kategorijaRepository;
-        private readonly IMemoryCache _cache;
+        private readonly IDistributedCache _cache;
         private readonly CacheVersionStore _cacheVersions;
         private static readonly TimeSpan CategoriesCacheTtl = TimeSpan.FromMinutes(5);
 
         public KategorijaController(
             IKategorijaRepository kategorijaRepository,
-            IMemoryCache cache,
+            IDistributedCache cache,
             CacheVersionStore cacheVersions)
         {
             _kategorijaRepository = kategorijaRepository;
@@ -29,13 +29,12 @@ namespace SmartLib.Web.Controllers
         public async Task<IActionResult> Index()
         {
             var cacheKey = $"categories_v1_{_cacheVersions.CategoriesVersion}_{_cacheVersions.BooksVersion}";
-            if (_cache.TryGetValue(cacheKey, out List<Kategorija>? cached) && cached != null)
-            {
+            var cached = await _cache.GetRecordAsync<List<Kategorija>>(cacheKey);
+            if (cached != null)
                 return View(cached);
-            }
 
             var kategorije = (await _kategorijaRepository.GetAllAsync()).ToList();
-            _cache.Set(cacheKey, kategorije, CategoriesCacheTtl);
+            await _cache.SetRecordAsync(cacheKey, kategorije, CategoriesCacheTtl);
             return View(kategorije);
         }
 

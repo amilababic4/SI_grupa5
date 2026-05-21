@@ -5,7 +5,7 @@ using SmartLib.Core.DTOs;
 using SmartLib.Core.Interfaces;
 using SmartLib.Core.Models;
 using SmartLib.Web.Models;
-using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Caching.Distributed;
 using System.Net.Http;
 using System.Security.Claims;
 using System.Text.Json;
@@ -21,14 +21,14 @@ namespace SmartLib.Web.Controllers
         private readonly IKategorijaRepository _kategorijaRepository;
         private readonly IZaduzenjeRepository _zaduzenjeRepository;
         private readonly IHttpClientFactory _httpClientFactory;
-        private readonly IMemoryCache _cache;
+        private readonly IDistributedCache _cache;
         private readonly IConfiguration _configuration;
         private readonly ILogger<KnjigaController> _logger;
         private readonly CacheVersionStore _cacheVersions;
         private static readonly TimeSpan ExploreCacheTtl = TimeSpan.FromMinutes(10);
-        private static readonly TimeSpan CatalogRecommendationCacheTtl = TimeSpan.FromMinutes(2);
-        private static readonly TimeSpan BookIndexCacheTtl = TimeSpan.FromMinutes(2);
-        private static readonly TimeSpan BookDetailsCacheTtl = TimeSpan.FromMinutes(2);
+        private static readonly TimeSpan CatalogRecommendationCacheTtl = TimeSpan.FromMinutes(10);
+        private static readonly TimeSpan BookIndexCacheTtl = TimeSpan.FromMinutes(10);
+        private static readonly TimeSpan BookDetailsCacheTtl = TimeSpan.FromMinutes(10);
 
         public KnjigaController(
             IKnjigaRepository knjigaRepository,
@@ -36,7 +36,7 @@ namespace SmartLib.Web.Controllers
             IKategorijaRepository kategorijaRepository,
             IZaduzenjeRepository zaduzenjeRepository,
             IHttpClientFactory httpClientFactory,
-            IMemoryCache cache,
+            IDistributedCache cache,
             IConfiguration configuration,
             ILogger<KnjigaController> logger,
             CacheVersionStore cacheVersions)
@@ -61,10 +61,9 @@ namespace SmartLib.Web.Controllers
             var normalizedIsbn = NormalizeIsbn(isbn);
             var cacheKey = $"cover_{normalizedIsbn}_{size}";
 
-            if (_cache.TryGetValue(cacheKey, out byte[]? cachedImage) && cachedImage != null)
-            {
+            var cachedImage = await _cache.GetBytesAsync(cacheKey);
+            if (cachedImage != null && cachedImage.Length > 0)
                 return File(cachedImage, "image/jpeg");
-            }
 
             try
             {
@@ -87,7 +86,7 @@ namespace SmartLib.Web.Controllers
                     // ili prazan piksel. Te slike su obično manje od 3KB.
                     if (imageBytes != null && imageBytes.Length > 3000)
                     {
-                        _cache.Set(cacheKey, imageBytes, TimeSpan.FromHours(24));
+                        await _cache.SetBytesAsync(cacheKey, imageBytes, TimeSpan.FromHours(24));
                         return File(imageBytes, "image/jpeg");
                     }
                 }
@@ -123,7 +122,7 @@ namespace SmartLib.Web.Controllers
                                         // Odbacujemo sve ispod 4500 bajtova kako bismo izbjegli placeholder.
                                         if (gbBytes != null && gbBytes.Length > 4500)
                                         {
-                                            _cache.Set(cacheKey, gbBytes, TimeSpan.FromHours(24));
+                                            await _cache.SetBytesAsync(cacheKey, gbBytes, TimeSpan.FromHours(24));
                                             return File(gbBytes, "image/jpeg");
                                         }
                                     }
@@ -160,10 +159,9 @@ namespace SmartLib.Web.Controllers
             var authorKey = NormalizeCachePart(autor);
             var cacheKey = $"books_index_v1_{booksVersion}_{categoriesVersion}_{titleKey}_{authorKey}_{page}_{pageSize}";
 
-            if (_cache.TryGetValue(cacheKey, out KatalogViewModel? cachedModel) && cachedModel != null)
-            {
+            var cachedModel = await _cache.GetRecordAsync<KatalogViewModel>(cacheKey);
+            if (cachedModel != null)
                 return View(cachedModel);
-            }
 
             var (knjige, ukupno) = await _knjigaRepository.GetPagedAsync(naslov, autor, page, pageSize);
 
@@ -193,7 +191,7 @@ namespace SmartLib.Web.Controllers
                 Autor = autor
             };
 
-            _cache.Set(cacheKey, model, BookIndexCacheTtl);
+            await _cache.SetRecordAsync(cacheKey, model, BookIndexCacheTtl);
 
             return View(model);
         }
@@ -293,7 +291,8 @@ namespace SmartLib.Web.Controllers
                 if (!string.IsNullOrWhiteSpace(opis))
                 {
                     var transCacheKey = $"desc_trans_{book.Id}";
-                    if (_cache.TryGetValue(transCacheKey, out string? cachedTrans) && !string.IsNullOrWhiteSpace(cachedTrans))
+                    var cachedTrans = await _cache.GetRecordAsync<string>(transCacheKey);
+                    if (!string.IsNullOrWhiteSpace(cachedTrans))
                     {
                         descriptions.Add(cachedTrans);
                     }
@@ -301,7 +300,7 @@ namespace SmartLib.Web.Controllers
                     {
                         var translated = await TranslateToBosnianAsync(opis);
                         var finalText = string.IsNullOrWhiteSpace(translated) ? opis : translated;
-                        _cache.Set(transCacheKey, finalText, TimeSpan.FromHours(24));
+                        await _cache.SetRecordAsync(transCacheKey, finalText, TimeSpan.FromHours(24));
                         descriptions.Add(finalText);
                     }
                 }
@@ -378,10 +377,9 @@ namespace SmartLib.Web.Controllers
                     : category.Trim().ToLowerInvariant();
                 var cacheKey = $"catalog_reco_{normalizedCategory}_{_cacheVersions.BooksVersion}_{_cacheVersions.CategoriesVersion}";
 
-                if (_cache.TryGetValue(cacheKey, out CatalogRecommendationResponse? cached) && cached != null)
-                {
+                var cached = await _cache.GetRecordAsync<CatalogRecommendationResponse>(cacheKey);
+                if (cached != null)
                     return Json(cached);
-                }
 
                 var books = await _knjigaRepository.GetRandomAsync(50);
                 if (!books.Any()) return NotFound();
@@ -415,7 +413,7 @@ namespace SmartLib.Web.Controllers
                     Isbn = book.Isbn
                 };
 
-                _cache.Set(cacheKey, response, CatalogRecommendationCacheTtl);
+                await _cache.SetRecordAsync(cacheKey, response, CatalogRecommendationCacheTtl);
                 return Json(response);
             }
             catch (Exception ex)
@@ -428,22 +426,23 @@ namespace SmartLib.Web.Controllers
         public async Task<IActionResult> Details(int id)
         {
             var cacheKey = $"book_details_v1_{_cacheVersions.BooksVersion}_{_cacheVersions.CategoriesVersion}_{id}";
-            if (_cache.TryGetValue(cacheKey, out KnjigaDetailsCacheEntry? cachedEntry) && cachedEntry != null)
+            var cachedEntry = await _cache.GetRecordAsync<KnjigaDetailsCacheEntry>(cacheKey);
+            if (cachedEntry != null)
             {
                 if (string.IsNullOrWhiteSpace(cachedEntry.Dto.Opis))
                 {
                     var normalizedIsbn = NormalizeIsbn(cachedEntry.Dto.Isbn);
                     var descCacheKey = $"desc_{normalizedIsbn}";
-                    if (_cache.TryGetValue(descCacheKey, out string? cachedDesc) && !string.IsNullOrWhiteSpace(cachedDesc))
-                    {
+                    var cachedDesc = await _cache.GetRecordAsync<string>(descCacheKey);
+                    if (!string.IsNullOrWhiteSpace(cachedDesc))
                         cachedEntry.Dto.Opis = cachedDesc;
-                    }
                 }
 
                 if (!string.IsNullOrWhiteSpace(cachedEntry.Dto.Opis))
                 {
                     var transCacheKey = $"desc_trans_{cachedEntry.Dto.Id}";
-                    if (_cache.TryGetValue(transCacheKey, out string? translatedDesc) && !string.IsNullOrWhiteSpace(translatedDesc))
+                    var translatedDesc = await _cache.GetRecordAsync<string>(transCacheKey);
+                    if (!string.IsNullOrWhiteSpace(translatedDesc))
                     {
                         cachedEntry.Dto.Opis = translatedDesc;
                     }
@@ -453,7 +452,7 @@ namespace SmartLib.Web.Controllers
                         if (!string.IsNullOrWhiteSpace(translated))
                         {
                             cachedEntry.Dto.Opis = translated;
-                            _cache.Set(transCacheKey, translated, TimeSpan.FromHours(24));
+                            await _cache.SetRecordAsync(transCacheKey, translated, TimeSpan.FromHours(24));
                         }
                     }
                 }
@@ -470,16 +469,16 @@ namespace SmartLib.Web.Controllers
             {
                 var normalizedIsbn = NormalizeIsbn(knjiga.Isbn);
                 var descCacheKey = $"desc_{normalizedIsbn}";
-                if (_cache.TryGetValue(descCacheKey, out string? cachedDesc) && !string.IsNullOrWhiteSpace(cachedDesc))
-                {
+                var cachedDesc = await _cache.GetRecordAsync<string>(descCacheKey);
+                if (!string.IsNullOrWhiteSpace(cachedDesc))
                     opis = cachedDesc;
-                }
             }
 
             if (!string.IsNullOrWhiteSpace(opis))
             {
                 var transCacheKey = $"desc_trans_{knjiga.Id}";
-                if (_cache.TryGetValue(transCacheKey, out string? translatedDesc) && !string.IsNullOrWhiteSpace(translatedDesc))
+                var translatedDesc = await _cache.GetRecordAsync<string>(transCacheKey);
+                if (!string.IsNullOrWhiteSpace(translatedDesc))
                 {
                     opis = translatedDesc;
                 }
@@ -489,7 +488,7 @@ namespace SmartLib.Web.Controllers
                     if (!string.IsNullOrWhiteSpace(translated))
                     {
                         opis = translated;
-                        _cache.Set(transCacheKey, translated, TimeSpan.FromHours(24));
+                        await _cache.SetRecordAsync(transCacheKey, translated, TimeSpan.FromHours(24));
                     }
                 }
             }
@@ -511,7 +510,7 @@ namespace SmartLib.Web.Controllers
             var primjerci = knjiga.Primjerci.OrderBy(p => p.InventarniBroj).ToList();
             ViewBag.Primjerci = primjerci;
 
-            _cache.Set(cacheKey, new KnjigaDetailsCacheEntry
+            await _cache.SetRecordAsync(cacheKey, new KnjigaDetailsCacheEntry
             {
                 Dto = dto,
                 Primjerci = primjerci
@@ -720,10 +719,9 @@ namespace SmartLib.Web.Controllers
             var normalizedIsbn = NormalizeIsbn(isbn);
             
             var cacheKey = $"desc_{normalizedIsbn}";
-            if (_cache.TryGetValue(cacheKey, out string? cachedDesc) && !string.IsNullOrEmpty(cachedDesc))
-            {
+            var cachedDesc = await _cache.GetRecordAsync<string>(cacheKey);
+            if (!string.IsNullOrEmpty(cachedDesc))
                 return cachedDesc;
-            }
             
             var apiKey = _configuration["GOOGLE_BOOKS_API_KEY"] ?? _configuration["GoogleBooks:ApiKey"];
             var url = $"https://www.googleapis.com/books/v1/volumes?q=isbn:{normalizedIsbn}";
@@ -753,7 +751,7 @@ namespace SmartLib.Web.Controllers
                                 var translated = await TranslateToBosnianAsync(trimmed);
                                 var finalText = string.IsNullOrWhiteSpace(translated) ? trimmed : translated;
 
-                                _cache.Set(cacheKey, finalText, TimeSpan.FromHours(24));
+                                await _cache.SetRecordAsync(cacheKey, finalText, TimeSpan.FromHours(24));
                                 try
                                 {
                                     await _knjigaRepository.TryUpdateOpisByIsbnAsync(normalizedIsbn, finalText);
@@ -777,7 +775,7 @@ namespace SmartLib.Web.Controllers
                 // Ignoriši greške
             }
 
-            _cache.Set(cacheKey, "Opis nije dostupan.", TimeSpan.FromMinutes(10));
+            await _cache.SetRecordAsync(cacheKey, "Opis nije dostupan.", TimeSpan.FromMinutes(10));
             return "Opis nije dostupan.";
         }
 

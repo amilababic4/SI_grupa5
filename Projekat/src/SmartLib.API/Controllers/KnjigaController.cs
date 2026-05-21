@@ -19,7 +19,7 @@ namespace SmartLib.API.Controllers
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IDistributedCache _cache;
         private readonly CacheVersionStore _cacheVersions;
-        private static readonly TimeSpan ApiBooksCacheTtl = TimeSpan.FromHours(1);
+        private static readonly TimeSpan ApiBooksCacheTtl = TimeSpan.FromMinutes(10);
         private static readonly TimeSpan CoverCacheTtl = TimeSpan.FromHours(1);
 
         public KnjigaController(

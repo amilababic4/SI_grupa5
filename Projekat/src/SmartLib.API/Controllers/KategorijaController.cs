@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Caching.Distributed;
 using SmartLib.Core.Interfaces;
 using SmartLib.Core.Models;
 using SmartLib.Infrastructure.Services;
@@ -18,13 +18,13 @@ namespace SmartLib.API.Controllers
     public class KategorijaController : ControllerBase
     {
         private readonly IKategorijaRepository _kategorijaRepository;
-        private readonly IMemoryCache _cache;
+        private readonly IDistributedCache _cache;
         private readonly CacheVersionStore _cacheVersions;
         private static readonly TimeSpan CategoriesCacheTtl = TimeSpan.FromMinutes(5);
 
         public KategorijaController(
             IKategorijaRepository kategorijaRepository,
-            IMemoryCache cache,
+            IDistributedCache cache,
             CacheVersionStore cacheVersions)
         {
             _kategorijaRepository = kategorijaRepository;
@@ -37,10 +37,9 @@ namespace SmartLib.API.Controllers
         public async Task<IActionResult> GetAll()
         {
             var cacheKey = $"api_categories_v1_{_cacheVersions.CategoriesVersion}_{_cacheVersions.BooksVersion}";
-            if (_cache.TryGetValue(cacheKey, out List<KategorijaResponse>? cached) && cached != null)
-            {
+            var cached = await _cache.GetRecordAsync<List<KategorijaResponse>>(cacheKey);
+            if (cached != null)
                 return Ok(cached);
-            }
 
             var kategorije = await _kategorijaRepository.GetAllAsync();
             var result = kategorije.Select(k => new KategorijaResponse
@@ -51,7 +50,7 @@ namespace SmartLib.API.Controllers
                 BrojKnjiga = k.Knjige.Count
             }).ToList();
 
-            _cache.Set(cacheKey, result, CategoriesCacheTtl);
+            await _cache.SetRecordAsync(cacheKey, result, CategoriesCacheTtl);
             return Ok(result);
         }
 
@@ -60,10 +59,9 @@ namespace SmartLib.API.Controllers
         public async Task<IActionResult> GetById(int id)
         {
             var cacheKey = $"api_category_{id}_v1_{_cacheVersions.CategoriesVersion}_{_cacheVersions.BooksVersion}";
-            if (_cache.TryGetValue(cacheKey, out KategorijaResponse? cached) && cached != null)
-            {
+            var cached = await _cache.GetRecordAsync<KategorijaResponse>(cacheKey);
+            if (cached != null)
                 return Ok(cached);
-            }
 
             var k = await _kategorijaRepository.GetByIdAsync(id);
             if (k == null)
@@ -77,7 +75,7 @@ namespace SmartLib.API.Controllers
                 BrojKnjiga = k.Knjige.Count
             };
 
-            _cache.Set(cacheKey, result, CategoriesCacheTtl);
+            await _cache.SetRecordAsync(cacheKey, result, CategoriesCacheTtl);
             return Ok(result);
         }
 
