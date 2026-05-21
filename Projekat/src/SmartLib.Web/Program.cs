@@ -107,6 +107,7 @@ builder.Services.AddScoped<IPrimjerakRepository, PrimjerakRepository>();
 builder.Services.AddScoped<IKategorijaRepository, KategorijaRepository>();
 builder.Services.AddScoped<IZaduzenjeRepository, ZaduzenjeRepository>();
 builder.Services.AddScoped<IClanarinaRepository, ClanarinaRepository>();
+builder.Services.AddScoped<IRezervacijaRepository, RezervacijaRepository>();
 builder.Services.AddHostedService<DeactivatedAccountCleanupService>();
 
 // Services

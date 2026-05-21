@@ -21,6 +21,7 @@ namespace SmartLib.API.Controllers
         private readonly IKorisnikRepository _korisnikRepo;
         private readonly IKnjigaRepository _knjigaRepo;
         private readonly IPrimjerakRepository _primjerakRepo;
+        private readonly IRezervacijaRepository _rezervacijaRepo;
         private readonly CacheVersionStore _cacheVersions;
 
         public ZaduzenjeController(
@@ -28,12 +29,14 @@ namespace SmartLib.API.Controllers
             IKorisnikRepository korisnikRepo,
             IKnjigaRepository knjigaRepo,
             IPrimjerakRepository primjerakRepo,
+            IRezervacijaRepository rezervacijaRepo,
             CacheVersionStore cacheVersions)
         {
             _zaduzenjeRepo = zaduzenjeRepo;
             _korisnikRepo = korisnikRepo;
             _knjigaRepo = knjigaRepo;
             _primjerakRepo = primjerakRepo;
+            _rezervacijaRepo = rezervacijaRepo;
             _cacheVersions = cacheVersions;
         }
 
@@ -127,6 +130,7 @@ namespace SmartLib.API.Controllers
 
             await _zaduzenjeRepo.CreateAsync(zaduzenje);
             await _primjerakRepo.UpdateStatusAsync(model.PrimjerakId, "zadužen");
+            await _rezervacijaRepo.FulfillAsync(model.KorisnikId, primjerak.KnjigaId);
 
             _cacheVersions.BumpBooksVersion();
 

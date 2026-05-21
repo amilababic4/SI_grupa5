@@ -20,6 +20,7 @@ namespace SmartLib.Web.Controllers
         private readonly IPrimjerakRepository _primjerakRepository;
         private readonly IKategorijaRepository _kategorijaRepository;
         private readonly IZaduzenjeRepository _zaduzenjeRepository;
+        private readonly IRezervacijaRepository _rezervacijaRepository;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IDistributedCache _cache;
         private readonly IConfiguration _configuration;
@@ -35,6 +36,7 @@ namespace SmartLib.Web.Controllers
             IPrimjerakRepository primjerakRepository,
             IKategorijaRepository kategorijaRepository,
             IZaduzenjeRepository zaduzenjeRepository,
+            IRezervacijaRepository rezervacijaRepository,
             IHttpClientFactory httpClientFactory,
             IDistributedCache cache,
             IConfiguration configuration,
@@ -45,6 +47,7 @@ namespace SmartLib.Web.Controllers
             _primjerakRepository = primjerakRepository;
             _kategorijaRepository = kategorijaRepository;
             _zaduzenjeRepository = zaduzenjeRepository;
+            _rezervacijaRepository = rezervacijaRepository;
             _httpClientFactory = httpClientFactory;
             _cache = cache;
             _configuration = configuration;
@@ -458,6 +461,7 @@ namespace SmartLib.Web.Controllers
                 }
                 
                 ViewBag.Primjerci = cachedEntry.Primjerci;
+                await SetRezervacijaViewBag(id);
                 return View(cachedEntry.Dto);
             }
 
@@ -516,6 +520,7 @@ namespace SmartLib.Web.Controllers
                 Primjerci = primjerci
             }, BookDetailsCacheTtl);
 
+            await SetRezervacijaViewBag(id);
             return View(dto);
         }
 
@@ -871,6 +876,14 @@ namespace SmartLib.Web.Controllers
             if (isbn.Length == 13) return isbn.All(char.IsDigit);
             if (isbn.Length == 10) return isbn[..9].All(char.IsDigit) && (char.IsDigit(isbn[9]) || isbn[9] == 'X');
             return false;
+        }
+
+        private async Task SetRezervacijaViewBag(int knjigaId)
+        {
+            if (!User.IsInRole(RoleNames.Clan)) return;
+            var korisnikIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!int.TryParse(korisnikIdStr, out var uid)) return;
+            ViewBag.ImaAktivnuRezervaciju = await _rezervacijaRepository.HasActiveAsync(uid, knjigaId);
         }
     }
 }

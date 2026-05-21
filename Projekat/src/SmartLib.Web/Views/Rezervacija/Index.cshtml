@@ -1,0 +1,94 @@
+@model SmartLib.Core.DTOs.AktivneRezervacijeViewModel
+@{
+    ViewData["Title"] = "Aktivne rezervacije";
+}
+
+<div class="katalog-header">
+    <h2>Aktivne rezervacije</h2>
+</div>
+
+@if (TempData["SuccessMessage"] is string successMsg)
+{
+    <div class="alert alert-success">@successMsg</div>
+}
+@if (TempData["ErrorMessage"] is string errorMsg)
+{
+    <div class="alert alert-error">@errorMsg</div>
+}
+
+<div class="card katalog-search">
+    <form asp-action="Index" method="get">
+        <div class="search-row">
+            <div class="form-group" style="flex:1; margin-bottom:0;">
+                <input type="text" name="filter" value="@Model.Filter"
+                       placeholder="Pretraga po imenu, emailu člana ili naslovu knjige..." />
+            </div>
+            <div style="display:flex; gap:0.5rem; align-items:flex-end;">
+                <button type="submit" class="btn btn-primary">Traži</button>
+                <a asp-action="Index" class="btn btn-secondary">Reset</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+@if (!Model.Rezervacije.Any())
+{
+    <div class="card katalog-empty">
+        <p>Nema aktivnih rezervacija@(string.IsNullOrWhiteSpace(Model.Filter) ? "." : " za zadani filter.")</p>
+    </div>
+}
+else
+{
+    <div class="card katalog-card">
+        <div class="katalog-table-wrap">
+            <table class="katalog-table">
+                <thead>
+                    <tr>
+                        <th>Član</th>
+                        <th>Email</th>
+                        <th>Knjiga</th>
+                        <th>Rezervisano</th>
+                        <th>Važi do</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var r in Model.Rezervacije)
+                    {
+                        var jeIstekla = r.DatumIsteka.HasValue && r.DatumIsteka.Value < DateTime.UtcNow;
+                        <tr class="@(r.KnjigaDostupna ? "tr-blizi" : "")">
+                            <td data-label="Član"><strong>@r.KorisnikIme</strong></td>
+                            <td data-label="Email" class="members-email">@r.KorisnikEmail</td>
+                            <td data-label="Knjiga">@r.KnjigaNaslov</td>
+                            <td data-label="Rezervisano">@r.DatumRezervacije.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td>
+                            <td data-label="Važi do">
+                                @if (r.DatumIsteka.HasValue)
+                                {
+                                    <span class="@(jeIstekla ? "status-kasni" : "")">
+                                        @r.DatumIsteka.Value.ToLocalTime().ToString("dd.MM.yyyy")
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span>—</span>
+                                }
+                            </td>
+                            <td data-label="Status">
+                                @if (r.KnjigaDostupna)
+                                {
+                                    <span class="status-dostupan" title="Primjerak je vraćen — čeka na zaduživanje">
+                                        Spremna za zaduženje
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="status-blizi">čeka se</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
