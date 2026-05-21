@@ -1,0 +1,51 @@
+@model SmartLib.Core.DTOs.ZahtjevNabavkeCreateDto
+@{
+    ViewData["Title"] = "Zahtjev za nabavku";
+}
+
+<div class="katalog-header" style="justify-content: center; position: relative;">
+    <h2>Unos zahtjeva za nabavku</h2>
+    <a asp-action="Index" class="btn btn-secondary" style="position: absolute; left: 0;">Nazad na katalog</a>
+</div>
+
+<div class="card book-form-card">
+    <form asp-controller="Knjiga" asp-action="ZahtjevNabavke" method="post">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="validation-message" style="margin-bottom: 1rem;"></div>
+
+        <div class="form-group">
+            <label asp-for="NazivKnjige">Naziv knjige</label>
+            <input asp-for="NazivKnjige" placeholder="Unesite naziv knjige" />
+            <span asp-validation-for="NazivKnjige" class="validation-message"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Autor">Autor</label>
+            <input asp-for="Autor" placeholder="Ime i prezime autora" />
+            <span asp-validation-for="Autor" class="validation-message"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Izdavac">Izdavač</label>
+            <input asp-for="Izdavac" placeholder="Naziv izdavača" />
+            <span asp-validation-for="Izdavac" class="validation-message"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="BrojPrimjeraka">Broj primjeraka</label>
+            <input asp-for="BrojPrimjeraka" type="number" min="1" />
+            <span asp-validation-for="BrojPrimjeraka" class="validation-message"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Napomena">Dodatni opis ili napomena</label>
+            <textarea asp-for="Napomena" rows="5" placeholder="Ovdje možete dodati posebne zahtjeve, izdanje ili napomenu za distributera."></textarea>
+            <span asp-validation-for="Napomena" class="validation-message"></span>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Pošalji zahtjev distributeru</button>
+            <a asp-action="Index" class="btn btn-secondary">Odustani</a>
+        </div>
+    </form>
+</div>

@@ -107,6 +107,7 @@ builder.Services.AddScoped<IPrimjerakRepository, PrimjerakRepository>();
 builder.Services.AddScoped<IKategorijaRepository, KategorijaRepository>();
 builder.Services.AddScoped<IZaduzenjeRepository, ZaduzenjeRepository>();
 builder.Services.AddScoped<IClanarinaRepository, ClanarinaRepository>();
+builder.Services.AddScoped<IZahtjevNabavkeRepository, ZahtjevNabavkeRepository>();
 builder.Services.AddHostedService<DeactivatedAccountCleanupService>();
 
 // Services
@@ -186,6 +187,23 @@ using (var scope = app.Services.CreateScope())
         ");
     }
     catch (Exception) { }
+
+    db.Database.ExecuteSqlRaw(@"
+        CREATE TABLE IF NOT EXISTS ZahtjeviNabavke (
+            Id INT NOT NULL AUTO_INCREMENT,
+            NaslovKnjige VARCHAR(300) NOT NULL,
+            Autor VARCHAR(200) NOT NULL,
+            Izdavac VARCHAR(200) NOT NULL,
+            BrojPrimjeraka INT NOT NULL,
+            Napomena LONGTEXT NULL,
+            DistributorEmail VARCHAR(200) NOT NULL,
+            Status VARCHAR(50) NOT NULL,
+            DatumKreiranja DATETIME(6) NOT NULL,
+            DatumSlanja DATETIME(6) NULL,
+            BibliotekarId INT NULL,
+            PRIMARY KEY (Id)
+        );
+    ");
 
     // Hardkodirani seed podataka (Opis i Slika) za knjige kako se ne bismo oslanjali na nepouzdan Google Books/OpenLibrary API
     db.Database.ExecuteSqlRaw(@"

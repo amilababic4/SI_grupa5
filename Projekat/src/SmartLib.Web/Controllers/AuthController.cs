@@ -171,12 +171,18 @@ namespace SmartLib.Web.Controllers
   </table>
 </body>
 </html>";
-
-                    await _emailService.SendEmailAsync(
-                        model.Email, 
-                        "Resetovanje lozinke - SmartLib", 
-                        emailBody);
-                    _logger.LogInformation("Password reset link sent to {Email}", model.Email);
+                    try
+                    {
+                        await _emailService.SendEmailAsync(
+                            model.Email,
+                            "Resetovanje lozinke - SmartLib",
+                            emailBody);
+                        _logger.LogInformation("Password reset link sent to {Email}", model.Email);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Password reset email could not be sent to {Email}", model.Email);
+                    }
                 }
             }
             else

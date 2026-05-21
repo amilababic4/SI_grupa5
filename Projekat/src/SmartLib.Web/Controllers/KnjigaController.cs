@@ -20,6 +20,8 @@ namespace SmartLib.Web.Controllers
         private readonly IPrimjerakRepository _primjerakRepository;
         private readonly IKategorijaRepository _kategorijaRepository;
         private readonly IZaduzenjeRepository _zaduzenjeRepository;
+        private readonly IZahtjevNabavkeRepository _zahtjevNabavkeRepository;
+        private readonly IEmailService _emailService;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IDistributedCache _cache;
         private readonly IConfiguration _configuration;
@@ -35,6 +37,8 @@ namespace SmartLib.Web.Controllers
             IPrimjerakRepository primjerakRepository,
             IKategorijaRepository kategorijaRepository,
             IZaduzenjeRepository zaduzenjeRepository,
+            IZahtjevNabavkeRepository zahtjevNabavkeRepository,
+            IEmailService emailService,
             IHttpClientFactory httpClientFactory,
             IDistributedCache cache,
             IConfiguration configuration,
@@ -45,6 +49,8 @@ namespace SmartLib.Web.Controllers
             _primjerakRepository = primjerakRepository;
             _kategorijaRepository = kategorijaRepository;
             _zaduzenjeRepository = zaduzenjeRepository;
+            _zahtjevNabavkeRepository = zahtjevNabavkeRepository;
+            _emailService = emailService;
             _httpClientFactory = httpClientFactory;
             _cache = cache;
             _configuration = configuration;
@@ -592,6 +598,64 @@ namespace SmartLib.Web.Controllers
 
         [Authorize(Roles = RoleNames.Bibliotekar + "," + RoleNames.Administrator)]
         [HttpGet]
+        public IActionResult ZahtjevNabavke()
+        {
+            return View(new ZahtjevNabavkeCreateDto());
+        }
+
+        [Authorize(Roles = RoleNames.Bibliotekar + "," + RoleNames.Administrator)]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ZahtjevNabavke(ZahtjevNabavkeCreateDto model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var distributorEmail = _configuration["EmailSettings:DistributorEmail"]?.Trim();
+            if (string.IsNullOrWhiteSpace(distributorEmail))
+            {
+                ModelState.AddModelError(string.Empty, "Email adresa distributera nije podešena u sistemu.");
+                return View(model);
+            }
+
+            var body = BuildProcurementEmailBody(model);
+
+            try
+            {
+                await _emailService.SendEmailAsync(
+                    distributorEmail,
+                    $"Zahtjev za nabavku knjige - {model.NazivKnjige.Trim()}",
+                    body);
+
+                await _zahtjevNabavkeRepository.CreateAsync(new ZahtjevNabavke
+                {
+                    NaslovKnjige = model.NazivKnjige.Trim(),
+                    Autor = model.Autor.Trim(),
+                    Izdavac = model.Izdavac.Trim(),
+                    BrojPrimjeraka = model.BrojPrimjeraka,
+                    Napomena = string.IsNullOrWhiteSpace(model.Napomena) ? null : model.Napomena.Trim(),
+                    DistributorEmail = distributorEmail,
+                    Status = "poslano",
+                    DatumKreiranja = DateTime.UtcNow,
+                    DatumSlanja = DateTime.UtcNow,
+                    BibliotekarId = GetUserId()
+                });
+
+                TempData["SuccessMessage"] = "Zahtjev za nabavku je uspješno poslan distributeru.";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Slanje zahtjeva za nabavku nije uspjelo za knjigu {Naslov}", model.NazivKnjige);
+                ModelState.AddModelError(string.Empty, "Slanje zahtjeva distributeru nije uspjelo. Pokušajte ponovo kasnije.");
+                return View(model);
+            }
+        }
+
+        [Authorize(Roles = RoleNames.Bibliotekar + "," + RoleNames.Administrator)]
+        [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
             var knjiga = await _knjigaRepository.GetByIdAsync(id);
@@ -698,6 +762,33 @@ namespace SmartLib.Web.Controllers
             var idValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (int.TryParse(idValue, out var id)) return id;
             return null;
+        }
+
+        private static string BuildProcurementEmailBody(ZahtjevNabavkeCreateDto model)
+        {
+            var napomena = string.IsNullOrWhiteSpace(model.Napomena)
+                ? "<em>Nema dodatne napomene.</em>"
+                : System.Net.WebUtility.HtmlEncode(model.Napomena.Trim()).Replace("\r\n", "<br />").Replace("\n", "<br />");
+
+            return $@"
+<!DOCTYPE html>
+<html>
+<head><meta charset='utf-8'></head>
+<body style='font-family:Arial,Helvetica,sans-serif;background:#f8fafc;padding:24px;color:#1f2937;'>
+  <div style='max-width:640px;margin:0 auto;background:#ffffff;border:1px solid #e2e8f0;border-radius:12px;padding:28px;'>
+    <h2 style='margin-top:0;'>Zahtjev za nabavku knjige</h2>
+    <p>Poštovani, molimo vas za ponudu i dostupnost sljedeće knjige:</p>
+    <table style='width:100%;border-collapse:collapse;margin:20px 0;'>
+      <tr><td style='padding:8px 0;font-weight:700;width:180px;'>Naziv knjige</td><td>{System.Net.WebUtility.HtmlEncode(model.NazivKnjige.Trim())}</td></tr>
+      <tr><td style='padding:8px 0;font-weight:700;'>Autor</td><td>{System.Net.WebUtility.HtmlEncode(model.Autor.Trim())}</td></tr>
+      <tr><td style='padding:8px 0;font-weight:700;'>Izdavač</td><td>{System.Net.WebUtility.HtmlEncode(model.Izdavac.Trim())}</td></tr>
+      <tr><td style='padding:8px 0;font-weight:700;'>Broj primjeraka</td><td>{model.BrojPrimjeraka}</td></tr>
+      <tr><td style='padding:8px 0;font-weight:700;vertical-align:top;'>Napomena</td><td>{napomena}</td></tr>
+    </table>
+    <p style='margin-bottom:0;'>Srdačan pozdrav,<br />SmartLib biblioteka</p>
+  </div>
+</body>
+</html>";
         }
 
 

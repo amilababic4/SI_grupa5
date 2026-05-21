@@ -79,4 +79,25 @@ namespace SmartLib.Core.DTOs
         public string? Naslov { get; set; }
         public string? Autor { get; set; }
     }
+
+    public class ZahtjevNabavkeCreateDto
+    {
+        [Required(ErrorMessage = "Naziv knjige je obavezan.")]
+        [StringLength(300, ErrorMessage = "Naziv knjige ne smije imati više od 300 znakova.")]
+        public string NazivKnjige { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Autor je obavezan.")]
+        [StringLength(200, ErrorMessage = "Autor ne smije imati više od 200 znakova.")]
+        public string Autor { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Izdavač je obavezan.")]
+        [StringLength(200, ErrorMessage = "Izdavač ne smije imati više od 200 znakova.")]
+        public string Izdavac { get; set; } = string.Empty;
+
+        [Range(1, 1000, ErrorMessage = "Broj primjeraka mora biti najmanje 1.")]
+        public int BrojPrimjeraka { get; set; } = 1;
+
+        [StringLength(2000, ErrorMessage = "Napomena ne smije imati više od 2000 znakova.")]
+        public string? Napomena { get; set; }
+    }
 }

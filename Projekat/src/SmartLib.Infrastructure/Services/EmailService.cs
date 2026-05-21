@@ -25,6 +25,8 @@ namespace SmartLib.Infrastructure.Services
 
         public async Task SendEmailAsync(string toEmail, string subject, string message)
         {
+            Exception? lastException = null;
+
             // Strategy 1: Try Brevo HTTP API (works on Render and allows sending to any email)
             var brevoApiKey = _configuration["EmailSettings:BrevoApiKey"];
             var senderEmail = _configuration["EmailSettings:SenderEmail"] ?? "theofficialsmartlibrary@gmail.com";
@@ -61,6 +63,7 @@ namespace SmartLib.Infrastructure.Services
                 }
                 catch (Exception ex)
                 {
+                    lastException = ex;
                     _logger.LogWarning(ex, "Brevo API failed for {ToEmail}, falling back to SMTP", toEmail);
                 }
             }
@@ -102,16 +105,15 @@ namespace SmartLib.Infrastructure.Services
                 }
                 catch (Exception ex)
                 {
+                    lastException = ex;
                     _logger.LogWarning(ex, "SMTP failed for {ToEmail}", toEmail);
                 }
             }
 
-            // Strategy 3: Log email content (fallback for development/debugging)
-            _logger.LogWarning("========== EMAIL (nijedna metoda slanja nije uspjela) ==========");
-            _logger.LogWarning("To: {ToEmail}", toEmail);
-            _logger.LogWarning("Subject: {Subject}", subject);
-            _logger.LogWarning("Body: {Body}", message);
-            _logger.LogWarning("================================================================");
+            _logger.LogError(lastException, "Nijedna metoda slanja emaila nije uspjela za {ToEmail}", toEmail);
+            throw new InvalidOperationException(
+                "Slanje email poruke trenutno nije dostupno.",
+                lastException);
         }
     }
 }

@@ -21,6 +21,7 @@ namespace SmartLib.Infrastructure.Data
         public DbSet<Clanarina> Clanarine => Set<Clanarina>();
         public DbSet<Rezervacija> Rezervacije => Set<Rezervacija>();
         public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+        public DbSet<ZahtjevNabavke> ZahtjeviNabavke => Set<ZahtjevNabavke>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -239,6 +240,21 @@ namespace SmartLib.Infrastructure.Data
                  .HasForeignKey(a => a.KorisnikId)
                  .IsRequired(false)
                  .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            modelBuilder.Entity<ZahtjevNabavke>(e =>
+            {
+                e.HasKey(z => z.Id);
+                e.Property(z => z.NaslovKnjige).IsRequired().HasMaxLength(300);
+                e.Property(z => z.Autor).IsRequired().HasMaxLength(200);
+                e.Property(z => z.Izdavac).IsRequired().HasMaxLength(200);
+                e.Property(z => z.BrojPrimjeraka).IsRequired();
+                e.Property(z => z.Napomena).HasColumnType("longtext");
+                e.Property(z => z.DistributorEmail).IsRequired().HasMaxLength(200);
+                e.Property(z => z.Status).IsRequired().HasMaxLength(50);
+                e.Property(z => z.DatumKreiranja).IsRequired();
+                e.Property(z => z.DatumSlanja);
+                e.Property(z => z.BibliotekarId);
             });
         }
     }
