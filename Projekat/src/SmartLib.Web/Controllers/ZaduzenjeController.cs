@@ -300,6 +300,7 @@ namespace SmartLib.Web.Controllers
             return new ZaduzenjeViewModel
             {
                 Id = z.Id,
+                KnjigaId = z.Primjerak?.KnjigaId ?? 0,
                 KorisnikIme = z.Korisnik != null ? $"{z.Korisnik.Ime} {z.Korisnik.Prezime}" : "-",
                 KorisnikEmail = z.Korisnik?.Email ?? "-",
                 KnjigaNaslov = z.Primjerak?.Knjiga?.Naslov ?? "-",

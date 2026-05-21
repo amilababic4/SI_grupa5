@@ -1,4 +1,4 @@
-﻿@model IEnumerable<ZaduzenjeViewModel>
+@model IEnumerable<ZaduzenjeViewModel>
 @{
     ViewData["Title"] = "Historija mojih zaduženja";
     var lista = Model.OrderByDescending(z => z.DatumStvarnogVracanja).ToList();
@@ -31,6 +31,7 @@ else
                         <th>Zaduženo</th>
                         <th>Rok vraćanja</th>
                         <th>Vraćeno</th>
+                        <th>Akcija</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -49,6 +50,12 @@ else
                                 else
                                 {
                                     <span class="historija-nepoznato">—</span>
+                                }
+                            </td>
+                            <td data-label="Akcija">
+                                @if (z.DatumStvarnogVracanja.HasValue)
+                                {
+                                    <a asp-controller="Recenzija" asp-action="Dodaj" asp-route-knjigaId="@z.KnjigaId" class="btn btn-primary btn-sm">Ocijeni knjigu</a>
                                 }
                             </td>
                         </tr>

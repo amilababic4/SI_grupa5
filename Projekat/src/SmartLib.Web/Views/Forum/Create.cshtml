@@ -1,0 +1,48 @@
+@model SmartLib.Core.DTOs.ForumObjavaCreateDto
+@{
+    ViewData["Title"] = "Nova objava";
+}
+
+<div class="page-header">
+    <div class="header-content">
+        <a asp-action="Index" style="text-decoration: none; color: var(--text-muted);">&larr; Nazad na forum</a>
+        <h1 style="margin-top: 1rem;">Nova forum objava</h1>
+    </div>
+</div>
+
+<div class="card" style="padding: 2rem; max-width: 800px; margin: 0 auto; background: var(--bg-card); border-radius: 8px;">
+    <form asp-action="Create" method="post">
+        
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label asp-for="Kategorija" style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Kategorija</label>
+            <select asp-for="Kategorija" class="form-control" required style="width: 100%; padding: 0.75rem; border-radius: 4px; border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-main);">
+                @foreach (var kat in (IEnumerable<string>)ViewBag.Kategorije)
+                {
+                    <option value="@kat">@kat</option>
+                }
+            </select>
+            <span asp-validation-for="Kategorija" class="text-danger"></span>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label asp-for="Naslov" style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Naslov objave</label>
+            <input asp-for="Naslov" class="form-control" placeholder="Unesite naslov..." required style="width: 100%; padding: 0.75rem; border-radius: 4px; border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-main);" />
+            <span asp-validation-for="Naslov" class="text-danger"></span>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label asp-for="Sadrzaj" style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Sadržaj</label>
+            <textarea asp-for="Sadrzaj" class="form-control" rows="10" placeholder="Opišite temu, postavite pitanje..." required style="width: 100%; padding: 0.75rem; border-radius: 4px; border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-main); font-family: inherit; resize: vertical;"></textarea>
+            <span asp-validation-for="Sadrzaj" class="text-danger"></span>
+        </div>
+
+        <div class="form-actions" style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+            <a asp-action="Index" class="btn btn-outline">Odustani</a>
+            <button type="submit" class="btn btn-primary">Objavi na forumu</button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

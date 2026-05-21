@@ -25,6 +25,7 @@ namespace SmartLib.Core.DTOs
     public class ZaduzenjeViewModel
     {
         public int Id { get; set; }
+        public int KnjigaId { get; set; }
         public string KorisnikIme { get; set; } = string.Empty;
         public string KorisnikEmail { get; set; } = string.Empty;
         public string KnjigaNaslov { get; set; } = string.Empty;

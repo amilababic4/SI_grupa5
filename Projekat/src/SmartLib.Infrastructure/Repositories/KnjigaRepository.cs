@@ -58,6 +58,7 @@ namespace SmartLib.Infrastructure.Repositories
             var query = _db.Knjige
                 .Include(k => k.Kategorija)
                 .Include(k => k.Primjerci)
+                .Include(k => k.Recenzije)
                 .AsNoTracking()
                 .AsQueryable();
 

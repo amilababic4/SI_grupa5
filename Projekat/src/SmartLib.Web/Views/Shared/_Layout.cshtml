@@ -60,11 +60,13 @@
                             <li><a asp-controller="Korisnik" asp-action="IndexBibliotekar">Bibliotekari</a></li>
                         }
                         <li><a asp-controller="Kategorija" asp-action="Index">Kategorije</a></li>
+                        <li><a asp-controller="Forum" asp-action="Index">Forum</a></li>
                     }
                     else
                     {
                         <li><a asp-controller="Zaduzenje" asp-action="Moja">Moja zaduženja</a></li>
                         <li><a asp-controller="Rezervacija" asp-action="Moje">Moje rezervacije</a></li>
+                        <li><a asp-controller="Forum" asp-action="Index">Forum</a></li>
                     }
 
                     @if (!string.IsNullOrEmpty(User.Identity?.Name))

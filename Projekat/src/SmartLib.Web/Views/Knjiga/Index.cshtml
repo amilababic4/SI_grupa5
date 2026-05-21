@@ -24,6 +24,7 @@
 <div class="card katalog-search">
     <form asp-controller="Knjiga" asp-action="Index" method="get">
         <div class="search-row">
+            <input type="hidden" name="page" value="1" />
             <div class="form-group" style="flex:1; margin-bottom:0;">
                 <input type="text" name="naslov" value="@Model.Naslov" placeholder="Pretraga po naslovu..." />
             </div>
@@ -42,7 +43,7 @@
 <div class="katalog-meta">
     @if (!string.IsNullOrWhiteSpace(Model.Naslov) || !string.IsNullOrWhiteSpace(Model.Autor))
     {
-        <span>Pronađeno: <strong>@Model.UkupnoStavki</strong> @(Model.UkupnoStavki == 1 ? "knjiga" : "knjiga")</span>
+        <span>Pronađeno: <strong>@Model.UkupnoStavki</strong> knjiga</span>
     }
     else
     {
@@ -60,6 +61,16 @@
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
         </button>
     </div>
+    <div class="katalog-page-size">
+        <label for="pageSizeSelect">📖 Prikaži:</label>
+        <select id="pageSizeSelect" aria-label="Broj knjiga po stranici">
+            <option value="8" @(Model.VelicinaStrane == 8 ? "selected" : "")>8 knjiga</option>
+            <option value="12" @(Model.VelicinaStrane == 12 ? "selected" : "")>12 knjiga</option>
+            <option value="16" @(Model.VelicinaStrane == 16 ? "selected" : "")>16 knjiga</option>
+            <option value="20" @(Model.VelicinaStrane == 20 ? "selected" : "")>20 knjiga</option>
+            <option value="24" @(Model.VelicinaStrane == 24 ? "selected" : "")>24 knjiga</option>
+        </select>
+    </div>
 </div>
 
 @if (!Model.Knjige.Any())
@@ -74,68 +85,124 @@
 }
 else
 {
-    <!-- LIST VIEW -->
-    <div id="katalog-list-layout" class="card katalog-card">
-        <div class="katalog-list">
-            @foreach (var knjiga in Model.Knjige)
-            {
-                <div class="katalog-list-item">
-                    <a asp-action="Details" asp-route-id="@knjiga.Id" class="stretched-link"></a>
-                    <div class="list-cover-wrapper">
-                        <img src="@Url.Action("Korice", "Knjiga", new { isbn = knjiga.Isbn, size = "L", v = 3 })" 
-                             alt="@knjiga.Naslov" 
-                             class="katalog-cover-img-large" 
-                             loading="lazy" />
-                    </div>
-                    <div class="list-content">
-                        <div class="list-info">
-                            <span class="list-title">@knjiga.Naslov</span>
-                            <span class="list-autor">@knjiga.Autor</span>
-                        </div>
+    <!-- LIST VIEW (Letterboxd style) -->
+    <div id="katalog-list-layout" class="lb-list-layout">
+        @foreach (var knjiga in Model.Knjige)
+        {
+            <div class="lb-list-item">
+                <a asp-action="Details" asp-route-id="@knjiga.Id" class="stretched-link"></a>
+                <div class="lb-cover">
+                    <img src="@Url.Action("Korice", "Knjiga", new { isbn = knjiga.Isbn, size = "L", v = 3 })" 
+                         alt="@knjiga.Naslov" 
+                         loading="lazy" />
+                </div>
+                <div class="lb-body">
+                    <div class="lb-body-top">
+                        <h3 class="lb-title">@knjiga.Naslov</h3>
+                        <span class="lb-author">@knjiga.Autor@(knjiga.GodinaIzdanja.HasValue ? $", {knjiga.GodinaIzdanja}" : "")</span>
                         
-                        <div class="list-meta">
-                            <div class="list-category">
-                                @if (knjiga.Kategorija != null)
+                        <div class="lb-rating-row">
+                            <span class="lb-stars">
+                                @for(int i = 1; i <= 5; i++)
                                 {
-                                    <span class="katalog-badge">@knjiga.Kategorija</span>
+                                    if (knjiga.BrojRecenzija > 0)
+                                    {
+                                        if (i <= Math.Floor(knjiga.ProsjecnaOcjena))
+                                        {
+                                            <span class="star full">★</span>
+                                        }
+                                        else if (i - knjiga.ProsjecnaOcjena < 1 && i - knjiga.ProsjecnaOcjena > 0)
+                                        {
+                                            <span class="star half">★</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="star empty">★</span>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="star empty">★</span>
+                                    }
                                 }
-                            </div>
-                            
-                            <div class="list-status">
-                                <span class="@(knjiga.BrojDostupnih > 0 ? "status-dostupan" : "status-nedostupan")">
-                                    @(knjiga.BrojDostupnih > 0 ? "DOSTUPNO" : "ZAUZETO")
-                                </span>
-                            </div>
-                        </div>
-
-                        <div class="list-actions">
-                            @if (User.IsInRole("Bibliotekar") || User.IsInRole("Administrator"))
+                            </span>
+                            @if (knjiga.BrojRecenzija > 0)
                             {
-                                <a asp-action="Edit" asp-route-id="@knjiga.Id" class="btn btn-primary btn-sm">Uredi</a>
+                                <span class="lb-rating-score">@knjiga.ProsjecnaOcjena.ToString("0.0")</span>
+                                <span class="lb-rating-count">(@knjiga.BrojRecenzija @(knjiga.BrojRecenzija == 1 ? "recenzija" : "recenzija"))</span>
+                            }
+                            else
+                            {
+                                <span class="lb-rating-count">Nema recenzija</span>
                             }
                         </div>
                     </div>
+
+                    @if (!string.IsNullOrWhiteSpace(knjiga.Opis))
+                    {
+                        <p class="lb-description">@(knjiga.Opis.Length > 200 ? knjiga.Opis.Substring(0, 200) + "…" : knjiga.Opis)</p>
+                    }
+
+                    <div class="lb-body-bottom">
+                        <div class="lb-tags">
+                            @if (knjiga.Kategorija != null)
+                            {
+                                <span class="lb-tag">@knjiga.Kategorija</span>
+                            }
+                            <span class="lb-availability @(knjiga.BrojDostupnih > 0 ? "available" : "unavailable")">
+                                @(knjiga.BrojDostupnih > 0 ? $"✓ Dostupno ({knjiga.BrojDostupnih})" : "✗ Zauzeto")
+                            </span>
+                        </div>
+                        @if (User.IsInRole("Bibliotekar") || User.IsInRole("Administrator"))
+                        {
+                            <div class="lb-actions">
+                                <a asp-action="Edit" asp-route-id="@knjiga.Id" class="btn btn-primary btn-sm">Uredi</a>
+                            </div>
+                        }
+                    </div>
                 </div>
-
-
-            }
-        </div>
+            </div>
+        }
     </div>
 
-    <!-- GRID VIEW -->
-    <div id="katalog-grid-layout" class="katalog-grid hidden-layout">
+    <!-- GRID VIEW (Letterboxd poster style) -->
+    <div id="katalog-grid-layout" class="lb-grid-layout hidden-layout">
+        <div class="katalog-picks">
+            Naše preporuke
+        </div>
         @foreach (var knjiga in Model.Knjige)
         {
-            <a asp-action="Details" asp-route-id="@knjiga.Id" class="grid-item">
-                <div class="grid-cover-wrapper">
+            <a asp-action="Details" asp-route-id="@knjiga.Id" class="lb-grid-card">
+                <div class="lb-grid-poster">
                     <img src="@Url.Action("Korice", "Knjiga", new { isbn = knjiga.Isbn, size = "L" })" 
                          alt="@knjiga.Naslov" 
-                         class="grid-cover-img" 
                          loading="lazy" />
+                    <div class="lb-grid-overlay">
+                        <div class="lb-grid-overlay-stars">
+                            @for(int i = 1; i <= 5; i++)
+                            {
+                                if (knjiga.BrojRecenzija > 0 && i <= Math.Round(knjiga.ProsjecnaOcjena))
+                                {
+                                    <span class="star full">★</span>
+                                }
+                                else
+                                {
+                                    <span class="star empty">★</span>
+                                }
+                            }
+                        </div>
+                        @if (knjiga.BrojRecenzija > 0)
+                        {
+                            <span class="lb-grid-overlay-score">@knjiga.ProsjecnaOcjena.ToString("0.0")</span>
+                        }
+                    </div>
+                    <span class="lb-grid-avail @(knjiga.BrojDostupnih > 0 ? "available" : "unavailable")">
+                        @(knjiga.BrojDostupnih > 0 ? "Dostupno" : "Zauzeto")
+                    </span>
                 </div>
-                <div class="grid-info">
-                    <span class="grid-title">@knjiga.Naslov</span>
-                    <span class="grid-autor">@knjiga.Autor</span>
+                <div class="lb-grid-info">
+                    <span class="lb-grid-title">@knjiga.Naslov</span>
+                    <span class="lb-grid-author">@knjiga.Autor</span>
                 </div>
             </a>
         }
@@ -145,12 +212,13 @@ else
     @if (Model.UkupnoStrana > 1)
     {
         <div class="pagination">
-            @if (Model.TrenutnaStrana > 1)
+                 @if (Model.TrenutnaStrana > 1)
             {
                 <a asp-action="Index"
-                   asp-route-page="@(Model.TrenutnaStrana - 1)"
-                   asp-route-naslov="@Model.Naslov"
-                   asp-route-autor="@Model.Autor"
+                     asp-route-page="@(Model.TrenutnaStrana - 1)"
+                     asp-route-naslov="@Model.Naslov"
+                     asp-route-autor="@Model.Autor"
+                     asp-route-pageSize="@Model.VelicinaStrane"
                    class="btn btn-secondary">← Prethodna</a>
             }
             else
@@ -165,9 +233,10 @@ else
             @if (Model.TrenutnaStrana < Model.UkupnoStrana)
             {
                 <a asp-action="Index"
-                   asp-route-page="@(Model.TrenutnaStrana + 1)"
-                   asp-route-naslov="@Model.Naslov"
-                   asp-route-autor="@Model.Autor"
+                     asp-route-page="@(Model.TrenutnaStrana + 1)"
+                     asp-route-naslov="@Model.Naslov"
+                     asp-route-autor="@Model.Autor"
+                     asp-route-pageSize="@Model.VelicinaStrane"
                    class="btn btn-secondary">Sljedeća →</a>
             }
             else
@@ -206,5 +275,22 @@ else
         if (savedView === 'grid') {
             btnGrid.click();
         }
+
+        const pageSizeSelect = document.getElementById('pageSizeSelect');
+        if (pageSizeSelect) {
+            pageSizeSelect.addEventListener('change', () => {
+                const params = new URLSearchParams(window.location.search);
+                params.set('pageSize', pageSizeSelect.value);
+                params.set('page', '1');
+                const newUrl = window.location.pathname + '?' + params.toString();
+                window.location.assign(newUrl);
+            });
+        }
+
+        // Sync pageSizeSelect value with current model value
+        if (pageSizeSelect) {
+            pageSizeSelect.value = '@Model.VelicinaStrane';
+        }
     </script>
 }
+

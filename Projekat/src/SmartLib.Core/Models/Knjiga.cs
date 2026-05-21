@@ -20,5 +20,6 @@ namespace SmartLib.Core.Models
         public Kategorija? Kategorija { get; set; }
         public ICollection<Primjerak> Primjerci { get; set; } = new List<Primjerak>();
         public ICollection<Rezervacija> Rezervacije { get; set; } = new List<Rezervacija>();
+        public ICollection<Recenzija> Recenzije { get; set; } = new List<Recenzija>();
     }
 }

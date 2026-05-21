@@ -21,7 +21,10 @@ namespace SmartLib.Infrastructure.Data
         public DbSet<Clanarina> Clanarine => Set<Clanarina>();
         public DbSet<Rezervacija> Rezervacije => Set<Rezervacija>();
         public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
-
+        public DbSet<ForumObjava> ForumObjave => Set<ForumObjava>();
+        public DbSet<ForumKomentar> ForumKomentari => Set<ForumKomentar>();
+        public DbSet<ForumReakcija> ForumReakcije => Set<ForumReakcija>();
+        public DbSet<Recenzija> Recenzije => Set<Recenzija>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // ─── ULOGA ───────────────────────────────────────────────────────────
@@ -239,6 +242,76 @@ namespace SmartLib.Infrastructure.Data
                  .HasForeignKey(a => a.KorisnikId)
                  .IsRequired(false)
                  .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            // ─── FORUM OBJAVA ─────────────────────────────────────────────────────
+            modelBuilder.Entity<ForumObjava>(e =>
+            {
+                e.HasKey(o => o.Id);
+                e.Property(o => o.Naslov).IsRequired().HasMaxLength(200);
+                e.Property(o => o.Sadrzaj).IsRequired().HasMaxLength(5000);
+                e.Property(o => o.Kategorija).IsRequired().HasMaxLength(100);
+                e.Property(o => o.DatumKreiranja).IsRequired();
+
+                e.HasOne(o => o.Korisnik)
+                 .WithMany()
+                 .HasForeignKey(o => o.KorisnikId)
+                 .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // ─── FORUM KOMENTAR ───────────────────────────────────────────────────
+            modelBuilder.Entity<ForumKomentar>(e =>
+            {
+                e.HasKey(k => k.Id);
+                e.Property(k => k.Sadrzaj).IsRequired().HasMaxLength(2000);
+                e.Property(k => k.DatumKreiranja).IsRequired();
+
+                e.HasOne(k => k.Objava)
+                 .WithMany(o => o.Komentari)
+                 .HasForeignKey(k => k.ObjavaId)
+                 .OnDelete(DeleteBehavior.Cascade);
+
+                e.HasOne(k => k.Korisnik)
+                 .WithMany()
+                 .HasForeignKey(k => k.KorisnikId)
+                 .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // ─── FORUM REAKCIJA ───────────────────────────────────────────────────
+            modelBuilder.Entity<ForumReakcija>(e =>
+            {
+                e.HasKey(r => r.Id);
+                e.Property(r => r.Tip).IsRequired().HasMaxLength(50);
+                e.Property(r => r.DatumKreiranja).IsRequired();
+
+                e.HasOne(r => r.Objava)
+                 .WithMany(o => o.Reakcije)
+                 .HasForeignKey(r => r.ObjavaId)
+                 .OnDelete(DeleteBehavior.Cascade);
+
+                e.HasOne(r => r.Korisnik)
+                 .WithMany()
+                 .HasForeignKey(r => r.KorisnikId)
+                 .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // ─── RECENZIJA ────────────────────────────────────────────────────────
+            modelBuilder.Entity<Recenzija>(e =>
+            {
+                e.HasKey(r => r.Id);
+                e.Property(r => r.Ocjena).IsRequired();
+                e.Property(r => r.Komentar).HasMaxLength(2000);
+                e.Property(r => r.DatumKreiranja).IsRequired();
+
+                e.HasOne(r => r.Knjiga)
+                 .WithMany(k => k.Recenzije)
+                 .HasForeignKey(r => r.KnjigaId)
+                 .OnDelete(DeleteBehavior.Cascade);
+
+                e.HasOne(r => r.Korisnik)
+                 .WithMany()
+                 .HasForeignKey(r => r.KorisnikId)
+                 .OnDelete(DeleteBehavior.Restrict);
             });
         }
     }

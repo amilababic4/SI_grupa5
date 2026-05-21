@@ -108,6 +108,8 @@ builder.Services.AddScoped<IKategorijaRepository, KategorijaRepository>();
 builder.Services.AddScoped<IZaduzenjeRepository, ZaduzenjeRepository>();
 builder.Services.AddScoped<IClanarinaRepository, ClanarinaRepository>();
 builder.Services.AddScoped<IRezervacijaRepository, RezervacijaRepository>();
+builder.Services.AddScoped<IForumRepository, ForumRepository>();
+builder.Services.AddScoped<IRecenzijaRepository, RecenzijaRepository>();
 builder.Services.AddHostedService<DeactivatedAccountCleanupService>();
 
 // Services
@@ -188,6 +190,57 @@ using (var scope = app.Services.CreateScope())
     }
     catch (Exception) { }
 
+    try
+    {
+        db.Database.ExecuteSqlRaw(@"
+            CREATE TABLE IF NOT EXISTS ForumObjave (
+                Id INT AUTO_INCREMENT PRIMARY KEY,
+                Naslov VARCHAR(200) NOT NULL,
+                Sadrzaj TEXT NOT NULL,
+                Kategorija VARCHAR(100) NOT NULL,
+                DatumKreiranja DATETIME(6) NOT NULL,
+                Zakljucana BOOLEAN NOT NULL DEFAULT 0,
+                KorisnikId INT NOT NULL,
+                FOREIGN KEY (KorisnikId) REFERENCES Korisnici(Id) ON DELETE RESTRICT
+            );
+        ");
+        db.Database.ExecuteSqlRaw(@"
+            CREATE TABLE IF NOT EXISTS ForumKomentari (
+                Id INT AUTO_INCREMENT PRIMARY KEY,
+                Sadrzaj TEXT NOT NULL,
+                DatumKreiranja DATETIME(6) NOT NULL,
+                ObjavaId INT NOT NULL,
+                KorisnikId INT NOT NULL,
+                FOREIGN KEY (ObjavaId) REFERENCES ForumObjave(Id) ON DELETE CASCADE,
+                FOREIGN KEY (KorisnikId) REFERENCES Korisnici(Id) ON DELETE RESTRICT
+            );
+        ");
+        db.Database.ExecuteSqlRaw(@"
+            CREATE TABLE IF NOT EXISTS ForumReakcije (
+                Id INT AUTO_INCREMENT PRIMARY KEY,
+                Tip VARCHAR(50) NOT NULL,
+                DatumKreiranja DATETIME(6) NOT NULL,
+                ObjavaId INT NOT NULL,
+                KorisnikId INT NOT NULL,
+                FOREIGN KEY (ObjavaId) REFERENCES ForumObjave(Id) ON DELETE CASCADE,
+                FOREIGN KEY (KorisnikId) REFERENCES Korisnici(Id) ON DELETE RESTRICT
+            );
+        ");
+        db.Database.ExecuteSqlRaw(@"
+            CREATE TABLE IF NOT EXISTS Recenzije (
+                Id INT AUTO_INCREMENT PRIMARY KEY,
+                KnjigaId INT NOT NULL,
+                KorisnikId INT NOT NULL,
+                Ocjena INT NOT NULL,
+                Komentar TEXT,
+                DatumKreiranja DATETIME(6) NOT NULL,
+                FOREIGN KEY (KnjigaId) REFERENCES Knjige(Id) ON DELETE CASCADE,
+                FOREIGN KEY (KorisnikId) REFERENCES Korisnici(Id) ON DELETE RESTRICT
+            );
+        ");
+    }
+    catch (Exception) { }
+
     // Hardkodirani seed podataka (Opis i Slika) za knjige kako se ne bismo oslanjali na nepouzdan Google Books/OpenLibrary API
     db.Database.ExecuteSqlRaw(@"
         UPDATE Knjige SET Opis = 'A heartfelt novel about a flawed man reflecting on his life, marriages, and friendships in Montreal.' WHERE Isbn = '3404921038' AND Opis IS NULL;
@@ -228,6 +281,151 @@ using (var scope = app.Services.CreateScope())
             new Kategorija { Naziv = "Udžbenici", Opis = "Obrazovni udžbenici i priručnici" },
             new Kategorija { Naziv = "Ostalo", Opis = "Ostale kategorije" }
         );
+        db.SaveChanges();
+    }
+
+    var seedKategorija = db.Kategorije.FirstOrDefault(k => k.Naziv == "Beletristika")
+        ?? db.Kategorije.FirstOrDefault();
+
+    if (seedKategorija != null)
+    {
+        var seedBooks = new List<Knjiga>
+        {
+            new Knjiga
+            {
+                Naslov = "Way of the Peaceful Warrior 20th Anniversary Edition: A Book That Changes Lives",
+                Autor = "Dan Millman",
+                Isbn = "0915811898",
+                Izdavac = "H.J. Kramer",
+                GodinaIzdanja = 2000,
+                SlikaUrl = "http://images.amazon.com/images/P/0915811898.01.LZZZZZZZ.jpg"
+            },
+            new Knjiga
+            {
+                Naslov = "Running from Safety: An Adventure of the Spirit",
+                Autor = "Richard Bach",
+                Isbn = "0385315287",
+                Izdavac = "Delta",
+                GodinaIzdanja = 1995,
+                SlikaUrl = "http://images.amazon.com/images/P/0385315287.01.LZZZZZZZ.jpg"
+            },
+            new Knjiga
+            {
+                Naslov = "The Bridge Across Forever",
+                Autor = "Richard Bach",
+                Isbn = "0440108268",
+                Izdavac = "Dell",
+                GodinaIzdanja = 1986,
+                SlikaUrl = "http://images.amazon.com/images/P/0440108268.01.LZZZZZZZ.jpg"
+            },
+            new Knjiga
+            {
+                Naslov = "A Gift of Wings",
+                Autor = "Richard Bach",
+                Isbn = "0440204321",
+                Izdavac = "Dell",
+                GodinaIzdanja = 1989,
+                SlikaUrl = "http://images.amazon.com/images/P/0440204321.01.LZZZZZZZ.jpg"
+            },
+            new Knjiga
+            {
+                Naslov = "One",
+                Autor = "Richard Bach",
+                Isbn = "044020562X",
+                Izdavac = "Dell",
+                GodinaIzdanja = 1989,
+                SlikaUrl = "http://images.amazon.com/images/P/044020562X.01.LZZZZZZZ.jpg"
+            },
+            new Knjiga
+            {
+                Naslov = "The Secret of Shambhala : In Search of the Eleventh Insight",
+                Autor = "James Redfield",
+                Isbn = "0446676489",
+                Izdavac = "Warner Books",
+                GodinaIzdanja = 2001,
+                SlikaUrl = "http://images.amazon.com/images/P/0446676489.01.LZZZZZZZ.jpg"
+            },
+            new Knjiga
+            {
+                Naslov = "Maps to Ecstasy: A Healing Journey for the Untamed Spirit",
+                Autor = "Gabrielle Roth",
+                Isbn = "1577310454",
+                Izdavac = "New World Library",
+                GodinaIzdanja = 1998,
+                SlikaUrl = "http://images.amazon.com/images/P/1577310454.01.LZZZZZZZ.jpg"
+            },
+            new Knjiga
+            {
+                Naslov = "Bridget Jones: The Edge of Reason",
+                Autor = "Helen Fielding",
+                Isbn = "0140298479",
+                Izdavac = "Penguin Books",
+                GodinaIzdanja = 2001,
+                SlikaUrl = "http://images.amazon.com/images/P/0140298479.01.LZZZZZZZ.jpg"
+            },
+            new Knjiga
+            {
+                Naslov = "Invitation",
+                Autor = "Oriah Mountain Dreamer",
+                Isbn = "0694524638",
+                Izdavac = "HarperAudio",
+                GodinaIzdanja = 2000,
+                SlikaUrl = "http://images.amazon.com/images/P/0694524638.01.LZZZZZZZ.jpg"
+            },
+            new Knjiga
+            {
+                Naslov = "Chief Seattle (Northwest Mythic Landscape Series)",
+                Autor = "David Buerge",
+                Isbn = "0912365579",
+                Izdavac = "Pub Group West",
+                GodinaIzdanja = 1992,
+                SlikaUrl = "http://images.amazon.com/images/P/0912365579.01.LZZZZZZZ.jpg"
+            },
+            new Knjiga
+            {
+                Naslov = "Write from the Heart: Unleashing the Power of Your Creativity",
+                Autor = "Hal Zina Bennett",
+                Isbn = "1882591275",
+                Izdavac = "Pub Group West",
+                GodinaIzdanja = 1995,
+                SlikaUrl = "http://images.amazon.com/images/P/1882591275.01.LZZZZZZZ.jpg"
+            }
+        };
+
+        foreach (var seed in seedBooks)
+        {
+            if (db.Knjige.Any(k => k.Isbn == seed.Isbn))
+            {
+                continue;
+            }
+
+            seed.KategorijaId = seedKategorija.Id;
+            db.Knjige.Add(seed);
+        }
+
+        db.SaveChanges();
+
+        foreach (var seed in seedBooks)
+        {
+            var saved = db.Knjige.FirstOrDefault(k => k.Isbn == seed.Isbn);
+            if (saved == null)
+            {
+                continue;
+            }
+
+            var inv = $"SEED-{saved.Isbn}-01";
+            if (!db.Primjerci.Any(p => p.InventarniBroj == inv))
+            {
+                db.Primjerci.Add(new Primjerak
+                {
+                    KnjigaId = saved.Id,
+                    InventarniBroj = inv,
+                    Status = "dostupan",
+                    DatumNabave = DateTime.UtcNow
+                });
+            }
+        }
+
         db.SaveChanges();
     }
 

@@ -298,3 +298,66 @@
         </div>
     }
 </div>
+
+@{
+    var recenzije = ViewBag.Recenzije as IEnumerable<Recenzija> ?? new List<Recenzija>();
+    var prosjek = recenzije.Any() ? recenzije.Average(r => r.Ocjena) : 0;
+}
+<div class="card" style="margin-top: 2rem;">
+    <div class="examples-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1.5rem;">
+        <div>
+            <h3 class="examples-title" style="margin: 0;">Recenzije čitalaca</h3>
+            @if(recenzije.Any())
+            {
+                <div style="color: #fbbf24; font-size: 1.2rem; margin-top: 0.25rem;">
+                    @prosjek.ToString("0.0") ⭐ <span style="font-size: 0.9rem; color: var(--text-muted);">(@recenzije.Count() recenzija)</span>
+                </div>
+            }
+        </div>
+        @if(!jeOsoblje)
+        {
+            <a asp-controller="Recenzija" asp-action="Dodaj" asp-route-knjigaId="@Model.Id" class="btn btn-outline btn-sm">Ocijeni knjigu</a>
+        }
+    </div>
+
+    @if (!recenzije.Any())
+    {
+        <div style="text-align: center; color: var(--text-muted); padding: 2rem 0;">
+            <p>Ova knjiga još nema recenzija.</p>
+        </div>
+    }
+    else
+    {
+        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            @foreach (var r in recenzije)
+            {
+                <div style="background: var(--bg-alt); padding: 1.25rem; border-radius: 8px; border: 1px solid var(--border-color);">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
+                        <div>
+                            <strong style="color: var(--text-main);">@(r.Korisnik?.Ime) @(r.Korisnik?.Prezime)</strong>
+                            <div style="color: var(--text-muted); font-size: 0.85rem;">@r.DatumKreiranja.ToLocalTime().ToString("dd.MM.yyyy")</div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                            <div style="color: #fbbf24; font-weight: bold;">
+                                @r.Ocjena / 5 ⭐
+                            </div>
+                            @if (jeOsoblje)
+                            {
+                                <form asp-controller="Recenzija" asp-action="Delete" method="post"
+                                      onsubmit="return confirm('Ukloniti ovu recenziju?');">
+                                    <input type="hidden" name="id" value="@r.Id" />
+                                    <input type="hidden" name="knjigaId" value="@Model.Id" />
+                                    <button type="submit" class="btn btn-danger btn-sm" title="Ukloni neadekvatnu recenziju">🗑 Ukloni</button>
+                                </form>
+                            }
+                        </div>
+                    </div>
+                    @if(!string.IsNullOrWhiteSpace(r.Komentar))
+                    {
+                        <p style="margin: 0; color: var(--text-secondary); line-height: 1.5;">@r.Komentar</p>
+                    }
+                </div>
+            }
+        </div>
+    }
+</div>

@@ -151,10 +151,11 @@ namespace SmartLib.Web.Controllers
             return File(svgBytes, "image/svg+xml");
         }
 
-        public async Task<IActionResult> Index(string? naslov, string? autor, int page = 1)
+        public async Task<IActionResult> Index(string? naslov, string? autor, int page = 1, int pageSize = 16)
         {
-            const int pageSize = 16;
             if (page < 1) page = 1;
+
+            if (pageSize <= 0) pageSize = 16;
 
             var booksVersion = _cacheVersions.BooksVersion;
             var categoriesVersion = _cacheVersions.CategoriesVersion;
@@ -177,8 +178,11 @@ namespace SmartLib.Web.Controllers
                 Kategorija = k.Kategorija?.Naziv,
                 Izdavac = k.Izdavac,
                 GodinaIzdanja = k.GodinaIzdanja,
+                Opis = k.Opis,
                 BrojPrimjeraka = k.Primjerci.Count,
-                BrojDostupnih = k.Primjerci.Count(p => p.Status == "dostupan")
+                BrojDostupnih = k.Primjerci.Count(p => p.Status == "dostupan"),
+                ProsjecnaOcjena = k.Recenzije != null && k.Recenzije.Any() ? k.Recenzije.Average(r => r.Ocjena) : 0,
+                BrojRecenzija = k.Recenzije?.Count ?? 0
             }).ToList();
 
             int ukupnoStrana = ukupno == 0 ? 1 : (int)Math.Ceiling((double)ukupno / pageSize);
@@ -426,7 +430,7 @@ namespace SmartLib.Web.Controllers
             }
         }
 
-        public async Task<IActionResult> Details(int id)
+        public async Task<IActionResult> Details(int id, [FromServices] IRecenzijaRepository recenzijaRepository)
         {
             var cacheKey = $"book_details_v1_{_cacheVersions.BooksVersion}_{_cacheVersions.CategoriesVersion}_{id}";
             var cachedEntry = await _cache.GetRecordAsync<KnjigaDetailsCacheEntry>(cacheKey);
@@ -462,6 +466,7 @@ namespace SmartLib.Web.Controllers
                 
                 ViewBag.Primjerci = cachedEntry.Primjerci;
                 await SetRezervacijaViewBag(id);
+                ViewBag.Recenzije = await recenzijaRepository.GetByKnjigaIdAsync(id);
                 return View(cachedEntry.Dto);
             }
 
@@ -513,6 +518,7 @@ namespace SmartLib.Web.Controllers
 
             var primjerci = knjiga.Primjerci.OrderBy(p => p.InventarniBroj).ToList();
             ViewBag.Primjerci = primjerci;
+            ViewBag.Recenzije = await recenzijaRepository.GetByKnjigaIdAsync(id);
 
             await _cache.SetRecordAsync(cacheKey, new KnjigaDetailsCacheEntry
             {

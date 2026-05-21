@@ -14,6 +14,8 @@ namespace SmartLib.Core.DTOs
         public string? Opis { get; set; }
         public int BrojPrimjeraka { get; set; }
         public int BrojDostupnih { get; set; }
+        public double ProsjecnaOcjena { get; set; }
+        public int BrojRecenzija { get; set; }
     }
 
     public class KnjigaCreateDto
