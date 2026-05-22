@@ -624,7 +624,7 @@
         <div class="reveal d2 cta-btns">
             @if (!(User.Identity?.IsAuthenticated ?? false))
             {
-                <a asp-controller="Auth" asp-action="Login" class="cta-primary">Prijava u sistem</a>
+                <a asp-controller="Auth" asp-action="Login" class="cta-primary" aria-hidden="true">Prijava</a>
             }
             <a asp-controller="Knjiga" asp-action="Index" class="cta-secondary">Pogledajte katalog</a>
         </div>
