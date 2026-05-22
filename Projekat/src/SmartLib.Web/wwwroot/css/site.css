@@ -4556,6 +4556,7 @@ body.home-page footer {
         color: var(--sl-gold);
     }
 
+<<<<<<< HEAD
 .izvjestaj-charts-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -4612,6 +4613,8 @@ body.home-page footer {
     margin-top: 2rem;
 }
 
+=======
+>>>>>>> origin/main
 /* ================================
    Dark Mode Toggle Button
    ================================ */
