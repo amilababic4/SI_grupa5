@@ -1,0 +1,506 @@
+/* Lightweight animations for SmartLib: premium 3D book open, tab transitions, catalog slide, menu reveal */
+:root {
+  --book-height: 82vh;
+  --book-width: min(calc(var(--book-height) * 0.65), 44vw);
+}
+
+@media (max-width: 600px) and (orientation: portrait) {
+  :root {
+    --book-height: 55vh;
+    --book-width: min(calc(var(--book-height) * 0.65), 46vw);
+  }
+}
+
+#book-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at center, #fdfbf7 0%, #e6dfcf 100%);
+  z-index: 9999;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.6s cubic-bezier(0.25, 1, 0.5, 1), visibility 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+  perspective: 2000px;
+  overflow: hidden;
+}
+
+/* Floor grid - soft cozy sepia lines */
+#book-overlay::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(rgba(120, 53, 15, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(120, 53, 15, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  background-position: center;
+  transform: rotateX(60deg) translateZ(-200px) scale(2.5);
+  transform-origin: center top;
+  opacity: 0.6;
+}
+
+/* Ambient glow - warm gold/amber */
+#book-overlay::after {
+  content: "";
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(217, 119, 6, 0.08) 0%, transparent 70%);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+#book-overlay.fade-out {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.book {
+  width: var(--book-width);
+  height: var(--book-height);
+  position: relative;
+  transform-style: preserve-3d;
+  transform: rotateX(20deg) rotateY(-20deg) translateZ(50px);
+  transition: transform 1.5s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.book.open {
+  transform: translateX(calc(var(--book-width) / 2)) rotateX(15deg) rotateY(-5deg) translateZ(50px);
+}
+
+.book .cover, .book .pages {
+  position: absolute;
+  inset: 0;
+  border-radius: 6px;
+  transform-style: preserve-3d;
+}
+
+.book .cover.front {
+  transform-origin: left center;
+  transform: rotateY(0deg);
+  transition: transform 1.5s cubic-bezier(0.25, 1, 0.5, 1);
+  z-index: 10;
+}
+
+/* Cybernetic Glassmorphic Covers */
+.book .cover.front .cover-side {
+  position: absolute;
+  inset: 0;
+  border-radius: 6px;
+  backface-visibility: hidden;
+  box-shadow: 0 0 30px rgba(120, 53, 15, 0.12);
+}
+
+.book .cover.front .cover-side.outer {
+  background: linear-gradient(135deg, #5c2c16 0%, #3a1a0b 100%);
+  border: 1px solid rgba(217, 119, 6, 0.35);
+  border-left: 6px solid #d97706;
+  z-index: 2;
+  transform: rotateY(0deg);
+}
+
+.book .cover.front .cover-side.outer::before {
+  content: "";
+  position: absolute;
+  top: 42%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: calc(var(--book-width) * 0.35);
+  height: calc(var(--book-width) * 0.35);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23d97706' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 19.5A2.5 2.5 0 0 1 6.5 17H20'/%3E%3Cpath d='M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z'/%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+  filter: drop-shadow(0 0 10px rgba(217, 119, 6, 0.6));
+}
+
+.book .cover.front .cover-side.outer::after {
+  content: "SMARTLIB";
+  position: absolute;
+  bottom: 20%;
+  left: 0;
+  right: 0;
+  text-align: center;
+  color: #d97706;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 700;
+  font-size: calc(var(--book-width) * 0.07);
+  letter-spacing: 0.15em;
+  text-shadow: 0 0 8px rgba(217, 119, 6, 0.4);
+}
+
+.book .cover.front .cover-side.inner {
+  background: #eae5d8;
+  border: 1px solid rgba(120, 53, 15, 0.15);
+  border-right: 6px solid rgba(217, 119, 6, 0.25);
+  transform: rotateY(180deg);
+  z-index: 1;
+}
+
+/* Left outer cover branding */
+
+.book .cover.back {
+  background: #3a1a0b;
+  border: 1px solid rgba(217, 119, 6, 0.25);
+  border-radius: 6px;
+  transform: translateZ(-10px);
+  box-shadow: 0 0 25px rgba(120, 53, 15, 0.1);
+}
+
+/* Double-page page sheet system */
+.book .pages {
+  width: 96%;
+  height: 96%;
+  top: 2%;
+  left: 2%;
+  z-index: 5;
+}
+
+.book .page-sheet {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transform-origin: left center;
+  transition: transform 1.5s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.book .page-sheet .page-side {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  border-radius: 6px;
+  background: #fbf9f4;
+  border: 1px solid rgba(120, 53, 15, 0.18);
+  box-shadow: 
+    0 0 25px rgba(0, 0, 0, 0.06), 
+    inset 0 0 15px rgba(120, 53, 15, 0.03);
+}
+
+.book .page-sheet .page-side.outer {
+  transform: rotateY(0deg);
+}
+
+.book .page-sheet .page-side.inner {
+  transform: rotateY(180deg);
+}
+
+/* Symmetrical page orientations */
+.book .left-page {
+  transform: rotateY(0deg) translateZ(2px);
+}
+
+.book .right-page {
+  transform: rotateY(0deg) translateZ(1px);
+}
+
+.book.open .cover.front {
+  transform: rotateY(-160deg);
+}
+
+.book.open .left-page {
+  transform: rotateY(-152deg) translateZ(2px);
+  transition-delay: 0.15s;
+}
+
+.book.open .right-page {
+  transform: rotateY(-12deg) translateZ(1px);
+  transition-delay: 0.3s;
+}
+
+/* Tab transitions */
+.slide-animation {
+  transition: all 0.3s ease-in-out;
+  transform-origin: center center;
+}
+.slide-enter {
+  transform: scale(0.8);
+  opacity: 0.5;
+}
+.slide-leave {
+  transform: scale(0.5);
+  opacity: 0.2;
+}
+
+
+
+/* Menu reveal - default to visible, JS will handle stagger delay */
+.menu-item {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* If book overlay is present, hide menu items initially for stagger reveal */
+#book-overlay ~ #main-nav .menu-item {
+  opacity: 0;
+  transform: translateY(-12px);
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .book.open .cover.front { animation: none; }
+  .catalog-slide.enlarged { animation: none; }
+  .slide-animation { transition: none; }
+}
+
+/* Container to keep book perfectly centered */
+.book-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Elegant book pages layout styling */
+.page-content {
+  padding: calc(var(--book-width) * 0.08) calc(var(--book-width) * 0.06);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  height: 100%;
+  text-align: center;
+  box-sizing: border-box;
+  position: relative;
+}
+
+/* Classic literary headings style */
+.book-page-header {
+  font-family: 'Manrope', sans-serif;
+  font-size: calc(var(--book-width) * 0.036);
+  font-weight: 700;
+  color: #78350f;
+  letter-spacing: 0.15em;
+  opacity: 0.85;
+  align-self: center;
+  margin-bottom: 2rem;
+}
+
+.book-page-footer {
+  font-family: 'Manrope', sans-serif;
+  font-size: calc(var(--book-width) * 0.034);
+  font-weight: 700;
+  color: #78350f;
+  letter-spacing: 0.12em;
+  opacity: 0.75;
+  margin-top: auto;
+  align-self: center;
+}
+
+.book-icon-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(var(--book-width) * 0.24);
+  height: calc(var(--book-width) * 0.24);
+  margin: 1.5rem auto 1rem auto;
+  border-radius: 50%;
+  border: 1px solid rgba(120, 53, 15, 0.2);
+  background: rgba(120, 53, 15, 0.03);
+  box-shadow: inset 0 0 10px rgba(120, 53, 15, 0.05);
+}
+
+.book-svg-icon {
+  width: 45%;
+  height: 45%;
+  color: #78350f;
+}
+
+.page-title {
+  font-family: 'Manrope', sans-serif;
+  font-weight: 800;
+  font-size: calc(var(--book-width) * 0.09);
+  color: #78350f;
+  margin: 0.5rem 0 calc(var(--book-width) * 0.05) 0;
+  letter-spacing: 0.1em;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: pageElementReveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: 0.3s;
+}
+
+/* Premium modern friendly welcome text styling - cozy legible cursive */
+.page-text {
+  font-family: 'Caveat', cursive !important;
+  font-style: normal;
+  font-size: calc(var(--book-width) * 0.062);
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+  color: #3b2c22 !important;
+  margin: 1.2rem 0;
+  max-width: 92%;
+  text-shadow: none;
+  opacity: 0;
+  transform: translateY(15px);
+  animation: pageElementReveal 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: 0.5s;
+}
+
+/* Hide any dynamic loader text or background bleed-through on the inner cover */
+.book .cover.front .cover-side.inner::after,
+.book .cover.front .cover-side.inner::before {
+  content: "" !important;
+  display: none !important;
+}
+
+/* Premium action button aligned neatly as a small signature note in the bottom-right */
+.book-action-btn {
+  font-family: 'Manrope', sans-serif;
+  font-size: calc(var(--book-width) * 0.033);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #ffffff !important;
+  background: #78350f;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(120, 53, 15, 0.15);
+  transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1);
+  margin-top: auto;
+  align-self: flex-end;
+  margin-right: 5%;
+  margin-bottom: 4%;
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: pageElementReveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: 0.7s;
+}
+
+/* Make the clickable area slightly larger than the visible button so it's easier to target with mouse */
+.book-action-btn {
+  position: relative;
+  z-index: 99999;
+}
+
+.book-action-btn::before {
+  content: "";
+  position: absolute;
+  top: -18px;
+  right: -18px;
+  bottom: -18px;
+  left: -18px;
+  background: transparent;
+  pointer-events: auto;
+  border-radius: 20px;
+}
+
+.book-action-btn:hover {
+  background: #d97706;
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: 0 4px 10px rgba(217, 119, 6, 0.2);
+}
+
+.book-action-btn:active {
+  transform: translateY(0) scale(0.98);
+}
+
+@keyframes pageElementReveal {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Stunning Dark Mode Loader Theme overrides ── */
+[data-theme="dark"] #book-overlay {
+  background: radial-gradient(circle at center, #070b14 0%, #010205 100%);
+}
+
+[data-theme="dark"] #book-overlay::before {
+  background-image: 
+    linear-gradient(rgba(0, 210, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 210, 255, 0.04) 1px, transparent 1px);
+  opacity: 0.7;
+}
+
+[data-theme="dark"] #book-overlay::after {
+  background: radial-gradient(circle, rgba(0, 210, 255, 0.12) 0%, transparent 70%);
+}
+
+[data-theme="dark"] .book .cover.front .cover-side.outer {
+  background: linear-gradient(135deg, #060b18 0%, #010205 100%);
+  border-color: rgba(0, 210, 255, 0.4);
+  border-left-color: #00d2ff;
+  box-shadow: 0 0 30px rgba(0, 210, 255, 0.15);
+}
+
+[data-theme="dark"] .book .cover.front .cover-side.outer::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2300d2ff' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 19.5A2.5 2.5 0 0 1 6.5 17H20'/%3E%3Cpath d='M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z'/%3E%3C/svg%3E");
+  filter: drop-shadow(0 0 15px rgba(0, 210, 255, 0.8));
+}
+
+[data-theme="dark"] .book .cover.front .cover-side.outer::after {
+  color: #00d2ff;
+  text-shadow: 0 0 10px rgba(0, 210, 255, 0.6);
+}
+
+[data-theme="dark"] .book .cover.front .cover-side.inner {
+  background: #060b18;
+  border-right-color: rgba(0, 210, 255, 0.3);
+}
+
+/* Left inner cover dark override */
+
+[data-theme="dark"] .book .cover.back {
+  background: #010205;
+  border-color: rgba(0, 210, 255, 0.3);
+}
+
+[data-theme="dark"] .book .page-sheet .page-side {
+  background: rgba(4, 8, 16, 0.92);
+  border-color: rgba(0, 210, 255, 0.35);
+  box-shadow: 
+    0 0 35px rgba(0, 210, 255, 0.2), 
+    inset 0 0 25px rgba(0, 210, 255, 0.12);
+}
+
+[data-theme="dark"] .book-page-header,
+[data-theme="dark"] .book-page-footer,
+[data-theme="dark"] .page-title {
+  color: #00d2ff;
+  text-shadow: 0 0 12px rgba(0, 210, 255, 0.6);
+}
+
+[data-theme="dark"] .book-icon-container {
+  border-color: rgba(0, 210, 255, 0.4);
+  background: rgba(0, 210, 255, 0.04);
+}
+
+[data-theme="dark"] .book-svg-icon {
+  color: #00d2ff;
+  filter: drop-shadow(0 0 8px rgba(0, 210, 255, 0.7));
+}
+
+[data-theme="dark"] .page-text {
+  color: #e2e8f0 !important;
+  text-shadow: 0 0 4px rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .book-action-btn {
+  background: #00d2ff;
+  color: #050a15 !important;
+  box-shadow: 0 0 12px rgba(0, 210, 255, 0.25);
+}
+
+[data-theme="dark"] .book-action-btn:hover {
+  background: #38bdf8;
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.4);
+}
+
+[data-theme="dark"] .skip-btn {
+  border-color: rgba(0, 210, 255, 0.35);
+  color: #00d2ff;
+  text-shadow: 0 0 8px rgba(0, 210, 255, 0.4);
+}
+
+[data-theme="dark"] .skip-btn:hover {
+  background: rgba(0, 210, 255, 0.06);
+}
+

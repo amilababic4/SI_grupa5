@@ -14,17 +14,14 @@
     <!-- TODO: Dodati NuGet pakete -->
     <!-- <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.*" /> -->
     <!-- <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.*" /> -->
-	  <PackageReference Include="coverlet.collector" Version="10.0.0">
-	    <PrivateAssets>all</PrivateAssets>
-	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-	  </PackageReference>
-	  <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.*" />
+    <PackageReference Include="coverlet.collector" Version="10.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.*" />
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.*" />
     <PackageReference Include="QuestPDF" Version="2024.10.4" />
-<<<<<<< HEAD
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-=======
->>>>>>> origin/main
   </ItemGroup>
 
 </Project>

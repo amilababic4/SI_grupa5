@@ -1,4 +1,4 @@
-﻿namespace SmartLib.Core.DTOs
+namespace SmartLib.Core.DTOs
 {
     public class MjesecniIzvjestajFilterDto
     {
@@ -31,11 +31,8 @@
         public int ZakasnjelaZaduzenja { get; set; }
         public List<ZaduzenjeIzvjestajRedDto> Stavke { get; set; } = new();
         public DateTime GenerisanoU { get; set; } = DateTime.Now;
-<<<<<<< HEAD
         public List<int> ZaduzenjaPoDanima { get; set; } = new();
         public List<KnjigaRankDto> TopKnjige { get; set; } = new();
-=======
->>>>>>> origin/main
     }
 
     // ── US-89: Rezervacije ──────────────────────────────────────────────────────
@@ -63,11 +60,8 @@
         public int OtkazaneRezervacije { get; set; }
         public List<RezervacijaIzvjestajRedDto> Stavke { get; set; } = new();
         public DateTime GenerisanoU { get; set; } = DateTime.Now;
-<<<<<<< HEAD
         public List<int> RezervacijePoDanima { get; set; } = new();
         public List<KnjigaRankDto> TopKnjige { get; set; } = new();
-=======
->>>>>>> origin/main
     }
 
     // ── US-90: Članovi ──────────────────────────────────────────────────────────
@@ -76,12 +70,8 @@
     {
         public int RedniBroj { get; set; }
         public string ImePrezime { get; set; } = string.Empty;
-<<<<<<< HEAD
-        public string Email { get; set; } = string.Empty;       
-=======
         public string Email { get; set; } = string.Empty;
         public string BrojClanske { get; set; } = string.Empty;
->>>>>>> origin/main
         public DateTime DatumRegistracije { get; set; }
         public string StatusClanarine { get; set; } = string.Empty;
         public DateTime? ClanarinaVaziDo { get; set; }
@@ -100,7 +90,6 @@
         public int ClanovaIsteklaClanarina { get; set; }
         public List<ClanIzvjestajRedDto> Stavke { get; set; } = new();
         public DateTime GenerisanoU { get; set; } = DateTime.Now;
-<<<<<<< HEAD
         public List<int> NoviClanoviPoDanima { get; set; } = new();
         public List<ClanAktivnostDto> TopClanovi { get; set; } = new();
     }
@@ -115,7 +104,5 @@
     {
         public string ImePrezime { get; set; } = string.Empty;
         public int BrojZaduzenja { get; set; }
-=======
->>>>>>> origin/main
     }
 }

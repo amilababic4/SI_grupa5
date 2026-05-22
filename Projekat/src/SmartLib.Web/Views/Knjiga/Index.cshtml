@@ -86,7 +86,7 @@
 else
 {
     <!-- LIST VIEW (Letterboxd style) -->
-    <div id="katalog-list-layout" class="lb-list-layout">
+    <div id="katalog-list-layout" class="lb-list-layout slide-animation">
         @foreach (var knjiga in Model.Knjige)
         {
             <div class="lb-list-item">
@@ -166,7 +166,7 @@ else
     </div>
 
     <!-- GRID VIEW (Letterboxd poster style) -->
-    <div id="katalog-grid-layout" class="lb-grid-layout hidden-layout">
+    <div id="katalog-grid-layout" class="lb-grid-layout hidden-layout slide-animation">
         <div class="katalog-picks">
             Naše preporuke
         </div>
@@ -254,19 +254,33 @@ else
         const layoutList = document.getElementById('katalog-list-layout');
         const layoutGrid = document.getElementById('katalog-grid-layout');
 
+        function switchLayout(oldLayout, newLayout) {
+            oldLayout.classList.add('slide-leave');
+            setTimeout(() => {
+                oldLayout.classList.add('hidden-layout');
+                oldLayout.classList.remove('slide-leave');
+                
+                newLayout.classList.remove('hidden-layout');
+                newLayout.classList.add('slide-enter');
+                requestAnimationFrame(() => {
+                    newLayout.classList.remove('slide-enter');
+                });
+            }, 300);
+        }
+
         btnList.addEventListener('click', () => {
+            if (btnList.classList.contains('active')) return;
             btnList.classList.add('active');
             btnGrid.classList.remove('active');
-            layoutList.classList.remove('hidden-layout');
-            layoutGrid.classList.add('hidden-layout');
+            switchLayout(layoutGrid, layoutList);
             localStorage.setItem('katalogView', 'list');
         });
 
         btnGrid.addEventListener('click', () => {
+            if (btnGrid.classList.contains('active')) return;
             btnGrid.classList.add('active');
             btnList.classList.remove('active');
-            layoutGrid.classList.remove('hidden-layout');
-            layoutList.classList.add('hidden-layout');
+            switchLayout(layoutList, layoutGrid);
             localStorage.setItem('katalogView', 'grid');
         });
 

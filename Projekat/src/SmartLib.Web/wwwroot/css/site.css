@@ -4613,8 +4613,6 @@ body.home-page footer {
     margin-top: 2rem;
 }
 
-=======
->>>>>>> origin/main
 /* ================================
    Dark Mode Toggle Button
    ================================ */
@@ -4633,29 +4631,49 @@ body.home-page footer {
     transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
 }
 
+/* Light navbar: subtle border, transparent background so icon itself is visible
+   without an inner square. Hover adds a gentle tint. */
 .smartlib-navbar-app .theme-toggle-btn {
     color: #334155;
-    background: rgba(219, 234, 254, 0.55);
-    border-color: rgba(30, 58, 95, 0.12);
+    background: transparent;
+    border-color: rgba(30, 58, 95, 0.08);
+    box-shadow: none;
 }
 
     .smartlib-navbar-app .theme-toggle-btn:hover {
-        background: rgba(219, 234, 254, 0.9);
-        border-color: rgba(30, 58, 95, 0.2);
-        transform: rotate(18deg) scale(1.08);
+        background: rgba(219, 234, 254, 0.22);
+        border-color: rgba(30, 58, 95, 0.14);
+        transform: rotate(6deg) scale(1.04);
     }
 
+/* Frontpage (dark-over-image) navbar: keep subtle translucent ring */
 .smartlib-navbar-front .theme-toggle-btn {
     color: rgba(255, 255, 255, 0.88);
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.12);
+    background: transparent;
+    border-color: rgba(255, 255, 255, 0.06);
+    box-shadow: none;
 }
 
     .smartlib-navbar-front .theme-toggle-btn:hover {
-        background: rgba(255, 255, 255, 0.16);
+        background: rgba(255, 255, 255, 0.06);
         color: #ffffff;
-        transform: rotate(18deg) scale(1.08);
+        transform: rotate(6deg) scale(1.04);
     }
+
+/* Ensure SVG icons don't introduce their own backgrounds and are centered */
+.theme-toggle-btn svg {
+    display: block;
+    width: 18px;
+    height: 18px;
+    background: transparent;
+}
+
+.theme-toggle-btn .icon-sun,
+.theme-toggle-btn .icon-moon {
+    box-shadow: none;
+    background: transparent;
+    border-radius: 4px;
+}
 
 /* ================================
    Dark Mode
