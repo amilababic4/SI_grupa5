@@ -111,6 +111,7 @@ builder.Services.AddScoped<IRezervacijaRepository, RezervacijaRepository>();
 builder.Services.AddScoped<IForumRepository, ForumRepository>();
 builder.Services.AddScoped<IRecenzijaRepository, RecenzijaRepository>();
 builder.Services.AddHostedService<DeactivatedAccountCleanupService>();
+builder.Services.AddScoped<IIzvjestajService, IzvjestajService>();
 
 // Services
 builder.Services.AddTransient<IEmailService, SmartLib.Infrastructure.Services.EmailService>();

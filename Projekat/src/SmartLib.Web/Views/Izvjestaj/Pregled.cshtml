@@ -1,0 +1,130 @@
+﻿@model SmartLib.Core.DTOs.MjesecniZaduzenjaIzvjestajDto
+@{
+    ViewData["Title"] = $"Izvještaj — {Model.NazivMjeseca} {Model.Godina}";
+}
+
+<div class="page-shell">
+
+    <!-- Header akcije -->
+    <div class="izvjestaj-page-header">
+        <div class="izvjestaj-page-header__left">
+            <a asp-action="Index" asp-controller="Izvjestaj" class="btn-back">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6" /></svg>
+                Nazad
+            </a>
+            <div class="izvjestaj-page-header__icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                </svg>
+            </div>
+            <div>
+                <h1 class="izvjestaj-page-header__title">Izvještaj o zaduživanjima</h1>
+                <p class="izvjestaj-page-header__subtitle">@Model.NazivMjeseca @Model.Godina · Generisano @Model.GenerisanoU.ToString("dd.MM.yyyy u HH:mm")</p>
+            </div>
+        </div>
+        <div class="izvjestaj-page-header__right">
+            <a asp-action="PdfPreuzimanje"
+               asp-controller="Izvjestaj"
+               asp-route-mjesec="@Model.Mjesec"
+               asp-route-godina="@Model.Godina"
+               class="btn btn-primary izvjestaj-pdf-btn"
+               target="_blank">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="7 10 12 15 17 10" />
+                    <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+                Preuzmi PDF
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistike -->
+    <div class="izvjestaj-stat-grid">
+        <div class="izvjestaj-stat-card izvjestaj-stat-card--primary">
+            <div class="izvjestaj-stat-card__label">Ukupno zaduženja</div>
+            <div class="izvjestaj-stat-card__val">@Model.UkupnoZaduzenja</div>
+        </div>
+        <div class="izvjestaj-stat-card izvjestaj-stat-card--success">
+            <div class="izvjestaj-stat-card__label">Aktivna</div>
+            <div class="izvjestaj-stat-card__val">@Model.AktivnaZaduzenja</div>
+        </div>
+        <div class="izvjestaj-stat-card izvjestaj-stat-card--muted">
+            <div class="izvjestaj-stat-card__label">Zatvorena</div>
+            <div class="izvjestaj-stat-card__val">@Model.ZatvorenaZaduzenja</div>
+        </div>
+        <div class="izvjestaj-stat-card izvjestaj-stat-card--danger">
+            <div class="izvjestaj-stat-card__label">Zakašnjela</div>
+            <div class="izvjestaj-stat-card__val">@Model.ZakasnjelaZaduzenja</div>
+        </div>
+    </div>
+
+    <!-- Tabela ili prazna poruka -->
+    @if (!Model.Stavke.Any())
+    {
+        <div class="empty-state-card">
+            <div class="empty-state-card__icon">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                </svg>
+            </div>
+            <h3 class="empty-state-card__title">Nema podataka</h3>
+            <p class="empty-state-card__text">Nije pronađeno nijedno zaduženje za period <strong>@Model.NazivMjeseca @Model.Godina</strong>.</p>
+            <a asp-action="Index" asp-controller="Izvjestaj" class="btn btn-secondary">Odaberi drugi period</a>
+        </div>
+    }
+    else
+    {
+        <div class="izvjestaj-table-card">
+            <div class="izvjestaj-table-card__head">
+                <span class="izvjestaj-table-card__title">Lista zaduženja</span>
+                <span class="izvjestaj-table-card__count">@Model.UkupnoZaduzenja zapisa</span>
+            </div>
+            <div class="table-responsive">
+                <table class="sl-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Član</th>
+                            <th>Knjiga</th>
+                            <th>Autor</th>
+                            <th>Inv. broj</th>
+                            <th>Zaduženo</th>
+                            <th>Rok vraćanja</th>
+                            <th>Vraćeno</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var s in Model.Stavke)
+                        {
+                            <tr>
+                                <td class="sl-table__num">@s.RedniBroj</td>
+                                <td>
+                                    <div class="sl-table__name">@s.ClanImePrezime</div>
+                                    <div class="sl-table__sub">@s.ClanEmail</div>
+                                </td>
+                                <td class="sl-table__bold">@s.NaslovKnjige</td>
+                                <td class="sl-table__muted">@s.Autor</td>
+                                <td class="sl-table__mono">@s.InventarniBroj</td>
+                                <td>@s.DatumZaduzivanja.ToString("dd.MM.yyyy")</td>
+                                <td>@(s.DatumPlaniranogVracanja?.ToString("dd.MM.yyyy") ?? "—")</td>
+                                <td class="@(s.DatumStvarnogVracanja.HasValue ? "sl-table__success" : "sl-table__muted")">
+                                    @(s.DatumStvarnogVracanja.HasValue? s.DatumStvarnogVracanja.Value.ToString("dd.MM.yyyy") : "—")
+                                </td>
+                                <td>
+                                    <span class="status-badge status-badge--@s.Status.ToLower().Replace("š", "s").Replace("é", "e")">
+                                        @(s.Status == "zakašnjelo" ? "Zakašnjelo" : s.Status == "aktivno" ? "Aktivno" : "Zatvoreno")
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+
+</div>

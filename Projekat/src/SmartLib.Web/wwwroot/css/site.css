@@ -3957,6 +3957,553 @@ body.home-page footer {
 }
 
 /* ================================
+   Izvještaji
+   ================================ */
+
+/* Page Header */
+.izvjestaj-page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.izvjestaj-page-header__left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.izvjestaj-page-header__icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--sl-radius-sm);
+    background: linear-gradient(135deg, var(--sl-blue), #2563eb);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.izvjestaj-page-header__title {
+    font-size: 1.55rem;
+    font-weight: 800;
+    color: var(--sl-blue);
+    margin: 0;
+    letter-spacing: -0.03em;
+}
+
+.izvjestaj-page-header__subtitle {
+    font-size: 0.88rem;
+    color: var(--sl-muted);
+    margin: 0;
+}
+
+.izvjestaj-page-header__right {
+    display: flex;
+    gap: 0.75rem;
+}
+
+/* Layout dvostupčani */
+.izvjestaj-layout {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: 1.5rem;
+    align-items: start;
+}
+
+@media (max-width: 768px) {
+    .izvjestaj-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Card */
+.izvjestaj-card {
+    background: var(--sl-card);
+    border: 1px solid var(--sl-border);
+    border-radius: var(--sl-radius-lg);
+    box-shadow: var(--sl-shadow);
+    overflow: hidden;
+}
+
+.izvjestaj-card__head {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--sl-border);
+}
+
+.izvjestaj-card__title {
+    font-size: 0.97rem;
+    font-weight: 700;
+    color: var(--sl-blue);
+    margin: 0;
+}
+
+/* Tip izvještaja lista */
+.izvjestaj-tip-lista {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.izvjestaj-tip-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.95rem 1rem;
+    border-radius: var(--sl-radius-md);
+    border: 1.5px solid var(--sl-border);
+    cursor: pointer;
+    transition: border-color 0.18s, background 0.18s, box-shadow 0.18s;
+    position: relative;
+    user-select: none;
+}
+
+    .izvjestaj-tip-item:hover:not(.izvjestaj-tip-item--disabled) {
+        border-color: var(--sl-blue);
+        background: var(--sl-blue-light);
+    }
+
+.izvjestaj-tip-item--selected {
+    border-color: var(--sl-blue) !important;
+    background: var(--sl-blue-light) !important;
+    box-shadow: 0 0 0 3px rgba(23, 59, 99, 0.08);
+}
+
+.izvjestaj-tip-item--disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.izvjestaj-tip-item__icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, rgba(23,59,99,0.12), rgba(37,99,235,0.15));
+    color: var(--sl-blue);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.izvjestaj-tip-item__info {
+    flex: 1;
+}
+
+.izvjestaj-tip-item__naziv {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--sl-text);
+}
+
+.izvjestaj-tip-item__opis {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--sl-muted);
+    margin-top: 1px;
+}
+
+.izvjestaj-tip-item__check {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--sl-blue);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transform: scale(0.7);
+    transition: opacity 0.18s, transform 0.18s;
+}
+
+.izvjestaj-tip-item--selected .izvjestaj-tip-item__check {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.izvjestaj-soon-badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--sl-gold);
+    color: #fff;
+    letter-spacing: 0.04em;
+}
+
+/* Forma */
+.izvjestaj-forma-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem 0;
+}
+
+.izvjestaj-period-preview {
+    margin: 1.25rem 1.5rem 0;
+    background: linear-gradient(135deg, var(--sl-blue-light), var(--sl-blue-soft));
+    border: 1px solid rgba(23,59,99,0.12);
+    border-radius: var(--sl-radius-sm);
+    padding: 0.85rem 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.izvjestaj-period-preview__label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--sl-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.izvjestaj-period-preview__val {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--sl-blue);
+    letter-spacing: -0.02em;
+}
+
+.izvjestaj-btn-generiraj {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 1.25rem 1.5rem 1.5rem;
+    width: calc(100% - 3rem);
+    justify-content: center;
+    font-size: 0.95rem;
+}
+
+/* Statistike na pregled stranici */
+.izvjestaj-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .izvjestaj-stat-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.izvjestaj-stat-card {
+    background: var(--sl-card);
+    border: 1px solid var(--sl-border);
+    border-radius: var(--sl-radius-md);
+    padding: 1.25rem 1.5rem;
+    box-shadow: var(--sl-shadow);
+    border-left: 4px solid transparent;
+}
+
+.izvjestaj-stat-card--primary {
+    border-left-color: var(--sl-blue);
+}
+
+.izvjestaj-stat-card--success {
+    border-left-color: var(--sl-success);
+}
+
+.izvjestaj-stat-card--muted {
+    border-left-color: var(--sl-muted);
+}
+
+.izvjestaj-stat-card--danger {
+    border-left-color: var(--sl-danger);
+}
+
+.izvjestaj-stat-card__label {
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: var(--sl-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.5rem;
+}
+
+.izvjestaj-stat-card__val {
+    font-size: 2.2rem;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+}
+
+.izvjestaj-stat-card--primary .izvjestaj-stat-card__val {
+    color: var(--sl-blue);
+}
+
+.izvjestaj-stat-card--success .izvjestaj-stat-card__val {
+    color: var(--sl-success);
+}
+
+.izvjestaj-stat-card--muted .izvjestaj-stat-card__val {
+    color: var(--sl-muted);
+}
+
+.izvjestaj-stat-card--danger .izvjestaj-stat-card__val {
+    color: var(--sl-danger);
+}
+
+/* Table card */
+.izvjestaj-table-card {
+    background: var(--sl-card);
+    border: 1px solid var(--sl-border);
+    border-radius: var(--sl-radius-lg);
+    box-shadow: var(--sl-shadow);
+    overflow: hidden;
+}
+
+.izvjestaj-table-card__head {
+    padding: 1.1rem 1.5rem;
+    border-bottom: 1px solid var(--sl-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.izvjestaj-table-card__title {
+    font-size: 0.97rem;
+    font-weight: 700;
+    color: var(--sl-blue);
+}
+
+.izvjestaj-table-card__count {
+    font-size: 0.82rem;
+    color: var(--sl-muted);
+    font-weight: 600;
+    background: var(--sl-blue-light);
+    padding: 3px 10px;
+    border-radius: 999px;
+}
+
+/* Tabela */
+.sl-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+
+    .sl-table thead tr {
+        background: linear-gradient(90deg, var(--sl-dark-2), var(--sl-blue));
+    }
+
+    .sl-table thead th {
+        padding: 0.75rem 1rem;
+        text-align: left;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: rgba(255,255,255,0.85);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    .sl-table tbody tr {
+        border-bottom: 1px solid var(--sl-border);
+        transition: background 0.15s;
+    }
+
+        .sl-table tbody tr:hover {
+            background: var(--sl-blue-light);
+        }
+
+        .sl-table tbody tr:nth-child(even) {
+            background: rgba(238, 246, 255, 0.45);
+        }
+
+            .sl-table tbody tr:nth-child(even):hover {
+                background: var(--sl-blue-light);
+            }
+
+    .sl-table td {
+        padding: 0.75rem 1rem;
+        color: var(--sl-text);
+        vertical-align: middle;
+    }
+
+.sl-table__num {
+    color: var(--sl-muted);
+    font-size: 0.8rem;
+    text-align: center;
+    width: 40px;
+}
+
+.sl-table__name {
+    font-weight: 700;
+    color: var(--sl-text);
+}
+
+.sl-table__sub {
+    font-size: 0.76rem;
+    color: var(--sl-muted);
+    margin-top: 1px;
+}
+
+.sl-table__bold {
+    font-weight: 600;
+}
+
+.sl-table__muted {
+    color: var(--sl-muted);
+}
+
+.sl-table__mono {
+    font-family: 'Courier New', monospace;
+    font-size: 0.82rem;
+    color: var(--sl-muted);
+}
+
+.sl-table__success {
+    color: var(--sl-success);
+    font-weight: 600;
+}
+
+/* Status badge */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.status-badge--aktivno {
+    background: rgba(2,122,72,0.12);
+    color: var(--sl-success);
+}
+
+.status-badge--zatvoreno {
+    background: rgba(100,116,139,0.12);
+    color: var(--sl-muted);
+}
+
+.status-badge--zakasnelo,
+.status-badge--zakasnilo {
+    background: rgba(180,35,24,0.10);
+    color: var(--sl-danger);
+}
+
+/* PDF dugme */
+.izvjestaj-pdf-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.6rem 1.2rem;
+    font-weight: 700;
+    font-size: 0.88rem;
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--sl-blue), #2563eb);
+    color: #fff;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.18s, box-shadow 0.18s;
+    box-shadow: 0 4px 14px rgba(23,59,99,0.25);
+}
+
+    .izvjestaj-pdf-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 22px rgba(23,59,99,0.32);
+        color: #fff;
+        text-decoration: none;
+    }
+
+/* Btn back */
+.btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--sl-muted);
+    text-decoration: none;
+    padding: 0.4rem 0.75rem;
+    border-radius: 999px;
+    border: 1px solid var(--sl-border);
+    background: var(--sl-card);
+    transition: color 0.18s, border-color 0.18s;
+}
+
+    .btn-back:hover {
+        color: var(--sl-blue);
+        border-color: var(--sl-blue);
+        text-decoration: none;
+    }
+
+/* Empty state */
+.empty-state-card {
+    background: var(--sl-card);
+    border: 1px solid var(--sl-border);
+    border-radius: var(--sl-radius-lg);
+    box-shadow: var(--sl-shadow);
+    padding: 4rem 2rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.empty-state-card__icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: var(--sl-blue-light);
+    color: var(--sl-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.empty-state-card__title {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--sl-text);
+    margin: 0;
+}
+
+.empty-state-card__text {
+    font-size: 0.92rem;
+    color: var(--sl-muted);
+    max-width: 380px;
+    margin: 0;
+}
+
+/* Alert banner */
+.alert-banner {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.9rem 1.25rem;
+    border-radius: var(--sl-radius-sm);
+    margin-bottom: 1.25rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.alert-banner--danger {
+    background: rgba(180,35,24,0.08);
+    border: 1px solid rgba(180,35,24,0.18);
+    color: var(--sl-danger);
+}
+
+/* Table responsive wrapper */
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* ================================
    Responsive Grid
    ================================ */
 
@@ -4000,6 +4547,14 @@ body.home-page footer {
     font-size: 0.84rem;
     font-weight: 700;
 }
+
+.izvjestaj-stat-card--warning {
+    border-left-color: var(--sl-gold);
+}
+
+    .izvjestaj-stat-card--warning .izvjestaj-stat-card__val {
+        color: var(--sl-gold);
+    }
 
 /* ================================
    Dark Mode Toggle Button
