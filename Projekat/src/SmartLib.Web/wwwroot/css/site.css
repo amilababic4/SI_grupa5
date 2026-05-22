@@ -5262,6 +5262,149 @@ body.home-page footer {
         display: block;
         transform: scale(1.15);
     }
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PB-44: Dodatni filteri pretrage — dodaj na kraj site.css
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Toggle dugme sa aktivnim indikatorom ──────────────────────────────────── */
+#btn-advanced-toggle {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    white-space: nowrap;
+}
+
+    #btn-advanced-toggle.active-filter-btn {
+        border-color: var(--accent, #6366f1);
+        color: var(--accent, #6366f1);
+    }
+
+.filter-badge {
+    font-size: 0.55rem;
+    color: var(--accent, #6366f1);
+    line-height: 1;
+    margin-left: 1px;
+}
+
+/* ── Collapsible filter panel ──────────────────────────────────────────────── */
+.advanced-filters-panel {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+}
+
+    .advanced-filters-panel.filters-open {
+        max-height: 320px; /* dovoljna visina za 3 filtera */
+    }
+
+.advanced-filters-inner {
+    padding-top: 1rem;
+    border-top: 1px solid var(--border, #334155);
+    margin-top: 0.75rem;
+}
+
+/* ── Grid layout za 3 filter kolone ───────────────────────────────────────── */
+.advanced-filters-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+@media (max-width: 768px) {
+    .advanced-filters-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ── Individualni filter group ─────────────────────────────────────────────── */
+.filter-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-muted, #94a3b8);
+    margin-bottom: 0.35rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.filter-select {
+    width: 100%;
+    padding: 0.45rem 0.6rem;
+    background: var(--bg-card, #1e293b);
+    border: 1px solid var(--border, #334155);
+    border-radius: 6px;
+    color: var(--text, #e2e8f0);
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    appearance: auto;
+}
+
+    .filter-select:focus {
+        outline: none;
+        border-color: var(--accent, #6366f1);
+    }
+
+/* ── Akcijski gumbi u panelu ───────────────────────────────────────────────── */
+.advanced-filters-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+/* ── Aktivni filteri — chip bar ────────────────────────────────────────────── */
+.active-filters-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0.5rem 0 0.25rem;
+}
+
+.active-filters-label {
+    font-size: 0.78rem;
+    color: var(--text-muted, #94a3b8);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    background: var(--bg-card, #1e293b);
+    border: 1px solid var(--accent, #6366f1);
+    color: var(--text, #e2e8f0);
+    border-radius: 999px;
+    padding: 0.2rem 0.6rem 0.2rem 0.7rem;
+    font-size: 0.8rem;
+    line-height: 1.4;
+}
+
+    .filter-chip strong {
+        color: var(--accent, #6366f1);
+    }
+
+.chip-remove {
+    color: var(--text-muted, #94a3b8);
+    text-decoration: none;
+    font-size: 1rem;
+    line-height: 1;
+    margin-left: 2px;
+    transition: color 0.15s;
+}
+
+    .chip-remove:hover {
+        color: var(--danger, #f87171);
+    }
+
 /* ================================
    Features Section (sticky design)
    ================================ */

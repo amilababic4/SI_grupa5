@@ -20,11 +20,16 @@
     <div class="alert alert-error">@errorMsg</div>
 }
 
-<!-- Pretraga -->
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     PB-44: Pretraga i filteri
+     Osnovna pretraga (naslov, autor) + collapsible panel za napredne filtere
+     ═══════════════════════════════════════════════════════════════════════════ -->
 <div class="card katalog-search">
-    <form asp-controller="Knjiga" asp-action="Index" method="get">
+    <form asp-controller="Knjiga" asp-action="Index" method="get" id="filter-form">
+        <input type="hidden" name="page" value="1" />
+
+        <!-- Osnovna pretraga — uvijek vidljiva -->
         <div class="search-row">
-            <input type="hidden" name="page" value="1" />
             <div class="form-group" style="flex:1; margin-bottom:0;">
                 <input type="text" name="naslov" value="@Model.Naslov" placeholder="Pretraga po naslovu..." />
             </div>
@@ -34,16 +39,187 @@
             <div style="display:flex; gap:0.5rem; align-items:flex-end;">
                 <button type="submit" class="btn btn-primary">Traži</button>
                 <a asp-controller="Knjiga" asp-action="Index" class="btn btn-secondary">Reset</a>
+                <!-- PB-44: Toggle dugme za napredne filtere -->
+                <button type="button"
+                        id="btn-advanced-toggle"
+                        class="btn btn-secondary @(Model.ImaNapredniFilter ? "active-filter-btn" : "")"
+                        aria-expanded="@(Model.ImaNapredniFilter ? "true" : "false")"
+                        aria-controls="advanced-filters-panel"
+                        title="Dodatni filteri pretrage">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none"
+                         viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
+                         style="vertical-align:middle; margin-right:4px;">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z" />
+                    </svg>
+                    Filteri
+                    @if (Model.ImaNapredniFilter)
+                    {
+                        <!-- Indikator aktivnih filtera -->
+                        <span class="filter-badge">●</span>
+                    }
+                </button>
             </div>
         </div>
+
+        <!-- PB-44: Collapsible panel za napredne filtere -->
+        <div id="advanced-filters-panel"
+             class="advanced-filters-panel @(Model.ImaNapredniFilter ? "filters-open" : "")">
+            <div class="advanced-filters-inner">
+                <div class="advanced-filters-grid">
+
+                    <!-- US-74: Filter po kategoriji -->
+                    <div class="form-group filter-group">
+                        <label for="filter-kategorija">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none"
+                                 viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z" />
+                            </svg>
+                            Kategorija
+                        </label>
+                        <select id="filter-kategorija" name="kategorijaId" class="filter-select">
+                            <option value="">— Sve kategorije —</option>
+                            @foreach (var kat in Model.Kategorije)
+                            {
+                                <option value="@kat.Id"
+                                        selected="@(Model.KategorijaId == kat.Id)">
+                                    @kat.Naziv
+                                </option>
+                            }
+                        </select>
+                    </div>
+
+                    <!-- US-75: Filter po izdavaču -->
+                    <div class="form-group filter-group">
+                        <label for="filter-izdavac">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none"
+                                 viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                            </svg>
+                            Izdavač
+                        </label>
+                        <select id="filter-izdavac" name="izdavac" class="filter-select">
+                            <option value="">— Svi izdavači —</option>
+                            @foreach (var izd in Model.Izdavaci)
+                            {
+                                <option value="@izd"
+                                        selected="@(Model.Izdavac == izd)">
+                                    @izd
+                                </option>
+                            }
+                        </select>
+                    </div>
+
+                    <!-- US-76: Filter po godini izdanja -->
+                    <div class="form-group filter-group">
+                        <label for="filter-godina">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none"
+                                 viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            Godina izdanja
+                        </label>
+                        <select id="filter-godina" name="godinaIzdanja" class="filter-select">
+                            <option value="">— Sve godine —</option>
+                            @foreach (var god in Model.Godine)
+                            {
+                                <option value="@god"
+                                        selected="@(Model.GodinaIzdanja == god)">
+                                    @god
+                                </option>
+                            }
+                        </select>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
     </form>
 </div>
 
+<!-- Aktivni filteri — summary chips -->
+@if (Model.ImaAktivnihFiltera)
+{
+    <div class="active-filters-bar">
+        <span class="active-filters-label">Aktivni filteri:</span>
+        @if (!string.IsNullOrWhiteSpace(Model.Naslov))
+        {
+            <span class="filter-chip">
+                Naslov: <strong>@Model.Naslov</strong>
+                <a asp-action="Index"
+                   asp-route-autor="@Model.Autor"
+                   asp-route-kategorijaId="@Model.KategorijaId"
+                   asp-route-izdavac="@Model.Izdavac"
+                   asp-route-godinaIzdanja="@Model.GodinaIzdanja"
+                   asp-route-page="1"
+                   class="chip-remove" title="Ukloni filter">×</a>
+            </span>
+        }
+        @if (!string.IsNullOrWhiteSpace(Model.Autor))
+        {
+            <span class="filter-chip">
+                Autor: <strong>@Model.Autor</strong>
+                <a asp-action="Index"
+                   asp-route-naslov="@Model.Naslov"
+                   asp-route-kategorijaId="@Model.KategorijaId"
+                   asp-route-izdavac="@Model.Izdavac"
+                   asp-route-godinaIzdanja="@Model.GodinaIzdanja"
+                   asp-route-page="1"
+                   class="chip-remove" title="Ukloni filter">×</a>
+            </span>
+        }
+        @if (Model.KategorijaId.HasValue)
+        {
+            var katNaziv = Model.Kategorije.FirstOrDefault(k => k.Id == Model.KategorijaId)?.Naziv ?? "—";
+            <span class="filter-chip">
+                Kategorija: <strong>@katNaziv</strong>
+                <a asp-action="Index"
+                   asp-route-naslov="@Model.Naslov"
+                   asp-route-autor="@Model.Autor"
+                   asp-route-izdavac="@Model.Izdavac"
+                   asp-route-godinaIzdanja="@Model.GodinaIzdanja"
+                   asp-route-page="1"
+                   class="chip-remove" title="Ukloni filter">×</a>
+            </span>
+        }
+        @if (!string.IsNullOrWhiteSpace(Model.Izdavac))
+        {
+            <span class="filter-chip">
+                Izdavač: <strong>@Model.Izdavac</strong>
+                <a asp-action="Index"
+                   asp-route-naslov="@Model.Naslov"
+                   asp-route-autor="@Model.Autor"
+                   asp-route-kategorijaId="@Model.KategorijaId"
+                   asp-route-godinaIzdanja="@Model.GodinaIzdanja"
+                   asp-route-page="1"
+                   class="chip-remove" title="Ukloni filter">×</a>
+            </span>
+        }
+        @if (Model.GodinaIzdanja.HasValue)
+        {
+            <span class="filter-chip">
+                Godina: <strong>@Model.GodinaIzdanja</strong>
+                <a asp-action="Index"
+                   asp-route-naslov="@Model.Naslov"
+                   asp-route-autor="@Model.Autor"
+                   asp-route-kategorijaId="@Model.KategorijaId"
+                   asp-route-izdavac="@Model.Izdavac"
+                   asp-route-page="1"
+                   class="chip-remove" title="Ukloni filter">×</a>
+            </span>
+        }
+    </div>
+}
+
 <!-- Rezultati -->
 <div class="katalog-meta">
-    @if (!string.IsNullOrWhiteSpace(Model.Naslov) || !string.IsNullOrWhiteSpace(Model.Autor))
+    @if (Model.ImaAktivnihFiltera)
     {
-        <span>Pronađeno: <strong>@Model.UkupnoStavki</strong> knjiga</span>
+        <span>Pronađeno: <strong>@Model.UkupnoStavki</strong> @(Model.UkupnoStavki == 1 ? "knjiga" : "knjiga")</span>
     }
     else
     {
@@ -75,11 +251,42 @@
 
 @if (!Model.Knjige.Any())
 {
+    <!-- PB-44: "Nema rezultata" poruke po US-74 / US-75 / US-76 / US-78 -->
     <div class="card katalog-empty">
-        <p>📚 Katalog je trenutno prazan.</p>
-        @if (User.IsInRole("Bibliotekar") || User.IsInRole("Administrator"))
+        @if (Model.ImaAktivnihFiltera)
         {
-            <a asp-action="Create" class="btn btn-primary">Dodaj prvu knjigu</a>
+            if (Model.KategorijaId.HasValue && !Model.GodinaIzdanja.HasValue && string.IsNullOrWhiteSpace(Model.Izdavac)
+            && string.IsNullOrWhiteSpace(Model.Naslov) && string.IsNullOrWhiteSpace(Model.Autor))
+            {
+                <!-- US-74 -->
+                <p>📚 Nema rezultata za odabranu kategoriju.</p>
+            }
+            else if (!string.IsNullOrWhiteSpace(Model.Izdavac) && !Model.KategorijaId.HasValue && !Model.GodinaIzdanja.HasValue
+            && string.IsNullOrWhiteSpace(Model.Naslov) && string.IsNullOrWhiteSpace(Model.Autor))
+            {
+                <!-- US-75 -->
+                <p>📚 Nema knjiga za odabranog izdavača.</p>
+            }
+            else if (Model.GodinaIzdanja.HasValue && !Model.KategorijaId.HasValue && string.IsNullOrWhiteSpace(Model.Izdavac)
+            && string.IsNullOrWhiteSpace(Model.Naslov) && string.IsNullOrWhiteSpace(Model.Autor))
+            {
+                <!-- US-76 -->
+                <p>📚 Nema knjiga za odabranu godinu.</p>
+            }
+            else
+            {
+                <!-- US-78: Kombinacija filtera -->
+                <p>📚 Nema rezultata za odabrane filtere.</p>
+            }
+            <a asp-action="Index" class="btn btn-secondary" style="margin-top:0.75rem;">Ukloni sve filtere</a>
+        }
+        else
+        {
+            <p>📚 Katalog je trenutno prazan.</p>
+            @if (User.IsInRole("Bibliotekar") || User.IsInRole("Administrator"))
+            {
+                <a asp-action="Create" class="btn btn-primary">Dodaj prvu knjigu</a>
+            }
         }
     </div>
 }
@@ -92,18 +299,18 @@ else
             <div class="lb-list-item">
                 <a asp-action="Details" asp-route-id="@knjiga.Id" class="stretched-link"></a>
                 <div class="lb-cover">
-                    <img src="@Url.Action("Korice", "Knjiga", new { isbn = knjiga.Isbn, size = "L", v = 3 })" 
-                         alt="@knjiga.Naslov" 
+                    <img src="@Url.Action("Korice", "Knjiga", new { isbn = knjiga.Isbn, size = "L", v = 3 })"
+                         alt="@knjiga.Naslov"
                          loading="lazy" />
                 </div>
                 <div class="lb-body">
                     <div class="lb-body-top">
                         <h3 class="lb-title">@knjiga.Naslov</h3>
                         <span class="lb-author">@knjiga.Autor@(knjiga.GodinaIzdanja.HasValue ? $", {knjiga.GodinaIzdanja}" : "")</span>
-                        
+
                         <div class="lb-rating-row">
                             <span class="lb-stars">
-                                @for(int i = 1; i <= 5; i++)
+                                @for (int i = 1; i <= 5; i++)
                                 {
                                     if (knjiga.BrojRecenzija > 0)
                                     {
@@ -174,12 +381,12 @@ else
         {
             <a asp-action="Details" asp-route-id="@knjiga.Id" class="lb-grid-card">
                 <div class="lb-grid-poster">
-                    <img src="@Url.Action("Korice", "Knjiga", new { isbn = knjiga.Isbn, size = "L" })" 
-                         alt="@knjiga.Naslov" 
+                    <img src="@Url.Action("Korice", "Knjiga", new { isbn = knjiga.Isbn, size = "L" })"
+                         alt="@knjiga.Naslov"
                          loading="lazy" />
                     <div class="lb-grid-overlay">
                         <div class="lb-grid-overlay-stars">
-                            @for(int i = 1; i <= 5; i++)
+                            @for (int i = 1; i <= 5; i++)
                             {
                                 if (knjiga.BrojRecenzija > 0 && i <= Math.Round(knjiga.ProsjecnaOcjena))
                                 {
@@ -212,13 +419,16 @@ else
     @if (Model.UkupnoStrana > 1)
     {
         <div class="pagination">
-                 @if (Model.TrenutnaStrana > 1)
+            @if (Model.TrenutnaStrana > 1)
             {
                 <a asp-action="Index"
-                     asp-route-page="@(Model.TrenutnaStrana - 1)"
-                     asp-route-naslov="@Model.Naslov"
-                     asp-route-autor="@Model.Autor"
-                     asp-route-pageSize="@Model.VelicinaStrane"
+                   asp-route-page="@(Model.TrenutnaStrana - 1)"
+                   asp-route-naslov="@Model.Naslov"
+                   asp-route-autor="@Model.Autor"
+                   asp-route-kategorijaId="@Model.KategorijaId"
+                   asp-route-izdavac="@Model.Izdavac"
+                   asp-route-godinaIzdanja="@Model.GodinaIzdanja"
+                   asp-route-pageSize="@Model.VelicinaStrane"
                    class="btn btn-secondary">← Prethodna</a>
             }
             else
@@ -233,10 +443,13 @@ else
             @if (Model.TrenutnaStrana < Model.UkupnoStrana)
             {
                 <a asp-action="Index"
-                     asp-route-page="@(Model.TrenutnaStrana + 1)"
-                     asp-route-naslov="@Model.Naslov"
-                     asp-route-autor="@Model.Autor"
-                     asp-route-pageSize="@Model.VelicinaStrane"
+                   asp-route-page="@(Model.TrenutnaStrana + 1)"
+                   asp-route-naslov="@Model.Naslov"
+                   asp-route-autor="@Model.Autor"
+                   asp-route-kategorijaId="@Model.KategorijaId"
+                   asp-route-izdavac="@Model.Izdavac"
+                   asp-route-godinaIzdanja="@Model.GodinaIzdanja"
+                   asp-route-pageSize="@Model.VelicinaStrane"
                    class="btn btn-secondary">Sljedeća →</a>
             }
             else
@@ -249,8 +462,9 @@ else
 
 @section Scripts {
     <script>
-        const btnList = document.getElementById('btn-list-view');
-        const btnGrid = document.getElementById('btn-grid-view');
+        // ── List / Grid toggle ────────────────────────────────────────────────────
+        const btnList   = document.getElementById('btn-list-view');
+        const btnGrid   = document.getElementById('btn-grid-view');
         const layoutList = document.getElementById('katalog-list-layout');
         const layoutGrid = document.getElementById('katalog-grid-layout');
 
@@ -270,27 +484,33 @@ else
             localStorage.setItem('katalogView', 'grid');
         });
 
-        // Restore preference
         const savedView = localStorage.getItem('katalogView');
-        if (savedView === 'grid') {
-            btnGrid.click();
-        }
+        if (savedView === 'grid') btnGrid.click();
 
+        // ── Page size select ──────────────────────────────────────────────────────
         const pageSizeSelect = document.getElementById('pageSizeSelect');
         if (pageSizeSelect) {
+            pageSizeSelect.value = '@Model.VelicinaStrane';
             pageSizeSelect.addEventListener('change', () => {
                 const params = new URLSearchParams(window.location.search);
                 params.set('pageSize', pageSizeSelect.value);
                 params.set('page', '1');
-                const newUrl = window.location.pathname + '?' + params.toString();
-                window.location.assign(newUrl);
+                window.location.assign(window.location.pathname + '?' + params.toString());
             });
         }
 
-        // Sync pageSizeSelect value with current model value
-        if (pageSizeSelect) {
-            pageSizeSelect.value = '@Model.VelicinaStrane';
+        // ── PB-44: Advanced filters panel toggle ──────────────────────────────────
+        const toggleBtn = document.getElementById('btn-advanced-toggle');
+        const panel     = document.getElementById('advanced-filters-panel');
+
+        if (toggleBtn && panel) {
+            toggleBtn.addEventListener('click', () => {
+                const isOpen = panel.classList.toggle('filters-open');
+                toggleBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+            });
         }
+
+        // Ako je aktivan neki napredni filter pri page loadu — panel ostaje otvoren
+        // (Kontrolirano direktno kroz Razor klasu 'filters-open' na elementu, gore.)
     </script>
 }
-

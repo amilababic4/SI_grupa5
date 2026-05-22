@@ -52,8 +52,18 @@ namespace SmartLib.Infrastructure.Repositories
             return await query.OrderBy(k => k.Naslov).ToListAsync();
         }
 
+        /// <summary>
+        /// PB-44: Proširena paginirana pretraga — kombinuje sve aktivne filtere (US-74, US-75, US-76, US-78).
+        /// Svaki filter je opcionalan; aktivni filteri se kombinuju AND logikom.
+        /// </summary>
         public async Task<(IEnumerable<Knjiga> Knjige, int UkupnoBroj)> GetPagedAsync(
-            string? naslov, string? autor, int page, int pageSize)
+            string? naslov,
+            string? autor,
+            int page,
+            int pageSize,
+            int? kategorijaId = null,
+            string? izdavac = null,
+            int? godinaIzdanja = null)
         {
             var query = _db.Knjige
                 .Include(k => k.Kategorija)
@@ -62,11 +72,25 @@ namespace SmartLib.Infrastructure.Repositories
                 .AsNoTracking()
                 .AsQueryable();
 
+            // Osnovna pretraga
             if (!string.IsNullOrWhiteSpace(naslov))
                 query = query.Where(k => k.Naslov.ToLower().Contains(naslov.ToLower()));
 
             if (!string.IsNullOrWhiteSpace(autor))
                 query = query.Where(k => k.Autor.ToLower().Contains(autor.ToLower()));
+
+            // PB-44 / US-74: Filter po kategoriji
+            if (kategorijaId.HasValue)
+                query = query.Where(k => k.KategorijaId == kategorijaId.Value);
+
+            // PB-44 / US-75: Filter po izdavaču
+            if (!string.IsNullOrWhiteSpace(izdavac))
+                query = query.Where(k => k.Izdavac != null &&
+                                         k.Izdavac.ToLower().Contains(izdavac.ToLower()));
+
+            // PB-44 / US-76: Filter po godini izdanja
+            if (godinaIzdanja.HasValue)
+                query = query.Where(k => k.GodinaIzdanja == godinaIzdanja.Value);
 
             var ukupno = await query.CountAsync();
             var knjige = await query
@@ -76,6 +100,36 @@ namespace SmartLib.Infrastructure.Repositories
                 .ToListAsync();
 
             return (knjige, ukupno);
+        }
+
+        /// <summary>
+        /// PB-44: Dohvata sve unikatne izdavače koji postoje u bazi, sortirane abecedno.
+        /// Koristi se za popunjavanje filter dropdowna.
+        /// </summary>
+        public async Task<IEnumerable<string>> GetDistinctIzdavaciAsync()
+        {
+            return await _db.Knjige
+                .AsNoTracking()
+                .Where(k => k.Izdavac != null && k.Izdavac != "")
+                .Select(k => k.Izdavac!)
+                .Distinct()
+                .OrderBy(i => i)
+                .ToListAsync();
+        }
+
+        /// <summary>
+        /// PB-44: Dohvata sve unikatne godine izdanja koje postoje u bazi, sortirane opadajuće.
+        /// Koristi se za popunjavanje filter dropdowna.
+        /// </summary>
+        public async Task<IEnumerable<int>> GetDistinctGodineAsync()
+        {
+            return await _db.Knjige
+                .AsNoTracking()
+                .Where(k => k.GodinaIzdanja.HasValue)
+                .Select(k => k.GodinaIzdanja!.Value)
+                .Distinct()
+                .OrderByDescending(g => g)
+                .ToListAsync();
         }
 
         public async Task<Knjiga?> GetByIsbnAsync(string isbn)
@@ -101,29 +155,22 @@ namespace SmartLib.Infrastructure.Repositories
 
         public async Task<bool> DeleteAsync(int id)
         {
-            // 1. Uèitavamo knjigu ZAJEDNO sa primjercima
             var knjiga = await _db.Knjige
                 .Include(k => k.Primjerci)
                 .FirstOrDefaultAsync(k => k.Id == id);
 
             if (knjiga == null) return false;
 
-            // 2. Ruèno uklanjamo sve primjerke iz baze podataka           
             if (knjiga.Primjerci != null && knjiga.Primjerci.Any())
-            {
                 _db.Primjerci.RemoveRange(knjiga.Primjerci);
-            }
 
-            // 3. Sada brišemo knjigu
             _db.Knjige.Remove(knjiga);
-
             await _db.SaveChangesAsync();
             return true;
         }
 
         public async Task<bool> HasActiveLoansAsync(int id)
         {
-            // US-28: Provjerava status svih primjeraka koji pripadaju ovoj knjizi
             return await _db.Zaduzenja
                 .AnyAsync(z => z.Primjerak!.KnjigaId == id && z.Status == "aktivno");
         }
@@ -131,15 +178,11 @@ namespace SmartLib.Infrastructure.Repositories
         public async Task<IEnumerable<Knjiga>> GetRandomAsync(int count)
         {
             if (count <= 0)
-            {
                 return Array.Empty<Knjiga>();
-            }
 
             var total = await _db.Knjige.CountAsync();
             if (total == 0)
-            {
                 return Array.Empty<Knjiga>();
-            }
 
             var take = Math.Min(count, total);
             if (take == total)
@@ -148,7 +191,6 @@ namespace SmartLib.Infrastructure.Repositories
                     .Include(k => k.Kategorija)
                     .AsNoTracking()
                     .ToListAsync();
-                // Fisher-Yates shuffle za pravu randomizaciju
                 for (int i = all.Count - 1; i > 0; i--)
                 {
                     int j = Random.Shared.Next(i + 1);
@@ -210,4 +252,3 @@ namespace SmartLib.Infrastructure.Repositories
         }
     }
 }
-

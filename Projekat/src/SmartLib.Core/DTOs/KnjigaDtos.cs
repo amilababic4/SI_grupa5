@@ -71,6 +71,9 @@ namespace SmartLib.Core.DTOs
         public int? GodinaIzdanja { get; set; }
     }
 
+    /// <summary>
+    /// PB-44: Prošireni ViewModel kataloga sa filterima napredne pretrage.
+    /// </summary>
     public class KatalogViewModel
     {
         public IEnumerable<KnjigaDto> Knjige { get; set; } = new List<KnjigaDto>();
@@ -78,7 +81,47 @@ namespace SmartLib.Core.DTOs
         public int UkupnoStrana { get; set; }
         public int UkupnoStavki { get; set; }
         public int VelicinaStrane { get; set; }
+
+        // Osnovna pretraga
         public string? Naslov { get; set; }
         public string? Autor { get; set; }
+
+        // PB-44: Dodatni filteri
+        public int? KategorijaId { get; set; }
+        public string? Izdavac { get; set; }
+        public int? GodinaIzdanja { get; set; }
+
+        // PB-44: Podaci za dropdown listu filtera
+        public IEnumerable<KategorijaFilterDto> Kategorije { get; set; } = new List<KategorijaFilterDto>();
+        public IEnumerable<string> Izdavaci { get; set; } = new List<string>();
+        public IEnumerable<int> Godine { get; set; } = new List<int>();
+
+        /// <summary>
+        /// Vraća true ako je aktivan bilo koji filter (osnovna pretraga ili napredni filteri).
+        /// </summary>
+        public bool ImaAktivnihFiltera =>
+            !string.IsNullOrWhiteSpace(Naslov) ||
+            !string.IsNullOrWhiteSpace(Autor) ||
+            KategorijaId.HasValue ||
+            !string.IsNullOrWhiteSpace(Izdavac) ||
+            GodinaIzdanja.HasValue;
+
+        /// <summary>
+        /// Vraća true ako je aktivan makar jedan napredni filter (ne osnovna pretraga).
+        /// Koristi se za automatsko otvaranje panela pri page loadu.
+        /// </summary>
+        public bool ImaNapredniFilter =>
+            KategorijaId.HasValue ||
+            !string.IsNullOrWhiteSpace(Izdavac) ||
+            GodinaIzdanja.HasValue;
+    }
+
+    /// <summary>
+    /// PB-44: Minimalni DTO za prikaz kategorija u filter dropdownu.
+    /// </summary>
+    public class KategorijaFilterDto
+    {
+        public int Id { get; set; }
+        public string Naziv { get; set; } = string.Empty;
     }
 }
