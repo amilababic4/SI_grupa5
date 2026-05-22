@@ -80,9 +80,9 @@ namespace SmartLib.Web.Controllers
                     ExpiresUtc = DateTimeOffset.UtcNow.AddHours(8)
                 });
 
-            // Signal the UI to show a one-time welcome animation after successful sign-in
-            TempData["ShowWelcomeAnimation"] = "true";
-            TempData["WelcomeName"] = $"{korisnik.Ime} {korisnik.Prezime}";
+              // Signal the UI to show the overlay once when the user first opens the catalog
+              HttpContext.Session.SetString("ShowCatalogWelcomeOnce", "true");
+              HttpContext.Session.SetString("CatalogWelcomeName", $"{korisnik.Ime} {korisnik.Prezime}");
 
             if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
             {

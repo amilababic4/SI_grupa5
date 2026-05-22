@@ -24,55 +24,34 @@
         var controller = ViewContext.RouteData.Values["controller"]?.ToString();
         var action = ViewContext.RouteData.Values["action"]?.ToString();
 
-        var isFrontPage = controller == "Home" && action == "Index";
         var isCatalogPage = controller == "Knjiga" && action == "Index";
-        var isProfilePage = controller == "Korisnik" && action == "Profil";
         var isAuthenticated = User.Identity?.IsAuthenticated == true;
 
-        // Do not show animations for administrators and librarians (they shouldn't have to watch it repeatedly)
+        // Do not show animations for administrators and librarians.
         var isAdminOrLib = User.IsInRole("Bibliotekar") || User.IsInRole("Administrator");
 
-        // One-time welcome animation flag set by controller after successful login
-        var showWelcomeFromTemp = TempData["ShowWelcomeAnimation"]?.ToString() == "true";
-        var welcomeNameFromTemp = TempData["WelcomeName"]?.ToString();
+        var showCatalogWelcomeOnce = Context.Session.GetString("ShowCatalogWelcomeOnce") == "true";
+        var welcomeNameFromSession = Context.Session.GetString("CatalogWelcomeName");
 
-        // Show animation on landing/catalog (except for admins/libs), or
-        // show a one-time welcome animation immediately after sign-in for any user.
+        // Show the animation only once, on the first catalog visit after login.
         var shouldShowAnimation = false;
-        if (showWelcomeFromTemp && isAuthenticated)
+        if (isCatalogPage && isAuthenticated && !isAdminOrLib && showCatalogWelcomeOnce)
         {
             shouldShowAnimation = true;
-        }
-        else
-        {
-            shouldShowAnimation = (isFrontPage || isCatalogPage) && !isAdminOrLib;
+            Context.Session.Remove("ShowCatalogWelcomeOnce");
+            Context.Session.Remove("CatalogWelcomeName");
         }
 
         string bookText = "";
 
-        if (isFrontPage)
+        if (isCatalogPage && shouldShowAnimation)
         {
-            if (isAuthenticated)
-            {
-                bookText = "Divno je vidjeti vas opet! 💖 Vaše police i knjige vas čekaju. Uživajte u čitanju.";
-            }
-            else
-            {
-                bookText = "Dobrodošli u SmartLib! ✨ Istražite bezgranične priče, maštajte slobodno i stvorite svoju biblioteku snova.";
-            }
-        }
-        else if (isCatalogPage)
-        {
-            bookText = "Otvaramo vrata naše bogate riznice znanja... 📚 Pronađite savršenu knjigu za sebe i zakoračite u novu avanturu.";
-        }
-        else if (showWelcomeFromTemp && isAuthenticated)
-        {
-            var name = !string.IsNullOrEmpty(welcomeNameFromTemp) ? welcomeNameFromTemp : User.Identity?.Name ?? "Član";
+            var name = !string.IsNullOrEmpty(welcomeNameFromSession) ? welcomeNameFromSession : User.Identity?.Name ?? "Član";
             bookText = $"Dobrodošli nazad, {name}! Drago nam je što ste tu.";
         }
 }
 
-<body class="@(ViewData["BodyClass"] as string)" data-disable-animations="@((isAdminOrLib && !showWelcomeFromTemp) ? "true" : "false")">
+<body class="@(ViewData["BodyClass"] as string)" data-disable-animations="@(isAdminOrLib ? "true" : "false")">
 
     @if (shouldShowAnimation)
     {
@@ -120,7 +99,7 @@
         </div>
     }
 
-    <nav id="main-nav" class="smartlib-navbar @(isFrontPage ? "smartlib-navbar-front" : "smartlib-navbar-app")">
+    <nav id="main-nav" class="smartlib-navbar @((controller == "Home" && action == "Index") ? "smartlib-navbar-front" : "smartlib-navbar-app")">
         <div class="smartlib-nav-inner">
 
             <div class="nav-brand">
