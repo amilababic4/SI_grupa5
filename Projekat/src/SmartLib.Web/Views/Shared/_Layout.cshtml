@@ -30,12 +30,20 @@
         // Do not show animations for administrators and librarians.
         var isAdminOrLib = User.IsInRole("Bibliotekar") || User.IsInRole("Administrator");
 
+        var showLoginWelcomeFromTemp = TempData["ShowWelcomeAnimation"]?.ToString() == "true";
+        var welcomeNameFromTemp = TempData["WelcomeName"]?.ToString();
+        var welcomeRole = User.IsInRole("Bibliotekar") || User.IsInRole("Administrator") ? "staff" : "member";
+
         var showCatalogWelcomeOnce = Context.Session.GetString("ShowCatalogWelcomeOnce") == "true";
         var welcomeNameFromSession = Context.Session.GetString("CatalogWelcomeName");
 
-        // Show the animation only once, on the first catalog visit after login.
+        // Show the login welcome immediately, and the catalog welcome once per session for members.
         var shouldShowAnimation = false;
-        if (isCatalogPage && isAuthenticated && !isAdminOrLib && showCatalogWelcomeOnce)
+        if (showLoginWelcomeFromTemp && isAuthenticated)
+        {
+            shouldShowAnimation = true;
+        }
+        else if (isCatalogPage && isAuthenticated && !isAdminOrLib && showCatalogWelcomeOnce)
         {
             shouldShowAnimation = true;
             Context.Session.Remove("ShowCatalogWelcomeOnce");
@@ -44,7 +52,14 @@
 
         string bookText = "";
 
-        if (isCatalogPage && shouldShowAnimation)
+        if (showLoginWelcomeFromTemp && isAuthenticated)
+        {
+            var name = !string.IsNullOrEmpty(welcomeNameFromTemp) ? welcomeNameFromTemp : User.Identity?.Name ?? "Član";
+            bookText = welcomeRole == "staff"
+                ? $"Dobrodošli nazad, {name}! Prijava je uspješna i svi alati su spremni."
+                : $"Dobrodošli nazad, {name}! Drago nam je što ste tu.";
+        }
+        else if (isCatalogPage && shouldShowAnimation)
         {
             var name = !string.IsNullOrEmpty(welcomeNameFromSession) ? welcomeNameFromSession : User.Identity?.Name ?? "Član";
             bookText = $"Dobrodošli nazad, {name}! Drago nam je što ste tu.";
