@@ -20,6 +20,10 @@ namespace SmartLib.Infrastructure.Services
         private static readonly Color BojaDanger = Color.FromHex("b42318");
         private static readonly Color BojaWarning = Color.FromHex("92400e");
 
+        // ════════════════════════════════════════════════════════════════════════
+        // ZADUŽENJA
+        // ════════════════════════════════════════════════════════════════════════
+
         public static byte[] GenerirajMjesecnaZaduzenjaPdf(MjesecniZaduzenjaIzvjestajDto data)
         {
             QuestPDF.Settings.License = LicenseType.Community;
@@ -30,12 +34,8 @@ namespace SmartLib.Infrastructure.Services
                 {
                     page.Size(PageSizes.A4.Landscape());
                     page.Margin(28);
-
                     page.DefaultTextStyle(x =>
-                        x.FontFamily("Arial")
-                         .FontSize(9)
-                         .FontColor(BojaTamna));
-
+                        x.FontFamily("Arial").FontSize(9).FontColor(BojaTamna));
                     page.Header().Element(c => IzgradiHeader(c, data));
                     page.Content().Element(c => IzgradiSadrzaj(c, data));
                     page.Footer().Element(c => IzgradiFooter(c, data));
@@ -43,81 +43,38 @@ namespace SmartLib.Infrastructure.Services
             }).GeneratePdf();
         }
 
-        // ─── HEADER ──────────────────────────────────────────────────────────────
         private static void IzgradiHeader(IContainer container, MjesecniZaduzenjaIzvjestajDto data)
         {
-            container
-                .Background(BojaPrimarna)
-                .Padding(20)
-                .Row(row =>
+            container.Background(BojaPrimarna).Padding(20).Row(row =>
+            {
+                row.RelativeItem().Column(col =>
                 {
-                    // Lijevo
-                    row.RelativeItem().Column(col =>
-                    {
-                        col.Item()
-                            .Text("SmartLib")
-                            .FontSize(22)
-                            .Bold()
-                            .FontColor(Color.FromHex("ffffff"));
-
-                        col.Item()
-                            .Text("Bibliotečki informacioni sistem")
-                            .FontSize(9)
-                            .FontColor(Color.FromHex("A6FFFFFF"));
-                    });
-
-                    // Sredina
-                    row.RelativeItem(2).AlignCenter().Column(col =>
-                    {
-                        col.Item()
-                            .Text("Izvještaj o zaduživanjima knjiga")
-                            .FontSize(14)
-                            .Bold()
-                            .FontColor(Color.FromHex("ffffff"))
-                            .AlignCenter();
-
-                        col.Item().Height(4);
-
-                        col.Item()
-                            .Background(BojaGold)
-                            .PaddingVertical(4)
-                            .PaddingHorizontal(6)
-                            .AlignCenter()
-                            .Text($"{data.NazivMjeseca} {data.Godina}")
-                            .FontSize(11)
-                            .Bold()
-                            .FontColor(Color.FromHex("ffffff"));
-                    });
-
-                    // Desno
-                    row.RelativeItem().AlignRight().Column(col =>
-                    {
-                        col.Item()
-                            .Text($"Generisano: {data.GenerisanoU:dd.MM.yyyy}")
-                            .FontSize(8)
-                            .FontColor(Color.FromHex("B3FFFFFF"))
-                            .AlignRight();
-
-                        col.Item()
-                            .Text($"u {data.GenerisanoU:HH:mm}")
-                            .FontSize(8)
-                            .FontColor(Color.FromHex("80FFFFFF"))
-                            .AlignRight();
-                    });
+                    col.Item().Text("SmartLib").FontSize(22).Bold().FontColor(Color.FromHex("ffffff"));
+                    col.Item().Text("Bibliotečki informacioni sistem").FontSize(9).FontColor(Color.FromHex("A6FFFFFF"));
                 });
+                row.RelativeItem(2).AlignCenter().Column(col =>
+                {
+                    col.Item().Text("Izvještaj o zaduživanjima knjiga")
+                        .FontSize(14).Bold().FontColor(Color.FromHex("ffffff")).AlignCenter();
+                    col.Item().Height(4);
+                    col.Item().Background(BojaGold).PaddingVertical(4).PaddingHorizontal(6).AlignCenter()
+                        .Text($"{data.NazivMjeseca} {data.Godina}").FontSize(11).Bold().FontColor(Color.FromHex("ffffff"));
+                });
+                row.RelativeItem().AlignRight().Column(col =>
+                {
+                    col.Item().Text($"Generisano: {data.GenerisanoU:dd.MM.yyyy}").FontSize(8).FontColor(Color.FromHex("B3FFFFFF")).AlignRight();
+                    col.Item().Text($"u {data.GenerisanoU:HH:mm}").FontSize(8).FontColor(Color.FromHex("80FFFFFF")).AlignRight();
+                });
+            });
         }
 
-        // ─── SADRŽAJ ─────────────────────────────────────────────────────────────
         private static void IzgradiSadrzaj(IContainer container, MjesecniZaduzenjaIzvjestajDto data)
         {
             container.Column(col =>
             {
                 col.Item().Height(16);
-
                 col.Item().Element(c => IzgradiStatistike(c, data));
-
                 col.Item().Height(16);
-
                 if (data.Stavke.Count == 0)
                     col.Item().Element(c => IzgradiPraznaPoruka(c, data));
                 else
@@ -125,72 +82,47 @@ namespace SmartLib.Infrastructure.Services
             });
         }
 
-        // ─── STATISTIKE ───────────────────────────────────────────────────────────
         private static void IzgradiStatistike(IContainer container, MjesecniZaduzenjaIzvjestajDto data)
         {
             container.Row(row =>
             {
                 StatKartica(row.RelativeItem(), "UKUPNO ZADUŽENJA", data.UkupnoZaduzenja.ToString(), BojaPrimarna);
                 row.ConstantItem(8);
-
                 StatKartica(row.RelativeItem(), "AKTIVNA", data.AktivnaZaduzenja.ToString(), BojaSuccess);
                 row.ConstantItem(8);
-
                 StatKartica(row.RelativeItem(), "ZATVORENA", data.ZatvorenaZaduzenja.ToString(), BojaMuted);
                 row.ConstantItem(8);
-
                 StatKartica(row.RelativeItem(), "ZAKAŠNJELA", data.ZakasnjelaZaduzenja.ToString(), BojaDanger);
             });
         }
 
         private static void StatKartica(IContainer container, string label, string vrijednost, Color boja)
         {
-            container
-                .Border(1)
-                .BorderColor(BojaBorder)
-                .Padding(14)
-                .Column(col =>
-                {
-                    col.Item()
-                        .Text(label)
-                        .FontSize(7)
-                        .Bold()
-                        .FontColor(BojaMuted);
-
-                    col.Item().Height(6);
-
-                    col.Item()
-                        .Text(vrijednost)
-                        .FontSize(28)
-                        .Bold()
-                        .FontColor(boja);
-                });
+            container.Border(1).BorderColor(BojaBorder).Padding(14).Column(col =>
+            {
+                col.Item().Text(label).FontSize(7).Bold().FontColor(BojaMuted);
+                col.Item().Height(6);
+                col.Item().Text(vrijednost).FontSize(28).Bold().FontColor(boja);
+            });
         }
 
-        // ─── TABELA ──────────────────────────────────────────────────────────────
         private static void IzgradiTabela(IContainer container, MjesecniZaduzenjaIzvjestajDto data)
         {
             container.Column(col =>
             {
-                col.Item()
-                    .PaddingBottom(8)
+                col.Item().PaddingBottom(8)
                     .Text($"Lista zaduženja — {data.NazivMjeseca} {data.Godina} ({data.UkupnoZaduzenja})")
-                    .FontSize(10)
-                    .Bold()
-                    .FontColor(BojaPrimarna);
+                    .FontSize(10).Bold().FontColor(BojaPrimarna);
 
                 col.Item().Table(table =>
                 {
+                    // 9 kolona: # | Član | Knjiga | Autor | Inv.broj | Zaduženo | Rok | Vraćeno | Status
                     table.ColumnsDefinition(cols =>
                     {
                         cols.ConstantColumn(24);
                         cols.RelativeColumn(2.2f);
-<<<<<<< HEAD
-                        cols.RelativeColumn(2.8f);                        
-=======
                         cols.RelativeColumn(2.8f);
                         cols.RelativeColumn(1.5f);
->>>>>>> origin/main
                         cols.RelativeColumn(1.2f);
                         cols.RelativeColumn(1.3f);
                         cols.RelativeColumn(1.3f);
@@ -201,12 +133,8 @@ namespace SmartLib.Infrastructure.Services
                     table.Header(header =>
                     {
                         void CellHeader(IContainer c, string text) =>
-                            c.Background(Color.FromHex("1e3a5f"))
-                             .Padding(6)
-                             .Text(text)
-                             .FontSize(7.5f)
-                             .Bold()
-                             .FontColor(Color.FromHex("ffffff"));
+                            c.Background(Color.FromHex("1e3a5f")).Padding(6)
+                             .Text(text).FontSize(7.5f).Bold().FontColor(Color.FromHex("ffffff"));
 
                         header.Cell().Element(c => CellHeader(c, "#"));
                         header.Cell().Element(c => CellHeader(c, "ČLAN"));
@@ -221,15 +149,9 @@ namespace SmartLib.Infrastructure.Services
 
                     foreach (var s in data.Stavke)
                     {
-                        var bg = s.RedniBroj % 2 == 0
-                            ? Color.FromHex("f8faff")
-                            : Color.FromHex("ffffff");
-
+                        var bg = s.RedniBroj % 2 == 0 ? Color.FromHex("f8faff") : Color.FromHex("ffffff");
                         IContainer Cell(IContainer c) =>
-                            c.Background(bg)
-                             .BorderBottom(0.5f)
-                             .BorderColor(BojaBorder)
-                             .Padding(6);
+                            c.Background(bg).BorderBottom(0.5f).BorderColor(BojaBorder).Padding(6);
 
                         table.Cell().Element(Cell).Text(s.RedniBroj.ToString()).FontColor(BojaMuted);
                         table.Cell().Element(Cell).Text(s.ClanImePrezime);
@@ -238,12 +160,10 @@ namespace SmartLib.Infrastructure.Services
                         table.Cell().Element(Cell).Text(s.InventarniBroj);
                         table.Cell().Element(Cell).Text(s.DatumZaduzivanja.ToString("dd.MM.yyyy"));
                         table.Cell().Element(Cell).Text(s.DatumPlaniranogVracanja?.ToString("dd.MM.yyyy") ?? "—");
-
                         table.Cell().Element(Cell).Text(
                             s.DatumStvarnogVracanja.HasValue
                                 ? s.DatumStvarnogVracanja.Value.ToString("dd.MM.yyyy")
-                                : "—"
-                        );
+                                : "—");
 
                         var status = s.Status switch
                         {
@@ -252,62 +172,41 @@ namespace SmartLib.Infrastructure.Services
                             "zakašnjelo" => ("Zakašnjelo", BojaDanger),
                             _ => (s.Status, BojaMuted)
                         };
-
-                        table.Cell().Element(Cell)
-                            .AlignCenter()
-                            .Text(status.Item1)
-                            .FontColor(status.Item2);
+                        table.Cell().Element(Cell).AlignCenter().Text(status.Item1).FontColor(status.Item2);
                     }
                 });
             });
         }
 
-        // ─── PRAZNA PORUKA ───────────────────────────────────────────────────────
         private static void IzgradiPraznaPoruka(IContainer container, MjesecniZaduzenjaIzvjestajDto data)
         {
-            container
-                .Border(1)
-                .BorderColor(BojaBorder)
-                .Padding(40)
-                .AlignCenter()
-                .Column(col =>
-                {
-                    col.Item().Text("Nema podataka").FontSize(16).Bold().FontColor(BojaMuted);
-                    col.Item().Height(8);
-                    col.Item().Text($"Nema zaduženja za {data.NazivMjeseca} {data.Godina}.")
-                        .FontSize(10)
-                        .FontColor(BojaMuted);
-                });
+            container.Border(1).BorderColor(BojaBorder).Padding(40).AlignCenter().Column(col =>
+            {
+                col.Item().Text("Nema podataka").FontSize(16).Bold().FontColor(BojaMuted);
+                col.Item().Height(8);
+                col.Item().Text($"Nema zaduženja za {data.NazivMjeseca} {data.Godina}.").FontSize(10).FontColor(BojaMuted);
+            });
         }
 
-        // ─── FOOTER ──────────────────────────────────────────────────────────────
         private static void IzgradiFooter(IContainer container, MjesecniZaduzenjaIzvjestajDto data)
         {
-            container
-                .PaddingTop(10)
-                .BorderTop(0.5f)
-                .BorderColor(BojaBorder)
-                .Row(row =>
+            container.PaddingTop(10).BorderTop(0.5f).BorderColor(BojaBorder).Row(row =>
+            {
+                row.RelativeItem().Text($"SmartLib © {DateTime.Now.Year}").FontSize(7.5f).FontColor(BojaMuted);
+                row.RelativeItem().AlignCenter().Text($"Period: {data.NazivMjeseca} {data.Godina}").FontSize(7.5f).FontColor(BojaMuted);
+                row.RelativeItem().AlignRight().Text(t =>
                 {
-                    row.RelativeItem().Text($"SmartLib © {DateTime.Now.Year}")
-                        .FontSize(7.5f)
-                        .FontColor(BojaMuted);
-
-                    row.RelativeItem().AlignCenter()
-                        .Text($"Period: {data.NazivMjeseca} {data.Godina}")
-                        .FontSize(7.5f)
-                        .FontColor(BojaMuted);
-
-                    row.RelativeItem().AlignRight()
-                        .Text(t =>
-                        {
-                            t.Span("Stranica ").FontSize(7.5f);
-                            t.CurrentPageNumber().FontSize(7.5f).Bold().FontColor(BojaPrimarna);
-                            t.Span(" / ");
-                            t.TotalPages().FontSize(7.5f).Bold().FontColor(BojaPrimarna);
-                        });
+                    t.Span("Stranica ").FontSize(7.5f);
+                    t.CurrentPageNumber().FontSize(7.5f).Bold().FontColor(BojaPrimarna);
+                    t.Span(" / ");
+                    t.TotalPages().FontSize(7.5f).Bold().FontColor(BojaPrimarna);
                 });
+            });
         }
+
+        // ════════════════════════════════════════════════════════════════════════
+        // REZERVACIJE
+        // ════════════════════════════════════════════════════════════════════════
 
         public static byte[] GenerirajMjesecneRezervacijePdf(MjesecneRezervacijeIzvjestajDto data)
         {
@@ -323,19 +222,18 @@ namespace SmartLib.Infrastructure.Services
                     page.Header().Element(c => RezHeader(c, data));
                     page.Content().Element(c => RezSadrzaj(c, data));
                     page.Footer().Element(c =>
-                        c.PaddingTop(10).BorderTop(0.5f).BorderColor(BojaBorder)
-                         .Row(row =>
-                         {
-                             row.RelativeItem().Text($"SmartLib © {DateTime.Now.Year}").FontSize(7.5f).FontColor(BojaMuted);
-                             row.RelativeItem().AlignCenter().Text($"Period: {data.NazivMjeseca} {data.Godina}").FontSize(7.5f).FontColor(BojaMuted);
-                             row.RelativeItem().AlignRight().Text(t =>
-                             {
-                                 t.Span("Stranica ").FontSize(7.5f);
-                                 t.CurrentPageNumber().FontSize(7.5f).Bold().FontColor(BojaPrimarna);
-                                 t.Span(" / ");
-                                 t.TotalPages().FontSize(7.5f).Bold().FontColor(BojaPrimarna);
-                             });
-                         }));
+                        c.PaddingTop(10).BorderTop(0.5f).BorderColor(BojaBorder).Row(row =>
+                        {
+                            row.RelativeItem().Text($"SmartLib © {DateTime.Now.Year}").FontSize(7.5f).FontColor(BojaMuted);
+                            row.RelativeItem().AlignCenter().Text($"Period: {data.NazivMjeseca} {data.Godina}").FontSize(7.5f).FontColor(BojaMuted);
+                            row.RelativeItem().AlignRight().Text(t =>
+                            {
+                                t.Span("Stranica ").FontSize(7.5f);
+                                t.CurrentPageNumber().FontSize(7.5f).Bold().FontColor(BojaPrimarna);
+                                t.Span(" / ");
+                                t.TotalPages().FontSize(7.5f).Bold().FontColor(BojaPrimarna);
+                            });
+                        }));
                 });
             }).GeneratePdf();
         }
@@ -351,10 +249,11 @@ namespace SmartLib.Infrastructure.Services
                 });
                 row.RelativeItem(2).AlignCenter().Column(col =>
                 {
-                    col.Item().Text("Izvještaj o rezervacijama knjiga").FontSize(14).Bold().FontColor(Color.FromHex("ffffff")).AlignCenter();
+                    col.Item().Text("Izvještaj o rezervacijama knjiga")
+                        .FontSize(14).Bold().FontColor(Color.FromHex("ffffff")).AlignCenter();
                     col.Item().Height(4);
                     col.Item().Background(BojaGold).PaddingVertical(4).PaddingHorizontal(6).AlignCenter()
-                       .Text($"{data.NazivMjeseca} {data.Godina}").FontSize(11).Bold().FontColor(Color.FromHex("ffffff"));
+                        .Text($"{data.NazivMjeseca} {data.Godina}").FontSize(11).Bold().FontColor(Color.FromHex("ffffff"));
                 });
                 row.RelativeItem().AlignRight().Column(col =>
                 {
@@ -369,8 +268,6 @@ namespace SmartLib.Infrastructure.Services
             container.Column(col =>
             {
                 col.Item().Height(16);
-
-                // Stat kartice
                 col.Item().Row(row =>
                 {
                     StatKartica(row.RelativeItem(), "UKUPNO REZERVACIJA", data.UkupnoRezervacija.ToString(), BojaPrimarna);
@@ -381,7 +278,6 @@ namespace SmartLib.Infrastructure.Services
                     row.ConstantItem(8);
                     StatKartica(row.RelativeItem(), "OTKAZANE", data.OtkazaneRezervacije.ToString(), BojaDanger);
                 });
-
                 col.Item().Height(16);
 
                 if (data.Stavke.Count == 0)
@@ -395,15 +291,13 @@ namespace SmartLib.Infrastructure.Services
                     return;
                 }
 
-                col.Item()
-                   .PaddingBottom(8)
-                   .Text($"Lista rezervacija — {data.NazivMjeseca} {data.Godina} ({data.UkupnoRezervacija})")
-                   .FontSize(10)
-                   .Bold()
-                   .FontColor(BojaPrimarna);
+                col.Item().PaddingBottom(8)
+                    .Text($"Lista rezervacija — {data.NazivMjeseca} {data.Godina} ({data.UkupnoRezervacija})")
+                    .FontSize(10).Bold().FontColor(BojaPrimarna);
 
                 col.Item().Table(table =>
                 {
+                    // 7 kolona: # | Član | Knjiga | Autor | Rezervisano | Ističe | Status
                     table.ColumnsDefinition(cols =>
                     {
                         cols.ConstantColumn(24);
@@ -433,7 +327,8 @@ namespace SmartLib.Infrastructure.Services
                     foreach (var s in data.Stavke)
                     {
                         var bg = s.RedniBroj % 2 == 0 ? Color.FromHex("f8faff") : Color.FromHex("ffffff");
-                        IContainer Cell(IContainer c) => c.Background(bg).BorderBottom(0.5f).BorderColor(BojaBorder).Padding(6);
+                        IContainer Cell(IContainer c) =>
+                            c.Background(bg).BorderBottom(0.5f).BorderColor(BojaBorder).Padding(6);
 
                         var status = s.Status switch
                         {
@@ -448,16 +343,16 @@ namespace SmartLib.Infrastructure.Services
                         table.Cell().Element(Cell).Text(s.NaslovKnjige);
                         table.Cell().Element(Cell).Text(s.Autor);
                         table.Cell().Element(Cell).Text(s.DatumRezervacije.ToString("dd.MM.yyyy"));
-                        table.Cell().Element(Cell).Text(
-                            s.DatumIsteka?.ToString("dd.MM.yyyy") ?? "—"
-                        );
+                        table.Cell().Element(Cell).Text(s.DatumIsteka?.ToString("dd.MM.yyyy") ?? "—");
                         table.Cell().Element(Cell).AlignCenter().Text(status.Item1).FontColor(status.Item2);
                     }
                 });
             });
         }
 
-        // ── Članovi PDF ──────────────────────────────────────────────────────────────
+        // ════════════════════════════════════════════════════════════════════════
+        // ČLANOVI
+        // ════════════════════════════════════════════════════════════════════════
 
         public static byte[] GenerirajMjesecneClanovePdf(MjesecniClanoviIzvjestajDto data)
         {
@@ -473,19 +368,18 @@ namespace SmartLib.Infrastructure.Services
                     page.Header().Element(c => ClanHeader(c, data));
                     page.Content().Element(c => ClanSadrzaj(c, data));
                     page.Footer().Element(c =>
-                        c.PaddingTop(10).BorderTop(0.5f).BorderColor(BojaBorder)
-                         .Row(row =>
-                         {
-                             row.RelativeItem().Text($"SmartLib © {DateTime.Now.Year}").FontSize(7.5f).FontColor(BojaMuted);
-                             row.RelativeItem().AlignCenter().Text($"Period: {data.NazivMjeseca} {data.Godina}").FontSize(7.5f).FontColor(BojaMuted);
-                             row.RelativeItem().AlignRight().Text(t =>
-                             {
-                                 t.Span("Stranica ").FontSize(7.5f);
-                                 t.CurrentPageNumber().FontSize(7.5f).Bold().FontColor(BojaPrimarna);
-                                 t.Span(" / ");
-                                 t.TotalPages().FontSize(7.5f).Bold().FontColor(BojaPrimarna);
-                             });
-                         }));
+                        c.PaddingTop(10).BorderTop(0.5f).BorderColor(BojaBorder).Row(row =>
+                        {
+                            row.RelativeItem().Text($"SmartLib © {DateTime.Now.Year}").FontSize(7.5f).FontColor(BojaMuted);
+                            row.RelativeItem().AlignCenter().Text($"Period: {data.NazivMjeseca} {data.Godina}").FontSize(7.5f).FontColor(BojaMuted);
+                            row.RelativeItem().AlignRight().Text(t =>
+                            {
+                                t.Span("Stranica ").FontSize(7.5f);
+                                t.CurrentPageNumber().FontSize(7.5f).Bold().FontColor(BojaPrimarna);
+                                t.Span(" / ");
+                                t.TotalPages().FontSize(7.5f).Bold().FontColor(BojaPrimarna);
+                            });
+                        }));
                 });
             }).GeneratePdf();
         }
@@ -501,10 +395,11 @@ namespace SmartLib.Infrastructure.Services
                 });
                 row.RelativeItem(2).AlignCenter().Column(col =>
                 {
-                    col.Item().Text("Izvještaj o članovima").FontSize(14).Bold().FontColor(Color.FromHex("ffffff")).AlignCenter();
+                    col.Item().Text("Izvještaj o članovima")
+                        .FontSize(14).Bold().FontColor(Color.FromHex("ffffff")).AlignCenter();
                     col.Item().Height(4);
                     col.Item().Background(BojaGold).PaddingVertical(4).PaddingHorizontal(6).AlignCenter()
-                       .Text($"{data.NazivMjeseca} {data.Godina}").FontSize(11).Bold().FontColor(Color.FromHex("ffffff"));
+                        .Text($"{data.NazivMjeseca} {data.Godina}").FontSize(11).Bold().FontColor(Color.FromHex("ffffff"));
                 });
                 row.RelativeItem().AlignRight().Column(col =>
                 {
@@ -519,7 +414,6 @@ namespace SmartLib.Infrastructure.Services
             container.Column(col =>
             {
                 col.Item().Height(16);
-
                 col.Item().Row(row =>
                 {
                     StatKartica(row.RelativeItem(), "UKUPNO AKTIVNIH", data.UkupnoAktivnihClanova.ToString(), BojaPrimarna);
@@ -530,7 +424,6 @@ namespace SmartLib.Infrastructure.Services
                     row.ConstantItem(8);
                     StatKartica(row.RelativeItem(), "ISTEKLA ČLAN.", data.ClanovaIsteklaClanarina.ToString(), BojaDanger);
                 });
-
                 col.Item().Height(16);
 
                 if (data.Stavke.Count == 0)
@@ -543,26 +436,19 @@ namespace SmartLib.Infrastructure.Services
                     });
                     return;
                 }
-              
-                col.Item()
-                   .PaddingBottom(8)
-                   .Text($"Lista članova — {data.NazivMjeseca} {data.Godina} ({data.UkupnoAktivnihClanova})")
-                   .FontSize(10)
-                   .Bold()
-                   .FontColor(BojaPrimarna);
+
+                col.Item().PaddingBottom(8)
+                    .Text($"Lista članova — {data.NazivMjeseca} {data.Godina} ({data.UkupnoAktivnihClanova})")
+                    .FontSize(10).Bold().FontColor(BojaPrimarna);
 
                 col.Item().Table(table =>
                 {
+                    // 8 kolona: # | Ime i prezime | Email | Registrovan | Čl.status | Čl.važi do | Zad. | Rez.
                     table.ColumnsDefinition(cols =>
                     {
                         cols.ConstantColumn(24);
                         cols.RelativeColumn(2f);
-<<<<<<< HEAD
-                        cols.RelativeColumn(2.5f);                       
-=======
                         cols.RelativeColumn(2.5f);
-                        cols.RelativeColumn(1.5f);
->>>>>>> origin/main
                         cols.RelativeColumn(1.4f);
                         cols.ConstantColumn(65);
                         cols.RelativeColumn(1.4f);
@@ -578,39 +464,25 @@ namespace SmartLib.Infrastructure.Services
 
                         header.Cell().Element(c => H(c, "#"));
                         header.Cell().Element(c => H(c, "IME I PREZIME"));
-<<<<<<< HEAD
-                        header.Cell().Element(c => H(c, "EMAIL"));                        
+                        header.Cell().Element(c => H(c, "EMAIL"));
                         header.Cell().Element(c => H(c, "REGISTROVAN"));
                         header.Cell().Element(c => H(c, "ČLAN. STATUS"));
                         header.Cell().Element(c => H(c, "ČLAN. VAŽI DO"));
                         header.Cell().Element(c => H(c, "ZADUŽENIH"));
                         header.Cell().Element(c => H(c, "REZERVISANIH"));
-=======
-                        header.Cell().Element(c => H(c, "EMAIL"));
-                        header.Cell().Element(c => H(c, "BR. ČLANSKE"));
-                        header.Cell().Element(c => H(c, "REGISTROVAN"));
-                        header.Cell().Element(c => H(c, "ČLAN. STATUS"));
-                        header.Cell().Element(c => H(c, "ČLAN. VAŽI DO"));
-                        header.Cell().Element(c => H(c, "ZAD."));
-                        header.Cell().Element(c => H(c, "REZ."));
->>>>>>> origin/main
                     });
 
                     foreach (var s in data.Stavke)
                     {
                         var bg = s.RedniBroj % 2 == 0 ? Color.FromHex("f8faff") : Color.FromHex("ffffff");
-                        IContainer Cell(IContainer c) => c.Background(bg).BorderBottom(0.5f).BorderColor(BojaBorder).Padding(6);
+                        IContainer Cell(IContainer c) =>
+                            c.Background(bg).BorderBottom(0.5f).BorderColor(BojaBorder).Padding(6);
 
                         var statusBoja = s.StatusClanarine == "Aktivna" ? BojaSuccess : BojaDanger;
 
                         table.Cell().Element(Cell).Text(s.RedniBroj.ToString()).FontColor(BojaMuted);
                         table.Cell().Element(Cell).Text(s.ImePrezime);
-<<<<<<< HEAD
-                        table.Cell().Element(Cell).Text(s.Email);                        
-=======
                         table.Cell().Element(Cell).Text(s.Email);
-                        table.Cell().Element(Cell).Text(s.BrojClanske);
->>>>>>> origin/main
                         table.Cell().Element(Cell).Text(s.DatumRegistracije.ToString("dd.MM.yyyy"));
                         table.Cell().Element(Cell).AlignCenter().Text(s.StatusClanarine).FontColor(statusBoja);
                         table.Cell().Element(Cell).Text(s.ClanarinaVaziDo.HasValue ? s.ClanarinaVaziDo.Value.ToString("dd.MM.yyyy") : "—");

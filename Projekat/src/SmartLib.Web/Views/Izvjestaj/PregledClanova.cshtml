@@ -83,22 +83,12 @@
                         <tr>
                             <th>#</th>
                             <th>Ime i prezime</th>
-<<<<<<< HEAD
-                            <th>Email</th>                            
+                            <th>Email</th>
                             <th>Registrovan</th>
                             <th>Čl. status</th>
                             <th>Čl. važi do</th>
                             <th>Zaduženih</th>
                             <th>Rezervisanih</th>
-=======
-                            <th>Email</th>
-                            <th>Br. članske</th>
-                            <th>Registrovan</th>
-                            <th>Čl. status</th>
-                            <th>Čl. važi do</th>
-                            <th>Zad.</th>
-                            <th>Rez.</th>
->>>>>>> origin/main
                         </tr>
                     </thead>
                     <tbody>
@@ -107,12 +97,7 @@
                             <tr>
                                 <td class="sl-table__num">@s.RedniBroj</td>
                                 <td class="sl-table__bold">@s.ImePrezime</td>
-<<<<<<< HEAD
-                                <td class="sl-table__muted">@s.Email</td>                                
-=======
                                 <td class="sl-table__muted">@s.Email</td>
-                                <td class="sl-table__mono">@s.BrojClanske</td>
->>>>>>> origin/main
                                 <td>@s.DatumRegistracije.ToString("dd.MM.yyyy")</td>
                                 <td>
                                     <span class="status-badge @(s.StatusClanarine == "Aktivna" ? "status-badge--aktivno" : "status-badge--zatvoreno")">
@@ -128,65 +113,34 @@
                 </table>
             </div>
         </div>
-    }
-<<<<<<< HEAD
 
-    @if (Model.Stavke.Any())
-    {
         <div class="izvjestaj-charts-grid">
 
             <div class="izvjestaj-chart-card">
-
-                <div class="izvjestaj-chart-card__title">
-                    Status članarina
-                </div>
-
-                <div class="izvjestaj-chart-card__sub">
-                    Udio aktivnih i isteklih članarina
-                </div>
-
+                <div class="izvjestaj-chart-card__title">Status članarina</div>
+                <div class="izvjestaj-chart-card__sub">Udio aktivnih i isteklih članarina</div>
                 <div class="izvjestaj-chart-legend">
-                    <span>
-                        <span class="leg-dot" style="background:#173b63"></span>
-                        Aktivna
-                    </span>
-
-                    <span>
-                        <span class="leg-dot" style="background:#b42318"></span>
-                        Istekla
-                    </span>
+                    <span><span class="leg-dot" style="background:#173b63"></span>Aktivna</span>
+                    <span><span class="leg-dot" style="background:#b42318"></span>Istekla</span>
                 </div>
-
                 <div style="position:relative;width:100%;height:220px">
                     <canvas id="chartDonut"
                             role="img"
                             aria-label="Raspodjela članarina za @Model.NazivMjeseca @Model.Godina">
-
-                        Aktivna: @Model.ClanovaAktivnaClanarina,
-                        Istekla: @Model.ClanovaIsteklaClanarina.
-
+                        Aktivna: @Model.ClanovaAktivnaClanarina, Istekla: @Model.ClanovaIsteklaClanarina.
                     </canvas>
                 </div>
-
             </div>
 
             <div class="izvjestaj-chart-card">
-
-                <div class="izvjestaj-chart-card__title">
-                    Novi članovi po danima
-                </div>
-
-                <div class="izvjestaj-chart-card__sub">
-                    Broj novih registracija svaki dan uodabranom periodu
-                </div>
-
+                <div class="izvjestaj-chart-card__title">Novi članovi po danima</div>
+                <div class="izvjestaj-chart-card__sub">Broj novih registracija svaki dan u odabranom periodu</div>
                 <div style="position:relative;width:100%;height:220px">
                     <canvas id="chartBar"
                             role="img"
                             aria-label="Novi članovi po danima u @Model.NazivMjeseca @Model.Godina">
                     </canvas>
                 </div>
-
             </div>
 
         </div>
@@ -194,56 +148,31 @@
         @if (Model.TopClanovi.Any())
         {
             <div class="izvjestaj-chart-card" style="margin-bottom:1.5rem">
-
-                <div class="izvjestaj-chart-card__title">
-                    Top @Model.TopClanovi.Count najaktivnijih članova
-                </div>
-
-                <div class="izvjestaj-chart-card__sub">
-                    Članovi s najviše zaduženja u @Model.NazivMjeseca @Model.Godina
-                </div>
-
+                <div class="izvjestaj-chart-card__title">Top @Model.TopClanovi.Count najaktivnijih članova</div>
+                <div class="izvjestaj-chart-card__sub">Članovi s najviše zaduženja u @Model.NazivMjeseca @Model.Godina</div>
                 <div style="position:relative;width:100%;height:@(Model.TopClanovi.Count * 48 + 60)px">
                     <canvas id="chartHbar"
                             role="img"
                             aria-label="Top članovi po broju zaduženja">
                     </canvas>
                 </div>
-
             </div>
         }
 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 
         <script>
-
             const isDark = matchMedia('(prefers-color-scheme: dark)').matches;
+            const txt  = isDark ? '#a1a1a1' : '#64748b';
+            const grid = isDark ? 'rgba(255,255,255,.07)' : 'rgba(0,0,0,.06)';
 
-            const txt = isDark
-                ? '#a1a1a1'
-                : '#64748b';
-
-            const grid = isDark
-                ? 'rgba(255,255,255,.07)'
-                : 'rgba(0,0,0,.06)';
-
-            // Membership status chart
             new Chart(document.getElementById('chartDonut'), {
                 type: 'doughnut',
                 data: {
-                    labels: [
-                        'Aktivna',
-                        'Istekla'
-                    ],
+                    labels: ['Aktivna', 'Istekla'],
                     datasets: [{
-                        data: [
-                            @Model.ClanovaAktivnaClanarina,
-                            @Model.ClanovaIsteklaClanarina
-                        ],
-                        backgroundColor: [
-                            '#173b63',
-                            '#b42318'
-                        ],
+                        data: [@Model.ClanovaAktivnaClanarina, @Model.ClanovaIsteklaClanarina],
+                        backgroundColor: ['#173b63', '#b42318'],
                         borderWidth: 0,
                         hoverOffset: 4
                     }]
@@ -252,155 +181,79 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     cutout: '62%',
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    }
+                    plugins: { legend: { display: false } }
                 }
             });
 
-            // New members by day chart
             new Chart(document.getElementById('chartBar'), {
                 type: 'bar',
                 data: {
-                    labels: [
-                        @Html.Raw(string.Join(",",
-                            Enumerable.Range(1, Model.NoviClanoviPoDanima.Count)
-                                    .Select(d => $"'{d}'")))
-                ],
-                datasets: [{
-                    label: 'Novi članovi',
-                    data: [
-                        @string.Join(",", Model.NoviClanoviPoDanima)
-                    ],
-                    backgroundColor: '#173b63',
-                    borderRadius: 3,
-                    borderSkipped: false
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                },
-                scales: {
-                    x: {
-                        ticks: {
-                            color: txt,
-                            font: {
-                                size: 11
-                            },
-                            autoSkip: true,
-                            maxTicksLimit: 10
-                        },
-                        grid: {
-                            display: false
-                        },
-                        border: {
-                            display: false
-                        }
-                    },
-                    y: {
-                        ticks: {
-                            color: txt,
-                            font: {
-                                size: 11
-                            },
-                            stepSize: 1
-                        },
-                        grid: {
-                            color: grid
-                        },
-                        border: {
-                            display: false
-                        },
-                        min: 0
-                    }
-                }
-            }
-        });
-
-        @if (Model.TopClanovi.Any())
-            {
-                    <text>
-
-                    // Top members chart
-                    new Chart(document.getElementById('chartHbar'), {
-                        type: 'bar',
-                        data: {
-                            labels: [
-                                @Html.Raw(string.Join(",",
-                                    Model.TopClanovi.Select(c =>
-                                            $"'{c.ImePrezime.Replace("'", "\\'")}'")))
-                    ],
+                    labels: [@Html.Raw(string.Join(",", Enumerable.Range(1, Model.NoviClanoviPoDanima.Count).Select(d => $"'{d}'")))],
                     datasets: [{
-                        label: 'Zaduženja',
-                        data: [
-                            @string.Join(",", Model.TopClanovi.Select(c => c.BrojZaduzenja))
-                        ],
-                        backgroundColor: [
-                            '#173b63',
-                            '#1e4d80',
-                            '#2563aa',
-                            '#3a7bd0',
-                            '#5a9be0'
-                        ],
-                        borderRadius: 4,
+                        label: 'Novi članovi',
+                        data: [@string.Join(",", Model.NoviClanoviPoDanima)],
+                        backgroundColor: '#173b63',
+                        borderRadius: 3,
                         borderSkipped: false
                     }]
                 },
                 options: {
-                    indexAxis: 'y',
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    },
+                    plugins: { legend: { display: false } },
                     scales: {
                         x: {
-                            ticks: {
-                                color: txt,
-                                font: {
-                                    size: 12
-                                }
-                            },
-                            grid: {
-                                color: grid
-                            },
-                            border: {
-                                display: false
-                            },
-                            min: 0
+                            ticks: { color: txt, font: { size: 11 }, autoSkip: true, maxTicksLimit: 10 },
+                            grid: { display: false },
+                            border: { display: false }
                         },
                         y: {
-                            ticks: {
-                                color: txt,
-                                font: {
-                                    size: 12
-                                }
-                            },
-                            grid: {
-                                display: false
-                            },
-                            border: {
-                                display: false
-                            }
+                            ticks: { color: txt, font: { size: 11 }, stepSize: 1 },
+                            grid: { color: grid },
+                            border: { display: false },
+                            min: 0
                         }
                     }
                 }
             });
 
-            </text>
-                }
-
+            @if (Model.TopClanovi.Any())
+            {
+                        <text>
+                        new Chart(document.getElementById('chartHbar'), {
+                            type: 'bar',
+                            data: {
+                                labels: [@Html.Raw(string.Join(",", Model.TopClanovi.Select(c => $"'{c.ImePrezime.Replace("'", "\\'")}'")))],
+                                datasets: [{
+                                    label: 'Zaduženja',
+                                    data: [@string.Join(",", Model.TopClanovi.Select(c => c.BrojZaduzenja))],
+                                    backgroundColor: ['#173b63', '#1e4d80', '#2563aa', '#3a7bd0', '#5a9be0'],
+                                    borderRadius: 4,
+                                    borderSkipped: false
+                                }]
+                            },
+                            options: {
+                                indexAxis: 'y',
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: { legend: { display: false } },
+                                scales: {
+                                    x: {
+                                        ticks: { color: txt, font: { size: 12 } },
+                                        grid: { color: grid },
+                                        border: { display: false },
+                                        min: 0
+                                    },
+                                    y: {
+                                        ticks: { color: txt, font: { size: 12 } },
+                                        grid: { display: false },
+                                        border: { display: false }
+                                    }
+                                }
+                            }
+                        });
+                        </text>
+            }
         </script>
     }
-=======
->>>>>>> origin/main
 </div>
