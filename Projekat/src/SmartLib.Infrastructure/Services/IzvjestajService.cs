@@ -51,6 +51,21 @@ namespace SmartLib.Infrastructure.Services
                 Status = z.Status
             }).ToList();
 
+<<<<<<< HEAD
+            int danUMjesecu = DateTime.DaysInMonth(godina, mjesec);
+            var zaduzenjaPoDanima = Enumerable.Range(1, danUMjesecu)
+                .Select(d => zaduzenja.Count(z => z.DatumZaduzivanja.Day == d))
+                .ToList();
+
+            var topKnjige = zaduzenja
+                .GroupBy(z => z.Primjerak?.Knjiga?.Naslov ?? "-")
+                .OrderByDescending(g => g.Count())
+                .Take(5)
+                .Select(g => new KnjigaRankDto { Naslov = g.Key, BrojZaduzenja = g.Count() })
+                .ToList();          
+
+=======
+>>>>>>> origin/main
             return new MjesecniZaduzenjaIzvjestajDto
             {
                 Mjesec = mjesec,
@@ -61,6 +76,11 @@ namespace SmartLib.Infrastructure.Services
                 ZatvorenaZaduzenja = zaduzenja.Count(z => z.Status == "zatvoreno"),
                 ZakasnjelaZaduzenja = zaduzenja.Count(z => z.Status == "zakašnjelo"),
                 Stavke = stavke,
+<<<<<<< HEAD
+                ZaduzenjaPoDanima = zaduzenjaPoDanima,
+                TopKnjige = topKnjige,
+=======
+>>>>>>> origin/main
                 GenerisanoU = GetLokalnoVrijeme()
             };
         }
@@ -90,6 +110,21 @@ namespace SmartLib.Infrastructure.Services
                 Status = r.Status
             }).ToList();
 
+<<<<<<< HEAD
+            int danUMjesecu = DateTime.DaysInMonth(godina, mjesec);
+            var rezervacijePoDanima = Enumerable.Range(1, danUMjesecu)
+                .Select(d => rezervacije.Count(r => r.DatumRezervacije.Day == d))
+                .ToList();
+
+            var topKnjige = rezervacije
+                .GroupBy(r => r.Knjiga?.Naslov ?? "-")
+                .OrderByDescending(g => g.Count())
+                .Take(5)
+                .Select(g => new KnjigaRankDto { Naslov = g.Key, BrojZaduzenja = g.Count() })
+                .ToList();
+
+=======
+>>>>>>> origin/main
             return new MjesecneRezervacijeIzvjestajDto
             {
                 Mjesec = mjesec,
@@ -100,7 +135,14 @@ namespace SmartLib.Infrastructure.Services
                 ZavrseneRezervacije = rezervacije.Count(r => r.Status == "završena"),
                 OtkazaneRezervacije = rezervacije.Count(r => r.Status == "otkazana"),
                 Stavke = stavke,
+<<<<<<< HEAD
+                GenerisanoU = DateTime.Now,
+                // ← i ovdje dodati
+                RezervacijePoDanima = rezervacijePoDanima,
+                TopKnjige = topKnjige,
+=======
                 GenerisanoU = GetLokalnoVrijeme()
+>>>>>>> origin/main
             };
         }
 
@@ -129,8 +171,12 @@ namespace SmartLib.Infrastructure.Services
                 {
                     RedniBroj = i + 1,
                     ImePrezime = $"{k.Ime} {k.Prezime}".Trim(),
+<<<<<<< HEAD
+                    Email = k.Email ?? "-",                    
+=======
                     Email = k.Email ?? "-",
                     BrojClanske = "-",
+>>>>>>> origin/main
                     DatumRegistracije = k.DatumKreiranja,
                     StatusClanarine = aktivnaClanarina != null ? "Aktivna" : "Istekla",
                     ClanarinaVaziDo = aktivnaClanarina?.DatumIsteka,
@@ -141,6 +187,31 @@ namespace SmartLib.Infrastructure.Services
                 };
             }).ToList();
 
+<<<<<<< HEAD
+            int danUMjesecu = DateTime.DaysInMonth(godina, mjesec);
+            var noviClanoviPoDanima = Enumerable.Range(1, danUMjesecu)
+                .Select(d => korisnici.Count(k =>
+                    k.DatumKreiranja >= pocetak &&
+                    k.DatumKreiranja < kraj &&
+                    k.DatumKreiranja.Day == d))
+                .ToList();
+
+            var topClanovi = korisnici
+                .Select(k => new ClanAktivnostDto
+                {
+                    ImePrezime = $"{k.Ime} {k.Prezime}".Trim(),
+                    BrojZaduzenja = k.Zaduzenja?.Count(z =>
+                        z.DatumZaduzivanja >= pocetak &&
+                        z.DatumZaduzivanja < kraj) ?? 0
+                })
+                .Where(c => c.BrojZaduzenja > 0)
+                .OrderByDescending(c => c.BrojZaduzenja)
+                .Take(5)
+                .ToList();
+
+
+=======
+>>>>>>> origin/main
             return new MjesecniClanoviIzvjestajDto
             {
                 Mjesec = mjesec,
@@ -152,6 +223,11 @@ namespace SmartLib.Infrastructure.Services
                 ClanovaAktivnaClanarina = stavke.Count(s => s.StatusClanarine == "Aktivna"),
                 ClanovaIsteklaClanarina = stavke.Count(s => s.StatusClanarine == "Istekla"),
                 Stavke = stavke,
+<<<<<<< HEAD
+                NoviClanoviPoDanima = noviClanoviPoDanima,
+                TopClanovi = topClanovi,
+=======
+>>>>>>> origin/main
                 GenerisanoU = GetLokalnoVrijeme()
             };
         }

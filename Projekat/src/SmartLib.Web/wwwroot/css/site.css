@@ -4556,6 +4556,65 @@ body.home-page footer {
         color: var(--sl-gold);
     }
 
+<<<<<<< HEAD
+.izvjestaj-charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .izvjestaj-charts-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.izvjestaj-chart-card {
+    background: var(--sl-card);
+    border: 1px solid var(--sl-border);
+    border-radius: var(--sl-radius-lg);
+    padding: 1.25rem 1.5rem;
+    box-shadow: var(--sl-shadow);
+}
+
+.izvjestaj-chart-card__title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--sl-blue);
+    margin-bottom: 2px;
+}
+
+.izvjestaj-chart-card__sub {
+    font-size: 0.79rem;
+    color: var(--sl-muted);
+    margin-bottom: 1rem;
+}
+
+.izvjestaj-chart-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    font-size: 12px;
+    color: var(--sl-muted);
+    margin-bottom: 12px;
+}
+
+.leg-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    display: inline-block;
+    margin-right: 4px;
+    vertical-align: middle;
+}
+
+.izvjestaj-charts-grid {
+    margin-top: 2rem;
+}
+
+=======
+>>>>>>> origin/main
 /* ================================
    Dark Mode Toggle Button
    ================================ */

@@ -185,8 +185,12 @@ namespace SmartLib.Infrastructure.Services
                     {
                         cols.ConstantColumn(24);
                         cols.RelativeColumn(2.2f);
+<<<<<<< HEAD
+                        cols.RelativeColumn(2.8f);                        
+=======
                         cols.RelativeColumn(2.8f);
                         cols.RelativeColumn(1.5f);
+>>>>>>> origin/main
                         cols.RelativeColumn(1.2f);
                         cols.RelativeColumn(1.3f);
                         cols.RelativeColumn(1.3f);
@@ -553,8 +557,12 @@ namespace SmartLib.Infrastructure.Services
                     {
                         cols.ConstantColumn(24);
                         cols.RelativeColumn(2f);
+<<<<<<< HEAD
+                        cols.RelativeColumn(2.5f);                       
+=======
                         cols.RelativeColumn(2.5f);
                         cols.RelativeColumn(1.5f);
+>>>>>>> origin/main
                         cols.RelativeColumn(1.4f);
                         cols.ConstantColumn(65);
                         cols.RelativeColumn(1.4f);
@@ -570,6 +578,14 @@ namespace SmartLib.Infrastructure.Services
 
                         header.Cell().Element(c => H(c, "#"));
                         header.Cell().Element(c => H(c, "IME I PREZIME"));
+<<<<<<< HEAD
+                        header.Cell().Element(c => H(c, "EMAIL"));                        
+                        header.Cell().Element(c => H(c, "REGISTROVAN"));
+                        header.Cell().Element(c => H(c, "ČLAN. STATUS"));
+                        header.Cell().Element(c => H(c, "ČLAN. VAŽI DO"));
+                        header.Cell().Element(c => H(c, "ZADUŽENIH"));
+                        header.Cell().Element(c => H(c, "REZERVISANIH"));
+=======
                         header.Cell().Element(c => H(c, "EMAIL"));
                         header.Cell().Element(c => H(c, "BR. ČLANSKE"));
                         header.Cell().Element(c => H(c, "REGISTROVAN"));
@@ -577,6 +593,7 @@ namespace SmartLib.Infrastructure.Services
                         header.Cell().Element(c => H(c, "ČLAN. VAŽI DO"));
                         header.Cell().Element(c => H(c, "ZAD."));
                         header.Cell().Element(c => H(c, "REZ."));
+>>>>>>> origin/main
                     });
 
                     foreach (var s in data.Stavke)
@@ -588,8 +605,12 @@ namespace SmartLib.Infrastructure.Services
 
                         table.Cell().Element(Cell).Text(s.RedniBroj.ToString()).FontColor(BojaMuted);
                         table.Cell().Element(Cell).Text(s.ImePrezime);
+<<<<<<< HEAD
+                        table.Cell().Element(Cell).Text(s.Email);                        
+=======
                         table.Cell().Element(Cell).Text(s.Email);
                         table.Cell().Element(Cell).Text(s.BrojClanske);
+>>>>>>> origin/main
                         table.Cell().Element(Cell).Text(s.DatumRegistracije.ToString("dd.MM.yyyy"));
                         table.Cell().Element(Cell).AlignCenter().Text(s.StatusClanarine).FontColor(statusBoja);
                         table.Cell().Element(Cell).Text(s.ClanarinaVaziDo.HasValue ? s.ClanarinaVaziDo.Value.ToString("dd.MM.yyyy") : "—");
