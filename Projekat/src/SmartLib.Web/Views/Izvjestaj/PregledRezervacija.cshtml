@@ -117,4 +117,278 @@
             </div>
         </div>
     }
+
+    @if (Model.Stavke.Any())
+    {
+        <div class="izvjestaj-charts-grid">
+
+            <div class="izvjestaj-chart-card">
+                <div class="izvjestaj-chart-card__title">
+                    Raspodjela po statusu
+                </div>
+
+                <div class="izvjestaj-chart-card__sub">
+                    Udio svakog statusa rezervacija u odabranom periodu
+                </div>
+
+                <div class="izvjestaj-chart-legend">
+                    <span>
+                        <span class="leg-dot" style="background:#173b63"></span>
+                        Aktivne
+                    </span>
+
+                    <span>
+                        <span class="leg-dot" style="background:#64748b"></span>
+                        Završene
+                    </span>
+
+                    <span>
+                        <span class="leg-dot" style="background:#b42318"></span>
+                        Otkazane
+                    </span>
+                </div>
+
+                <div style="position:relative;width:100%;height:220px">
+                    <canvas id="chartDonut"
+                            role="img"
+                            aria-label="Raspodjela rezervacija po statusu za @Model.NazivMjeseca @Model.Godina">
+
+                        Aktivne: @Model.AktivneRezervacije,
+                        Završene: @Model.ZavrseneRezervacije,
+                        Otkazane: @Model.OtkazaneRezervacije.
+
+                    </canvas>
+                </div>
+            </div>
+
+            <div class="izvjestaj-chart-card">
+                <div class="izvjestaj-chart-card__title">
+                    Rezervacije po danima
+                </div>
+
+                <div class="izvjestaj-chart-card__sub">
+                    Broj novih rezervacija svaki dan u odabranom periodu
+                </div>
+
+                <div style="position:relative;width:100%;height:220px">
+                    <canvas id="chartBar"
+                            role="img"
+                            aria-label="Rezervacije po danima u @Model.NazivMjeseca @Model.Godina">
+                    </canvas>
+                </div>
+            </div>
+
+        </div>
+
+        @if (Model.TopKnjige.Any())
+        {
+            <div class="izvjestaj-chart-card" style="margin-bottom:1.5rem">
+
+                <div class="izvjestaj-chart-card__title">
+                    Najčešće rezervirane knjige
+                </div>
+
+                <div class="izvjestaj-chart-card__sub">
+                    Knjige s najviše rezervacija u @Model.NazivMjeseca @Model.Godina
+                </div>
+
+                <div style="position:relative;width:100%;height:@(Model.TopKnjige.Count * 48 + 60)px">
+                    <canvas id="chartHbar"
+                            role="img"
+                            aria-label="Top knjige po broju rezervacija">
+                    </canvas>
+                </div>
+
+            </div>
+        }
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+
+        <script>
+            const isDark = matchMedia('(prefers-color-scheme: dark)').matches;
+
+            const txt = isDark
+                ? '#a1a1a1'
+                : '#64748b';
+
+            const grid = isDark
+                ? 'rgba(255,255,255,.07)'
+                : 'rgba(0,0,0,.06)';
+
+            // Doughnut chart
+            new Chart(document.getElementById('chartDonut'), {
+                type: 'doughnut',
+                data: {
+                    labels: [
+                        'Aktivne',
+                        'Završene',
+                        'Otkazane'
+                    ],
+                    datasets: [{
+                        data: [
+                            @Model.AktivneRezervacije,
+                            @Model.ZavrseneRezervacije,
+                            @Model.OtkazaneRezervacije
+                        ],
+                        backgroundColor: [
+                            '#173b63',
+                            '#64748b',
+                            '#b42318'
+                        ],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '62%',
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+
+            // Daily reservations chart
+            new Chart(document.getElementById('chartBar'), {
+                type: 'bar',
+                data: {
+                    labels: [
+                        @Html.Raw(string.Join(",",
+                            Enumerable.Range(1, Model.RezervacijePoDanima.Count)
+                                    .Select(d => $"'{d}'")))
+                ],
+                datasets: [{
+                    label: 'Rezervacije',
+                    data: [
+                        @string.Join(",", Model.RezervacijePoDanima)
+                    ],
+                    backgroundColor: '#173b63',
+                    borderRadius: 3,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: {
+                            color: txt,
+                            font: {
+                                size: 11
+                            },
+                            autoSkip: true,
+                            maxTicksLimit: 10
+                        },
+                        grid: {
+                            display: false
+                        },
+                        border: {
+                            display: false
+                        }
+                    },
+                    y: {
+                        ticks: {
+                            color: txt,
+                            font: {
+                                size: 11
+                            },
+                            stepSize: 1
+                        },
+                        grid: {
+                            color: grid
+                        },
+                        border: {
+                            display: false
+                        },
+                        min: 0
+                    }
+                }
+            }
+        });
+
+        @if (Model.TopKnjige.Any())
+            {
+                    <text>
+
+                    // Top reserved books chart
+                    new Chart(document.getElementById('chartHbar'), {
+                        type: 'bar',
+                        data: {
+                            labels: [
+                                @Html.Raw(string.Join(",",
+                                    Model.TopKnjige.Select(k =>
+                                            $"'{k.Naslov.Replace("'", "\\'")}'")))
+                    ],
+                    datasets: [{
+                        label: 'Rezervacije',
+                        data: [
+                            @string.Join(",", Model.TopKnjige.Select(k => k.BrojZaduzenja))
+                        ],
+                        backgroundColor: [
+                            '#173b63',
+                            '#1e4d80',
+                            '#2563aa',
+                            '#3a7bd0',
+                            '#5a9be0'
+                        ],
+                        borderRadius: 4,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                color: txt,
+                                font: {
+                                    size: 12
+                                }
+                            },
+                            grid: {
+                                color: grid
+                            },
+                            border: {
+                                display: false
+                            },
+                            min: 0
+                        },
+                        y: {
+                            ticks: {
+                                color: txt,
+                                font: {
+                                    size: 12
+                                }
+                            },
+                            grid: {
+                                display: false
+                            },
+                            border: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+
+            </text>
+                }
+        </script>
+    }
 </div>
