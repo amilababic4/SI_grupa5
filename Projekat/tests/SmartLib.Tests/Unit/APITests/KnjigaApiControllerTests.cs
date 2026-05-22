@@ -155,8 +155,7 @@ namespace SmartLib.Tests.Unit.APITests
         [Fact]
         public async Task GetAll_VracaOkSaListomKnjiga()
         {
-            _knjigaMock.Setup(r => r.GetPagedAsync(null, null, 1, 10))
-                       .ReturnsAsync((new List<Knjiga> { TestKnjiga() }, 1));
+            _knjigaMock.Setup(r => r.GetPagedAsync(null, null, 1, 10, null, null, null)).ReturnsAsync((new List<Knjiga> { TestKnjiga() }, 1));
 
             var result = await _controller.GetAll(null, null, 1, 10);
 
@@ -168,7 +167,7 @@ namespace SmartLib.Tests.Unit.APITests
         public async Task GetAll_PaginacijaMetadata_IspravnaVrijednost()
         {
             var knjige = Enumerable.Range(1, 10).Select(i => TestKnjiga(i)).ToList();
-            _knjigaMock.Setup(r => r.GetPagedAsync(null, null, 2, 10))
+            _knjigaMock.Setup(r => r.GetPagedAsync(null, null, 2, 10, null, null, null))
                        .ReturnsAsync((knjige, 25));
 
             var result = await _controller.GetAll(null, null, 2, 10);
@@ -181,12 +180,11 @@ namespace SmartLib.Tests.Unit.APITests
         [Fact]
         public async Task GetAll_FiltriranjePoPasvaNaslov_ProslijedjeParametarRepozitoriju()
         {
-            _knjigaMock.Setup(r => r.GetPagedAsync("Harry", null, 1, 10))
-                       .ReturnsAsync((new List<Knjiga>(), 0));
+            _knjigaMock.Setup(r => r.GetPagedAsync("Harry",null,1,10,null,null, null)).ReturnsAsync((new List<Knjiga>(), 0));
 
             var result = await _controller.GetAll("Harry", null, 1, 10);
 
-            _knjigaMock.Verify(r => r.GetPagedAsync("Harry", null, 1, 10), Times.Once);
+            _knjigaMock.Verify(r => r.GetPagedAsync("Harry",null,1,10,null,null,null),Times.Once);
         }
 
         // kategorija ne postoji → 400
@@ -449,8 +447,7 @@ namespace SmartLib.Tests.Unit.APITests
         [Fact]
         public async Task GetAll_NemaKnjiga_VracaPrazanRezultat()
         {
-            _knjigaMock.Setup(r => r.GetPagedAsync(null, null, 1, 10))
-                       .ReturnsAsync((new List<Knjiga>(), 0));
+            _knjigaMock.Setup(r => r.GetPagedAsync(null, null, 1, 10, null, null,null)).ReturnsAsync((new List<Knjiga>(), 0));
 
             var result = await _controller.GetAll(null, null, 1, 10);
 
