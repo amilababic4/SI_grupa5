@@ -205,60 +205,60 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 
         <script>
-            const isDark = matchMedia('(prefers-color-scheme: dark)').matches;
+                const isDark = matchMedia('(prefers-color-scheme: dark)').matches;
 
-            const txt = isDark
-                ? '#a1a1a1'
-                : '#64748b';
+                const txt = isDark
+                    ? '#a1a1a1'
+                    : '#64748b';
 
-            const grid = isDark
-                ? 'rgba(255,255,255,.07)'
-                : 'rgba(0,0,0,.06)';
+                const grid = isDark
+                    ? 'rgba(255,255,255,.07)'
+                    : 'rgba(0,0,0,.06)';
 
-            // Doughnut chart
-            new Chart(document.getElementById('chartDonut'), {
-                type: 'doughnut',
-                data: {
-                    labels: [
-                        'Aktivne',
-                        'Završene',
-                        'Otkazane'
-                    ],
-                    datasets: [{
-                        data: [
-                            @Model.AktivneRezervacije,
-                            @Model.ZavrseneRezervacije,
-                            @Model.OtkazaneRezervacije
+                // Doughnut chart
+                new Chart(document.getElementById('chartDonut'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: [
+                            'Aktivne',
+                            'Završene',
+                            'Otkazane'
                         ],
-                        backgroundColor: [
-                            '#173b63',
-                            '#64748b',
-                            '#b42318'
-                        ],
-                        borderWidth: 0,
-                        hoverOffset: 4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    cutout: '62%',
-                    plugins: {
-                        legend: {
-                            display: false
+                        datasets: [{
+                            data: [
+                                @Model.AktivneRezervacije,
+                                @Model.ZavrseneRezervacije,
+                                @Model.OtkazaneRezervacije
+                            ],
+                            backgroundColor: [
+                                '#173b63',
+                                '#64748b',
+                                '#b42318'
+                            ],
+                            borderWidth: 0,
+                            hoverOffset: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '62%',
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
                         }
                     }
-                }
-            });
+                });
 
-            // Daily reservations chart
-            new Chart(document.getElementById('chartBar'), {
-                type: 'bar',
-                data: {
-                    labels: [
-                        @Html.Raw(string.Join(",",
-                            Enumerable.Range(1, Model.RezervacijePoDanima.Count)
-                                    .Select(d => $"'{d}'")))
+                // Daily reservations chart
+                new Chart(document.getElementById('chartBar'), {
+                    type: 'bar',
+                    data: {
+                        labels: [
+                            @Html.Raw(string.Join(",",
+                                Enumerable.Range(1, Model.RezervacijePoDanima.Count)
+                                                .Select(d => $"'{d}'")))
                 ],
                 datasets: [{
                     label: 'Rezervacije',
@@ -316,17 +316,17 @@
         });
 
         @if (Model.TopKnjige.Any())
-            {
-                    <text>
+                {
+                            <text>
 
-                    // Top reserved books chart
-                    new Chart(document.getElementById('chartHbar'), {
-                        type: 'bar',
-                        data: {
-                            labels: [
-                                @Html.Raw(string.Join(",",
-                                    Model.TopKnjige.Select(k =>
-                                            $"'{k.Naslov.Replace("'", "\\'")}'")))
+                            // Top reserved books chart
+                            new Chart(document.getElementById('chartHbar'), {
+                                type: 'bar',
+                                data: {
+                                    labels: [
+                                        @Html.Raw(string.Join(",",
+                                            Model.TopKnjige.Select(k =>
+                                                            $"'{k.Naslov.Replace("'", "\\'")}'")))
                     ],
                     datasets: [{
                         label: 'Rezervacije',
@@ -388,9 +388,7 @@
             });
 
             </text>
-                }
+                                }
         </script>
     }
-=======
->>>>>>> origin/main
 </div>

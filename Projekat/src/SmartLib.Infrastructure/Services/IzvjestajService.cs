@@ -12,11 +12,11 @@ namespace SmartLib.Infrastructure.Services
         private readonly ApplicationDbContext _db;
         private static readonly TimeZoneInfo LokalnaVremenskaZona = ResolveLokalnaVremenskaZona();
 
-        private static readonly string[] NaziviMjeseci =
-        [
+        private static readonly string[] NaziviMjeseci = new[]
+        {
             "Januar", "Februar", "Mart", "April", "Maj", "Juni",
             "Juli", "August", "Septembar", "Oktobar", "Novembar", "Decembar"
-        ];
+        };
 
         public IzvjestajService(ApplicationDbContext db)
         {
@@ -62,6 +62,7 @@ namespace SmartLib.Infrastructure.Services
                 .Take(5)
                 .Select(g => new KnjigaRankDto { Naslov = g.Key, BrojZaduzenja = g.Count() })
                 .ToList();
+
             return new MjesecniZaduzenjaIzvjestajDto
             {
                 Mjesec = mjesec,
@@ -114,6 +115,7 @@ namespace SmartLib.Infrastructure.Services
                 .Take(5)
                 .Select(g => new KnjigaRankDto { Naslov = g.Key, BrojZaduzenja = g.Count() })
                 .ToList();
+
             return new MjesecneRezervacijeIzvjestajDto
             {
                 Mjesec = mjesec,
@@ -136,7 +138,6 @@ namespace SmartLib.Infrastructure.Services
             var kraj = pocetak.AddMonths(1);
             var danas = DateTime.UtcNow;
 
-            // Svi aktivni korisnici (uloga Clan) koji su registrovani do kraja odabranog perioda
             var korisnici = await _db.Korisnici
                 .AsNoTracking()
                 .Include(k => k.Clanarine)
@@ -156,7 +157,6 @@ namespace SmartLib.Infrastructure.Services
                     RedniBroj = i + 1,
                     ImePrezime = $"{k.Ime} {k.Prezime}".Trim(),
                     Email = k.Email ?? "-",
-                    BrojClanske = "-",
                     DatumRegistracije = k.DatumKreiranja,
                     StatusClanarine = aktivnaClanarina != null ? "Aktivna" : "Istekla",
                     ClanarinaVaziDo = aktivnaClanarina?.DatumIsteka,
@@ -187,6 +187,7 @@ namespace SmartLib.Infrastructure.Services
                 .OrderByDescending(c => c.BrojZaduzenja)
                 .Take(5)
                 .ToList();
+
             return new MjesecniClanoviIzvjestajDto
             {
                 Mjesec = mjesec,
@@ -211,7 +212,7 @@ namespace SmartLib.Infrastructure.Services
 
         private static TimeZoneInfo ResolveLokalnaVremenskaZona()
         {
-            string[] candidates = ["Europe/Sarajevo", "Central European Standard Time"];
+            string[] candidates = new[] { "Europe/Sarajevo", "Central European Standard Time" };
 
             foreach (var id in candidates)
             {
