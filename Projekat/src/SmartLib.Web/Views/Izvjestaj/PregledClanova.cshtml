@@ -1,84 +1,197 @@
 @model SmartLib.Core.DTOs.MjesecniClanoviIzvjestajDto
+@using System.Text.Json
+
 @{
     ViewData["Title"] = $"Članovi — {Model.NazivMjeseca} {Model.Godina}";
 }
 
 <div class="page-shell">
+
     <div class="izvjestaj-page-header">
         <div class="izvjestaj-page-header__left">
-            <a asp-action="Index" asp-controller="Izvjestaj" class="btn-back">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6" /></svg>
+
+            <a asp-action="Index"
+               asp-controller="Izvjestaj"
+               class="btn-back">
+
+                <svg width="16"
+                     height="16"
+                     viewBox="0 0 24 24"
+                     fill="none"
+                     stroke="currentColor"
+                     stroke-width="2">
+
+                    <polyline points="15 18 9 12 15 6" />
+                </svg>
+
                 Nazad
             </a>
+
             <div class="izvjestaj-page-header__icon">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+
+                <svg width="22"
+                     height="22"
+                     viewBox="0 0 24 24"
+                     fill="none"
+                     stroke="currentColor"
+                     stroke-width="1.8">
+
                     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
                     <circle cx="9" cy="7" r="4" />
                     <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
                     <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+
                 </svg>
+
             </div>
+
             <div>
-                <h1 class="izvjestaj-page-header__title">Izvještaj o članovima</h1>
-                <p class="izvjestaj-page-header__subtitle">@Model.NazivMjeseca @Model.Godina · Generisano @Model.GenerisanoU.ToString("dd.MM.yyyy u HH:mm")</p>
+
+                <h1 class="izvjestaj-page-header__title">
+                    Izvještaj o članovima
+                </h1>
+
+                <p class="izvjestaj-page-header__subtitle">
+                    @Model.NazivMjeseca @Model.Godina ·
+                    Generisano @Model.GenerisanoU.ToString("dd.MM.yyyy u HH:mm")
+                </p>
+
             </div>
+
         </div>
+
         <div class="izvjestaj-page-header__right">
-            <a asp-action="PdfClanovi" asp-controller="Izvjestaj"
-               asp-route-mjesec="@Model.Mjesec" asp-route-godina="@Model.Godina"
-               class="btn btn-primary izvjestaj-pdf-btn" target="_blank">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+            <a asp-action="PdfClanovi"
+               asp-controller="Izvjestaj"
+               asp-route-mjesec="@Model.Mjesec"
+               asp-route-godina="@Model.Godina"
+               class="btn btn-primary izvjestaj-pdf-btn"
+               target="_blank">
+
+                <svg width="16"
+                     height="16"
+                     viewBox="0 0 24 24"
+                     fill="none"
+                     stroke="currentColor"
+                     stroke-width="2">
+
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                     <polyline points="7 10 12 15 17 10" />
                     <line x1="12" y1="15" x2="12" y2="3" />
+
                 </svg>
+
                 Preuzmi PDF
+
             </a>
+
         </div>
     </div>
 
     <div class="izvjestaj-stat-grid">
+
         <div class="izvjestaj-stat-card izvjestaj-stat-card--primary">
-            <div class="izvjestaj-stat-card__label">Ukupno aktivnih</div>
-            <div class="izvjestaj-stat-card__val">@Model.UkupnoAktivnihClanova</div>
+            <div class="izvjestaj-stat-card__label">
+                Ukupno aktivnih
+            </div>
+
+            <div class="izvjestaj-stat-card__val">
+                @Model.UkupnoAktivnihClanova
+            </div>
         </div>
+
         <div class="izvjestaj-stat-card izvjestaj-stat-card--success">
-            <div class="izvjestaj-stat-card__label">Novih u odabranom periodu</div>
-            <div class="izvjestaj-stat-card__val">@Model.NovihClanova</div>
+            <div class="izvjestaj-stat-card__label">
+                Novih u odabranom periodu
+            </div>
+
+            <div class="izvjestaj-stat-card__val">
+                @Model.NovihClanova
+            </div>
         </div>
+
         <div class="izvjestaj-stat-card izvjestaj-stat-card--warning">
-            <div class="izvjestaj-stat-card__label">Aktivna članarina</div>
-            <div class="izvjestaj-stat-card__val">@Model.ClanovaAktivnaClanarina</div>
+            <div class="izvjestaj-stat-card__label">
+                Aktivna članarina
+            </div>
+
+            <div class="izvjestaj-stat-card__val">
+                @Model.ClanovaAktivnaClanarina
+            </div>
         </div>
+
         <div class="izvjestaj-stat-card izvjestaj-stat-card--danger">
-            <div class="izvjestaj-stat-card__label">Istekla članarina</div>
-            <div class="izvjestaj-stat-card__val">@Model.ClanovaIsteklaClanarina</div>
+            <div class="izvjestaj-stat-card__label">
+                Istekla članarina
+            </div>
+
+            <div class="izvjestaj-stat-card__val">
+                @Model.ClanovaIsteklaClanarina
+            </div>
         </div>
+
     </div>
 
-    @if (!Model.Stavke.Any())
+    @if (Model.Stavke == null || !Model.Stavke.Any())
     {
         <div class="empty-state-card">
+
             <div class="empty-state-card__icon">
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3">
+
+                <svg width="40"
+                     height="40"
+                     viewBox="0 0 24 24"
+                     fill="none"
+                     stroke="currentColor"
+                     stroke-width="1.3">
+
                     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
                     <circle cx="9" cy="7" r="4" />
+
                 </svg>
+
             </div>
-            <h3 class="empty-state-card__title">Nema podataka</h3>
-            <p class="empty-state-card__text">Nije pronađen nijedan član za period <strong>@Model.NazivMjeseca @Model.Godina</strong>.</p>
-            <a asp-action="Index" asp-controller="Izvjestaj" class="btn btn-secondary">Odaberi drugi period</a>
+
+            <h3 class="empty-state-card__title">
+                Nema podataka
+            </h3>
+
+            <p class="empty-state-card__text">
+                Nije pronađen nijedan član za period
+                <strong>@Model.NazivMjeseca @Model.Godina</strong>.
+            </p>
+
+            <a asp-action="Index"
+               asp-controller="Izvjestaj"
+               class="btn btn-secondary">
+
+                Odaberi drugi period
+
+            </a>
+
         </div>
     }
     else
     {
         <div class="izvjestaj-table-card">
+
             <div class="izvjestaj-table-card__head">
-                <span class="izvjestaj-table-card__title">Lista članova</span>
-                <span class="izvjestaj-table-card__count">@Model.UkupnoAktivnihClanova zapisa</span>
+
+                <span class="izvjestaj-table-card__title">
+                    Lista članova
+                </span>
+
+                <span class="izvjestaj-table-card__count">
+                    @Model.UkupnoAktivnihClanova zapisa
+                </span>
+
             </div>
+
             <div class="table-responsive">
+
                 <table class="sl-table">
+
                     <thead>
                         <tr>
                             <th>#</th>
@@ -91,163 +204,390 @@
                             <th>Rezervisanih</th>
                         </tr>
                     </thead>
+
                     <tbody>
+
                         @foreach (var s in Model.Stavke)
                         {
                             <tr>
-                                <td class="sl-table__num">@s.RedniBroj</td>
-                                <td class="sl-table__bold">@s.ImePrezime</td>
-                                <td class="sl-table__muted">@s.Email</td>
-                                <td>@s.DatumRegistracije.ToString("dd.MM.yyyy")</td>
-                                <td>
-                                    <span class="status-badge @(s.StatusClanarine == "Aktivna" ? "status-badge--aktivno" : "status-badge--zatvoreno")">
-                                        @s.StatusClanarine
-                                    </span>
+
+                                <td class="sl-table__num">
+                                    @s.RedniBroj
                                 </td>
-                                <td>@(s.ClanarinaVaziDo.HasValue? s.ClanarinaVaziDo.Value.ToString("dd.MM.yyyy") : "—")</td>
-                                <td class="sl-table__num">@s.BrojZaduzenja</td>
-                                <td class="sl-table__num">@s.BrojRezervacija</td>
+
+                                <td class="sl-table__bold">
+                                    @s.ImePrezime
+                                </td>
+
+                                <td class="sl-table__muted">
+                                    @s.Email
+                                </td>
+
+                                <td>
+                                    @s.DatumRegistracije.ToString("dd.MM.yyyy")
+                                </td>
+
+                                <td>
+
+                                    <span class="status-badge @(s.StatusClanarine?.Trim().ToLower() == "aktivna"
+                                                                                  ? "status-badge--aktivno"
+                                                                                  : "status-badge--zatvoreno")">
+
+                                @s.StatusClanarine
+
+                                    </span>
+
+                                </td>
+
+                                <td>
+                                    @(s.ClanarinaVaziDo?.ToString("dd.MM.yyyy") ?? "—")
+                                </td>
+
+                                <td class="sl-table__num">
+                                    @s.BrojZaduzenja
+                                </td>
+
+                                <td class="sl-table__num">
+                                    @s.BrojRezervacija
+                                </td>
+
                             </tr>
-                        }
+                                        }
+
                     </tbody>
+
                 </table>
+
             </div>
+
         </div>
+
         <div class="izvjestaj-charts-grid">
 
             <div class="izvjestaj-chart-card">
-                <div class="izvjestaj-chart-card__title">Status članarina</div>
-                <div class="izvjestaj-chart-card__sub">Udio aktivnih i isteklih članarina</div>
-                <div class="izvjestaj-chart-legend">
-                    <span><span class="leg-dot" style="background:#173b63"></span>Aktivna</span>
-                    <span><span class="leg-dot" style="background:#b42318"></span>Istekla</span>
+
+                <div class="izvjestaj-chart-card__title">
+                    Status članarina
                 </div>
+
+                <div class="izvjestaj-chart-card__sub">
+                    Udio aktivnih i isteklih članarina
+                </div>
+
+                <div class="izvjestaj-chart-legend">
+
+                    <span>
+                        <span class="leg-dot" style="background:#173b63"></span>
+                        Aktivna
+                    </span>
+
+                    <span>
+                        <span class="leg-dot" style="background:#b42318"></span>
+                        Istekla
+                    </span>
+
+                </div>
+
                 <div style="position:relative;width:100%;height:220px">
+
                     <canvas id="chartDonut"
                             role="img"
                             aria-label="Raspodjela članarina za @Model.NazivMjeseca @Model.Godina">
-                        Aktivna: @Model.ClanovaAktivnaClanarina, Istekla: @Model.ClanovaIsteklaClanarina.
+
+                        Aktivna: @Model.ClanovaAktivnaClanarina,
+                        Istekla: @Model.ClanovaIsteklaClanarina.
+
                     </canvas>
+
                 </div>
+
             </div>
 
             <div class="izvjestaj-chart-card">
-                <div class="izvjestaj-chart-card__title">Novi članovi po danima</div>
-                <div class="izvjestaj-chart-card__sub">Broj novih registracija svaki dan u odabranom periodu</div>
+
+                <div class="izvjestaj-chart-card__title">
+                    Novi članovi po danima
+                </div>
+
+                <div class="izvjestaj-chart-card__sub">
+                    Broj novih registracija svaki dan u odabranom periodu
+                </div>
+
                 <div style="position:relative;width:100%;height:220px">
+
                     <canvas id="chartBar"
                             role="img"
                             aria-label="Novi članovi po danima u @Model.NazivMjeseca @Model.Godina">
                     </canvas>
+
                 </div>
+
             </div>
 
         </div>
 
-        @if (Model.TopClanovi.Any())
+        @if (Model.TopClanovi != null && Model.TopClanovi.Any())
         {
             <div class="izvjestaj-chart-card" style="margin-bottom:1.5rem">
-                <div class="izvjestaj-chart-card__title">Top @Model.TopClanovi.Count najaktivnijih članova</div>
-                <div class="izvjestaj-chart-card__sub">Članovi s najviše zaduženja u @Model.NazivMjeseca @Model.Godina</div>
+
+                <div class="izvjestaj-chart-card__title">
+                    Top @Model.TopClanovi.Count najaktivnijih članova
+                </div>
+
+                <div class="izvjestaj-chart-card__sub">
+                    Članovi s najviše zaduženja u @Model.NazivMjeseca @Model.Godina
+                </div>
+
                 <div style="position:relative;width:100%;height:@(Model.TopClanovi.Count * 48 + 60)px">
+
                     <canvas id="chartHbar"
                             role="img"
                             aria-label="Top članovi po broju zaduženja">
                     </canvas>
+
                 </div>
+
             </div>
         }
 
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 
-        <script>
-            const isDark = matchMedia('(prefers-color-scheme: dark)').matches;
-            const txt  = isDark ? '#a1a1a1' : '#64748b';
-            const grid = isDark ? 'rgba(255,255,255,.07)' : 'rgba(0,0,0,.06)';
+                <script>
 
-            new Chart(document.getElementById('chartDonut'), {
-                type: 'doughnut',
-                data: {
-                    labels: ['Aktivna', 'Istekla'],
-                    datasets: [{
-                        data: [@Model.ClanovaAktivnaClanarina, @Model.ClanovaIsteklaClanarina],
-                        backgroundColor: ['#173b63', '#b42318'],
-                        borderWidth: 0,
-                        hoverOffset: 4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    cutout: '62%',
-                    plugins: { legend: { display: false } }
-                }
-        
-                    datasets: [{
-                        label: 'Novi članovi',
-                        data: [@string.Join(",", Model.NoviClanoviPoDanima)],
-                        backgroundColor: '#173b63',
-                        borderRadius: 3,
-                        borderSkipped: false
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        x: {
-                            ticks: { color: txt, font: { size: 11 }, autoSkip: true, maxTicksLimit: 10 },
-                            grid: { display: false },
-                            border: { display: false }
-                        },
-                        y: {
-                            ticks: { color: txt, font: { size: 11 }, stepSize: 1 },
-                            grid: { color: grid },
-                            border: { display: false },
-                            min: 0
-                        }
+                    const isDark = matchMedia('(prefers-color-scheme: dark)').matches;
+
+                    const txt = isDark
+                        ? '#a1a1a1'
+                        : '#64748b';
+
+                    const grid = isDark
+                        ? 'rgba(255,255,255,.07)'
+                        : 'rgba(0,0,0,.06)';
+
+                    const noviClanoviPoDanima =
+                        @Html.Raw(JsonSerializer.Serialize(Model.NoviClanoviPoDanima ?? new List<int>()));
+
+                    const topClanoviLabels =
+                        @Html.Raw(JsonSerializer.Serialize(
+                            (Model.TopClanovi ?? Enumerable.Empty<dynamic>())
+                                    .Select(c => c.ImePrezime)
+                        ));
+
+        const topClanoviData =
+            @Html.Raw(JsonSerializer.Serialize(
+                                (Model.TopClanovi ?? Enumerable.Empty<dynamic>())
+                                        .Select(c => c.BrojZaduzenja)
+                        ));
+
+        // Doughnut chart
+        new Chart(document.getElementById('chartDonut'), {
+
+            type: 'doughnut',
+
+            data: {
+                labels: [
+                    'Aktivna',
+                    'Istekla'
+                ],
+
+                datasets: [{
+                    data: [
+                        @Model.ClanovaAktivnaClanarina,
+                        @Model.ClanovaIsteklaClanarina
+                    ],
+
+                    backgroundColor: [
+                        '#173b63',
+                        '#b42318'
+                    ],
+
+                    borderWidth: 0,
+                    hoverOffset: 4
+                }]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '62%',
+
+                plugins: {
+                    legend: {
+                        display: false
                     }
                 }
-            });
+            }
 
-            @if (Model.TopClanovi.Any())
-            {
-                        <text>
-                        new Chart(document.getElementById('chartHbar'), {
-                            type: 'bar',
-                            data: {
-                                labels: [@Html.Raw(string.Join(",", Model.TopClanovi.Select(c => $"'{c.ImePrezime.Replace("'", "\\'")}'")))],
-                                datasets: [{
-                                    label: 'Zaduženja',
-                                    data: [@string.Join(",", Model.TopClanovi.Select(c => c.BrojZaduzenja))],
-                                    backgroundColor: ['#173b63', '#1e4d80', '#2563aa', '#3a7bd0', '#5a9be0'],
-                                    borderRadius: 4,
-                                    borderSkipped: false
-                                }]
+        });
+
+        // Daily members chart
+        new Chart(document.getElementById('chartBar'), {
+
+            type: 'bar',
+
+            data: {
+
+                labels: noviClanoviPoDanima.map((_, i) => (i + 1).toString()),
+
+                datasets: [{
+                    label: 'Novi članovi',
+                    data: noviClanoviPoDanima,
+
+                    backgroundColor: '#173b63',
+
+                    borderRadius: 3,
+                    borderSkipped: false
+                }]
+            },
+
+            options: {
+
+                responsive: true,
+                maintainAspectRatio: false,
+
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+
+                scales: {
+
+                    x: {
+
+                        ticks: {
+                            color: txt,
+                            font: {
+                                size: 11
                             },
-                            options: {
-                                indexAxis: 'y',
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                plugins: { legend: { display: false } },
-                                scales: {
-                                    x: {
-                                        ticks: { color: txt, font: { size: 12 } },
-                                        grid: { color: grid },
-                                        border: { display: false },
-                                        min: 0
+                            autoSkip: true,
+                            maxTicksLimit: 10
+                        },
+
+                        grid: {
+                            display: false
+                        },
+
+                        border: {
+                            display: false
+                        }
+                    },
+
+                    y: {
+
+                        ticks: {
+                            color: txt,
+                            font: {
+                                size: 11
+                            },
+                            stepSize: 1
+                        },
+
+                        grid: {
+                            color: grid
+                        },
+
+                        border: {
+                            display: false
+                        },
+
+                        min: 0
+                    }
+                }
+            }
+        });
+
+        @if (Model.TopClanovi != null && Model.TopClanovi.Any())
+            {
+                    <text>
+
+                    // Top members chart
+                    new Chart(document.getElementById('chartHbar'), {
+
+                        type: 'bar',
+
+                        data: {
+
+                            labels: topClanoviLabels,
+
+                            datasets: [{
+                                label: 'Zaduženja',
+
+                                data: topClanoviData,
+
+                                backgroundColor: [
+                                    '#173b63',
+                                    '#1e4d80',
+                                    '#2563aa',
+                                    '#3a7bd0',
+                                    '#5a9be0'
+                                ],
+
+                                borderRadius: 4,
+                                borderSkipped: false
+                            }]
+                        },
+
+                        options: {
+
+                            indexAxis: 'y',
+
+                            responsive: true,
+                            maintainAspectRatio: false,
+
+                            plugins: {
+                                legend: {
+                                    display: false
+                                }
+                            },
+
+                            scales: {
+
+                                x: {
+
+                                    ticks: {
+                                        color: txt,
+                                        font: {
+                                            size: 12
+                                        }
                                     },
-                                    y: {
-                                        ticks: { color: txt, font: { size: 12 } },
-                                        grid: { display: false },
-                                        border: { display: false }
+
+                                    grid: {
+                                        color: grid
+                                    },
+
+                                    border: {
+                                        display: false
+                                    },
+
+                                    min: 0
+                                },
+
+                                y: {
+
+                                    ticks: {
+                                        color: txt,
+                                        font: {
+                                            size: 12
+                                        }
+                                    },
+
+                                    grid: {
+                                        display: false
+                                    },
+
+                                    border: {
+                                        display: false
                                     }
                                 }
                             }
-                        });
-                        </text>
+                        }
+                    });
+
+                    </text>
             }
+
         </script>
     }
+
 </div>

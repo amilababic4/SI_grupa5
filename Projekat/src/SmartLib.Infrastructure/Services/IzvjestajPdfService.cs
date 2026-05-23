@@ -448,12 +448,12 @@ namespace SmartLib.Infrastructure.Services
                     {
                         cols.ConstantColumn(24);
                         cols.RelativeColumn(2f);
-                        cols.RelativeColumn(2.5f);
+                        cols.RelativeColumn(2.1f);
                         cols.RelativeColumn(1.4f);
                         cols.ConstantColumn(65);
                         cols.RelativeColumn(1.4f);
-                        cols.ConstantColumn(50);
-                        cols.ConstantColumn(50);
+                        cols.ConstantColumn(65);
+                        cols.ConstantColumn(68);
                     });
 
                     table.Header(header =>
