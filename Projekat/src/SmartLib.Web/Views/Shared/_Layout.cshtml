@@ -50,7 +50,10 @@
             Context.Session.Remove("CatalogWelcomeName");
         }
 
-        string bookText = "";
+        string bookText       = "";
+        string bookHeaderRight = "✦ DAŠAK INSPIRACIJE ✦";
+        string bookFooterLeft  = "ODABERITE SVOJU PRIČU";
+        string bookBtnText     = "Uđite u biblioteku ➔";
 
         if (showLoginWelcomeFromTemp && isAuthenticated)
         {
@@ -62,7 +65,10 @@
         else if (isCatalogPage && shouldShowAnimation)
         {
             var name = !string.IsNullOrEmpty(welcomeNameFromSession) ? welcomeNameFromSession : User.Identity?.Name ?? "Član";
-            bookText = $"Dobrodošli nazad, {name}! Drago nam je što ste tu.";
+            bookText       = $"Svaka knjiga je novo putovanje, {name}. Pronađite priču koja govori baš vama.";
+            bookHeaderRight = "✦ VAŠA ČITAONICA ✦";
+            bookFooterLeft  = "OTKRIJTE NOVE SVJETOVE";
+            bookBtnText     = "Istražite katalog ➔";
         }
 }
 
@@ -72,6 +78,17 @@
     {
         <!-- Book opening overlay (removed after animation or click) -->
         <div id="book-overlay" aria-hidden="true">
+            <!-- Floating ambient particles -->
+            <div class="book-particles" aria-hidden="true">
+                <span class="particle p1"></span>
+                <span class="particle p2"></span>
+                <span class="particle p3"></span>
+                <span class="particle p4"></span>
+                <span class="particle p5"></span>
+                <span class="particle p6"></span>
+                <span class="particle p7"></span>
+                <span class="particle p8"></span>
+            </div>
             <div class="book-container">
                 <div class="book" role="img" aria-label="Opening book animation">
                     <div class="cover front">
@@ -92,7 +109,7 @@
                                         </svg>
                                     </div>
                                     <h2 class="page-title">SmartLib</h2>
-                                    <div class="book-page-footer">ODABERITE SVOJU PRIČU</div>
+                                    <div class="book-page-footer">@bookFooterLeft</div>
                                 </div>
                             </div>
                         </div>
@@ -100,9 +117,14 @@
                         <div class="page-sheet right-page">
                             <div class="page-side outer">
                                 <div class="page-content">
-                                    <div class="book-page-header">✦ DAŠAK INSPIRACIJE ✦</div>
+                                    <span class="page-quote-bg" aria-hidden="true">&ldquo;</span>
+                                    <span class="corner-ornament corner-tl" aria-hidden="true"></span>
+                                    <span class="corner-ornament corner-tr" aria-hidden="true"></span>
+                                    <span class="corner-ornament corner-bl" aria-hidden="true"></span>
+                                    <span class="corner-ornament corner-br" aria-hidden="true"></span>
+                                    <div class="book-page-header">@bookHeaderRight</div>
                                     <p class="page-text">@bookText</p>
-                                    <button id="close-overlay-btn" class="book-action-btn">Uđite u biblioteku ➔</button>
+                                    <button id="close-overlay-btn" class="book-action-btn">@bookBtnText</button>
                                 </div>
                             </div>
                             <div class="page-side inner"></div>
