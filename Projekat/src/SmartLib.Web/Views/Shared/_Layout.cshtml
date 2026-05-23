@@ -65,9 +65,31 @@
         else if (isCatalogPage && shouldShowAnimation)
         {
             var name = !string.IsNullOrEmpty(welcomeNameFromSession) ? welcomeNameFromSession : User.Identity?.Name ?? "Član";
-            bookText       = $"Svaka knjiga je novo putovanje, {name}. Pronađite priču koja govori baš vama.";
-            bookHeaderRight = "✦ VAŠA ČITAONICA ✦";
-            bookFooterLeft  = "OTKRIJTE NOVE SVJETOVE";
+
+            // Dataset of randomised catalog quotes — famous authors & original poetic lines
+            var catalogQuotes = new[]
+            {
+                (h: "✦ VAŠA ČITAONICA ✦",    t: $"Svaka knjiga je novo putovanje, {name}. Pronađite priču koja govori baš vama.",                    f: "OTKRIJTE NOVE SVJETOVE"),
+                (h: "✦ RIZNICA PRIČA ✦",     t: $"Dobrodošli u trezor mašte, {name}! Hiljade svjetova čekaju da ih otkrijete.",                      f: "ZARONITE U STRANICE"),
+                (h: "✦ MUDROST DANA ✦",      t: "\"Čitalac živi hiljadu života. Onaj koji ne čita — samo jedan.\" — G.R.R. Martin",                   f: "ŽIVITE VIŠE ŽIVOTA"),
+                (h: "✦ DAŠAK INSPIRACIJE ✦", t: $"Između ovih korica krije se čitav jedan svijet, {name}. Koji ćete otvoriti danas?",                 f: "BIRAJTE SVOJU AVANTURU"),
+                (h: "✦ VAŠA BIBLIOTEKA ✦",   t: "\"Uvijek sam zamišljao da je Raj neka vrsta biblioteke.\" — Jorge Luis Borges",                      f: "DOBRODOŠLI U RAJ"),
+                (h: "✦ PORUKA ZA VAS ✦",     t: $"Prava knjiga te mijenja zauvijek, {name}. Pronađite je upravo ovdje.",                             f: "PRONAĐITE SVOJU"),
+                (h: "✦ DAŠAK MAŠTE ✦",       t: "Čitanje je sanjarenje s otvorenim očima — i vi ste upravo zakoračili u san.",                         f: "URONITE U PRIČE"),
+                (h: "✦ VAŠA KARTA ✦",        t: $"{name}, ovaj katalog je vaša karta do mjesta koja niste ni zamislili.",                             f: "KRENITE NA PUT"),
+                (h: "✦ MUDRE RIJEČI ✦",      t: "\"Ne sve one koji lutaju su izgubljeni.\" — J.R.R. Tolkien",                                         f: "ISTRAŽUJTE SLOBODNO"),
+                (h: "✦ NOVA STRANICA ✦",     t: "Svaka stranica je novi početak. Svaka knjiga — novi pogled na svijet.",                               f: "PRELISTAJTE KATALOG"),
+                (h: "✦ VAŠA PRIČA ✦",        t: $"Knjige ne završavaju — one se nastavljaju u vama, {name}.",                                         f: "NASTAVITE ČITATI"),
+                (h: "✦ KNJIŽEVNA BLAGA ✦",   t: "\"Knjige su ogledala — vidimo u njima ono što već nosimo u sebi.\" — J.K. Rowling",                   f: "PRONAĐITE SEBE"),
+                (h: "✦ TREZOR SNOVA ✦",      t: $"Biblioteka je trezor svih snova koje su ikad zapisali, {name}. Birajte mudro.",                      f: "ODABERITE SVOJU PRIČU"),
+                (h: "✦ AVANTURA ČEKA ✦",     t: $"{name}, vaša sljedeća omiljena knjiga strpljivo čeka. Ona je tu, negdje.",                          f: "PRONAĐITE JE"),
+                (h: "✦ MAGIJA STRANICA ✦",   t: "Samo dobra knjiga može te odvesti tamo gdje avion ne može.",                                          f: "LETITE RIJEČIMA"),
+            };
+
+            var pick = catalogQuotes[Random.Shared.Next(catalogQuotes.Length)];
+            bookText        = pick.t;
+            bookHeaderRight = pick.h;
+            bookFooterLeft  = pick.f;
             bookBtnText     = "Istražite katalog ➔";
         }
 }
@@ -88,6 +110,12 @@
                 <span class="particle p6"></span>
                 <span class="particle p7"></span>
                 <span class="particle p8"></span>
+                <span class="particle p9"></span>
+                <span class="particle p10"></span>
+                <span class="particle p11"></span>
+                <span class="particle p12"></span>
+                <span class="particle p13"></span>
+                <span class="particle p14"></span>
             </div>
             <div class="book-container">
                 <div class="book" role="img" aria-label="Opening book animation">
