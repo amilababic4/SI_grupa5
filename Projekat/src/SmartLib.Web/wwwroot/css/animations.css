@@ -322,7 +322,6 @@
   animation-delay: 0.3s;
 }
 
-/* Premium modern friendly welcome text styling - cozy legible cursive */
 .page-text {
   font-family: 'Caveat', cursive !important;
   font-style: normal;
@@ -478,7 +477,8 @@
   filter: drop-shadow(0 0 8px rgba(0, 210, 255, 0.7));
 }
 
-[data-theme="dark"] .page-text {
+[data-theme="dark"] .page-text,
+html[data-theme="dark"] .page-text {
   color: #e2e8f0 !important;
   text-shadow: 0 0 4px rgba(255, 255, 255, 0.1);
 }
