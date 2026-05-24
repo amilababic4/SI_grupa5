@@ -1,0 +1,700 @@
+@model IEnumerable<SmartLib.Core.Models.Vijest>
+@{
+    ViewData["Title"] = "Vijesti";
+    ViewData["MainClass"] = "vijesti-page-root";
+    ViewData["BodyClass"] = "vijesti-public-page";
+    bool isAdmin = User.IsInRole("Bibliotekar") || User.IsInRole("Administrator");
+    var vijestList = Model.ToList();
+    var featured   = vijestList.FirstOrDefault();
+    var gridCards  = vijestList.Skip(1).ToList();
+    var categories = vijestList.Select(v => v.Kategorija).Distinct().OrderBy(c => c).ToList();
+    var catCounts  = vijestList.GroupBy(v => v.Kategorija).ToDictionary(g => g.Key, g => g.Count());
+
+    string FmtDate(DateTime d) => $"{d.Day:D2}/{d.Month:D2}/{d.Year}";
+
+    string latestDate = vijestList.Any() ? FmtDate(vijestList.Max(v => v.DatumObjave)) : "—";
+
+    // Markdig pipeline: raw HTML disabled to prevent XSS
+    var mdPipeline = new MarkdownPipelineBuilder().DisableHtml().Build();
+    string MdHtml(string md)   => Markdown.ToHtml(md ?? "", mdPipeline);
+    string MdPlain(string md)  => Markdown.ToPlainText(md ?? "", mdPipeline).Trim();
+
+    string TagCls(string cat) => (cat?.ToLower() ?? "") switch {
+        "forum"     => "tc-forum",
+        "edukacija" => "tc-edukacija",
+        "događaji"  => "tc-događaji",
+        "djeca"     => "tc-djeca",
+        _           => "tc-obavještenje"
+    };
+
+    string MediaBg(string cat) => (cat?.ToLower() ?? "") switch {
+        "forum"     => "#1B3D8F",
+        "edukacija" => "#060F3A",
+        "događaji"  => "#173b63",
+        "djeca"     => "#0D3373",
+        _           => "#0D3373"
+    };
+}
+
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,600;0,800;1,400;1,600&display=swap" rel="stylesheet">
+
+<style>
+  .vijesti-page-root{padding:0;margin:0;}
+
+  :root{--sl-dark:#07111f;--cream:#F7F2EB;--royal:#1B3D8F;--midnight:#060F3A;--china:#5A80C8;--dawn:#C4D9FF;--ink:#0d1b2e;--ink-mid:#3d4f70;--ink-muted:#6b7a99;}
+
+  .reveal{opacity:0;transform:translateY(28px);transition:opacity .75s cubic-bezier(.16,1,.3,1),transform .75s cubic-bezier(.16,1,.3,1);}
+  .reveal.in{opacity:1;transform:none;}
+  .d1{transition-delay:.08s}.d2{transition-delay:.16s}.d3{transition-delay:.24s}
+
+  /* HERO */
+  .news-hero{position:relative;overflow:hidden;padding:7rem 2rem 5rem;background:linear-gradient(135deg,#07111f 0%,#0e2444 45%,#1B3D8F 100%);color:white;}
+  .hero-orb{position:absolute;border-radius:50%;pointer-events:none;}
+  .news-hero-inner{max-width:1200px;margin:0 auto;position:relative;z-index:1;display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:end;}
+  .news-hero-kicker{display:flex;align-items:center;gap:.7rem;font-size:.78rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--china);margin-bottom:1.4rem;}
+  .news-hero-kicker::before{content:'';display:block;width:28px;height:2px;background:var(--china);}
+  .news-hero-title{font-size:clamp(4.5rem,11vw,9rem);font-weight:800;letter-spacing:-.06em;line-height:.9;color:white;font-family:"Plus Jakarta Sans",Arial,sans-serif;}
+  .news-hero-title em{font-style:italic;color:var(--china);}
+  .news-hero-desc{font-size:1.05rem;color:rgba(255,255,255,.65);line-height:1.76;margin-bottom:2rem;}
+  .news-stats{display:flex;gap:2.5rem;flex-wrap:wrap;}
+  .news-stat-num{font-family:"Plus Jakarta Sans",sans-serif;font-size:2.4rem;font-weight:800;letter-spacing:-.05em;color:white;line-height:1;display:block;}
+  .news-stat-label{font-size:.75rem;color:rgba(255,255,255,.45);font-weight:700;letter-spacing:.06em;text-transform:uppercase;display:block;margin-top:.2rem;}
+  .news-live-row{display:flex;align-items:center;gap:.6rem;margin-top:1.5rem;font-size:.82rem;color:rgba(255,255,255,.45);font-weight:600;}
+  .news-live-dot{width:7px;height:7px;border-radius:50%;background:#22c55e;box-shadow:0 0 8px rgba(34,197,94,.7);animation:vLivePulse 2s ease infinite;flex-shrink:0;}
+  @@keyframes vLivePulse{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.4);opacity:.7;}}
+
+  /* FILTER BAR */
+  .news-filter{position:sticky;top:65px;z-index:100;background:rgba(247,242,235,.96);backdrop-filter:blur(16px);border-bottom:1px solid rgba(27,61,143,.1);padding:.85rem 2rem;}
+  .news-filter-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;}
+  .filter-btn{padding:.45rem 1.1rem;border-radius:999px;border:1.5px solid rgba(27,61,143,.15);background:transparent;font-family:"Manrope",sans-serif;font-size:.85rem;font-weight:700;color:var(--ink-mid);cursor:pointer;transition:all .22s;white-space:nowrap;}
+  .filter-btn:hover{border-color:var(--royal);color:var(--royal);}
+  .filter-btn.active{background:var(--royal);border-color:var(--royal);color:white;}
+  .filter-count{font-size:.7rem;background:rgba(27,61,143,.1);color:var(--royal);padding:.08rem .4rem;border-radius:999px;margin-left:.3rem;}
+  .filter-btn.active .filter-count{background:rgba(255,255,255,.2);color:white;}
+
+  /* MAIN */
+  .news-content{max-width:1200px;margin:0 auto;padding:4rem 2rem 6rem;background:var(--cream);}
+
+  /* FEATURED */
+  .featured-article{display:grid;grid-template-columns:1.2fr 1fr;border-radius:24px;overflow:hidden;box-shadow:0 24px 60px rgba(6,15,58,.12);background:white;margin-bottom:3.5rem;cursor:pointer;transition:box-shadow .3s;}
+  .featured-article:hover{box-shadow:0 32px 80px rgba(6,15,58,.18);}
+  .feat-media{position:relative;overflow:hidden;min-height:460px;}
+  .feat-media svg,.feat-media img{width:100%;height:100%;display:block;object-fit:cover;}
+  .feat-badges{position:absolute;top:1.2rem;left:1.2rem;display:flex;gap:.5rem;}
+  .feat-badge{padding:.32rem .82rem;border-radius:999px;background:var(--royal);color:white;font-size:.7rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;}
+  .feat-body{padding:2.8rem 2.4rem;display:flex;flex-direction:column;gap:1.1rem;justify-content:center;}
+  .feat-cat{font-size:.73rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--royal);display:flex;align-items:center;gap:.5rem;}
+  .feat-cat::before{content:'';display:block;width:18px;height:1.5px;background:var(--royal);}
+  .feat-title{font-size:clamp(1.35rem,2.2vw,1.85rem);color:var(--ink);line-height:1.22;font-family:"Plus Jakarta Sans",Arial,sans-serif;font-weight:800;letter-spacing:-.03em;}
+  .feat-excerpt{font-size:.94rem;color:var(--ink-mid);line-height:1.76;}
+  .feat-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-top:auto;padding-top:1rem;border-top:1px solid rgba(27,61,143,.07);}
+  .feat-meta{display:flex;align-items:center;gap:.8rem;font-size:.8rem;color:var(--ink-muted);font-weight:600;}
+  .feat-link{display:inline-flex;align-items:center;gap:.5rem;padding:.6rem 1.35rem;border-radius:999px;background:var(--royal);color:white;font-weight:700;font-size:.86rem;text-decoration:none;transition:all .2s;border:none;cursor:pointer;font-family:"Manrope",sans-serif;}
+  .feat-link:hover{opacity:.88;transform:translateY(-1px);color:white;text-decoration:none;}
+  .feat-link svg{width:13px;height:13px;}
+
+  /* SECTION DIVIDER */
+  .section-label{display:flex;align-items:center;gap:1rem;margin-bottom:1.6rem;}
+  .section-label-text{font-size:.72rem;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-muted);white-space:nowrap;}
+  .section-label::after{content:'';flex:1;height:1px;background:rgba(27,61,143,.1);}
+
+  /* NEWS GRID */
+  .news-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.4rem;}
+  .news-card{background:white;border-radius:20px;overflow:hidden;border:1px solid rgba(27,61,143,.07);display:flex;flex-direction:column;transition:transform .3s cubic-bezier(.16,1,.3,1),box-shadow .3s;cursor:pointer;}
+  .news-card:hover{transform:translateY(-6px);box-shadow:0 22px 55px rgba(6,15,58,.12);}
+  .news-card-media{height:196px;overflow:hidden;position:relative;flex-shrink:0;}
+  .news-card-media svg,.news-card-media img{width:100%;height:100%;display:block;object-fit:cover;}
+  .nc-tag{position:absolute;bottom:.8rem;left:.8rem;padding:.26rem .68rem;border-radius:999px;font-size:.68rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;}
+  .news-card-body{padding:1.55rem;flex:1;display:flex;flex-direction:column;gap:.65rem;}
+  .nc-title{font-family:"Plus Jakarta Sans",sans-serif;font-size:1.02rem;font-weight:800;letter-spacing:-.03em;color:var(--ink);line-height:1.3;}
+  .nc-excerpt{font-size:.86rem;color:var(--ink-mid);line-height:1.68;flex:1;}
+  .nc-footer{display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:.75rem;border-top:1px solid rgba(27,61,143,.06);}
+  .nc-date{font-size:.76rem;color:var(--ink-muted);font-weight:600;}
+  .news-card.filtered-out,.featured-article.filtered-out{display:none;}
+
+  /* CATEGORY TAG COLOURS */
+  .tc-obavještenje,.tc-obaviještenje{background:rgba(27,61,143,.12);color:var(--royal);}
+  .tc-forum{background:rgba(13,51,115,.12);color:#0D3373;}
+  .tc-edukacija{background:rgba(90,128,200,.18);color:var(--china);}
+  .tc-događaji{background:rgba(6,15,58,.1);color:#0D3373;}
+  .tc-djeca{background:rgba(196,217,255,.55);color:var(--royal);}
+
+  /* PAGINATION */
+  .news-pagination{display:flex;align-items:center;justify-content:center;gap:.5rem;margin-top:3.5rem;}
+  .page-btn{width:40px;height:40px;border-radius:50%;border:1.5px solid rgba(27,61,143,.14);background:transparent;cursor:pointer;font-family:"Manrope",sans-serif;font-size:.88rem;font-weight:700;color:var(--ink-mid);display:flex;align-items:center;justify-content:center;transition:all .18s;}
+  .page-btn:hover{border-color:var(--royal);color:var(--royal);}
+  .page-btn.active{background:var(--royal);border-color:var(--royal);color:white;}
+  .page-btn svg{width:13px;height:13px;}
+
+  /* EMPTY STATE */
+  .vijesti-empty{text-align:center;padding:6rem 2rem;color:var(--ink-muted);}
+  .vijesti-empty svg{width:64px;height:64px;opacity:.3;margin-bottom:1.2rem;display:block;margin-left:auto;margin-right:auto;}
+  .vijesti-empty h3{font-size:1.3rem;color:var(--ink-mid);margin-bottom:.5rem;}
+
+  /* NEWS DETAIL MODAL — centered card */
+  .nd-modal{position:fixed;inset:0;z-index:10000;display:flex;align-items:flex-start;justify-content:center;padding:24px;background:rgba(6,15,58,.65);backdrop-filter:blur(8px);overflow-y:auto;overscroll-behavior:contain;opacity:0;pointer-events:none;transition:opacity .3s ease;}
+  .nd-modal.open{opacity:1;pointer-events:all;}
+  .nd-backdrop{position:absolute;inset:0;cursor:pointer;}
+  .nd-sheet{position:relative;z-index:1;width:min(700px,100%);max-height:calc(100dvh - 48px);background:var(--cream);border-radius:24px;overflow:hidden;transform:scale(.96) translateY(12px);transition:transform .38s cubic-bezier(.16,1,.3,1),opacity .3s ease;opacity:0;box-shadow:0 32px 80px rgba(6,15,58,.32);display:flex;flex-direction:column;margin:auto;}
+  .nd-modal.open .nd-sheet{transform:scale(1) translateY(0);opacity:1;}
+  .nd-topbar{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.5rem;background:white;border-bottom:1px solid rgba(27,61,143,.07);flex-shrink:0;gap:1rem;}
+  .nd-close{width:36px;height:36px;border-radius:50%;border:1.5px solid rgba(27,61,143,.15);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--ink-mid);transition:all .18s;flex-shrink:0;}
+  .nd-close:hover{background:var(--royal);border-color:var(--royal);color:white;}
+  .nd-close svg{width:13px;height:13px;}
+  .nd-tag-bar{display:flex;align-items:center;gap:.6rem;flex:1;}
+  .nd-pill{padding:.26rem .72rem;border-radius:999px;font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;}
+  .nd-media{width:100%;height:220px;flex-shrink:0;overflow:hidden;}
+  .nd-media svg,.nd-media img{width:100%;height:100%;display:block;object-fit:cover;}
+  .nd-body{padding:2rem 2rem 2.5rem;flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;}
+  .nd-meta{font-size:.8rem;color:var(--ink-muted);font-weight:600;display:flex;align-items:center;gap:.55rem;flex-wrap:wrap;margin-bottom:.9rem;}
+  .nd-title{font-size:clamp(1.4rem,3vw,2rem);color:var(--ink);margin-bottom:1.6rem;line-height:1.15;font-family:"Plus Jakarta Sans",Arial,sans-serif;font-weight:800;letter-spacing:-.04em;}
+  .nd-article p{font-size:.95rem;color:var(--ink-mid);line-height:1.84;margin-bottom:1.2rem;}
+  .nd-article h3{font-family:"Plus Jakarta Sans",sans-serif;font-size:1.05rem;font-weight:800;color:var(--ink);letter-spacing:-.03em;margin:1.6rem 0 .5rem;}
+  .nd-article strong,.nd-article b{font-weight:700;color:var(--ink);}
+  .nd-article blockquote{border-left:3px solid var(--royal);padding:.4rem 0 .4rem 1.1rem;margin:1.4rem 0;color:var(--ink-mid);font-style:italic;}
+  .nd-article ul,.nd-article ol{padding-left:1.5rem;margin-bottom:1.1rem;}
+  .nd-article li{font-size:.93rem;color:var(--ink-mid);line-height:1.74;margin-bottom:.28rem;}
+  .nd-article a{color:var(--royal);font-weight:600;text-decoration:underline;text-underline-offset:3px;}
+  .nd-article a:hover{opacity:.78;}
+  .nd-footer{margin-top:2.4rem;padding-top:1.4rem;border-top:1px solid rgba(27,61,143,.1);}
+  .nd-back{display:inline-flex;align-items:center;gap:.5rem;padding:.62rem 1.3rem;border-radius:999px;border:1.5px solid rgba(27,61,143,.15);background:transparent;font-size:.86rem;font-weight:700;color:var(--ink-mid);cursor:pointer;transition:all .18s;font-family:"Manrope",sans-serif;}
+  .nd-back:hover{border-color:var(--royal);color:var(--royal);}
+  .nd-back svg{width:13px;height:13px;}
+
+  /* ADMIN CONTROLS */
+  .card-admin-bar{display:flex;gap:.4rem;margin-top:.6rem;padding-top:.6rem;border-top:1px solid rgba(27,61,143,.08);}
+  .btn-card-edit,.btn-card-delete{font-size:.75rem;font-weight:700;padding:.3rem .75rem;border-radius:999px;border:none;cursor:pointer;text-decoration:none;transition:opacity .18s;font-family:"Manrope",sans-serif;}
+  .btn-card-edit{background:rgba(27,61,143,.1);color:var(--royal);}
+  .btn-card-edit:hover{background:rgba(27,61,143,.2);color:var(--royal);}
+  .btn-card-delete{background:rgba(180,35,24,.1);color:#c0392b;}
+  .btn-card-delete:hover{background:rgba(180,35,24,.2);color:#c0392b;}
+  .adm-fab{position:fixed;bottom:2rem;right:2rem;z-index:400;padding:.75rem 1.4rem;border-radius:999px;background:linear-gradient(135deg,var(--midnight),var(--royal));color:white;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:.5rem;font-family:"Manrope",sans-serif;font-size:.88rem;font-weight:700;box-shadow:0 10px 28px rgba(27,61,143,.38);transition:transform .2s,box-shadow .2s;}
+  .adm-fab:hover{transform:translateY(-2px);box-shadow:0 14px 36px rgba(27,61,143,.48);color:white;}
+  .adm-fab svg{width:16px;height:16px;}
+
+  /* ADMIN MODAL */
+  .adm-overlay{position:fixed;inset:0;z-index:10000;background:rgba(6,15,58,.58);backdrop-filter:blur(6px);display:flex;align-items:flex-start;justify-content:center;padding:24px;overflow-y:auto;overscroll-behavior:contain;opacity:0;pointer-events:none;transition:opacity .3s ease;}
+  .adm-overlay.open{opacity:1;pointer-events:all;}
+  .adm-drawer{position:relative;width:min(640px,100%);max-height:calc(100dvh - 48px);background:white;border-radius:24px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 32px 80px rgba(6,15,58,.32);transform:scale(.94) translateY(16px);opacity:0;transition:transform .38s cubic-bezier(.16,1,.3,1),opacity .3s ease;margin:auto;}
+  .adm-overlay.open .adm-drawer{transform:scale(1) translateY(0);opacity:1;}
+  .adm-form-body{flex:1;overflow-y:auto;min-height:0;padding:1.8rem;-webkit-overflow-scrolling:touch;}
+  .adm-hdr{padding:1.5rem 1.8rem;background:linear-gradient(135deg,var(--midnight) 0%,#0e2878 48%,var(--royal) 100%);color:white;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+  .adm-hdr-label{font-size:.68rem;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.48);margin-bottom:.25rem;}
+  .adm-hdr-title-text{font-family:"Plus Jakarta Sans",sans-serif;font-size:1.35rem;font-weight:800;letter-spacing:-.03em;}
+  .adm-hdr-close{width:36px;height:36px;border-radius:50%;border:1.5px solid rgba(255,255,255,.22);background:rgba(255,255,255,.08);cursor:pointer;display:flex;align-items:center;justify-content:center;color:white;transition:all .18s;flex-shrink:0;}
+  .adm-hdr-close:hover{background:rgba(255,255,255,.22);}
+  .adm-hdr-close svg{width:14px;height:14px;}
+  .af{margin-bottom:1.1rem;}
+  .af label{display:block;margin-bottom:.4rem;font-size:.83rem;font-weight:700;color:#344054;}
+  .af input,.af select,.af textarea{width:100%;min-height:46px;padding:.7rem .85rem;border:1.5px solid rgba(27,61,143,.14);border-radius:12px;background:rgba(247,242,235,.6);color:var(--ink);font-size:.93rem;font-family:"Manrope",sans-serif;outline:none;transition:border-color .18s,box-shadow .18s,background .18s;resize:vertical;}
+  .af input:focus,.af select:focus,.af textarea:focus{border-color:rgba(27,61,143,.42);background:white;box-shadow:0 0 0 4px rgba(27,61,143,.07);}
+  .af textarea{min-height:140px;}
+  .af-row{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;}
+  .af-hint{font-size:.75rem;color:var(--ink-muted);margin-top:.28rem;}
+  .af-error{border-color:rgba(180,35,24,.5) !important;}
+  .adm-divider{height:1px;background:rgba(27,61,143,.07);margin:1.4rem 0;}
+  .adm-footer-bar{padding:1.2rem 1.8rem;border-top:1px solid rgba(27,61,143,.08);display:flex;gap:.7rem;flex-shrink:0;background:white;}
+  .adm-cancel{padding:.68rem 1.3rem;border-radius:999px;border:1.5px solid rgba(27,61,143,.15);background:transparent;font-family:"Manrope",sans-serif;font-size:.88rem;font-weight:700;color:var(--ink-mid);cursor:pointer;transition:all .18s;}
+  .adm-cancel:hover{border-color:var(--royal);color:var(--royal);}
+  .adm-submit{flex:1;padding:.72rem 1.5rem;border-radius:999px;border:none;background:linear-gradient(135deg,var(--midnight),var(--royal));color:white;font-family:"Manrope",sans-serif;font-size:.92rem;font-weight:700;cursor:pointer;transition:all .18s;box-shadow:0 8px 22px rgba(27,61,143,.22);}
+  .adm-submit:hover{opacity:.9;transform:translateY(-1px);}
+  .adm-submit:disabled{opacity:.55;transform:none;cursor:not-allowed;}
+  .adm-toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(90px);background:var(--midnight);color:white;padding:.8rem 1.6rem;border-radius:999px;font-size:.88rem;font-weight:700;z-index:10100;transition:transform .38s cubic-bezier(.16,1,.3,1);pointer-events:none;white-space:nowrap;box-shadow:0 8px 24px rgba(6,15,58,.3);}
+  .adm-toast.show{transform:translateX(-50%) translateY(0);}
+
+  @@media(max-width:900px){
+    .news-hero-inner,.featured-article{grid-template-columns:1fr;}
+    .feat-media{min-height:260px;}
+    .news-grid{grid-template-columns:repeat(2,1fr);}
+  }
+  @@media(max-width:580px){
+    .news-grid{grid-template-columns:1fr;}
+    .news-hero-title{font-size:clamp(3rem,14vw,5rem);}
+    .adm-overlay{padding:8px;}
+    .adm-drawer{max-height:calc(100dvh - 16px);border-radius:20px;width:100%;}
+    .af-row{grid-template-columns:1fr;}
+  }
+</style>
+
+<!-- HERO -->
+<section class="news-hero">
+  <div class="hero-orb" style="width:650px;height:650px;right:-150px;top:-200px;background:radial-gradient(circle,rgba(27,61,143,.38) 0%,transparent 70%);"></div>
+  <div class="hero-orb" style="width:300px;height:300px;left:-60px;bottom:-80px;background:radial-gradient(circle,rgba(90,128,200,.22) 0%,transparent 70%);"></div>
+  <div class="news-hero-inner">
+    <div>
+      <div class="news-hero-kicker">SmartLib — Novosti</div>
+      <h1 class="news-hero-title">Vijesti<br><em>&amp; novosti</em></h1>
+    </div>
+    <div>
+      <p class="news-hero-desc">Sve što se dešava u SmartLib zajednici — novi naslovi, događaji, forumske diskusije i obavještenja biblioteke.</p>
+      <div class="news-stats">
+        <div>
+          <span class="news-stat-num">@vijestList.Count</span>
+          <span class="news-stat-label">Objavljenih članaka</span>
+        </div>
+        <div>
+          <span class="news-stat-num">@categories.Count</span>
+          <span class="news-stat-label">Kategorija</span>
+        </div>
+      </div>
+      <div class="news-live-row">
+        <span class="news-live-dot"></span>
+        Ažurirano: @latestDate
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FILTER BAR -->
+<div class="news-filter">
+  <div class="news-filter-inner">
+    <button class="filter-btn active" data-filter="all">
+      Sve <span class="filter-count">@vijestList.Count</span>
+    </button>
+    @foreach (var cat in categories)
+    {
+      <button class="filter-btn" data-filter="@cat.ToLower()">
+        @cat <span class="filter-count">@catCounts[cat]</span>
+      </button>
+    }
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="news-content">
+
+  @if (!vijestList.Any())
+  {
+    <div class="vijesti-empty reveal">
+      <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="8" y="12" width="48" height="40" rx="6" stroke="currentColor" stroke-width="2"/>
+        <path d="M20 24h24M20 32h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <h3>Nema objavljenih vijesti</h3>
+      <p>Vijesti će biti prikazane čim budu objavljene.</p>
+    </div>
+  }
+  else
+  {
+    if (featured != null)
+    {
+      <article class="featured-article reveal" data-cat="@featured.Kategorija.ToLower()" onclick="openArticle(@featured.Id)">
+        <div class="feat-media">
+          @if (!string.IsNullOrEmpty(featured.SlikaUrl))
+          {
+            <img src="@featured.SlikaUrl" alt="@featured.Naslov" />
+          }
+          else
+          {
+            <svg viewBox="0 0 560 460" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%">
+              <defs><pattern id="fp1" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(30)"><line x1="0" y1="0" x2="0" y2="14" stroke="#1B3D8F" stroke-width="2"/></pattern></defs>
+              <rect width="560" height="460" fill="@MediaBg(featured.Kategorija)"/>
+              <rect width="560" height="460" fill="url(#fp1)" opacity="0.22"/>
+              <ellipse cx="280" cy="230" rx="140" ry="110" fill="rgba(27,61,143,0.3)"/>
+            </svg>
+          }
+          <div class="feat-badges">
+            <span class="feat-badge">Istaknuto</span>
+          </div>
+        </div>
+        <div class="feat-body">
+          <div class="feat-cat">@featured.Kategorija</div>
+          <h2 class="feat-title">@featured.Naslov</h2>
+          @{ var featPlain = MdPlain(featured.Sadrzaj); }
+          <p class="feat-excerpt">@(featPlain.Length > 200 ? featPlain[..200] + "…" : featPlain)</p>
+          <div class="feat-footer">
+            <div class="feat-meta">
+              <span>@FmtDate(featured.DatumObjave)</span>
+            </div>
+            <button class="feat-link" onclick="event.stopPropagation();openArticle(@featured.Id)">
+              Čitaj više
+              <svg viewBox="0 0 14 14" fill="none"><path d="M2 7h10M7 2l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+          @if (isAdmin)
+          {
+            <div class="card-admin-bar" onclick="event.stopPropagation()">
+              <button class="btn-card-edit" onclick="admOpen(@featured.Id)">Uredi</button>
+              <button class="btn-card-delete" onclick="admDelete(@featured.Id)">Obriši</button>
+            </div>
+          }
+        </div>
+      </article>
+    }
+
+    @if (gridCards.Any())
+    {
+      <div class="section-label"><span class="section-label-text">Sve vijesti</span></div>
+      <div class="news-grid">
+        @for (int i = 0; i < gridCards.Count; i++)
+        {
+          var v = gridCards[i];
+          var delayClass = i % 3 == 0 ? "d1" : (i % 3 == 1 ? "d2" : "d3");
+          <article class="news-card reveal @delayClass" data-cat="@v.Kategorija.ToLower()" onclick="openArticle(@v.Id)">
+            <div class="news-card-media">
+              @if (!string.IsNullOrEmpty(v.SlikaUrl))
+              {
+                <img src="@v.SlikaUrl" alt="@v.Naslov" />
+              }
+              else
+              {
+                <svg viewBox="0 0 360 196" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%">
+                  <defs><pattern id="nc@(v.Id)" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(-40)"><line x1="0" y1="0" x2="0" y2="10" stroke="rgba(196,217,255,0.4)" stroke-width="1.5"/></pattern></defs>
+                  <rect width="360" height="196" fill="@MediaBg(v.Kategorija)"/>
+                  <rect width="360" height="196" fill="url(#nc@(v.Id))" opacity="0.28"/>
+                </svg>
+              }
+              <span class="nc-tag @TagCls(v.Kategorija)">@v.Kategorija</span>
+            </div>
+            <div class="news-card-body">
+              <div class="nc-title">@v.Naslov</div>
+              @{ var cardPlain = MdPlain(v.Sadrzaj); }
+              <p class="nc-excerpt">@(cardPlain.Length > 120 ? cardPlain[..120] + "…" : cardPlain)</p>
+              <div class="nc-footer">
+                <span class="nc-date">@FmtDate(v.DatumObjave)</span>
+              </div>
+              @if (isAdmin)
+              {
+                <div class="card-admin-bar" onclick="event.stopPropagation()">
+                  <button class="btn-card-edit" onclick="admOpen(@v.Id)">Uredi</button>
+                  <button class="btn-card-delete" onclick="admDelete(@v.Id)">Obriši</button>
+                </div>
+              }
+            </div>
+          </article>
+        }
+      </div>
+    }
+  }
+
+</div>
+
+<!-- NEWS DETAIL SHEET -->
+<div class="nd-modal" id="nd-modal" role="dialog" aria-modal="true">
+  <div class="nd-backdrop" id="nd-backdrop"></div>
+  <div class="nd-sheet">
+    <div class="nd-topbar">
+      <button class="nd-close" id="nd-close" aria-label="Zatvori">
+        <svg viewBox="0 0 14 14" fill="none"><path d="M2 2l10 10M12 2L2 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <div class="nd-tag-bar">
+        <span class="nd-pill" id="nd-pill"></span>
+      </div>
+    </div>
+    <div class="nd-media" id="nd-media"></div>
+    <div class="nd-body">
+      <div class="nd-meta" id="nd-meta"></div>
+      <h1 class="nd-title" id="nd-title"></h1>
+      <div class="nd-article" id="nd-article"></div>
+      <div class="nd-footer">
+        <button class="nd-back" id="nd-back">
+          <svg viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Povratak na vijesti
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+@if (isAdmin)
+{
+  <!-- Admin modal backdrop + centering container -->
+  <div class="adm-overlay" id="adm-overlay">
+
+    <!-- Admin modal panel — click stops propagation so backdrop click closes -->
+    <div class="adm-drawer" id="adm-drawer" role="dialog" aria-modal="true" aria-labelledby="adm-hdr-title-text" onclick="event.stopPropagation()">
+      <div class="adm-hdr">
+        <div>
+          <div class="adm-hdr-label">Admin panel</div>
+          <div class="adm-hdr-title-text" id="adm-hdr-title-text">Nova vijest</div>
+        </div>
+        <button class="adm-hdr-close" id="adm-close" aria-label="Zatvori">
+          <svg viewBox="0 0 14 14" fill="none"><path d="M2 2l10 10M12 2L2 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div class="adm-form-body">
+        <form id="adm-form" novalidate>
+          @Html.AntiForgeryToken()
+          <input type="hidden" id="af-id" value="0">
+          <div class="af">
+            <label for="af-title">Naslov vijesti *</label>
+            <input id="af-title" type="text" placeholder="Unesite naslov vijesti…" autocomplete="off">
+          </div>
+          <div class="af-row">
+            <div class="af">
+              <label for="af-cat">Kategorija</label>
+              <select id="af-cat">
+                <option value="Obavještenje">Obavještenje</option>
+                <option value="Forum">Forum</option>
+                <option value="Edukacija">Edukacija</option>
+                <option value="Događaji">Događaji</option>
+                <option value="Djeca">Djeca</option>
+              </select>
+            </div>
+            <div class="af">
+              <label for="af-date-display">Datum objave</label>
+              <input id="af-date-display" type="text" placeholder="dd/MM/yyyy" autocomplete="off" maxlength="10">
+              <input id="af-date" type="hidden">
+            </div>
+          </div>
+          <div class="af">
+            <label for="af-content">Sadržaj vijesti *</label>
+            <textarea id="af-content" rows="9" placeholder="Unesite tekst vijesti…"></textarea>
+            <div class="af-hint">Podržava Markdown: **bold**, ### naslov, > citat, liste i linkove.</div>
+          </div>
+          <div class="af">
+            <label for="af-img">URL slike naslovnice (opcionalno)</label>
+            <input id="af-img" type="text" placeholder="/uploads/slika.jpg ili URL">
+            <div class="af-hint">Preporučeni format 16:9 · min. 1200×675 px</div>
+          </div>
+        </form>
+      </div>
+      <div class="adm-footer-bar">
+        <button class="adm-cancel" id="adm-cancel">Odustani</button>
+        <button class="adm-submit" id="adm-submit">Objavi vijest</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FAB button -->
+  <button class="adm-fab" id="adm-fab" title="Nova vijest" onclick="admOpen(0)">
+    <svg viewBox="0 0 22 22" fill="none"><path d="M11 4v14M4 11h14" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+    Dodaj vijest
+  </button>
+
+  <!-- Toast notification -->
+  <div class="adm-toast" id="adm-toast">Vijest uspješno objavljena!</div>
+}
+
+<!-- JSON island -->
+<script id="vijestiData" type="application/json">
+@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Select(v => new {
+    id = v.Id,
+    naslov = v.Naslov,
+    sadrzaj = v.Sadrzaj,
+    sadrzajHtml = MdHtml(v.Sadrzaj),
+    kategorija = v.Kategorija,
+    slikaUrl = v.SlikaUrl,
+    datum = FmtDate(v.DatumObjave),
+    datumIso = v.DatumObjave.ToString("yyyy-MM-dd")
+})))
+</script>
+
+@section Scripts {
+<script>
+  // Reveal on scroll
+  var vObs = new IntersectionObserver(function(entries) {
+    entries.forEach(function(e) {
+      if (e.isIntersecting) { e.target.classList.add('in'); vObs.unobserve(e.target); }
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(function(el) { vObs.observe(el); });
+
+  // Category filter
+  document.querySelectorAll('.filter-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      var f = btn.dataset.filter;
+      document.querySelectorAll('[data-cat]').forEach(function(card) {
+        card.classList.toggle('filtered-out', f !== 'all' && card.dataset.cat !== f);
+      });
+    });
+  });
+
+  // Article data
+  var _ARTS = {};
+  try {
+    JSON.parse(document.getElementById('vijestiData').textContent)
+      .forEach(function(v) { _ARTS[v.id] = v; });
+  } catch(e) {}
+
+  var MEDIA_BG = {
+    'Forum':'#1B3D8F','Edukacija':'#060F3A','Događaji':'#173b63','Djeca':'#0D3373'
+  };
+  var TAG_CLS = {
+    'Forum':'tc-forum','Edukacija':'tc-edukacija','Događaji':'tc-događaji','Djeca':'tc-djeca'
+  };
+
+  function escH(s) {
+    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function openArticle(id) {
+    var a = _ARTS[id]; if (!a) return;
+    var bg = MEDIA_BG[a.kategorija] || '#0D3373';
+    var pill = document.getElementById('nd-pill');
+    pill.textContent = a.kategorija;
+    pill.className = 'nd-pill ' + (TAG_CLS[a.kategorija] || 'tc-obavještenje');
+    document.getElementById('nd-meta').innerHTML = '<span>' + escH(a.datum) + '</span>';
+    document.getElementById('nd-title').textContent = a.naslov;
+    document.getElementById('nd-article').innerHTML = a.sadrzajHtml || '';
+    var pid = 'vmp' + id;
+    document.getElementById('nd-media').innerHTML = a.slikaUrl
+      ? '<img src="' + escH(a.slikaUrl) + '" alt="' + escH(a.naslov) + '"/>'
+      : '<svg viewBox="0 0 700 240" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%">'
+        + '<defs><pattern id="' + pid + '" width="12" height="12" patternUnits="userSpaceOnUse" patternTransform="rotate(30)">'
+        + '<line x1="0" y1="0" x2="0" y2="12" stroke="rgba(255,255,255,.18)" stroke-width="1.5"/></pattern></defs>'
+        + '<rect width="700" height="240" fill="' + bg + '"/>'
+        + '<rect width="700" height="240" fill="url(#' + pid + ')"/>'
+        + '</svg>';
+    document.getElementById('nd-modal').classList.add('open');
+    var _nb = document.querySelector('.nd-body'); if (_nb) _nb.scrollTop = 0;
+  }
+
+  function closeArticle() {
+    document.getElementById('nd-modal').classList.remove('open');
+  }
+
+  document.getElementById('nd-close').addEventListener('click', closeArticle);
+  document.getElementById('nd-back').addEventListener('click', closeArticle);
+  document.getElementById('nd-backdrop').addEventListener('click', closeArticle);
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      if (document.getElementById('nd-modal').classList.contains('open')) closeArticle();
+      if (document.getElementById('adm-drawer') && document.getElementById('adm-drawer').classList.contains('open')) admClose();
+    }
+  });
+
+@if (isAdmin)
+{
+<text>
+  /* ── Admin Drawer ─────────────────────────────────── */
+  function pad(n) { return String(n).padStart(2,'0'); }
+  function _isoToDisp(iso) { var p=(iso||'').split('-'); return p.length===3 ? pad(+p[2])+'/'+pad(+p[1])+'/'+p[0] : ''; }
+  function _dispToIso(d) { var p=(d||'').split('/'); return p.length===3 && p[2].length===4 ? p[2]+'-'+pad(+p[1])+'-'+pad(+p[0]) : ''; }
+
+  var admOverlayEl = document.getElementById('adm-overlay');
+  var admDrawerEl  = document.getElementById('adm-drawer');
+  var admTitleEl   = document.getElementById('adm-hdr-title-text');
+  var admSubmitBtn = document.getElementById('adm-submit');
+  var admToastEl   = document.getElementById('adm-toast');
+
+  function admGetToken() {
+    var el = document.querySelector('#adm-form [name="__RequestVerificationToken"]');
+    return el ? el.value : '';
+  }
+
+  function admShowToast(msg) {
+    admToastEl.textContent = msg;
+    admToastEl.classList.add('show');
+    setTimeout(function() { admToastEl.classList.remove('show'); }, 3000);
+  }
+
+  function admOpen(id) {
+    document.getElementById('af-id').value = id;
+    document.getElementById('af-title').classList.remove('af-error');
+    document.getElementById('af-content').classList.remove('af-error');
+
+    if (id === 0) {
+      admTitleEl.textContent = 'Nova vijest';
+      document.getElementById('af-title').value   = '';
+      document.getElementById('af-cat').value      = 'Obavještenje';
+      var _td = new Date().toISOString().split('T')[0];
+      document.getElementById('af-date').value = _td;
+      document.getElementById('af-date-display').value = _isoToDisp(_td);
+      document.getElementById('af-content').value  = '';
+      document.getElementById('af-img').value      = '';
+      admSubmitBtn.textContent = 'Objavi vijest';
+    } else {
+      var a = _ARTS[id];
+      if (!a) return;
+      admTitleEl.textContent = 'Uredi vijest';
+      document.getElementById('af-title').value   = a.naslov || '';
+      document.getElementById('af-cat').value      = a.kategorija || 'Obavještenje';
+      document.getElementById('af-date').value = a.datumIso || '';
+      document.getElementById('af-date-display').value = _isoToDisp(a.datumIso || '');
+      document.getElementById('af-content').value  = a.sadrzaj || '';
+      document.getElementById('af-img').value      = a.slikaUrl || '';
+      admSubmitBtn.textContent = 'Sačuvaj izmjene';
+    }
+    admSubmitBtn.disabled = false;
+    admOverlayEl.classList.add('open');
+    admDrawerEl.classList.add('open');
+  }
+
+  function admClose() {
+    admOverlayEl.classList.remove('open');
+    admDrawerEl.classList.remove('open');
+  }
+
+  admSubmitBtn.addEventListener('click', function() {
+    var id      = parseInt(document.getElementById('af-id').value, 10) || 0;
+    var naslov  = document.getElementById('af-title').value.trim();
+    var sadrzaj = document.getElementById('af-content').value.trim();
+    var valid   = true;
+
+    if (!naslov)  { document.getElementById('af-title').classList.add('af-error');   document.getElementById('af-title').focus();   valid = false; }
+    if (!sadrzaj) { document.getElementById('af-content').classList.add('af-error'); if (valid) document.getElementById('af-content').focus(); valid = false; }
+    if (!valid) return;
+
+    var fd = new FormData();
+    fd.append('__RequestVerificationToken', admGetToken());
+    if (id > 0) fd.append('Id', id);
+    fd.append('Naslov',      naslov);
+    fd.append('Kategorija',  document.getElementById('af-cat').value);
+    fd.append('DatumObjave', document.getElementById('af-date').value);
+    fd.append('Sadrzaj',     sadrzaj);
+    fd.append('SlikaUrl',    document.getElementById('af-img').value.trim());
+
+    var url = id > 0 ? '/Vijest/Edit/' + id : '/Vijest/Create';
+    admSubmitBtn.disabled    = true;
+    admSubmitBtn.textContent = 'Čekaj…';
+
+    fetch(url, {
+      method: 'POST',
+      headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      body: fd
+    })
+    .then(function(r) {
+      if (!r.ok) throw new Error('Server error ' + r.status);
+      return r.json();
+    })
+    .then(function(data) {
+      if (data.success) {
+        admClose();
+        admShowToast(id > 0 ? 'Vijest uspješno ažurirana!' : 'Vijest uspješno objavljena!');
+        setTimeout(function() { window.location.reload(); }, 1400);
+      }
+    })
+    .catch(function() {
+      admSubmitBtn.disabled    = false;
+      admSubmitBtn.textContent = id > 0 ? 'Sačuvaj izmjene' : 'Objavi vijest';
+    });
+  });
+
+  function admDelete(id) {
+    if (!confirm('Sigurno obrisati ovu vijest?')) return;
+    var fd = new FormData();
+    fd.append('__RequestVerificationToken', admGetToken());
+    fetch('/Vijest/Delete/' + id, {
+      method: 'POST',
+      headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      body: fd
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.success) {
+        admShowToast('Vijest obrisana.');
+        setTimeout(function() { window.location.reload(); }, 1000);
+      }
+    })
+    .catch(function(err) { console.error(err); });
+  }
+
+  document.getElementById('adm-close').addEventListener('click', admClose);
+  document.getElementById('adm-cancel').addEventListener('click', admClose);
+  admOverlayEl.addEventListener('click', admClose);
+
+  // Remove error highlight on input
+  document.getElementById('af-title').addEventListener('input', function() { this.classList.remove('af-error'); });
+  document.getElementById('af-content').addEventListener('input', function() { this.classList.remove('af-error'); });
+  // Sync display text → hidden ISO date
+  document.getElementById('af-date-display').addEventListener('input', function() {
+    document.getElementById('af-date').value = _dispToIso(this.value.trim());
+  });
+</text>
+}
+</script>
+}

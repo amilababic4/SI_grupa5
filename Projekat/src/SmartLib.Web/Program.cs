@@ -116,6 +116,8 @@ builder.Services.AddScoped<IClanarinaRepository, ClanarinaRepository>();
 builder.Services.AddScoped<IRezervacijaRepository, RezervacijaRepository>();
 builder.Services.AddScoped<IForumRepository, ForumRepository>();
 builder.Services.AddScoped<IRecenzijaRepository, RecenzijaRepository>();
+builder.Services.AddScoped<IVijestRepository, VijestRepository>();
+builder.Services.AddScoped<IDogadjajRepository, DogadjajRepository>();
 builder.Services.AddHostedService<DeactivatedAccountCleanupService>();
 builder.Services.AddScoped<IIzvjestajService, IzvjestajService>();
 
@@ -243,6 +245,36 @@ using (var scope = app.Services.CreateScope())
                 DatumKreiranja DATETIME(6) NOT NULL,
                 FOREIGN KEY (KnjigaId) REFERENCES Knjige(Id) ON DELETE CASCADE,
                 FOREIGN KEY (KorisnikId) REFERENCES Korisnici(Id) ON DELETE RESTRICT
+            );
+        ");
+    }
+    catch (Exception) { }
+
+    try
+    {
+        db.Database.ExecuteSqlRaw(@"
+            CREATE TABLE IF NOT EXISTS Vijesti (
+                Id INT AUTO_INCREMENT PRIMARY KEY,
+                Naslov VARCHAR(300) NOT NULL,
+                Sadrzaj LONGTEXT NOT NULL,
+                Kategorija VARCHAR(100) NOT NULL DEFAULT 'Obavještenje',
+                SlikaUrl VARCHAR(512) NULL,
+                DatumObjave DATETIME(6) NOT NULL,
+                AutorId INT NOT NULL,
+                FOREIGN KEY (AutorId) REFERENCES Korisnici(Id) ON DELETE RESTRICT
+            );
+        ");
+        db.Database.ExecuteSqlRaw(@"
+            CREATE TABLE IF NOT EXISTS Dogadjaji (
+                Id INT AUTO_INCREMENT PRIMARY KEY,
+                Naslov VARCHAR(300) NOT NULL,
+                Opis TEXT NULL,
+                Datum DATETIME(6) NOT NULL,
+                Sat VARCHAR(20) NULL,
+                Lokacija VARCHAR(200) NULL,
+                Kategorija VARCHAR(100) NOT NULL DEFAULT 'Edukacija',
+                AutorId INT NOT NULL,
+                FOREIGN KEY (AutorId) REFERENCES Korisnici(Id) ON DELETE RESTRICT
             );
         ");
     }

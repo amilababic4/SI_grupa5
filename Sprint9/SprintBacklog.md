@@ -8,10 +8,11 @@ Tokom ovog sprinta implementiraju se funkcionalnosti vezane za:
 
 * rezervaciju knjiga koje trenutno nisu dostupne,
 * pregled i otkazivanje aktivnih rezervacija,
+* automatsko upravljanje istekom rezervacija,
 * filtriranje knjiga po kategoriji, izdavaču i godini izdanja,
 * kombinovanje više filtera prilikom pretrage kataloga,
-* generisanje mjesečnih izvještaja o zaduživanjima, rezervacijama i članovima,
-* forum zajednicu
+* generisanje mjesečnih izvještaja o zaduživanjima,
+* generisanje izvještaja o rezervacijama i članovima biblioteke.
 
 <br>
 
@@ -22,10 +23,11 @@ Tokom ovog sprinta implementiraju se funkcionalnosti vezane za:
 | PB-43 | Automatsko otkazivanje rezervacije | Sistem automatski prati rok trajanja rezervacija i otkazuje istekle rezervacije. | Nizak | M | **Završeno** |
 | PB-44 | Napredna pretraga i filteri | Filtriranje knjiga po kategoriji, izdavaču i godini uz mogućnost kombinovanja filtera. | Nizak | M | **Završeno** |
 | PB-45 | Mjesečni izvještaji za upravu | Generisanje mjesečnih izvještaja o zaduživanjima, rezervacijama i članovima biblioteke. | Nizak | L | **Završeno** |
-| PB-57 | Pregled i filtriranje forumskih objava | Pregled i filtriranje objava u forumu | Nizak | M | **Završeno** |
-| PB-58 | Kreiranje i interakcija sa forumskim objavama | Korisnici mogu komentarisati postojeće forum objave i učestvovati u diskusiji | Nizak | M | **Završeno** |
-| PB-59 | Moderacija forumskog sadržaja | Administrator ili bibliotekar može obrisati neprimjerene forum objave i komentare | Nizak | S | **Završeno** |
+| PB-56 | Unapređenje korisničkog interfejsa | Poboljšanje izgleda i responzivnosti ključnih stranica sistema, uz bolju navigaciju i usklađen vizuelni stil. |  Srednji | M | **Završeno** |
+| PB-57 | Modul vijesti i novosti | Prikaz bibliotečkih vijesti i obavještenja korisnicima kroz posebnu javnu stranicu. | Srednji | M | **Završeno** |
+| PB-58 | Kalendar događaja | Prikaz planiranih bibliotečkih događaja kroz kalendar i listu predstojećih aktivnosti. | Srednji | M | **Završeno** |
 
+| PB-59 | Forum zajednice za članove | Omogućavanje članovima biblioteke da učestvuju u diskusijama i razmjeni preporuka kroz forum zajednice. |Srednji | M | **Završeno** |
 <br>
 
 ## Sprint Backlog stavke:
@@ -280,119 +282,170 @@ Tokom ovog sprinta implementiraju se funkcionalnosti vezane za:
 
 <br>
 
-## PB-57: Pregled i filtriranje forumskih objava
+## PB-57: Vijesti i obavještenja
 
-### Naziv: Pregled forumskih objava
-### US-112: Kao korisnik sistema (član, bibliotekar ili administrator), želim pregledati sve objave na forumu kako bih mogao pratiti diskusije i aktivnosti zajednice.
+### Naziv: Pregled vijesti i obavještenja
+
+### US-110: Kao korisnik sistema, želim pregledati vijesti i obavještenja biblioteke, kako bih bio informisan o novostima i važnim informacijama.
 **Acceptance Criteria:**
-- Kada korisnik otvori sekciju "Forum", tada sistem prikazuje listu svih objava.
-- Kada se objave učitaju, tada se prikazuju u obliku kartica.
-- Na svakoj kartici sistem prikazuje naslov objave, autora, kategoriju, broj reakcija i broj komentara.
-- Sistem mora omogućiti scroll ukoliko postoji veliki broj objava.
+- Korisnik može otvoriti sekciju "Vijesti".
+- Sistem prikazuje listu objavljenih vijesti.
+- Za svaku vijest prikazuje se naslov, kratak opis i datum objave.
+- Korisnik može otvoriti vijest i pročitati puni sadržaj.
+- Ako nema objavljenih vijesti, prikazuje se odgovarajuća poruka.
 
 <br>
 
 ---
 
-### Naziv: Filtriranje objava po kategoriji
-### US-113: Kao korisnik sistema, želim filtrirati objave prema kategorijama kako bih lakše pronašao relevantne diskusije.
+### Naziv: Filtriranje vijesti po kategoriji
+
+### US-111: Kao korisnik sistema, želim filtrirati vijesti po kategoriji, kako bih lakše pronašao informacije koje me zanimaju.
 **Acceptance Criteria:**
-- Kada korisnik otvori sekciju "Forum", tada sistem prikazuje kategorije: "Opšta diskusija", "Preporuke knjiga", "Pitanja", "Recenzije" i "Sve objave".
-- Kada korisnik odabere određenu kategoriju, tada sistem prikazuje samo objave iz te kategorije.
-- Kada korisnik odabere opciju "Sve objave", tada sistem prikazuje sve objave bez filtriranja.
-- Aktivna kategorija mora biti jasno vizuelno označena.
+- Korisnik može odabrati kategoriju vijesti.
+- Nakon odabira kategorije prikazuju se samo vijesti iz te kategorije.
+- Korisnik može vratiti prikaz na sve vijesti.
+- Ako nema vijesti za odabranu kategoriju, prikazuje se poruka da nema rezultata.
 
 <br>
 
 ---
 
-### Naziv: Pregled detalja objave
-### US-114: Kao korisnik sistema, želim otvoriti pojedinačnu objavu kako bih mogao pregledati kompletan sadržaj i komentare.
+### Naziv: Dodavanje vijesti
+
+### US-112: Kao administrator, želim dodati novu vijest, kako bih korisnike informisao o važnim obavještenjima i aktivnostima biblioteke.
 **Acceptance Criteria:**
-- Kada korisnik klikne na karticu objave, tada sistem otvara detaljan prikaz objave.
-- Detaljan prikaz sadrži naslov, autora, kategoriju, datum objave i kompletan sadržaj objave.
-- Sistem prikazuje listu svih komentara vezanih za objavu.
-- Broj reakcija i komentara mora biti vidljiv na stranici objave.
+- Administrator može otvoriti formu za dodavanje vijesti.
+- Forma sadrži naslov, kratak opis, puni sadržaj, datum objave i kategoriju.
+- Nakon uspješnog dodavanja, vijest se prikazuje u listi vijesti.
+- Sistem ne dozvoljava dodavanje vijesti bez obaveznih podataka.
+- Dodana vijest je vidljiva korisnicima na stranici "Vijesti".
 
 <br>
 
 ---
 
 | **Prioritet** | Srednji |
-|---------------|-------|
-| **Poslovna vrijednost** | Omogućava korisnicima jednostavan pregled i pretragu sadržaja foruma, čime se podstiče aktivnost i komunikacija unutar bibliotečke zajednice. |
-| **Pretpostavke / Otvorena pitanja** | Objave postoje u sistemu i povezane su sa registrovanim korisnicima. |
-| **Veze i zavisnosti** | PB-17 Sistem prijave. <br> Modul korisničkih uloga i autorizacije. |
+|---------------|---------|
+| **Poslovna vrijednost** | Omogućava bolju informisanost korisnika o aktivnostima biblioteke i važnim obavještenjima. |
+| **Pretpostavke / Otvorena pitanja** | Vijesti se unose i održavaju od strane ovlaštenih korisnika sistema. |
+| **Veze i zavisnosti** | Početna stranica sistema. <br> Navigacija kroz sistem. |
+
 ---
 
 <br>
 
-## PB-58: Kreiranje i interakcija sa forumskim objavama
+## PB-58: Kalendar događaja
 
-### Naziv: Kreiranje nove objave
-### US-115: Kao korisnik sistema (član, bibliotekar ili administrator), želim kreirati novu objavu na forumu kako bih mogao učestvovati u diskusijama zajednice.
+### Naziv: Pregled kalendara događaja
+
+### US-113: Kao korisnik sistema, želim pregledati kalendar događaja, kako bih znao koje aktivnosti biblioteka organizuje.
 **Acceptance Criteria:**
-- Kada korisnik klikne na dugme "Nova objava", tada sistem otvara formu za kreiranje objave.
-- Forma sadrži polja: kategorija, naslov i sadržaj objave.
-- Kada korisnik klikne na dugme "Objavi na forumu", tada sistem objavljuje novu objavu.
-- Nakon uspješne objave, nova objava je odmah vidljiva na forumu.
-- Sistem ne dozvoljava objavu ukoliko neka obavezna polja nisu unesena.
+- Korisnik može otvoriti sekciju "Kalendar".
+- Sistem prikazuje kalendar sa označenim danima koji imaju događaje.
+- Korisnik može izabrati dan u kalendaru.
+- Za odabrani dan prikazuju se događaji ako postoje.
+- Ako za odabrani dan nema događaja, prikazuje se odgovarajuća poruka.
 
 <br>
 
 ---
 
-### Naziv: Reagovanje na objavu
-### US-116: Kao korisnik sistema, želim lajkovati objavu kako bih mogao pokazati da mi se sadržaj sviđa ili da je koristan.
+### Naziv: Pregled predstojećih događaja
+
+### US-114: Kao korisnik sistema, želim vidjeti listu predstojećih događaja, kako bih mogao planirati svoje učešće.
 **Acceptance Criteria:**
-- Kada korisnik otvori objavu, tada sistem prikazuje opciju za reakciju "Like".
-- Kada korisnik klikne na dugme za reakciju, tada sistem evidentira reakciju.
-- Nakon reakcije, broj lajkova se ažurira.
-- Jedan korisnik može ostaviti samo jednu reakciju na istu objavu.
+- Sistem prikazuje listu budućih događaja.
+- Događaji su prikazani po datumu i vremenu održavanja.
+- Za svaki događaj prikazuje se naziv, datum, vrijeme, lokacija i kategorija.
+- Prošli događaji se ne prikazuju u listi predstojećih događaja.
 
 <br>
 
 ---
 
-### Naziv: Dodavanje komentara na objavu
-### US-117: Kao korisnik sistema, želim komentarisati objavu kako bih mogao učestvovati u diskusiji sa drugim korisnicima.
+### Naziv: Dodavanje događaja u kalendar
+
+### US-115: Kao administrator, želim dodati novi događaj u kalendar, kako bi korisnici mogli vidjeti planirane aktivnosti biblioteke.
 **Acceptance Criteria:**
-- Kada korisnik otvori objavu, tada sistem prikazuje formu za unos komentara.
-- Kada korisnik unese komentar i klikne na dugme "Objavi komentar", tada sistem sprema komentar.
-- Novi komentar se odmah prikazuje ispod objave.
-- Sistem prikazuje autora i datum komentara.
-- Sistem ne dozvoljava objavu praznog komentara.
-
-<br>
-
----
-
-| **Prioritet** | Visok |
-|---------------|-------|
-| **Poslovna vrijednost** | Omogućava korisnicima aktivno učešće u zajednici kroz objavljivanje sadržaja, komentarisanje i reakcije na objave. |
-| **Pretpostavke / Otvorena pitanja** | Korisnik mora biti prijavljen u sistem kako bi mogao kreirati objave i komentare. |
-| **Veze i zavisnosti** | PB-17 Sistem prijave. <br> Modul korisničkih uloga i autorizacije. |
----
-
-<br>
-
-## PB-59: Moderacija forumskog sadržaja
-
-### Naziv: Brisanje komentara od strane moderatora
-### US-118: Kao bibliotekar ili administrator, želim obrisati neprimjeren komentar kako bih održavao kvalitet diskusije na forumu.
-**Acceptance Criteria:**
-- Kada bibliotekar ili administrator otvori objavu, tada sistem prikazuje opciju za brisanje komentara.
-- Kada moderator klikne na opciju "Obriši komentar", tada sistem traži potvrdu akcije.
-- Nakon potvrde, komentar se uklanja iz sistema.
-- Član biblioteke nema mogućnost brisanja komentara drugih korisnika.
+- Administrator može otvoriti formu za dodavanje događaja.
+- Forma sadrži naziv događaja, datum, vrijeme, lokaciju, kategoriju i opis.
+- Nakon uspješnog dodavanja, događaj se prikazuje u kalendaru.
+- Novi događaj se prikazuje i u listi predstojećih događaja ako je njegov datum u budućnosti.
 
 <br>
 
 ---
 
 | **Prioritet** | Srednji |
-|---------------|-------|
-| **Poslovna vrijednost** | Omogućava bibliotekarima i administratorima održavanje sigurnog i kvalitetnog prostora za komunikaciju korisnika. |
-| **Pretpostavke / Otvorena pitanja** | Bibliotekar i administrator imaju moderatorske privilegije nad forumskim sadržajem. |
-| **Veze i zavisnosti** | PB-58 Kreiranje i interakcija sa forumskim objavama. <br> Modul korisničkih uloga i autorizacije. |
+|---------------|---------|
+| **Poslovna vrijednost** | Omogućava korisnicima bolji pregled aktivnosti biblioteke i olakšava organizaciju događaja. |
+| **Pretpostavke / Otvorena pitanja** | Sistem ima definisan način unosa i čuvanja događaja. |
+| **Veze i zavisnosti** | Navigacija kroz sistem. <br> Uloge korisnika. |
+
+---
+
+<br>
+
+## PB-59: Forum zajednice za članove
+
+### Naziv: Pregled forum zajednice
+
+### US-116: Kao član biblioteke, želim pristupiti forumu zajednice, kako bih mogao učestvovati u diskusijama sa drugim članovima.
+**Acceptance Criteria:**
+- Prijavljeni član može otvoriti sekciju "Forum".
+- Sistem prikazuje listu dostupnih forum tema.
+- Član može otvoriti temu i pregledati diskusiju.
+- Neprijavljeni korisnici nemaju pristup funkcionalnostima foruma ako to nije dozvoljeno pravilima sistema.
+
+<br>
+
+---
+
+### Naziv: Kreiranje nove forum teme
+
+### US-117: Kao član biblioteke, želim kreirati novu forum temu, kako bih započeo diskusiju o knjigama ili aktivnostima.
+**Acceptance Criteria:**
+- Član može otvoriti formu za novu forum temu.
+- Forma sadrži naslov i sadržaj teme.
+- Nakon kreiranja, tema se prikazuje u listi forum tema.
+- Sistem ne dozvoljava kreiranje prazne teme.
+
+<br>
+
+---
+
+### Naziv: Komentarisanje forum teme
+
+### US-118: Kao član biblioteke, želim komentarisati forum teme, kako bih učestvovao u razgovoru sa drugim članovima.
+**Acceptance Criteria:**
+- Član može dodati komentar na postojeću temu.
+- Komentar se prikazuje u okviru odabrane teme.
+- Sistem prikazuje autora i vrijeme objave komentara.
+- Prazan komentar nije moguće objaviti.
+
+<br>
+
+---
+
+### Naziv: Lajkanje forum objave
+
+### US-119: Kao član biblioteke, želim lajkovati objavu na forumu, kako bih pokazalo da je objava korisna ili zanimljiva.
+**Acceptance Criteria:**
+- Prijavljeni član može lajkovati forum objavu.
+- Broj lajkova se prikazuje uz objavu.
+- Član može ukloniti svoj lajk ako ga je već dodao.
+- Jedan član može lajkovati istu objavu samo jednom.
+- Sistem ažurira broj lajkova nakon svake promjene.
+
+<br>
+
+---
+
+| **Prioritet** | Srednji |
+|---------------|---------|
+| **Poslovna vrijednost** | Povećava interakciju članova biblioteke i omogućava razvoj zajednice oko čitanja, preporuka i bibliotečkih aktivnosti. |
+| **Pretpostavke / Otvorena pitanja** | Forum je dostupan prijavljenim korisnicima u skladu sa njihovom ulogom. |
+| **Veze i zavisnosti** | Sistem prijave korisnika. <br> Navigacija za članove biblioteke. |
+
 ---

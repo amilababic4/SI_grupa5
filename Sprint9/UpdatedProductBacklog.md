@@ -72,15 +72,17 @@ Ovaj dokument predstavlja ažurirani Product Backlog projekta **Bibliotečki inf
 | PB-48 | Online produžetak članarine | Omogućiti korisniku produženje članarine putem sistema | Feature | Nizak | M | U backlogu | Sprint 10 | Zahtijeva integraciju sistema za online plaćanje |
 | PB-49 | Integracija sa distributerom knjiga | Povezivanje sistema sa vanjskim servisom za nabavku knjiga | Technical Task | Nizak | L | U backlogu | Sprint 10 |  |
 | PB-56 | Upravljanje lozinkom korisničkog naloga | Reset zaboravljene lozinke putem emaila i promjena postojeće lozinke | Feature | Visok | L | Završeno u Sprintu 8 | Sprint 8 |
-| PB-57 | Pregled i filtriranje forumskih objava | Pregled i filtriranje objava u forumu | Feature | Nizak | M | Završeno u Sprintu 9 | Sprint 9 | Omogućava interakciju članova biblioteke |
-| PB-58 | Kreiranje i interakcija sa forumskim objavama | Korisnici mogu komentarisati postojeće forum objave i učestvovati u diskusiji | Feature | Nizak | M | Završeno u Sprintu 9 | Sprint 9 | Nadogradnja forum sistema |
-| PB-59 | Moderacija forumskog sadržaja | Administrator ili bibliotekar može obrisati neprimjerene forum objave i komentare | Feature | Nizak | S | Završeno u Sprintu 9 | Sprint 9 | Moderacija sadržaja |
 | PB-50 | Stabilizacija sistema | Bug fixing i optimizacija | Technical Task | Visok | M | U backlogu | Sprint 11 | Nakon početnog testiranja |
 | PB-51 | Izrada liste poznatih ograničenja i tehničkog duga | Popis ograničenja i nedovršenih dijelova | Documentation | Visok | M | U backlogu | Sprint 11 |  |
 | PB-52 | Release Notes | Opis funkcionalnosti kroz verzije | Documentation | Visok | M | U backlogu | Sprint 12 |  |
 | PB-53 | Korisnička dokumentacija | Izrada dokumentacije za upotrebu | Documentation | Visok | M | U backlogu | Sprint 12 | Bez tehničkih dijelova |
 | PB-54 | Tehnička dokumentacija | Izrada dokumentacije za opis sistema | Documentation | Visok | M | U backlogu | Sprint 12 | Detaljan opis |
 | PB-55 | Završna demonstracija | Finalizacija projekta | Documentation | Visok | M | U backlogu | Sprint 13 |  |
+| PB-56 | Unapređenje korisničkog interfejsa | Poboljšanje izgleda i responzivnosti ključnih stranica sistema, uz bolju navigaciju i usklađen vizuelni stil. | Feature | Srednji | M | Završeno u Sprintu 9 | Sprint 9 | Fokus na bolji UX i preglednost sistema. |
+| PB-57 | Modul vijesti i novosti | Prikaz bibliotečkih vijesti i obavještenja korisnicima kroz posebnu javnu stranicu. | Feature | Srednji | M | Završeno u Sprintu 9 | Sprint 9 | Informisanje korisnika o novostima u biblioteci. |
+| PB-58 | Kalendar događaja | Prikaz planiranih bibliotečkih događaja kroz kalendar i listu predstojećih aktivnosti. | Feature | Srednji | M | Završeno u Sprintu 9 | Sprint 9 | Omogućava korisnicima lakše praćenje aktivnosti. |
+| PB-59 | Forum zajednice za članove | Omogućavanje članovima biblioteke da učestvuju u diskusijama i razmjeni preporuka kroz forum zajednice. | Feature | Srednji | M | Završeno u Sprintu 9 | Sprint 9 | Podstiče interakciju i angažman članova. |
+
 
 ## Legenda
 
