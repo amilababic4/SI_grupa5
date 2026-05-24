@@ -8,11 +8,10 @@ Tokom ovog sprinta implementiraju se funkcionalnosti vezane za:
 
 * rezervaciju knjiga koje trenutno nisu dostupne,
 * pregled i otkazivanje aktivnih rezervacija,
-* automatsko upravljanje istekom rezervacija,
 * filtriranje knjiga po kategoriji, izdavaču i godini izdanja,
 * kombinovanje više filtera prilikom pretrage kataloga,
-* generisanje mjesečnih izvještaja o zaduživanjima,
-* generisanje izvještaja o rezervacijama i članovima biblioteke.
+* generisanje mjesečnih izvještaja o zaduživanjima, rezervacijama i članovima,
+* forum zajednicu
 
 <br>
 
@@ -23,6 +22,9 @@ Tokom ovog sprinta implementiraju se funkcionalnosti vezane za:
 | PB-43 | Automatsko otkazivanje rezervacije | Sistem automatski prati rok trajanja rezervacija i otkazuje istekle rezervacije. | Nizak | M | **Završeno** |
 | PB-44 | Napredna pretraga i filteri | Filtriranje knjiga po kategoriji, izdavaču i godini uz mogućnost kombinovanja filtera. | Nizak | M | **Završeno** |
 | PB-45 | Mjesečni izvještaji za upravu | Generisanje mjesečnih izvještaja o zaduživanjima, rezervacijama i članovima biblioteke. | Nizak | L | **Završeno** |
+| PB-57 | Pregled i filtriranje forumskih objava | Pregled i filtriranje objava u forumu | Nizak | M | **Završeno** |
+| PB-58 | Kreiranje i interakcija sa forumskim objavama | Korisnici mogu komentarisati postojeće forum objave i učestvovati u diskusiji | Nizak | M | **Završeno** |
+| PB-59 | Moderacija forumskog sadržaja | Administrator ili bibliotekar može obrisati neprimjerene forum objave i komentare | Nizak | S | **Završeno** |
 
 <br>
 
@@ -277,3 +279,120 @@ Tokom ovog sprinta implementiraju se funkcionalnosti vezane za:
 ---
 
 <br>
+
+## PB-57: Pregled i filtriranje forumskih objava
+
+### Naziv: Pregled forumskih objava
+### US-112: Kao korisnik sistema (član, bibliotekar ili administrator), želim pregledati sve objave na forumu kako bih mogao pratiti diskusije i aktivnosti zajednice.
+**Acceptance Criteria:**
+- Kada korisnik otvori sekciju "Forum", tada sistem prikazuje listu svih objava.
+- Kada se objave učitaju, tada se prikazuju u obliku kartica.
+- Na svakoj kartici sistem prikazuje naslov objave, autora, kategoriju, broj reakcija i broj komentara.
+- Sistem mora omogućiti scroll ukoliko postoji veliki broj objava.
+
+<br>
+
+---
+
+### Naziv: Filtriranje objava po kategoriji
+### US-113: Kao korisnik sistema, želim filtrirati objave prema kategorijama kako bih lakše pronašao relevantne diskusije.
+**Acceptance Criteria:**
+- Kada korisnik otvori sekciju "Forum", tada sistem prikazuje kategorije: "Opšta diskusija", "Preporuke knjiga", "Pitanja", "Recenzije" i "Sve objave".
+- Kada korisnik odabere određenu kategoriju, tada sistem prikazuje samo objave iz te kategorije.
+- Kada korisnik odabere opciju "Sve objave", tada sistem prikazuje sve objave bez filtriranja.
+- Aktivna kategorija mora biti jasno vizuelno označena.
+
+<br>
+
+---
+
+### Naziv: Pregled detalja objave
+### US-114: Kao korisnik sistema, želim otvoriti pojedinačnu objavu kako bih mogao pregledati kompletan sadržaj i komentare.
+**Acceptance Criteria:**
+- Kada korisnik klikne na karticu objave, tada sistem otvara detaljan prikaz objave.
+- Detaljan prikaz sadrži naslov, autora, kategoriju, datum objave i kompletan sadržaj objave.
+- Sistem prikazuje listu svih komentara vezanih za objavu.
+- Broj reakcija i komentara mora biti vidljiv na stranici objave.
+
+<br>
+
+---
+
+| **Prioritet** | Srednji |
+|---------------|-------|
+| **Poslovna vrijednost** | Omogućava korisnicima jednostavan pregled i pretragu sadržaja foruma, čime se podstiče aktivnost i komunikacija unutar bibliotečke zajednice. |
+| **Pretpostavke / Otvorena pitanja** | Objave postoje u sistemu i povezane su sa registrovanim korisnicima. |
+| **Veze i zavisnosti** | PB-17 Sistem prijave. <br> Modul korisničkih uloga i autorizacije. |
+---
+
+<br>
+
+## PB-58: Kreiranje i interakcija sa forumskim objavama
+
+### Naziv: Kreiranje nove objave
+### US-115: Kao korisnik sistema (član, bibliotekar ili administrator), želim kreirati novu objavu na forumu kako bih mogao učestvovati u diskusijama zajednice.
+**Acceptance Criteria:**
+- Kada korisnik klikne na dugme "Nova objava", tada sistem otvara formu za kreiranje objave.
+- Forma sadrži polja: kategorija, naslov i sadržaj objave.
+- Kada korisnik klikne na dugme "Objavi na forumu", tada sistem objavljuje novu objavu.
+- Nakon uspješne objave, nova objava je odmah vidljiva na forumu.
+- Sistem ne dozvoljava objavu ukoliko neka obavezna polja nisu unesena.
+
+<br>
+
+---
+
+### Naziv: Reagovanje na objavu
+### US-116: Kao korisnik sistema, želim lajkovati objavu kako bih mogao pokazati da mi se sadržaj sviđa ili da je koristan.
+**Acceptance Criteria:**
+- Kada korisnik otvori objavu, tada sistem prikazuje opciju za reakciju "Like".
+- Kada korisnik klikne na dugme za reakciju, tada sistem evidentira reakciju.
+- Nakon reakcije, broj lajkova se ažurira.
+- Jedan korisnik može ostaviti samo jednu reakciju na istu objavu.
+
+<br>
+
+---
+
+### Naziv: Dodavanje komentara na objavu
+### US-117: Kao korisnik sistema, želim komentarisati objavu kako bih mogao učestvovati u diskusiji sa drugim korisnicima.
+**Acceptance Criteria:**
+- Kada korisnik otvori objavu, tada sistem prikazuje formu za unos komentara.
+- Kada korisnik unese komentar i klikne na dugme "Objavi komentar", tada sistem sprema komentar.
+- Novi komentar se odmah prikazuje ispod objave.
+- Sistem prikazuje autora i datum komentara.
+- Sistem ne dozvoljava objavu praznog komentara.
+
+<br>
+
+---
+
+| **Prioritet** | Visok |
+|---------------|-------|
+| **Poslovna vrijednost** | Omogućava korisnicima aktivno učešće u zajednici kroz objavljivanje sadržaja, komentarisanje i reakcije na objave. |
+| **Pretpostavke / Otvorena pitanja** | Korisnik mora biti prijavljen u sistem kako bi mogao kreirati objave i komentare. |
+| **Veze i zavisnosti** | PB-17 Sistem prijave. <br> Modul korisničkih uloga i autorizacije. |
+---
+
+<br>
+
+## PB-59: Moderacija forumskog sadržaja
+
+### Naziv: Brisanje komentara od strane moderatora
+### US-118: Kao bibliotekar ili administrator, želim obrisati neprimjeren komentar kako bih održavao kvalitet diskusije na forumu.
+**Acceptance Criteria:**
+- Kada bibliotekar ili administrator otvori objavu, tada sistem prikazuje opciju za brisanje komentara.
+- Kada moderator klikne na opciju "Obriši komentar", tada sistem traži potvrdu akcije.
+- Nakon potvrde, komentar se uklanja iz sistema.
+- Član biblioteke nema mogućnost brisanja komentara drugih korisnika.
+
+<br>
+
+---
+
+| **Prioritet** | Srednji |
+|---------------|-------|
+| **Poslovna vrijednost** | Omogućava bibliotekarima i administratorima održavanje sigurnog i kvalitetnog prostora za komunikaciju korisnika. |
+| **Pretpostavke / Otvorena pitanja** | Bibliotekar i administrator imaju moderatorske privilegije nad forumskim sadržajem. |
+| **Veze i zavisnosti** | PB-58 Kreiranje i interakcija sa forumskim objavama. <br> Modul korisničkih uloga i autorizacije. |
+---
