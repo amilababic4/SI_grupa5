@@ -72,21 +72,16 @@ namespace SmartLib.Web.Controllers
             {
                 var upperSize = string.IsNullOrEmpty(size) ? "M" : size.ToUpper();
                 if (upperSize != "S" && upperSize != "M" && upperSize != "L")
-                {
                     upperSize = "M";
-                }
 
                 var client = _httpClientFactory.CreateClient();
-                
+
                 // Pokušaj 1: Open Library
                 var openLibraryUrl = $"https://covers.openlibrary.org/b/isbn/{normalizedIsbn}-{upperSize}.jpg?default=false";
                 var olResponse = await client.GetAsync(openLibraryUrl);
-
                 if (olResponse.IsSuccessStatusCode)
                 {
                     var imageBytes = await olResponse.Content.ReadAsByteArrayAsync();
-                    // OpenLibrary često vraća mali placeholder sliku sa tekstom "Image Not Available" 
-                    // ili prazan piksel. Te slike su obično manje od 3KB.
                     if (imageBytes != null && imageBytes.Length > 3000)
                     {
                         await _cache.SetBytesAsync(cacheKey, imageBytes, TimeSpan.FromHours(24));
@@ -98,9 +93,7 @@ namespace SmartLib.Web.Controllers
                 var apiKey = _configuration["GOOGLE_BOOKS_API_KEY"] ?? _configuration["GoogleBooks:ApiKey"];
                 var googleUrl = $"https://www.googleapis.com/books/v1/volumes?q=isbn:{normalizedIsbn}";
                 if (!string.IsNullOrWhiteSpace(apiKey))
-                {
                     googleUrl += $"&key={Uri.EscapeDataString(apiKey)}";
-                }
 
                 var googleResponse = await client.GetAsync(googleUrl);
                 if (googleResponse.IsSuccessStatusCode)
@@ -121,8 +114,6 @@ namespace SmartLib.Web.Controllers
                                     if (gbResponse.IsSuccessStatusCode)
                                     {
                                         var gbBytes = await gbResponse.Content.ReadAsByteArrayAsync();
-                                        // Google Books vraća onaj sivi placeholder sa linijama koji je obično oko 2-3 KB.
-                                        // Odbacujemo sve ispod 4500 bajtova kako bismo izbjegli placeholder.
                                         if (gbBytes != null && gbBytes.Length > 4500)
                                         {
                                             await _cache.SetBytesAsync(cacheKey, gbBytes, TimeSpan.FromHours(24));
@@ -140,34 +131,45 @@ namespace SmartLib.Web.Controllers
                 _logger.LogWarning("Greška prilikom dohvatanja korice za ISBN {Isbn}: {Message}", normalizedIsbn, ex.Message);
             }
 
-            // FALLBACK SVG (ako API nema sliku ili dođe do greške)
             var fallbackSvg = $@"<svg xmlns=""http://www.w3.org/2000/svg"" width=""300"" height=""450"" viewBox=""0 0 300 450"">
                 <rect width=""300"" height=""450"" fill=""#1e293b""/>
                 <rect x=""15"" y=""15"" width=""270"" height=""420"" fill=""none"" stroke=""#334155"" stroke-width=""2""/>
                 <text x=""150"" y=""200"" font-family=""sans-serif"" font-size=""24"" fill=""#64748b"" text-anchor=""middle"">Slika nije</text>
                 <text x=""150"" y=""240"" font-family=""sans-serif"" font-size=""24"" fill=""#64748b"" text-anchor=""middle"">dostupna</text>
             </svg>";
-            var svgBytes = System.Text.Encoding.UTF8.GetBytes(fallbackSvg);
-            return File(svgBytes, "image/svg+xml");
+            return File(System.Text.Encoding.UTF8.GetBytes(fallbackSvg), "image/svg+xml");
         }
 
-        public async Task<IActionResult> Index(string? naslov, string? autor, int page = 1, int pageSize = 16)
+        // ─── PB-44: Proširena Index akcija sa naprednim filterima ──────────────────
+        public async Task<IActionResult> Index(
+            string? naslov,
+            string? autor,
+            int? kategorijaId,
+            string? izdavac,
+            int? godinaIzdanja,
+            int page = 1,
+            int pageSize = 16)
         {
             if (page < 1) page = 1;
-
             if (pageSize <= 0) pageSize = 16;
 
             var booksVersion = _cacheVersions.BooksVersion;
             var categoriesVersion = _cacheVersions.CategoriesVersion;
             var titleKey = NormalizeCachePart(naslov);
             var authorKey = NormalizeCachePart(autor);
-            var cacheKey = $"books_index_v1_{booksVersion}_{categoriesVersion}_{titleKey}_{authorKey}_{page}_{pageSize}";
+            var katKey = kategorijaId?.ToString() ?? "all";
+            var izdKey = NormalizeCachePart(izdavac);
+            var godKey = godinaIzdanja?.ToString() ?? "all";
+
+            var cacheKey = $"books_index_v2_{booksVersion}_{categoriesVersion}_{titleKey}_{authorKey}_{katKey}_{izdKey}_{godKey}_{page}_{pageSize}";
 
             var cachedModel = await _cache.GetRecordAsync<KatalogViewModel>(cacheKey);
             if (cachedModel != null)
                 return View(cachedModel);
 
-            var (knjige, ukupno) = await _knjigaRepository.GetPagedAsync(naslov, autor, page, pageSize);
+            // PB-44: Prošireni poziv repozitorija sa svim filterima (US-78: kombinacija)
+            var (knjige, ukupno) = await _knjigaRepository.GetPagedAsync(
+                naslov, autor, page, pageSize, kategorijaId, izdavac, godinaIzdanja);
 
             var dtos = knjige.Select(k => new KnjigaDto
             {
@@ -181,11 +183,22 @@ namespace SmartLib.Web.Controllers
                 Opis = k.Opis,
                 BrojPrimjeraka = k.Primjerci.Count,
                 BrojDostupnih = k.Primjerci.Count(p => p.Status == "dostupan"),
-                ProsjecnaOcjena = k.Recenzije != null && k.Recenzije.Any() ? k.Recenzije.Average(r => r.Ocjena) : 0,
+                ProsjecnaOcjena = k.Recenzije != null && k.Recenzije.Any()
+                    ? k.Recenzije.Average(r => r.Ocjena)
+                    : 0,
                 BrojRecenzija = k.Recenzije?.Count ?? 0
             }).ToList();
 
             int ukupnoStrana = ukupno == 0 ? 1 : (int)Math.Ceiling((double)ukupno / pageSize);
+
+            // PB-44: Punimo dropdown podatke za filtere
+            var kategorije = (await _kategorijaRepository.GetAllAsync())
+                .Select(k => new KategorijaFilterDto { Id = k.Id, Naziv = k.Naziv ?? "" })
+                .OrderBy(k => k.Naziv)
+                .ToList();
+
+            var izdavaci = await _knjigaRepository.GetDistinctIzdavaciAsync();
+            var godine = await _knjigaRepository.GetDistinctGodineAsync();
 
             var model = new KatalogViewModel
             {
@@ -194,12 +207,20 @@ namespace SmartLib.Web.Controllers
                 UkupnoStrana = ukupnoStrana,
                 UkupnoStavki = ukupno,
                 VelicinaStrane = pageSize,
+                // Osnovna pretraga
                 Naslov = naslov,
-                Autor = autor
+                Autor = autor,
+                // PB-44: Napredni filteri
+                KategorijaId = kategorijaId,
+                Izdavac = izdavac,
+                GodinaIzdanja = godinaIzdanja,
+                // Dropdown podaci
+                Kategorije = kategorije,
+                Izdavaci = izdavaci,
+                Godine = godine
             };
 
             await _cache.SetRecordAsync(cacheKey, model, BookIndexCacheTtl);
-
             return View(model);
         }
 
@@ -247,23 +268,17 @@ namespace SmartLib.Web.Controllers
             var preferredBudget = (int)Math.Ceiling(totalTarget * 0.8);
             var surpriseBudget = totalTarget - preferredBudget;
 
-            // Dohvatamo sve knjige i shufflujemo ih svježe svaki put
             var allRandom = await _knjigaRepository.GetRandomAsync(50);
-            
-            // Osiguravamo unikatnost knjiga po Naslovu i Autoru
+
             var uniquePool = new List<Knjiga>();
             var seenPool = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             foreach (var b in allRandom)
             {
                 if (string.IsNullOrWhiteSpace(b.Naslov) || string.IsNullOrWhiteSpace(b.Autor)) continue;
                 var key = $"{b.Naslov.Trim()}|{b.Autor.Trim()}";
-                if (seenPool.Add(key))
-                {
-                    uniquePool.Add(b);
-                }
+                if (seenPool.Add(key)) uniquePool.Add(b);
             }
 
-            // Pravi shuffle (Fisher-Yates) za potpunu randomizaciju svakog zahtjeva
             for (int i = uniquePool.Count - 1; i > 0; i--)
             {
                 int j = Random.Shared.Next(i + 1);
@@ -300,9 +315,7 @@ namespace SmartLib.Web.Controllers
                     var transCacheKey = $"desc_trans_{book.Id}";
                     var cachedTrans = await _cache.GetRecordAsync<string>(transCacheKey);
                     if (!string.IsNullOrWhiteSpace(cachedTrans))
-                    {
                         descriptions.Add(cachedTrans);
-                    }
                     else
                     {
                         var translated = await TranslateToBosnianAsync(opis);
@@ -315,7 +328,7 @@ namespace SmartLib.Web.Controllers
                 {
                     var desc = await FetchDescriptionFromGoogleBooksAsync(book.Isbn);
                     descriptions.Add(desc);
-                    await Task.Delay(50); // Kratka pauza da ne bismo preplavili Google API
+                    await Task.Delay(50);
                 }
             }
 
@@ -324,19 +337,14 @@ namespace SmartLib.Web.Controllers
             {
                 var book = selectedBooks[i];
                 var description = descriptions[i];
-
-                // Prefer serving covers from our internal Korice endpoint (consistent caching/fallbacks).
                 var thumbnail = string.Empty;
                 if (!string.IsNullOrWhiteSpace(book.Isbn))
-                {
                     thumbnail = Url.Action("Korice", "Knjiga", new { isbn = book.Isbn, size = "L" }) ?? string.Empty;
-                }
                 else if (!string.IsNullOrWhiteSpace(book.SlikaUrl))
-                {
-                    // Fallback to stored external image URL if ISBN is not available
                     thumbnail = book.SlikaUrl;
-                }
-                bool isWildcard = book.Kategorija != null && surpriseCategories.Contains(book.Kategorija.Naziv, StringComparer.OrdinalIgnoreCase);
+
+                bool isWildcard = book.Kategorija != null &&
+                    surpriseCategories.Contains(book.Kategorija.Naziv, StringComparer.OrdinalIgnoreCase);
 
                 rawCards.Add(new ExploreCardViewModel
                 {
@@ -385,30 +393,22 @@ namespace SmartLib.Web.Controllers
                 var cacheKey = $"catalog_reco_{normalizedCategory}_{_cacheVersions.BooksVersion}_{_cacheVersions.CategoriesVersion}";
 
                 var cached = await _cache.GetRecordAsync<CatalogRecommendationResponse>(cacheKey);
-                if (cached != null)
-                    return Json(cached);
+                if (cached != null) return Json(cached);
 
                 var books = await _knjigaRepository.GetRandomAsync(50);
                 if (!books.Any()) return NotFound();
 
-                // Avoid always recommending the demo book when possible.
                 var nonDemo = books
                     .Where(b => !string.Equals(b.Naslov, "Demo knjiga", StringComparison.OrdinalIgnoreCase))
                     .ToList();
-                if (nonDemo.Any())
-                {
-                    books = nonDemo;
-                }
+                if (nonDemo.Any()) books = nonDemo;
 
                 Knjiga? book = null;
                 if (!string.IsNullOrWhiteSpace(category))
-                {
-                    book = books.FirstOrDefault(b => 
+                    book = books.FirstOrDefault(b =>
                         b.Kategorija?.Naziv?.Equals(category.Trim(), StringComparison.OrdinalIgnoreCase) ?? false);
-                }
 
                 book ??= books.OrderBy(_ => Random.Shared.Next()).FirstOrDefault();
-
                 if (book == null) return NotFound();
 
                 var response = new CatalogRecommendationResponse
@@ -450,9 +450,7 @@ namespace SmartLib.Web.Controllers
                     var transCacheKey = $"desc_trans_{cachedEntry.Dto.Id}";
                     var translatedDesc = await _cache.GetRecordAsync<string>(transCacheKey);
                     if (!string.IsNullOrWhiteSpace(translatedDesc))
-                    {
                         cachedEntry.Dto.Opis = translatedDesc;
-                    }
                     else
                     {
                         var translated = await TranslateToBosnianAsync(cachedEntry.Dto.Opis);
@@ -463,7 +461,7 @@ namespace SmartLib.Web.Controllers
                         }
                     }
                 }
-                
+
                 ViewBag.Primjerci = cachedEntry.Primjerci;
                 await SetRezervacijaViewBag(id);
                 ViewBag.Recenzije = await recenzijaRepository.GetByKnjigaIdAsync(id);
@@ -488,9 +486,7 @@ namespace SmartLib.Web.Controllers
                 var transCacheKey = $"desc_trans_{knjiga.Id}";
                 var translatedDesc = await _cache.GetRecordAsync<string>(transCacheKey);
                 if (!string.IsNullOrWhiteSpace(translatedDesc))
-                {
                     opis = translatedDesc;
-                }
                 else
                 {
                     var translated = await TranslateToBosnianAsync(opis);
@@ -660,10 +656,9 @@ namespace SmartLib.Web.Controllers
 
         [Authorize(Roles = "Bibliotekar,Administrator")]
         [HttpPost]
-        [ValidateAntiForgeryToken] // Sigurnosna zaštita koju već imaš u View-u
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
-            // 1. Provjera aktivnih zaduženja (US-28)
             if (await _knjigaRepository.HasActiveLoansAsync(id))
             {
                 TempData["ErrorMessage"] = "Knjiga ima aktivna zaduženja i ne može biti obrisana.";
@@ -674,10 +669,9 @@ namespace SmartLib.Web.Controllers
             try
             {
                 var success = await _knjigaRepository.DeleteAsync(id);
-
                 if (success)
                 {
-                    TempData["SuccessMessage"] = "Knjiga je uspješno obrisana iz kataloga."; // US-25
+                    TempData["SuccessMessage"] = "Knjiga je uspješno obrisana iz kataloga.";
                     changed = true;
                 }
                 else
@@ -695,7 +689,7 @@ namespace SmartLib.Web.Controllers
                 _cacheVersions.BumpBooksVersion();
                 _cacheVersions.BumpCategoriesVersion();
             }
-            return RedirectToAction(nameof(Index)); // US-29 (Osvježavanje liste)
+            return RedirectToAction(nameof(Index));
         }
 
         private async Task PopulateKategorije(int? selectedId = null)
@@ -711,12 +705,6 @@ namespace SmartLib.Web.Controllers
             return null;
         }
 
-
-
-
-
-
-
         private static int MapCoverZoom(string size) => size switch
         {
             "S" => 1,
@@ -728,18 +716,15 @@ namespace SmartLib.Web.Controllers
         {
             if (string.IsNullOrWhiteSpace(isbn)) return "Opis nije dostupan.";
             var normalizedIsbn = NormalizeIsbn(isbn);
-            
+
             var cacheKey = $"desc_{normalizedIsbn}";
             var cachedDesc = await _cache.GetRecordAsync<string>(cacheKey);
-            if (!string.IsNullOrEmpty(cachedDesc))
-                return cachedDesc;
-            
+            if (!string.IsNullOrEmpty(cachedDesc)) return cachedDesc;
+
             var apiKey = _configuration["GOOGLE_BOOKS_API_KEY"] ?? _configuration["GoogleBooks:ApiKey"];
             var url = $"https://www.googleapis.com/books/v1/volumes?q=isbn:{normalizedIsbn}";
             if (!string.IsNullOrWhiteSpace(apiKey))
-            {
                 url += $"&key={Uri.EscapeDataString(apiKey)}";
-            }
 
             try
             {
@@ -756,7 +741,7 @@ namespace SmartLib.Web.Controllers
                         {
                             var description = GetJsonString(volumeInfo, "description");
                             var trimmed = TrimText(description, 260);
-                            
+
                             if (trimmed != "Opis nije dostupan.")
                             {
                                 var translated = await TranslateToBosnianAsync(trimmed);
@@ -766,8 +751,6 @@ namespace SmartLib.Web.Controllers
                                 try
                                 {
                                     await _knjigaRepository.TryUpdateOpisByIsbnAsync(normalizedIsbn, finalText);
-                                    // Ne bumpamo BooksVersion jer bi to stalno invalidiralo keš za sve korisnike 
-                                    // dok se u pozadini prevode opisi knjiga.
                                 }
                                 catch (Exception ex)
                                 {
@@ -797,8 +780,6 @@ namespace SmartLib.Web.Controllers
             try
             {
                 var client = _httpClientFactory.CreateClient();
-                
-                // Postavljamo User-Agent jer Google Translate blokira zahtjeve bez njega (403 Forbidden)
                 client.DefaultRequestHeaders.UserAgent.Clear();
                 client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
 
@@ -822,15 +803,11 @@ namespace SmartLib.Web.Controllers
                                 {
                                     var part = element[0].GetString();
                                     if (!string.IsNullOrEmpty(part))
-                                    {
                                         translatedParts.Add(part);
-                                    }
                                 }
                             }
                             if (translatedParts.Any())
-                            {
                                 return string.Join(" ", translatedParts).Trim();
-                            }
                         }
                     }
                 }
@@ -840,7 +817,7 @@ namespace SmartLib.Web.Controllers
                 _logger.LogWarning("Greška pri prevođenju teksta na bosanski: {Message}", ex.Message);
             }
 
-            return text; // Vrati originalni tekst ako prevođenje ne uspije
+            return text;
         }
 
         private static string? GetJsonString(JsonElement element, string propertyName)

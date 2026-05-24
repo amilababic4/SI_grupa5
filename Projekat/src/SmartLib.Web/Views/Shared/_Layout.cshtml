@@ -14,6 +14,7 @@
     </script>
 
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/animations.css" asp-append-version="true" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -111,6 +112,7 @@
         [data-theme="dark"] .nd-logout-btn { color: #f87171 !important; }
         [data-theme="dark"] .nd-logout-btn:hover { background: rgba(248,113,113,.06) !important; }
     </style>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 
 @{
@@ -119,9 +121,145 @@
 
         var isFrontPage   = controller == "Home" && action == "Index";
         var isDarkNavPage = controller == "Vijest" || controller == "Kalendar";
+        var isCatalogPage = controller == "Knjiga" && action == "Index";
+        var isAuthenticated = User.Identity?.IsAuthenticated == true;
+
+        // Do not show animations for administrators and librarians.
+        var isAdminOrLib = User.IsInRole("Bibliotekar") || User.IsInRole("Administrator");
+
+        var showLoginWelcomeFromTemp = TempData["ShowWelcomeAnimation"]?.ToString() == "true";
+        var welcomeNameFromTemp = TempData["WelcomeName"]?.ToString();
+        var welcomeRole = User.IsInRole("Bibliotekar") || User.IsInRole("Administrator") ? "staff" : "member";
+
+        var showCatalogWelcomeOnce = Context.Session.GetString("ShowCatalogWelcomeOnce") == "true";
+        var welcomeNameFromSession = Context.Session.GetString("CatalogWelcomeName");
+
+        // Show the login welcome immediately, and the catalog welcome once per session for members.
+        var shouldShowAnimation = false;
+        if (showLoginWelcomeFromTemp && isAuthenticated)
+        {
+            shouldShowAnimation = true;
+        }
+        else if (isCatalogPage && isAuthenticated && !isAdminOrLib && showCatalogWelcomeOnce)
+        {
+            shouldShowAnimation = true;
+            Context.Session.Remove("ShowCatalogWelcomeOnce");
+            Context.Session.Remove("CatalogWelcomeName");
+        }
+
+        string bookText       = "";
+        string bookHeaderRight = "✦ DAŠAK INSPIRACIJE ✦";
+        string bookFooterLeft  = "ODABERITE SVOJU PRIČU";
+        string bookBtnText     = "Uđite u biblioteku ➔";
+
+        if (showLoginWelcomeFromTemp && isAuthenticated)
+        {
+            var name = !string.IsNullOrEmpty(welcomeNameFromTemp) ? welcomeNameFromTemp : User.Identity?.Name ?? "Član";
+            bookText = welcomeRole == "staff"
+                ? $"Dobrodošli nazad, {name}! Prijava je uspješna i svi alati su spremni."
+                : $"Dobrodošli nazad, {name}! Drago nam je što ste tu.";
+        }
+        else if (isCatalogPage && shouldShowAnimation)
+        {
+            var name = !string.IsNullOrEmpty(welcomeNameFromSession) ? welcomeNameFromSession : User.Identity?.Name ?? "Član";
+
+            // Dataset of randomised catalog quotes — famous authors & original poetic lines
+            var catalogQuotes = new[]
+            {
+                (h: "✦ VAŠA ČITAONICA ✦",    t: $"Svaka knjiga je novo putovanje, {name}. Pronađite priču koja govori baš vama.",                    f: "OTKRIJTE NOVE SVJETOVE"),
+                (h: "✦ RIZNICA PRIČA ✦",     t: $"Dobrodošli u trezor mašte, {name}! Hiljade svjetova čekaju da ih otkrijete.",                      f: "ZARONITE U STRANICE"),
+                (h: "✦ MUDROST DANA ✦",      t: "\"Čitalac živi hiljadu života. Onaj koji ne čita — samo jedan.\" — G.R.R. Martin",                   f: "ŽIVITE VIŠE ŽIVOTA"),
+                (h: "✦ DAŠAK INSPIRACIJE ✦", t: $"Između ovih korica krije se čitav jedan svijet, {name}. Koji ćete otvoriti danas?",                 f: "BIRAJTE SVOJU AVANTURU"),
+                (h: "✦ VAŠA BIBLIOTEKA ✦",   t: "\"Uvijek sam zamišljao da je Raj neka vrsta biblioteke.\" — Jorge Luis Borges",                      f: "DOBRODOŠLI U RAJ"),
+                (h: "✦ PORUKA ZA VAS ✦",     t: $"Prava knjiga te mijenja zauvijek, {name}. Pronađite je upravo ovdje.",                             f: "PRONAĐITE SVOJU"),
+                (h: "✦ DAŠAK MAŠTE ✦",       t: "Čitanje je sanjarenje s otvorenim očima — i vi ste upravo zakoračili u san.",                         f: "URONITE U PRIČE"),
+                (h: "✦ VAŠA KARTA ✦",        t: $"{name}, ovaj katalog je vaša karta do mjesta koja niste ni zamislili.",                             f: "KRENITE NA PUT"),
+                (h: "✦ MUDRE RIJEČI ✦",      t: "\"Ne sve one koji lutaju su izgubljeni.\" — J.R.R. Tolkien",                                         f: "ISTRAŽUJTE SLOBODNO"),
+                (h: "✦ NOVA STRANICA ✦",     t: "Svaka stranica je novi početak. Svaka knjiga — novi pogled na svijet.",                               f: "PRELISTAJTE KATALOG"),
+                (h: "✦ VAŠA PRIČA ✦",        t: $"Knjige ne završavaju — one se nastavljaju u vama, {name}.",                                         f: "NASTAVITE ČITATI"),
+                (h: "✦ KNJIŽEVNA BLAGA ✦",   t: "\"Knjige su ogledala — vidimo u njima ono što već nosimo u sebi.\" — J.K. Rowling",                   f: "PRONAĐITE SEBE"),
+                (h: "✦ TREZOR SNOVA ✦",      t: $"Biblioteka je trezor svih snova koje su ikad zapisali, {name}. Birajte mudro.",                      f: "ODABERITE SVOJU PRIČU"),
+                (h: "✦ AVANTURA ČEKA ✦",     t: $"{name}, vaša sljedeća omiljena knjiga strpljivo čeka. Ona je tu, negdje.",                          f: "PRONAĐITE JE"),
+                (h: "✦ MAGIJA STRANICA ✦",   t: "Samo dobra knjiga može te odvesti tamo gdje avion ne može.",                                          f: "LETITE RIJEČIMA"),
+            };
+
+            var pick = catalogQuotes[Random.Shared.Next(catalogQuotes.Length)];
+            bookText        = pick.t;
+            bookHeaderRight = pick.h;
+            bookFooterLeft  = pick.f;
+            bookBtnText     = "Istražite katalog ➔";
+        }
 }
 
-<body class="@(ViewData["BodyClass"] as string)">
+<body class="@(ViewData["BodyClass"] as string)" data-disable-animations="@(isAdminOrLib && !shouldShowAnimation ? "true" : "false")">
+
+    @if (shouldShowAnimation)
+    {
+        <!-- Book opening overlay (removed after animation or click) -->
+        <div id="book-overlay" aria-hidden="true">
+            <!-- Floating ambient particles -->
+            <div class="book-particles" aria-hidden="true">
+                <span class="particle p1"></span>
+                <span class="particle p2"></span>
+                <span class="particle p3"></span>
+                <span class="particle p4"></span>
+                <span class="particle p5"></span>
+                <span class="particle p6"></span>
+                <span class="particle p7"></span>
+                <span class="particle p8"></span>
+                <span class="particle p9"></span>
+                <span class="particle p10"></span>
+                <span class="particle p11"></span>
+                <span class="particle p12"></span>
+                <span class="particle p13"></span>
+                <span class="particle p14"></span>
+            </div>
+            <div class="book-container">
+                <div class="book" role="img" aria-label="Opening book animation">
+                    <div class="cover front">
+                        <div class="cover-side outer"></div>
+                        <div class="cover-side inner"></div>
+                    </div>
+                    <div class="pages">
+                        <!-- Left Page Sheet (swings open to the left with branding) -->
+                        <div class="page-sheet left-page">
+                            <div class="page-side outer"></div>
+                            <div class="page-side inner">
+                                <div class="page-content">
+                                    <div class="book-page-header">✦ KUTAK ZA ČITANJE ✦</div>
+                                    <div class="book-icon-container">
+                                        <svg class="book-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                                        </svg>
+                                    </div>
+                                    <h2 class="page-title">SmartLib</h2>
+                                    <div class="book-page-footer">@bookFooterLeft</div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Right Page Sheet (stays on the right with creative text) -->
+                        <div class="page-sheet right-page">
+                            <div class="page-side outer">
+                                <div class="page-content">
+                                    <span class="page-quote-bg" aria-hidden="true">&ldquo;</span>
+                                    <span class="corner-ornament corner-tl" aria-hidden="true"></span>
+                                    <span class="corner-ornament corner-tr" aria-hidden="true"></span>
+                                    <span class="corner-ornament corner-bl" aria-hidden="true"></span>
+                                    <span class="corner-ornament corner-br" aria-hidden="true"></span>
+                                    <div class="book-page-header">@bookHeaderRight</div>
+                                    <p class="page-text">@bookText</p>
+                                    <button id="close-overlay-btn" class="book-action-btn">@bookBtnText</button>
+                                </div>
+                            </div>
+                            <div class="page-side inner"></div>
+                        </div>
+                    </div>
+                    <div class="cover back"></div>
+                </div>
+            </div>
+        </div>
+    }
 
     <nav id="main-nav" class="smartlib-navbar @(isFrontPage ? "smartlib-navbar-front" : isDarkNavPage ? "smartlib-navbar-dark" : "smartlib-navbar-app")">
         <div class="smartlib-nav-inner">
@@ -137,9 +275,10 @@
                     <span class="brand-icon">📚</span>
                     <span class="brand-text">SmartLib</span>
                 </a>
+                <button id="menu-trigger" class="mobile-menu-btn" aria-label="Meni" style="background:none;border:none;cursor:pointer;font-size:1.5rem;display:none;">☰</button>
             </div>
 
-            <ul class="nav-links">
+            <ul class="nav-links" id="nav-menu">
                 @if (User.Identity?.IsAuthenticated == true)
                 {
                     @if (User.IsInRole("Administrator"))
@@ -165,18 +304,10 @@
                         <li><a asp-controller="Forum" asp-action="Index">Forum</a></li>
                         <li><a asp-controller="Knjiga" asp-action="Explore" class="nav-explore-link">Želiš nešto novo?</a></li>
                     }
-
-                    @if (!string.IsNullOrEmpty(User.Identity?.Name))
-                    {
-                        <li>
-                            <a asp-controller="Korisnik" asp-action="Profil" class="nav-user-name">
-                                @User.Identity.Name
-                            </a>
-                        </li>
-                    }
-
+                    <li class="nav-sep" role="separator"></li>
+                    <li><a asp-controller="Korisnik" asp-action="Profil">Moj profil</a></li>
                     <li>
-                        <form asp-controller="Auth" asp-action="Logout" method="post" class="nav-form">
+                        <form asp-controller="Auth" asp-action="Logout" method="post" style="display:contents">
                             <button type="submit" class="nav-link-btn">Odjava</button>
                         </form>
                     </li>
@@ -184,14 +315,14 @@
                 else
                 {
                     <li><a asp-controller="Vijest" asp-action="Index">Vijesti</a></li>
-                    <li><a asp-controller="Kalendar" asp-action="Index">Kalendar</a></li>
-                    <li>
+                    <li><a asp-controller="Kalendar" asp-action="Index">Kalendar</a></li>     
+                    <li class="menu-item">
                         <a asp-controller="Auth" asp-action="Login" class="nav-login-link">Prijava</a>
                     </li>
                 }
 
                 @* Dark mode toggle *@
-                <li>
+                <li class="menu-item">
                     <button id="theme-toggle" class="theme-toggle-btn" aria-label="Promijeni temu" title="Promijeni temu">
                         <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
                              fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -270,6 +401,8 @@
     <footer>
         <p>&copy; 2026 SmartLib — SI Grupa 5, ETF Sarajevo</p>
     </footer>
+
+    <script src="~/js/animations.js" asp-append-version="true" defer></script>
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {

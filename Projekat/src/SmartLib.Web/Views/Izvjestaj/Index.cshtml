@@ -1,0 +1,193 @@
+﻿@{
+    ViewData["Title"] = "Izvještaji";
+    int trenutnaGodina = ViewBag.TrenutnaGodina ?? DateTime.Now.Year;
+    int trenutniMjesec = ViewBag.TrenutniMjesec ?? DateTime.Now.Month;
+}
+
+<div class="page-shell">
+
+    @if (TempData["Greska"] != null)
+    {
+        <div class="alert-banner alert-banner--danger">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
+            @TempData["Greska"]
+        </div>
+    }
+
+    <!-- Page header -->
+    <div class="izvjestaj-page-header">
+        <div class="izvjestaj-page-header__left">
+            <div class="izvjestaj-page-header__icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                    <line x1="16" y1="13" x2="8" y2="13" />
+                    <line x1="16" y1="17" x2="8" y2="17" />
+                    <polyline points="10 9 9 9 8 9" />
+                </svg>
+            </div>
+            <div>
+                <h1 class="izvjestaj-page-header__title">Izvještaji</h1>
+                <p class="izvjestaj-page-header__subtitle">Generišite izvještaje po periodu i tipu</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="izvjestaj-layout">
+
+        <!-- Lijeva kolona: tip izvještaja -->
+        <div class="izvjestaj-card">
+            <div class="izvjestaj-card__head">
+                <h2 class="izvjestaj-card__title">Odaberite tip izvještaja</h2>
+            </div>
+            <div class="izvjestaj-tip-lista" id="tipLista">
+
+                <label class="izvjestaj-tip-item izvjestaj-tip-item--selected" data-tip="zaduzenja">
+                    <input type="radio" name="tipIzvjestaja" value="zaduzenja" checked hidden>
+                    <div class="izvjestaj-tip-item__icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                        </svg>
+                    </div>
+                    <div class="izvjestaj-tip-item__info">
+                        <span class="izvjestaj-tip-item__naziv">Zaduživanja knjiga</span>
+                        <span class="izvjestaj-tip-item__opis">Pregled svih zaduženja za odabrani period</span>
+                    </div>
+                    <div class="izvjestaj-tip-item__check">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12" /></svg>
+                    </div>
+                </label>
+
+                <!-- Placeholder za buduće izvještaje — lako se proširi -->
+                <label class="izvjestaj-tip-item" data-tip="rezervacije">
+                    <input type="radio" name="tipIzvjestaja" value="rezervacije" hidden>
+                    <div class="izvjestaj-tip-item__icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                            <line x1="16" y1="2" x2="16" y2="6" />
+                            <line x1="8" y1="2" x2="8" y2="6" />
+                            <line x1="3" y1="10" x2="21" y2="10" />
+                        </svg>
+                    </div>
+                    <div class="izvjestaj-tip-item__info">
+                        <span class="izvjestaj-tip-item__naziv">Rezervacije knjiga</span>
+                        <span class="izvjestaj-tip-item__opis">Pregled svih rezervacija za odabrani period</span>
+                    </div>
+                    <div class="izvjestaj-tip-item__check">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12" /></svg>
+                    </div>
+                </label>
+
+                <label class="izvjestaj-tip-item" data-tip="clanovi">
+                    <input type="radio" name="tipIzvjestaja" value="clanovi" hidden>
+                    <div class="izvjestaj-tip-item__icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                            <circle cx="9" cy="7" r="4" />
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                        </svg>
+                    </div>
+                    <div class="izvjestaj-tip-item__info">
+                        <span class="izvjestaj-tip-item__naziv">Članovi</span>
+                        <span class="izvjestaj-tip-item__opis">Pregled aktivnih članova i stanja članarina</span>
+                    </div>
+                    <div class="izvjestaj-tip-item__check">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12" /></svg>
+                    </div>
+                </label>
+
+            </div>
+        </div>
+
+        <!-- Desna kolona: forma za period -->
+        <div class="izvjestaj-card">
+            <div class="izvjestaj-card__head">
+                <h2 class="izvjestaj-card__title">Odaberite period</h2>
+            </div>
+
+            <form asp-action="Pregled" asp-controller="Izvjestaj" method="post" id="izvjestajForma">
+                <input type="hidden" name="tipIzvjestaja" id="hiddenTip" value="zaduzenja">
+
+                <div class="izvjestaj-forma-grid">
+                    <div class="form-group">
+                        <label class="form-label" for="selMjesec">Mjesec</label>
+                        <select id="selMjesec" name="mjesec" class="form-select" required>
+                            <option value="">— Odaberite —</option>
+                            @{
+                                string[] mieseci = { "Januar", "Februar", "Mart", "April", "Maj", "Juni",
+                                                        "Juli", "August", "Septembar", "Oktobar", "Novembar", "Decembar" };
+                                for (int m = 1; m <= 12; m++)
+                                {
+                                    <option value="@m" selected="@(m == trenutniMjesec ? "selected" : null)">@mieseci[m - 1]</option>
+                                }
+                            }
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="selGodina">Godina</label>
+                        <select id="selGodina" name="godina" class="form-select" required>
+                            <option value="">— Odaberite —</option>
+                            @for (int g = trenutnaGodina; g >= 2020; g--)
+                            {
+                                <option value="@g" selected="@(g == trenutnaGodina ? "selected" : null)">@g</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Preview kartice odabranog perioda -->
+                <div class="izvjestaj-period-preview" id="periodPreview">
+                    <div class="izvjestaj-period-preview__label">Odabrani period</div>
+                    <div class="izvjestaj-period-preview__val" id="periodPrikaz">—</div>
+                </div>
+
+                <button type="submit" class="btn btn-primary izvjestaj-btn-generiraj" id="btnGeneriraj">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        <polyline points="14 2 14 8 20 8" />
+                        <line x1="16" y1="13" x2="8" y2="13" />
+                    </svg>
+                    Generiši izvještaj
+                </button>
+
+            </form>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    const mieseciNazivi = ["Januar", "Februar", "Mart", "April", "Maj", "Juni",
+        "Juli", "August", "Septembar", "Oktobar", "Novembar", "Decembar"];
+
+    function azurirajPreview() {
+        const m = document.getElementById('selMjesec').value;
+        const g = document.getElementById('selGodina').value;
+        const el = document.getElementById('periodPrikaz');
+        if (m && g) {
+            el.textContent = mieseciNazivi[parseInt(m) - 1] + ' ' + g;
+        } else {
+            el.textContent = '—';
+        }
+    }
+
+    document.getElementById('selMjesec').addEventListener('change', azurirajPreview);
+    document.getElementById('selGodina').addEventListener('change', azurirajPreview);
+
+    // Sinhronizuj radio dugmad s hidden inputom
+    document.querySelectorAll('.izvjestaj-tip-item[data-tip]').forEach(item => {
+        item.addEventListener('click', () => {
+            document.querySelectorAll('.izvjestaj-tip-item').forEach(i => i.classList.remove('izvjestaj-tip-item--selected'));
+            item.classList.add('izvjestaj-tip-item--selected');
+            document.getElementById('hiddenTip').value = item.dataset.tip;
+            const radio = item.querySelector('input[type=radio]');
+            if (radio) radio.checked = true;
+        });
+    });
+
+    // Init preview
+    azurirajPreview();
+</script>

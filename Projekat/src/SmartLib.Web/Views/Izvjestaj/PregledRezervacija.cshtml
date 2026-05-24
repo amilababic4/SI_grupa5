@@ -1,0 +1,394 @@
+﻿@model SmartLib.Core.DTOs.MjesecneRezervacijeIzvjestajDto
+@{
+    ViewData["Title"] = $"Rezervacije — {Model.NazivMjeseca} {Model.Godina}";
+}
+
+<div class="page-shell">
+    <div class="izvjestaj-page-header">
+        <div class="izvjestaj-page-header__left">
+            <a asp-action="Index" asp-controller="Izvjestaj" class="btn-back">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6" /></svg>
+                Nazad
+            </a>
+            <div class="izvjestaj-page-header__icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <rect x="3" y="4" width="18" height="18" rx="2" />
+                    <line x1="16" y1="2" x2="16" y2="6" />
+                    <line x1="8" y1="2" x2="8" y2="6" />
+                    <line x1="3" y1="10" x2="21" y2="10" />
+                </svg>
+            </div>
+            <div>
+                <h1 class="izvjestaj-page-header__title">Izvještaj o rezervacijama</h1>
+                <p class="izvjestaj-page-header__subtitle">@Model.NazivMjeseca @Model.Godina · Generisano @Model.GenerisanoU.ToString("dd.MM.yyyy u HH:mm")</p>
+            </div>
+        </div>
+        <div class="izvjestaj-page-header__right">
+            <a asp-action="PdfRezervacije" asp-controller="Izvjestaj"
+               asp-route-mjesec="@Model.Mjesec" asp-route-godina="@Model.Godina"
+               class="btn btn-primary izvjestaj-pdf-btn" target="_blank">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="7 10 12 15 17 10" />
+                    <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+                Preuzmi PDF
+            </a>
+        </div>
+    </div>
+
+    <div class="izvjestaj-stat-grid">
+        <div class="izvjestaj-stat-card izvjestaj-stat-card--primary">
+            <div class="izvjestaj-stat-card__label">Ukupno rezervacija</div>
+            <div class="izvjestaj-stat-card__val">@Model.UkupnoRezervacija</div>
+        </div>
+        <div class="izvjestaj-stat-card izvjestaj-stat-card--success">
+            <div class="izvjestaj-stat-card__label">Aktivne</div>
+            <div class="izvjestaj-stat-card__val">@Model.AktivneRezervacije</div>
+        </div>
+        <div class="izvjestaj-stat-card izvjestaj-stat-card--muted">
+            <div class="izvjestaj-stat-card__label">Završene</div>
+            <div class="izvjestaj-stat-card__val">@Model.ZavrseneRezervacije</div>
+        </div>
+        <div class="izvjestaj-stat-card izvjestaj-stat-card--danger">
+            <div class="izvjestaj-stat-card__label">Otkazane</div>
+            <div class="izvjestaj-stat-card__val">@Model.OtkazaneRezervacije</div>
+        </div>
+    </div>
+
+    @if (!Model.Stavke.Any())
+    {
+        <div class="empty-state-card">
+            <div class="empty-state-card__icon">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3">
+                    <rect x="3" y="4" width="18" height="18" rx="2" />
+                    <line x1="16" y1="2" x2="16" y2="6" />
+                    <line x1="8" y1="2" x2="8" y2="6" />
+                    <line x1="3" y1="10" x2="21" y2="10" />
+                </svg>
+            </div>
+            <h3 class="empty-state-card__title">Nema podataka</h3>
+            <p class="empty-state-card__text">Nije pronađena nijedna rezervacija za period <strong>@Model.NazivMjeseca @Model.Godina</strong>.</p>
+            <a asp-action="Index" asp-controller="Izvjestaj" class="btn btn-secondary">Odaberi drugi period</a>
+        </div>
+    }
+    else
+    {
+        <div class="izvjestaj-table-card">
+            <div class="izvjestaj-table-card__head">
+                <span class="izvjestaj-table-card__title">Lista rezervacija</span>
+                <span class="izvjestaj-table-card__count">@Model.UkupnoRezervacija zapisa</span>
+            </div>
+            <div class="table-responsive">
+                <table class="sl-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Član</th>
+                            <th>Knjiga</th>
+                            <th>Autor</th>
+                            <th>Rezervisano</th>
+                            <th>Ističe</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var s in Model.Stavke)
+                        {
+                            <tr>
+                                <td class="sl-table__num">@s.RedniBroj</td>
+                                <td>
+                                    <div class="sl-table__name">@s.ClanImePrezime</div>
+                                    <div class="sl-table__sub">@s.ClanEmail</div>
+                                </td>
+                                <td class="sl-table__bold">@s.NaslovKnjige</td>
+                                <td class="sl-table__muted">@s.Autor</td>
+                                <td>@s.DatumRezervacije.ToString("dd.MM.yyyy")</td>
+                                <td>@(s.DatumIsteka?.ToString("dd.MM.yyyy") ?? "—")</td>
+                                <td>
+                                    <span class="status-badge status-badge--@s.Status.ToLower()">
+                                        @(s.Status == "aktivna" ? "Aktivna" : s.Status == "završena" ? "Završena" : "Otkazana")
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+
+    @if (Model.Stavke.Any())
+    {
+        <div class="izvjestaj-charts-grid">
+
+            <div class="izvjestaj-chart-card">
+                <div class="izvjestaj-chart-card__title">
+                    Raspodjela po statusu
+                </div>
+
+                <div class="izvjestaj-chart-card__sub">
+                    Udio svakog statusa rezervacija u odabranom periodu
+                </div>
+
+                <div class="izvjestaj-chart-legend">
+                    <span>
+                        <span class="leg-dot" style="background:#173b63"></span>
+                        Aktivne
+                    </span>
+
+                    <span>
+                        <span class="leg-dot" style="background:#64748b"></span>
+                        Završene
+                    </span>
+
+                    <span>
+                        <span class="leg-dot" style="background:#b42318"></span>
+                        Otkazane
+                    </span>
+                </div>
+
+                <div style="position:relative;width:100%;height:220px">
+                    <canvas id="chartDonut"
+                            role="img"
+                            aria-label="Raspodjela rezervacija po statusu za @Model.NazivMjeseca @Model.Godina">
+
+                        Aktivne: @Model.AktivneRezervacije,
+                        Završene: @Model.ZavrseneRezervacije,
+                        Otkazane: @Model.OtkazaneRezervacije.
+
+                    </canvas>
+                </div>
+            </div>
+
+            <div class="izvjestaj-chart-card">
+                <div class="izvjestaj-chart-card__title">
+                    Rezervacije po danima
+                </div>
+
+                <div class="izvjestaj-chart-card__sub">
+                    Broj novih rezervacija svaki dan u odabranom periodu
+                </div>
+
+                <div style="position:relative;width:100%;height:220px">
+                    <canvas id="chartBar"
+                            role="img"
+                            aria-label="Rezervacije po danima u @Model.NazivMjeseca @Model.Godina">
+                    </canvas>
+                </div>
+            </div>
+
+        </div>
+
+        @if (Model.TopKnjige.Any())
+        {
+            <div class="izvjestaj-chart-card" style="margin-bottom:1.5rem">
+
+                <div class="izvjestaj-chart-card__title">
+                    Najčešće rezervirane knjige
+                </div>
+
+                <div class="izvjestaj-chart-card__sub">
+                    Knjige s najviše rezervacija u @Model.NazivMjeseca @Model.Godina
+                </div>
+
+                <div style="position:relative;width:100%;height:@(Model.TopKnjige.Count * 48 + 60)px">
+                    <canvas id="chartHbar"
+                            role="img"
+                            aria-label="Top knjige po broju rezervacija">
+                    </canvas>
+                </div>
+
+            </div>
+        }
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+
+        <script>
+                const isDark = matchMedia('(prefers-color-scheme: dark)').matches;
+
+                const txt = isDark
+                    ? '#a1a1a1'
+                    : '#64748b';
+
+                const grid = isDark
+                    ? 'rgba(255,255,255,.07)'
+                    : 'rgba(0,0,0,.06)';
+
+                // Doughnut chart
+                new Chart(document.getElementById('chartDonut'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: [
+                            'Aktivne',
+                            'Završene',
+                            'Otkazane'
+                        ],
+                        datasets: [{
+                            data: [
+                                @Model.AktivneRezervacije,
+                                @Model.ZavrseneRezervacije,
+                                @Model.OtkazaneRezervacije
+                            ],
+                            backgroundColor: [
+                                '#173b63',
+                                '#64748b',
+                                '#b42318'
+                            ],
+                            borderWidth: 0,
+                            hoverOffset: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '62%',
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        }
+                    }
+                });
+
+                // Daily reservations chart
+                new Chart(document.getElementById('chartBar'), {
+                    type: 'bar',
+                    data: {
+                        labels: [
+                            @Html.Raw(string.Join(",",
+                                Enumerable.Range(1, Model.RezervacijePoDanima.Count)
+                                                .Select(d => $"'{d}'")))
+                ],
+                datasets: [{
+                    label: 'Rezervacije',
+                    data: [
+                        @string.Join(",", Model.RezervacijePoDanima)
+                    ],
+                    backgroundColor: '#173b63',
+                    borderRadius: 3,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: {
+                            color: txt,
+                            font: {
+                                size: 11
+                            },
+                            autoSkip: true,
+                            maxTicksLimit: 10
+                        },
+                        grid: {
+                            display: false
+                        },
+                        border: {
+                            display: false
+                        }
+                    },
+                    y: {
+                        ticks: {
+                            color: txt,
+                            font: {
+                                size: 11
+                            },
+                            stepSize: 1
+                        },
+                        grid: {
+                            color: grid
+                        },
+                        border: {
+                            display: false
+                        },
+                        min: 0
+                    }
+                }
+            }
+        });
+
+        @if (Model.TopKnjige.Any())
+                {
+                            <text>
+
+                            // Top reserved books chart
+                            new Chart(document.getElementById('chartHbar'), {
+                                type: 'bar',
+                                data: {
+                                    labels: [
+                                        @Html.Raw(string.Join(",",
+                                            Model.TopKnjige.Select(k =>
+                                                            $"'{k.Naslov.Replace("'", "\\'")}'")))
+                    ],
+                    datasets: [{
+                        label: 'Rezervacije',
+                        data: [
+                            @string.Join(",", Model.TopKnjige.Select(k => k.BrojZaduzenja))
+                        ],
+                        backgroundColor: [
+                            '#173b63',
+                            '#1e4d80',
+                            '#2563aa',
+                            '#3a7bd0',
+                            '#5a9be0'
+                        ],
+                        borderRadius: 4,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                color: txt,
+                                font: {
+                                    size: 12
+                                }
+                            },
+                            grid: {
+                                color: grid
+                            },
+                            border: {
+                                display: false
+                            },
+                            min: 0
+                        },
+                        y: {
+                            ticks: {
+                                color: txt,
+                                font: {
+                                    size: 12
+                                }
+                            },
+                            grid: {
+                                display: false
+                            },
+                            border: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+
+            </text>
+                                }
+        </script>
+    }
+</div>
