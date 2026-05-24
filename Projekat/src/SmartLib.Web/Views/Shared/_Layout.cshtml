@@ -370,6 +370,7 @@
                     <li><a asp-controller="Korisnik" asp-action="IndexBibliotekar">Bibliotekari</a></li>
                     <li><a asp-controller="Kategorija" asp-action="Index">Kategorije</a></li>
                     <li><a asp-controller="Forum" asp-action="Index">Forum</a></li>
+                    <li><a asp-controller="Izvjestaj" asp-action="Index">Izvještaji</a></li>
                     <li><a asp-controller="Admin" asp-action="AuditLog">Admin SmartLib</a></li>
                 }
                 else if (User.IsInRole("Bibliotekar"))
@@ -377,6 +378,7 @@
                     <li><a asp-controller="Zaduzenje" asp-action="Index">Zaduženja</a></li>
                     <li><a asp-controller="Rezervacija" asp-action="Index">Rezervacije</a></li>
                     <li><a asp-controller="Forum" asp-action="Index">Forum</a></li>
+                    <li><a asp-controller="Izvjestaj" asp-action="Index">Izvještaji</a></li>
                 }
                 else
                 {
