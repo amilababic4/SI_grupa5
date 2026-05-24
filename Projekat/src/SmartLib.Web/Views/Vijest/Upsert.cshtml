@@ -1,0 +1,123 @@
+@model SmartLib.Core.Models.Vijest
+@{
+    bool isEdit = Model.Id != 0;
+    ViewData["Title"] = isEdit ? "Uredi vijest" : "Dodaj vijest";
+}
+
+<style>
+.upsert-hero {
+    background: linear-gradient(135deg, #07111f 0%, #102845 50%, #173b63 100%);
+    padding: 3rem 2rem 2.5rem;
+    color: white;
+}
+.upsert-hero-inner { max-width: 760px; margin: 0 auto; }
+.upsert-kicker {
+    font-size: 0.74rem; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase;
+    color: #5A80C8; display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.8rem;
+}
+.upsert-kicker::before { content: ''; display: block; width: 22px; height: 1.5px; background: #5A80C8; }
+.upsert-title {
+    font-size: 1.9rem; font-family: "Plus Jakarta Sans", Arial, sans-serif;
+    font-weight: 800; letter-spacing: -0.04em; color: white;
+}
+.upsert-body { background: var(--sl-dark, #07111f); padding: 2.5rem 2rem 4rem; }
+.upsert-card {
+    max-width: 760px; margin: 0 auto;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 20px; padding: 2.4rem;
+}
+.form-group { margin-bottom: 1.4rem; }
+.form-label {
+    display: block; font-size: 0.85rem; font-weight: 700;
+    color: rgba(255,255,255,0.7); margin-bottom: 0.5rem; letter-spacing: 0.04em;
+}
+.form-control-dark {
+    width: 100%; padding: 0.75rem 1rem;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 10px; color: white;
+    font-size: 0.95rem; font-family: "Manrope", sans-serif;
+    transition: border-color 0.2s, background 0.2s;
+}
+.form-control-dark:focus {
+    outline: none;
+    border-color: #5A80C8;
+    background: rgba(90,128,200,0.08);
+}
+.form-control-dark::placeholder { color: rgba(255,255,255,0.3); }
+textarea.form-control-dark { resize: vertical; min-height: 160px; }
+select.form-control-dark option { background: #0f1e38; color: white; }
+.text-danger-light { color: #ff8a80; font-size: 0.8rem; margin-top: 0.3rem; display: block; }
+.form-actions { display: flex; gap: 0.8rem; justify-content: flex-end; flex-wrap: wrap; margin-top: 1.8rem; }
+.btn-submit-dark {
+    padding: 0.7rem 1.8rem; border-radius: 999px;
+    background: var(--royal, #1B3D8F); color: white;
+    font-family: "Manrope", sans-serif; font-weight: 700; font-size: 0.92rem;
+    border: none; cursor: pointer; transition: opacity 0.18s, transform 0.18s;
+}
+.btn-submit-dark:hover { opacity: 0.88; transform: translateY(-1px); }
+.btn-cancel-dark {
+    padding: 0.7rem 1.6rem; border-radius: 999px;
+    background: transparent; color: rgba(255,255,255,0.6);
+    font-family: "Manrope", sans-serif; font-weight: 700; font-size: 0.92rem;
+    border: 1px solid rgba(255,255,255,0.18); text-decoration: none;
+    transition: background 0.18s, color 0.18s;
+    display: inline-flex; align-items: center;
+}
+.btn-cancel-dark:hover { background: rgba(255,255,255,0.08); color: white; text-decoration: none; }
+</style>
+
+<div class="upsert-hero">
+    <div class="upsert-hero-inner">
+        <div class="upsert-kicker">@(isEdit ? "Uredi" : "Nova vijest")</div>
+        <h1 class="upsert-title">@(isEdit ? "Uredi vijest" : "Dodaj novu vijest")</h1>
+    </div>
+</div>
+
+<div class="upsert-body">
+    <div class="upsert-card">
+        <form asp-action="@(isEdit ? "Edit" : "Create")" asp-route-id="@(isEdit ? Model.Id : (int?)null)" method="post">
+            @Html.AntiForgeryToken()
+            @if (isEdit)
+            {
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="AutorId" />
+                <input type="hidden" asp-for="DatumObjave" />
+            }
+
+            <div class="form-group">
+                <label class="form-label" asp-for="Naslov">Naslov *</label>
+                <input class="form-control-dark" asp-for="Naslov" placeholder="Unesite naslov vijesti..." />
+                <span class="text-danger-light" asp-validation-for="Naslov"></span>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" asp-for="Kategorija">Kategorija</label>
+                <select class="form-control-dark" asp-for="Kategorija">
+                    <option value="Obavještenje">Obavještenje</option>
+                    <option value="Forum">Forum</option>
+                    <option value="Edukacija">Edukacija</option>
+                    <option value="Događaji">Događaji</option>
+                    <option value="Djeca">Djeca</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" asp-for="SlikaUrl">URL slike (opcionalno)</label>
+                <input class="form-control-dark" asp-for="SlikaUrl" placeholder="https://..." />
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" asp-for="Sadrzaj">Sadržaj *</label>
+                <textarea class="form-control-dark" asp-for="Sadrzaj" rows="8" placeholder="Unesite sadržaj vijesti..."></textarea>
+                <span class="text-danger-light" asp-validation-for="Sadrzaj"></span>
+            </div>
+
+            <div class="form-actions">
+                <a asp-action="Index" class="btn-cancel-dark">Odustani</a>
+                <button type="submit" class="btn-submit-dark">@(isEdit ? "Sačuvaj izmjene" : "Objavi vijest")</button>
+            </div>
+        </form>
+    </div>
+</div>

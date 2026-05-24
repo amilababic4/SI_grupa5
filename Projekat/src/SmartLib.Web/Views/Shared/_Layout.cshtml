@@ -17,21 +17,122 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* ── Hamburger ──────────────────────────────────────── */
+        .nav-brand { display: flex; align-items: center; gap: .4rem; }
+        .nav-hamburger {
+            width: 36px; height: 36px; border-radius: 9px;
+            border: 1.5px solid transparent; background: transparent;
+            cursor: pointer; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; gap: 5px;
+            flex-shrink: 0; transition: background .18s; padding: 0;
+            margin-left: -6px;
+        }
+        .nav-hamburger span { display: block; width: 17px; height: 1.8px; border-radius: 2px; transition: background .18s; }
+        .smartlib-navbar-app .nav-hamburger span { background: #334155; }
+        .smartlib-navbar-front .nav-hamburger span,
+        .smartlib-navbar-dark .nav-hamburger span { background: rgba(255,255,255,.85); }
+        .smartlib-navbar-app .nav-hamburger:hover { background: rgba(219,234,254,.9); }
+        .smartlib-navbar-front .nav-hamburger:hover,
+        .smartlib-navbar-dark .nav-hamburger:hover { background: rgba(255,255,255,.1); }
+        [data-theme="dark"] .smartlib-navbar-app .nav-hamburger span { background: rgba(255,255,255,.7); }
+        [data-theme="dark"] .smartlib-navbar-app .nav-hamburger:hover { background: rgba(255,255,255,.07); }
+
+        /* ── Drawer overlay ─────────────────────────────────── */
+        .nav-drawer-overlay {
+            position: fixed; inset: 0; z-index: 9000;
+            background: rgba(6,15,58,.52); backdrop-filter: blur(4px);
+            opacity: 0; pointer-events: none; transition: opacity .3s ease;
+        }
+        .nav-drawer-overlay.open { opacity: 1; pointer-events: all; }
+
+        /* ── Drawer panel ───────────────────────────────────── */
+        .nav-drawer {
+            position: fixed; top: 0; left: 0; bottom: 0; z-index: 9001;
+            width: 270px; max-width: 90vw; background: #ffffff;
+            box-shadow: 6px 0 40px rgba(6,15,58,.12);
+            transform: translateX(-100%);
+            transition: transform .38s cubic-bezier(.16,1,.3,1);
+            display: flex; flex-direction: column; overflow-y: auto;
+        }
+        .nav-drawer.open { transform: translateX(0); }
+        [data-theme="dark"] .nav-drawer { background: #0d1b2e; }
+
+        .nav-drawer-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 1.1rem 1.3rem;
+            border-bottom: 1px solid rgba(27,61,143,.08); flex-shrink: 0;
+        }
+        [data-theme="dark"] .nav-drawer-header { border-color: rgba(90,128,200,.12); }
+
+        .nav-drawer-brand {
+            display: flex; align-items: center; gap: .5rem;
+            font-weight: 800; font-size: 1rem; color: #1B3D8F;
+            text-decoration: none; font-family: "Manrope", sans-serif;
+        }
+        [data-theme="dark"] .nav-drawer-brand { color: rgba(255,255,255,.9); }
+        .nav-drawer-brand:hover { text-decoration: none; opacity: .85; }
+        .nav-drawer-brand-icon {
+            width: 28px; height: 28px; border-radius: 7px;
+            background: linear-gradient(135deg, #173b63, #2563eb);
+            display: flex; align-items: center; justify-content: center; font-size: .84rem;
+        }
+
+        .nav-drawer-close {
+            width: 32px; height: 32px; border-radius: 50%;
+            border: 1.5px solid rgba(27,61,143,.13); background: transparent;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            color: #3d4f70; transition: all .18s; flex-shrink: 0;
+        }
+        .nav-drawer-close:hover { background: rgba(27,61,143,.06); border-color: rgba(27,61,143,.24); }
+        [data-theme="dark"] .nav-drawer-close { border-color: rgba(90,128,200,.18); color: rgba(255,255,255,.55); }
+        [data-theme="dark"] .nav-drawer-close:hover { background: rgba(90,128,200,.1); }
+        .nav-drawer-close svg { width: 12px; height: 12px; }
+
+        .nav-drawer-links { list-style: none; padding: .5rem 0; flex: 1; }
+        .nav-drawer-links li a,
+        .nav-drawer-links li .nd-logout-btn {
+            display: flex; align-items: center; padding: .65rem 1.3rem;
+            font-size: .9rem; font-weight: 600; color: #0d1b2e;
+            text-decoration: none; transition: background .16s, color .16s;
+            border: none; background: none; cursor: pointer;
+            width: 100%; text-align: left; font-family: "Manrope", sans-serif;
+        }
+        .nav-drawer-links li a:hover { background: rgba(27,61,143,.05); color: #1B3D8F; text-decoration: none; }
+        [data-theme="dark"] .nav-drawer-links li a,
+        [data-theme="dark"] .nav-drawer-links li .nd-logout-btn { color: rgba(255,255,255,.78); }
+        [data-theme="dark"] .nav-drawer-links li a:hover { background: rgba(90,128,200,.09); color: rgba(255,255,255,.95); }
+
+        .nav-drawer-sep { height: 1px; background: rgba(27,61,143,.07); margin: .35rem 1.3rem; }
+        [data-theme="dark"] .nav-drawer-sep { background: rgba(90,128,200,.1); }
+
+        .nd-logout-btn { color: #b42318 !important; }
+        .nd-logout-btn:hover { background: rgba(180,35,24,.05) !important; color: #b42318 !important; }
+        [data-theme="dark"] .nd-logout-btn { color: #f87171 !important; }
+        [data-theme="dark"] .nd-logout-btn:hover { background: rgba(248,113,113,.06) !important; }
+    </style>
 </head>
 
 @{
         var controller = ViewContext.RouteData.Values["controller"]?.ToString();
         var action = ViewContext.RouteData.Values["action"]?.ToString();
 
-        var isFrontPage = controller == "Home" && action == "Index";
+        var isFrontPage   = controller == "Home" && action == "Index";
+        var isDarkNavPage = controller == "Vijest" || controller == "Kalendar";
 }
 
 <body class="@(ViewData["BodyClass"] as string)">
 
-    <nav id="main-nav" class="smartlib-navbar @(isFrontPage ? "smartlib-navbar-front" : "smartlib-navbar-app")">
+    <nav id="main-nav" class="smartlib-navbar @(isFrontPage ? "smartlib-navbar-front" : isDarkNavPage ? "smartlib-navbar-dark" : "smartlib-navbar-app")">
         <div class="smartlib-nav-inner">
 
             <div class="nav-brand">
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <button class="nav-hamburger" id="nav-hamburger" aria-label="Otvori meni" aria-expanded="false">
+                        <span></span><span></span><span></span>
+                    </button>
+                }
                 <a asp-controller="Home" asp-action="Index">
                     <span class="brand-icon">📚</span>
                     <span class="brand-text">SmartLib</span>
@@ -41,32 +142,28 @@
             <ul class="nav-links">
                 @if (User.Identity?.IsAuthenticated == true)
                 {
-                    <li><a asp-controller="Knjiga" asp-action="Index">Katalog</a></li>
-                    @if (!(User.IsInRole("Bibliotekar") || User.IsInRole("Administrator")))
+                    @if (User.IsInRole("Administrator"))
                     {
-                        <li><a asp-controller="Knjiga" asp-action="Explore" class="nav-explore-link">Želiš nešto novo?</a></li>
-                    }
-                }
-
-                @if (User.Identity?.IsAuthenticated == true)
-                {
-                    @if (User.IsInRole("Bibliotekar") || User.IsInRole("Administrator"))
-                    {
+                        <li><a asp-controller="Knjiga" asp-action="Index">Katalog</a></li>
                         <li><a asp-controller="Zaduzenje" asp-action="Index">Zaduženja</a></li>
                         <li><a asp-controller="Rezervacija" asp-action="Index">Rezervacije</a></li>
                         <li><a asp-controller="Korisnik" asp-action="Index">Članovi</a></li>
-                        @if (User.IsInRole("Administrator"))
-                        {
-                            <li><a asp-controller="Korisnik" asp-action="IndexBibliotekar">Bibliotekari</a></li>
-                        }
-                        <li><a asp-controller="Kategorija" asp-action="Index">Kategorije</a></li>
+                        <li><a asp-controller="Korisnik" asp-action="IndexBibliotekar">Bibliotekari</a></li>
+                    }
+                    else if (User.IsInRole("Bibliotekar"))
+                    {
+                        <li><a asp-controller="Knjiga" asp-action="Index">Katalog</a></li>
+                        <li><a asp-controller="Zaduzenje" asp-action="Index">Zaduženja</a></li>
+                        <li><a asp-controller="Rezervacija" asp-action="Index">Rezervacije</a></li>
                         <li><a asp-controller="Forum" asp-action="Index">Forum</a></li>
                     }
                     else
                     {
+                        <li><a asp-controller="Knjiga" asp-action="Index">Katalog</a></li>
                         <li><a asp-controller="Zaduzenje" asp-action="Moja">Moja zaduženja</a></li>
                         <li><a asp-controller="Rezervacija" asp-action="Moje">Moje rezervacije</a></li>
                         <li><a asp-controller="Forum" asp-action="Index">Forum</a></li>
+                        <li><a asp-controller="Knjiga" asp-action="Explore" class="nav-explore-link">Želiš nešto novo?</a></li>
                     }
 
                     @if (!string.IsNullOrEmpty(User.Identity?.Name))
@@ -86,6 +183,8 @@
                 }
                 else
                 {
+                    <li><a asp-controller="Vijest" asp-action="Index">Vijesti</a></li>
+                    <li><a asp-controller="Kalendar" asp-action="Index">Kalendar</a></li>
                     <li>
                         <a asp-controller="Auth" asp-action="Login" class="nav-login-link">Prijava</a>
                     </li>
@@ -111,6 +210,58 @@
             </ul>
         </div>
     </nav>
+
+    @* ── Side drawer (authenticated only) ─────────────────────────────── *@
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <div class="nav-drawer-overlay" id="nav-drawer-overlay" aria-hidden="true"></div>
+        <nav class="nav-drawer" id="nav-drawer" aria-label="Bočni meni">
+            <div class="nav-drawer-header">
+                <a asp-controller="Home" asp-action="Index" class="nav-drawer-brand">
+                    <span class="nav-drawer-brand-icon">📚</span>SmartLib
+                </a>
+                <button class="nav-drawer-close" id="nav-drawer-close" aria-label="Zatvori meni">
+                    <svg viewBox="0 0 14 14" fill="none"><path d="M2 2l10 10M12 2L2 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </button>
+            </div>
+            <ul class="nav-drawer-links">
+                <li><a asp-controller="Home" asp-action="Index">Početna</a></li>
+                <li><a asp-controller="Vijest" asp-action="Index">Vijesti</a></li>
+                <li><a asp-controller="Kalendar" asp-action="Index">Kalendar</a></li>
+                <li><a asp-controller="Knjiga" asp-action="Index">Katalog</a></li>
+                @if (User.IsInRole("Administrator"))
+                {
+                    <li><a asp-controller="Zaduzenje" asp-action="Index">Zaduženja</a></li>
+                    <li><a asp-controller="Rezervacija" asp-action="Index">Rezervacije</a></li>
+                    <li><a asp-controller="Korisnik" asp-action="Index">Članovi</a></li>
+                    <li><a asp-controller="Korisnik" asp-action="IndexBibliotekar">Bibliotekari</a></li>
+                    <li><a asp-controller="Kategorija" asp-action="Index">Kategorije</a></li>
+                    <li><a asp-controller="Forum" asp-action="Index">Forum</a></li>
+                    <li><a asp-controller="Admin" asp-action="AuditLog">Admin SmartLib</a></li>
+                }
+                else if (User.IsInRole("Bibliotekar"))
+                {
+                    <li><a asp-controller="Zaduzenje" asp-action="Index">Zaduženja</a></li>
+                    <li><a asp-controller="Rezervacija" asp-action="Index">Rezervacije</a></li>
+                    <li><a asp-controller="Forum" asp-action="Index">Forum</a></li>
+                }
+                else
+                {
+                    <li><a asp-controller="Zaduzenje" asp-action="Moja">Moja zaduženja</a></li>
+                    <li><a asp-controller="Rezervacija" asp-action="Moje">Moje rezervacije</a></li>
+                    <li><a asp-controller="Forum" asp-action="Index">Forum</a></li>
+                    <li><a asp-controller="Knjiga" asp-action="Explore">Želiš nešto novo?</a></li>
+                }
+                <li class="nav-drawer-sep" role="separator"></li>
+                <li><a asp-controller="Korisnik" asp-action="Profil">Moj profil</a></li>
+                <li>
+                    <form asp-controller="Auth" asp-action="Logout" method="post">
+                        <button type="submit" class="nd-logout-btn">Odjava</button>
+                    </form>
+                </li>
+            </ul>
+        </nav>
+    }
 
     <main class="@(ViewData["MainClass"] as string ?? "page-shell")">
         @RenderBody()
@@ -155,6 +306,36 @@
                     updateIcon();
                 });
             }
+
+            // ── Side drawer ──────────────────────────────────────────────────
+            const _drawer    = document.getElementById("nav-drawer");
+            const _dOverlay  = document.getElementById("nav-drawer-overlay");
+            const _hamburger = document.getElementById("nav-hamburger");
+            const _dClose    = document.getElementById("nav-drawer-close");
+
+            function openDrawer() {
+                if (!_drawer) return;
+                _drawer.classList.add("open");
+                _dOverlay.classList.add("open");
+                _hamburger.setAttribute("aria-expanded", "true");
+                document.body.style.overflow = "hidden";
+            }
+            function closeDrawer() {
+                if (!_drawer) return;
+                _drawer.classList.remove("open");
+                _dOverlay.classList.remove("open");
+                if (_hamburger) _hamburger.setAttribute("aria-expanded", "false");
+                document.body.style.overflow = "";
+            }
+
+            if (_hamburger) _hamburger.addEventListener("click", openDrawer);
+            if (_dClose)    _dClose.addEventListener("click", closeDrawer);
+            if (_dOverlay)  _dOverlay.addEventListener("click", closeDrawer);
+            if (_drawer) {
+                _drawer.querySelectorAll("a").forEach(a => a.addEventListener("click", closeDrawer));
+                _drawer.querySelectorAll('button[type="submit"]').forEach(b => b.addEventListener("click", closeDrawer));
+            }
+            document.addEventListener("keydown", e => { if (e.key === "Escape") closeDrawer(); });
         });
     </script>
 

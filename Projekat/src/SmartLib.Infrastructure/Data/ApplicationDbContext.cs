@@ -25,6 +25,8 @@ namespace SmartLib.Infrastructure.Data
         public DbSet<ForumKomentar> ForumKomentari => Set<ForumKomentar>();
         public DbSet<ForumReakcija> ForumReakcije => Set<ForumReakcija>();
         public DbSet<Recenzija> Recenzije => Set<Recenzija>();
+        public DbSet<Vijest> Vijesti => Set<Vijest>();
+        public DbSet<Dogadjaj> Dogadjaji => Set<Dogadjaj>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // ─── ULOGA ───────────────────────────────────────────────────────────
@@ -311,6 +313,39 @@ namespace SmartLib.Infrastructure.Data
                 e.HasOne(r => r.Korisnik)
                  .WithMany()
                  .HasForeignKey(r => r.KorisnikId)
+                 .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // ─── VIJEST ───────────────────────────────────────────────────────────
+            modelBuilder.Entity<Vijest>(e =>
+            {
+                e.HasKey(v => v.Id);
+                e.Property(v => v.Naslov).IsRequired().HasMaxLength(300);
+                e.Property(v => v.Sadrzaj).IsRequired().HasColumnType("longtext");
+                e.Property(v => v.Kategorija).IsRequired().HasMaxLength(100);
+                e.Property(v => v.SlikaUrl).HasMaxLength(512);
+                e.Property(v => v.DatumObjave).IsRequired();
+
+                e.HasOne(v => v.Autor)
+                 .WithMany()
+                 .HasForeignKey(v => v.AutorId)
+                 .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // ─── DOGADJAJ ─────────────────────────────────────────────────────────
+            modelBuilder.Entity<Dogadjaj>(e =>
+            {
+                e.HasKey(d => d.Id);
+                e.Property(d => d.Naslov).IsRequired().HasMaxLength(300);
+                e.Property(d => d.Opis).HasMaxLength(2000);
+                e.Property(d => d.Datum).IsRequired();
+                e.Property(d => d.Sat).HasMaxLength(20);
+                e.Property(d => d.Lokacija).HasMaxLength(200);
+                e.Property(d => d.Kategorija).IsRequired().HasMaxLength(100);
+
+                e.HasOne(d => d.Autor)
+                 .WithMany()
+                 .HasForeignKey(d => d.AutorId)
                  .OnDelete(DeleteBehavior.Restrict);
             });
         }

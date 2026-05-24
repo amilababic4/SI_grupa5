@@ -15,17 +15,23 @@ namespace SmartLib.Web.Controllers
         private readonly IBookRecommender _bookRecommender;
         private readonly IDistributedCache _cache;
         private readonly CacheVersionStore _cacheVersions;
+        private readonly IVijestRepository _vijestRepository;
+        private readonly IDogadjajRepository _dogadjajRepository;
 
         public HomeController(
             IKnjigaRepository knjigaRepository,
             IBookRecommender bookRecommender,
             IDistributedCache cache,
-            CacheVersionStore cacheVersions)
+            CacheVersionStore cacheVersions,
+            IVijestRepository vijestRepository,
+            IDogadjajRepository dogadjajRepository)
         {
             _knjigaRepository = knjigaRepository;
             _bookRecommender = bookRecommender;
             _cache = cache;
             _cacheVersions = cacheVersions;
+            _vijestRepository = vijestRepository;
+            _dogadjajRepository = dogadjajRepository;
         }
 
         public async Task<IActionResult> Index()
@@ -81,6 +87,16 @@ namespace SmartLib.Web.Controllers
                     viewModel.RecommendedKnjige = recoDtos;
                 }
             }
+
+            var allVijesti = await _vijestRepository.GetAllAsync();
+            viewModel.RecentVijesti = allVijesti.Take(4).ToList();
+
+            var allDogadjaji = await _dogadjajRepository.GetAllAsync();
+            viewModel.UpcomingDogadjaji = allDogadjaji
+                .Where(d => d.Datum.Date >= DateTime.Today)
+                .OrderBy(d => d.Datum)
+                .Take(4)
+                .ToList();
 
             return View(viewModel);
         }

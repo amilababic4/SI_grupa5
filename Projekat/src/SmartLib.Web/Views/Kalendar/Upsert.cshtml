@@ -1,0 +1,136 @@
+@model SmartLib.Core.Models.Dogadjaj
+@{
+    bool isEdit = Model.Id != 0;
+    ViewData["Title"] = isEdit ? "Uredi događaj" : "Dodaj događaj";
+}
+
+<style>
+.upsert-hero {
+    background: linear-gradient(135deg, #07111f 0%, #102845 50%, #173b63 100%);
+    padding: 3rem 2rem 2.5rem; color: white;
+}
+.upsert-hero-inner { max-width: 760px; margin: 0 auto; }
+.upsert-kicker {
+    font-size: 0.74rem; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase;
+    color: #5A80C8; display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.8rem;
+}
+.upsert-kicker::before { content: ''; display: block; width: 22px; height: 1.5px; background: #5A80C8; }
+.upsert-title {
+    font-size: 1.9rem; font-family: "Plus Jakarta Sans", Arial, sans-serif;
+    font-weight: 800; letter-spacing: -0.04em; color: white;
+}
+.upsert-body { background: var(--porcelain, #E8EDF8); padding: 2.5rem 2rem 4rem; }
+.upsert-card {
+    max-width: 760px; margin: 0 auto;
+    background: white;
+    border: 1px solid rgba(13,27,46,0.08);
+    border-radius: 20px; padding: 2.4rem;
+    box-shadow: 0 8px 30px rgba(13,27,46,0.06);
+}
+.form-group { margin-bottom: 1.4rem; }
+.form-label {
+    display: block; font-size: 0.85rem; font-weight: 700;
+    color: var(--ink-mid, #3d4f70); margin-bottom: 0.5rem; letter-spacing: 0.04em;
+}
+.form-control-light {
+    width: 100%; padding: 0.72rem 1rem;
+    background: var(--porcelain, #E8EDF8);
+    border: 1.5px solid rgba(13,27,46,0.12);
+    border-radius: 10px; color: var(--ink, #0d1b2e);
+    font-size: 0.95rem; font-family: "Manrope", sans-serif;
+    transition: border-color 0.2s, background 0.2s;
+}
+.form-control-light:focus {
+    outline: none;
+    border-color: var(--royal, #1B3D8F);
+    background: white;
+}
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+select.form-control-light option { background: white; }
+textarea.form-control-light { resize: vertical; min-height: 120px; }
+.text-danger-sm { color: #b42318; font-size: 0.8rem; margin-top: 0.3rem; display: block; }
+.form-actions { display: flex; gap: 0.8rem; justify-content: flex-end; flex-wrap: wrap; margin-top: 1.8rem; }
+.btn-submit {
+    padding: 0.7rem 1.8rem; border-radius: 999px;
+    background: var(--royal, #1B3D8F); color: white;
+    font-family: "Manrope", sans-serif; font-weight: 700; font-size: 0.92rem;
+    border: none; cursor: pointer; transition: opacity 0.18s, transform 0.18s;
+}
+.btn-submit:hover { opacity: 0.88; transform: translateY(-1px); }
+.btn-cancel {
+    padding: 0.7rem 1.6rem; border-radius: 999px;
+    background: transparent; color: var(--ink-mid, #3d4f70);
+    font-family: "Manrope", sans-serif; font-weight: 700; font-size: 0.92rem;
+    border: 1.5px solid rgba(13,27,46,0.18); text-decoration: none;
+    display: inline-flex; align-items: center;
+    transition: background 0.18s, color 0.18s;
+}
+.btn-cancel:hover { background: rgba(13,27,46,0.05); color: var(--ink); text-decoration: none; }
+@@media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
+</style>
+
+<div class="upsert-hero">
+    <div class="upsert-hero-inner">
+        <div class="upsert-kicker">@(isEdit ? "Uredi" : "Novi događaj")</div>
+        <h1 class="upsert-title">@(isEdit ? "Uredi događaj" : "Dodaj novi događaj")</h1>
+    </div>
+</div>
+
+<div class="upsert-body">
+    <div class="upsert-card">
+        <form asp-action="@(isEdit ? "Edit" : "Create")" asp-route-id="@(isEdit ? Model.Id : (int?)null)" method="post">
+            @Html.AntiForgeryToken()
+            @if (isEdit)
+            {
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="AutorId" />
+            }
+
+            <div class="form-group">
+                <label class="form-label" asp-for="Naslov">Naziv događaja *</label>
+                <input class="form-control-light" asp-for="Naslov" placeholder="Npr. Radionica: Kako čitati više..." />
+                <span class="text-danger-sm" asp-validation-for="Naslov"></span>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" asp-for="Datum">Datum *</label>
+                    <input class="form-control-light" type="date" asp-for="Datum"
+                           value="@Model.Datum.ToString("yyyy-MM-dd")" />
+                    <span class="text-danger-sm" asp-validation-for="Datum"></span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" asp-for="Sat">Sat (opcionalno)</label>
+                    <input class="form-control-light" asp-for="Sat" placeholder="Npr. 18:00" />
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" asp-for="Kategorija">Kategorija</label>
+                    <select class="form-control-light" asp-for="Kategorija">
+                        <option>Edukacija</option>
+                        <option>Zajednica</option>
+                        <option>Djeca</option>
+                        <option>Predavanje</option>
+                        <option>Ostalo</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" asp-for="Lokacija">Lokacija (opcionalno)</label>
+                    <input class="form-control-light" asp-for="Lokacija" placeholder="Npr. Čitaonica, prizemlje" />
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" asp-for="Opis">Kratki opis / napomena</label>
+                <textarea class="form-control-light" asp-for="Opis" rows="4" placeholder="Slobodan ulaz, za prijavljene članove..."></textarea>
+            </div>
+
+            <div class="form-actions">
+                <a asp-action="Index" class="btn-cancel">Odustani</a>
+                <button type="submit" class="btn-submit">@(isEdit ? "Sačuvaj izmjene" : "Dodaj događaj")</button>
+            </div>
+        </form>
+    </div>
+</div>

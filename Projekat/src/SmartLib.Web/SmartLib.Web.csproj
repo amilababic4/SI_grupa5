@@ -20,6 +20,7 @@
 	  </PackageReference>
 	  <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.*" />
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.*" />
+    <PackageReference Include="Markdig" Version="0.37.0" />
   </ItemGroup>
 
 </Project>
