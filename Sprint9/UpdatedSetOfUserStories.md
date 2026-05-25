@@ -949,6 +949,17 @@ PB-26 Upravljanje korisnicima. <br> PB-20 Profil člana|
 
 ---
 
+### Naziv: Status recenzije u historiji zaduženja
+### US-134: Kao član biblioteke, želim vidjeti da li sam ostavio recenziju za vraćenu knjigu, kako bih znao da li trebam dodati recenziju.
+**Acceptance Criteria:**
+- Za svaku vraćenu knjigu sistem prikazuje status "Recenzija ostavljena" ili opciju "Ocijeni knjigu".
+- Za knjige koje još nisu vraćene, prikazuje se neutralna oznaka bez akcije.
+- Opcija "Ocijeni knjigu" vodi na formu za recenziju odabrane knjige.
+
+<br>
+
+---
+
 | **Prioritet** | Visok |
 |---------------|-------|
 | **Poslovna vrijednost** | Omogućava članovima jasan pregled trenutnih zaduženja i rokova vraćanja, što smanjuje kašnjenja i rasterećuje bibliotekare. |
@@ -1827,10 +1838,203 @@ PB-26 Upravljanje korisnicima. <br> PB-20 Profil člana|
 
 ---
 
+### Naziv: Filtriranje forum tema po kategoriji
+
+### US-126: Kao član biblioteke, želim filtrirati forum teme po kategoriji, kako bih brže pronašao diskusije koje me zanimaju.
+**Acceptance Criteria:**
+- Na stranici foruma prikazane su dostupne kategorije.
+- Kada član odabere kategoriju, prikazuju se samo teme iz te kategorije.
+- Odabrana kategorija je jasno označena u UI.
+- Član može vratiti prikaz na sve teme.
+
+<br>
+
+---
+
 | **Prioritet** | Srednji |
 |---------------|---------|
 | **Poslovna vrijednost** | Povećava interakciju članova biblioteke i omogućava razvoj zajednice oko čitanja, preporuka i bibliotečkih aktivnosti. |
 | **Pretpostavke / Otvorena pitanja** | Forum je dostupan prijavljenim korisnicima u skladu sa njihovom ulogom. |
 | **Veze i zavisnosti** | Sistem prijave korisnika. <br> Navigacija za članove biblioteke. |
+
+---
+
+<br>
+
+## PB-63: Prijava neadekvatnog sadržaja
+
+### Naziv: Prijava forum komentara
+
+### US-127: Kao član biblioteke, želim prijaviti neadekvatan komentar na forumu, kako bi bibliotekar ili administrator mogao reagovati.
+**Acceptance Criteria:**
+- Prijavljeni član može prijaviti komentar na forumu.
+- Jedan član ne može više puta prijaviti isti komentar.
+- Sistem evidentira prijavu sa datumom i korisnikom koji prijavljuje.
+- Nakon prijave, administrator ili bibliotekar dobija obavijest o prijavljenom komentaru.
+
+<br>
+
+---
+
+| **Prioritet** | Srednji |
+|---------------|---------|
+| **Poslovna vrijednost** | Omogućava pravovremeno reagovanje na neprimjeren sadržaj i štiti kvalitet zajednice. |
+| **Pretpostavke / Otvorena pitanja** | Forum je dostupan prijavljenim korisnicima. <br> Definisan kanal za obavijesti admina/bibliotekara. |
+| **Veze i zavisnosti** | PB-59 Forum zajednice za članove. <br> Sistem prijave korisnika. |
+
+---
+
+<br>
+
+## PB-60: Recenzije i ocjene knjiga
+
+### Naziv: Ocjenjivanje knjige zvjezdicama
+
+### US-120: Kao član biblioteke, želim ocijeniti knjigu od 1 do 5 zvjezdica, kako bih izrazio svoje mišljenje o knjizi.
+**Acceptance Criteria:**
+- Prijavljeni član može ostaviti ocjenu za knjigu.
+- Ocjena mora biti u rasponu od 1 do 5.
+- Jedan član može ocijeniti istu knjigu samo jednom.
+- Prosječna ocjena i broj ocjena prikazuju se na detaljima knjige i u katalogu.
+
+<br>
+
+---
+
+### Naziv: Dodavanje recenzije uz ocjenu
+
+### US-121: Kao član biblioteke, želim uz ocjenu ostaviti kratku recenziju knjige, kako bih drugim korisnicima dao dodatni kontekst.
+**Acceptance Criteria:**
+- Recenzija (komentar) je opcionalna, ali ocjena je obavezna.
+- Komentar ne smije biti prazan ako je unesen.
+- Sistem filtrira neprimjeren sadržaj i prikazuje jasnu poruku o grešci.
+- Recenzija se prikazuje uz ime autora i datum objave.
+- Nakon uspješnog slanja recenzije, korisnik vidi potvrdu na stranici detalja knjige.
+- Nakon neuspješnog pokušaja, korisnik vidi poruku o grešci na stranici detalja knjige.
+
+<br>
+
+---
+
+### Naziv: Uklanjanje neadekvatne recenzije
+
+### US-122: Kao bibliotekar ili administrator, želim ukloniti neadekvatnu recenziju, kako bi sadržaj ostao prikladan za sve korisnike.
+**Acceptance Criteria:**
+- Bibliotekar ili administrator može ukloniti recenziju sa stranice detalja knjige.
+- Sistem traži potvrdu prije uklanjanja recenzije.
+- Nakon uklanjanja, recenzija više nije vidljiva korisnicima.
+- Sistem prikazuje poruku o uspješnom uklanjanju.
+
+<br>
+
+---
+
+| **Prioritet** | Srednji |
+|---------------|---------|
+| **Poslovna vrijednost** | Omogućava korisnicima da dijele mišljenja o knjigama i pomaže drugima u odabiru literature. |
+| **Pretpostavke / Otvorena pitanja** | Prijavljeni korisnici imaju pristup detaljima knjige. <br> Definisan je način filtriranja neprimjerenog sadržaja. |
+| **Veze i zavisnosti** | PB-28 Pregled kataloga knjiga. <br> Sistem prijave korisnika. |
+
+---
+
+<br>
+
+## PB-61: Moderacija sadržaja foruma
+
+### Naziv: Uklanjanje neadekvatnih komentara
+
+### US-123: Kao bibliotekar ili administrator, želim ukloniti neadekvatan komentar na forumu, kako bi diskusija ostala pristojna i korisna.
+**Acceptance Criteria:**
+- Bibliotekar ili administrator može ukloniti komentar u okviru forum teme.
+- Sistem traži potvrdu prije uklanjanja komentara.
+- Nakon uklanjanja, komentar više nije vidljiv korisnicima.
+- Sistem prikazuje poruku o uspješnom uklanjanju.
+
+<br>
+
+---
+
+| **Prioritet** | Srednji |
+|---------------|---------|
+| **Poslovna vrijednost** | Osigurava kvalitet i sigurnost komunikacije unutar forumske zajednice. |
+| **Pretpostavke / Otvorena pitanja** | Forum je dostupan prijavljenim korisnicima u skladu sa njihovom ulogom. |
+| **Veze i zavisnosti** | PB-59 Forum zajednice za članove. <br> Sistem prijave korisnika. |
+
+---
+
+<br>
+
+## PB-62: UX poboljšanja kataloga
+
+### Naziv: Odabir broja knjiga po stranici
+
+### US-124: Kao korisnik sistema, želim odabrati koliko se knjiga prikazuje po stranici, kako bih prilagodio pregled kataloga svojim potrebama.
+**Acceptance Criteria:**
+- Korisnik može izabrati broj knjiga po stranici (npr. 6, 12, 24).
+- Nakon promjene, katalog se odmah ažurira.
+- Odabrana vrijednost ostaje aktivna tokom sesije.
+- Paginacija se prilagođava odabranom broju knjiga po stranici.
+
+<br>
+
+---
+
+### Naziv: Animacije pri učitavanju i navigaciji kataloga
+
+### US-125: Kao korisnik sistema, želim da stranice imaju blage animacije pri učitavanju i otvaranju kataloga, kako bi interfejs bio prijatniji i moderniji.
+**Acceptance Criteria:**
+- Prilikom učitavanja stranice prikazuje se kratka ulazna animacija.
+- Klik na navigacijsku stavku "Katalog" pokreće glatku tranziciju.
+- Animacije ne smiju usporavati funkcionalnost ili onemogućiti interakciju.
+- Animacije su konzistentne na desktop i mobilnim uređajima.
+
+<br>
+
+---
+
+| **Prioritet** | Nizak |
+|---------------|---------|
+| **Poslovna vrijednost** | Poboljšava korisnički doživljaj i prilagođava prikaz kataloga različitim navikama korisnika. |
+| **Pretpostavke / Otvorena pitanja** | Katalog knjiga je implementiran sa paginacijom. |
+| **Veze i zavisnosti** | PB-28 Pregled kataloga knjiga. |
+
+---
+
+<br>
+
+## PB-64: Indikatori procitanosti knjiga
+
+### Naziv: Vizuelni indikator procitanosti
+
+### US-132: Kao član biblioteke, želim vidjeti indikator da je knjiga već pročitana, kako bih lakše razlikovao pročitane i nepročitane naslove.
+**Acceptance Criteria:**
+- Kada je član prijavljen, sistem označava pročitane knjige u katalogu.
+- Indikator je jasan i vidljiv bez otvaranja detalja knjige.
+- Indikator se prikazuje samo za člana koji je pročitao knjigu.
+- Neprijavljeni korisnici ne vide indikator procitanosti.
+- U katalogu se prikazuje broj pročitanih knjiga za prijavljenog člana.
+
+<br>
+
+---
+
+### Naziv: Filter samo nepročitane
+
+### US-133: Kao član biblioteke, želim filtrirati katalog na "samo nepročitane" knjige, kako bih brže pronašao naslove koje još nisam pročitao.
+**Acceptance Criteria:**
+- U katalogu postoji opcija "Samo nepročitane" za prijavljenog člana.
+- Kada je filter uključen, prikazuju se samo knjige koje član nije pročitao.
+- Kada se filter isključi, prikaz se vraća na sve knjige.
+- Filter se primjenjuje zajedno sa ostalim aktivnim filterima.
+
+<br>
+
+---
+
+| **Prioritet** | Srednji |
+|---------------|---------|
+| **Poslovna vrijednost** | Pomaže članovima da prate svoj napredak čitanja i brže otkriju nove naslove. |
+| **Pretpostavke / Otvorena pitanja** | Sistem evidentira status procitanosti po članu. |
+| **Veze i zavisnosti** | PB-28 Pregled kataloga knjiga. <br> PB-35 Pregled vlastitih zaduženja. |
 
 ---

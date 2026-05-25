@@ -225,6 +225,18 @@ using (var scope = app.Services.CreateScope())
             );
         ");
         db.Database.ExecuteSqlRaw(@"
+            CREATE TABLE IF NOT EXISTS ForumKomentarPrijave (
+                Id INT AUTO_INCREMENT PRIMARY KEY,
+                KomentarId INT NOT NULL,
+                PrijavioKorisnikId INT NOT NULL,
+                Razlog VARCHAR(500) NULL,
+                DatumKreiranja DATETIME(6) NOT NULL,
+                UNIQUE KEY UX_ForumKomentarPrijave_KomentarKorisnik (KomentarId, PrijavioKorisnikId),
+                FOREIGN KEY (KomentarId) REFERENCES ForumKomentari(Id) ON DELETE CASCADE,
+                FOREIGN KEY (PrijavioKorisnikId) REFERENCES Korisnici(Id) ON DELETE RESTRICT
+            );
+        ");
+        db.Database.ExecuteSqlRaw(@"
             CREATE TABLE IF NOT EXISTS ForumReakcije (
                 Id INT AUTO_INCREMENT PRIMARY KEY,
                 Tip VARCHAR(50) NOT NULL,

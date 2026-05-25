@@ -77,6 +77,20 @@ namespace SmartLib.Infrastructure.Repositories
             return true;
         }
 
+        // PB-63: prijava komentara
+        public async Task<ForumKomentarPrijava> AddKomentarPrijavaAsync(ForumKomentarPrijava prijava)
+        {
+            _db.ForumKomentarPrijave.Add(prijava);
+            await _db.SaveChangesAsync();
+            return prijava;
+        }
+
+        public async Task<bool> HasKomentarPrijavaAsync(int komentarId, int korisnikId)
+        {
+            return await _db.ForumKomentarPrijave
+                .AnyAsync(p => p.KomentarId == komentarId && p.PrijavioKorisnikId == korisnikId);
+        }
+
         // PB-60: toggle korisno reakcija
         public async Task<bool> ToggleReakcijaAsync(int objavaId, int korisnikId, string tip = "korisno")
         {

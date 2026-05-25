@@ -18,6 +18,7 @@ namespace SmartLib.Web.Controllers
         private readonly IKnjigaRepository _knjigaRepo;
         private readonly IPrimjerakRepository _primjerakRepo;
         private readonly IRezervacijaRepository _rezervacijaRepo;
+        private readonly IRecenzijaRepository _recenzijaRepo;
         private readonly CacheVersionStore _cacheVersions;
 
         public ZaduzenjeController(
@@ -26,6 +27,7 @@ namespace SmartLib.Web.Controllers
             IKnjigaRepository knjigaRepo,
             IPrimjerakRepository primjerakRepo,
             IRezervacijaRepository rezervacijaRepo,
+            IRecenzijaRepository recenzijaRepo,
             CacheVersionStore cacheVersions)
         {
             _zaduzenjeRepo = zaduzenjeRepo;
@@ -33,6 +35,7 @@ namespace SmartLib.Web.Controllers
             _knjigaRepo = knjigaRepo;
             _primjerakRepo = primjerakRepo;
             _rezervacijaRepo = rezervacijaRepo;
+            _recenzijaRepo = recenzijaRepo;
             _cacheVersions = cacheVersions;
         }
 
@@ -232,6 +235,15 @@ namespace SmartLib.Web.Controllers
             var mojaZaduzenja = await _zaduzenjeRepo.GetClosedHistoryForKorisnikAsync(korisnikId, granica);
 
             var model = mojaZaduzenja.Select(MapToViewModel).ToList();
+
+            foreach (var item in model)
+            {
+                item.ProcitanaKnjiga = item.DatumStvarnogVracanja.HasValue;
+                if (item.KnjigaId > 0)
+                {
+                    item.ImaRecenziju = await _recenzijaRepo.HasUserReviewedAsync(item.KnjigaId, korisnikId);
+                }
+            }
 
             // Promijeni samo ovu liniju na dnu:
             return View("MojaHistorija", model);

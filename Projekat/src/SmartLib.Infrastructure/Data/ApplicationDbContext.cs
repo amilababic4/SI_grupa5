@@ -24,6 +24,7 @@ namespace SmartLib.Infrastructure.Data
         public DbSet<ForumObjava> ForumObjave => Set<ForumObjava>();
         public DbSet<ForumKomentar> ForumKomentari => Set<ForumKomentar>();
         public DbSet<ForumReakcija> ForumReakcije => Set<ForumReakcija>();
+        public DbSet<ForumKomentarPrijava> ForumKomentarPrijave => Set<ForumKomentarPrijava>();
         public DbSet<Recenzija> Recenzije => Set<Recenzija>();
         public DbSet<Vijest> Vijesti => Set<Vijest>();
         public DbSet<Dogadjaj> Dogadjaji => Set<Dogadjaj>();
@@ -295,6 +296,26 @@ namespace SmartLib.Infrastructure.Data
                  .WithMany()
                  .HasForeignKey(r => r.KorisnikId)
                  .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // ─── FORUM KOMENTAR PRIJAVA ────────────────────────────────────────
+            modelBuilder.Entity<ForumKomentarPrijava>(e =>
+            {
+                e.HasKey(p => p.Id);
+                e.Property(p => p.Razlog).HasMaxLength(500);
+                e.Property(p => p.DatumKreiranja).IsRequired();
+
+                e.HasOne(p => p.Komentar)
+                 .WithMany()
+                 .HasForeignKey(p => p.KomentarId)
+                 .OnDelete(DeleteBehavior.Cascade);
+
+                e.HasOne(p => p.PrijavioKorisnik)
+                 .WithMany()
+                 .HasForeignKey(p => p.PrijavioKorisnikId)
+                 .OnDelete(DeleteBehavior.Restrict);
+
+                e.HasIndex(p => new { p.KomentarId, p.PrijavioKorisnikId }).IsUnique();
             });
 
             // ─── RECENZIJA ────────────────────────────────────────────────────────

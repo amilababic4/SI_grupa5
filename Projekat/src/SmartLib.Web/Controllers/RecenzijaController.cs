@@ -44,8 +44,8 @@ namespace SmartLib.Web.Controllers
             var reviewed = await _recenzijaRepo.HasUserReviewedAsync(knjigaId, uId.Value);
             if (reviewed)
             {
-                TempData["ErrorMessage"] = "Već ste ostavili recenziju za ovu knjigu.";
-                return RedirectToAction("MojaHistorija", "Zaduzenje");
+                TempData["ReviewErrorMessage"] = "Već ste ostavili recenziju za ovu knjigu.";
+                return RedirectToAction("Details", "Knjiga", new { id = knjigaId });
             }
 
             var knjiga = await _knjigaRepo.GetByIdAsync(knjigaId);
@@ -77,8 +77,8 @@ namespace SmartLib.Web.Controllers
             var reviewed = await _recenzijaRepo.HasUserReviewedAsync(KnjigaId, uId.Value);
             if (reviewed)
             {
-                TempData["ErrorMessage"] = "Već ste ostavili recenziju za ovu knjigu.";
-                return RedirectToAction("MojaHistorija", "Zaduzenje");
+                TempData["ReviewErrorMessage"] = "Već ste ostavili recenziju za ovu knjigu.";
+                return RedirectToAction("Details", "Knjiga", new { id = KnjigaId });
             }
 
             if (!ModelState.IsValid)
@@ -105,7 +105,7 @@ namespace SmartLib.Web.Controllers
 
             await _recenzijaRepo.AddAsync(r);
 
-            TempData["SuccessMessage"] = "Uspješno ste ostavili recenziju!";
+            TempData["ReviewSuccessMessage"] = "Uspješno ste ostavili recenziju!";
             return RedirectToAction("Details", "Knjiga", new { id = KnjigaId });
         }
 

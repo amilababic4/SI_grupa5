@@ -30,6 +30,7 @@ namespace SmartLib.Web.Controllers
         private static readonly TimeSpan CatalogRecommendationCacheTtl = TimeSpan.FromMinutes(10);
         private static readonly TimeSpan BookIndexCacheTtl = TimeSpan.FromMinutes(10);
         private static readonly TimeSpan BookDetailsCacheTtl = TimeSpan.FromMinutes(10);
+        private static readonly TimeSpan ReadSetCacheTtl = TimeSpan.FromDays(30);
 
         public KnjigaController(
             IKnjigaRepository knjigaRepository,
@@ -147,6 +148,7 @@ namespace SmartLib.Web.Controllers
             int? kategorijaId,
             string? izdavac,
             int? godinaIzdanja,
+            bool samoNeprocitane = false,
             int page = 1,
             int pageSize = 16)
         {
@@ -161,15 +163,37 @@ namespace SmartLib.Web.Controllers
             var izdKey = NormalizeCachePart(izdavac);
             var godKey = godinaIzdanja?.ToString() ?? "all";
 
-            var cacheKey = $"books_index_v2_{booksVersion}_{categoriesVersion}_{titleKey}_{authorKey}_{katKey}_{izdKey}_{godKey}_{page}_{pageSize}";
+            var userId = GetUserId();
+            var isClan = User.IsInRole("Član");
+            if (!isClan || !userId.HasValue)
+            {
+                samoNeprocitane = false;
+            }
+
+            var userKey = isClan && userId.HasValue ? userId.Value.ToString() : "public";
+            var readKey = samoNeprocitane ? "unread1" : "unread0";
+            var readStamp = isClan && userId.HasValue
+                ? await GetReadStampAsync(userId.Value)
+                : "0";
+
+            var cacheKey = $"books_index_v2_{booksVersion}_{categoriesVersion}_{titleKey}_{authorKey}_{katKey}_{izdKey}_{godKey}_{page}_{pageSize}_{userKey}_{readKey}_{readStamp}";
 
             var cachedModel = await _cache.GetRecordAsync<KatalogViewModel>(cacheKey);
             if (cachedModel != null)
                 return View(cachedModel);
 
+            HashSet<int> procitane = new();
+            if (isClan && userId.HasValue)
+            {
+                procitane = await GetCombinedReadSetAsync(userId.Value);
+            }
+
             // PB-44: Prošireni poziv repozitorija sa svim filterima (US-78: kombinacija)
+            var fetchPage = samoNeprocitane ? 1 : page;
+            var fetchPageSize = samoNeprocitane ? int.MaxValue : pageSize;
+
             var (knjige, ukupno) = await _knjigaRepository.GetPagedAsync(
-                naslov, autor, page, pageSize, kategorijaId, izdavac, godinaIzdanja);
+                naslov, autor, fetchPage, fetchPageSize, kategorijaId, izdavac, godinaIzdanja);
 
             var dtos = knjige.Select(k => new KnjigaDto
             {
@@ -186,8 +210,21 @@ namespace SmartLib.Web.Controllers
                 ProsjecnaOcjena = k.Recenzije != null && k.Recenzije.Any()
                     ? k.Recenzije.Average(r => r.Ocjena)
                     : 0,
-                BrojRecenzija = k.Recenzije?.Count ?? 0
+                BrojRecenzija = k.Recenzije?.Count ?? 0,
+                Procitana = procitane.Contains(k.Id)
             }).ToList();
+
+            if (samoNeprocitane)
+            {
+                dtos = dtos
+                    .Where(k => !k.Procitana)
+                    .ToList();
+                ukupno = dtos.Count;
+                dtos = dtos
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToList();
+            }
 
             int ukupnoStrana = ukupno == 0 ? 1 : (int)Math.Ceiling((double)ukupno / pageSize);
 
@@ -207,6 +244,8 @@ namespace SmartLib.Web.Controllers
                 UkupnoStrana = ukupnoStrana,
                 UkupnoStavki = ukupno,
                 VelicinaStrane = pageSize,
+                SamoNeprocitane = samoNeprocitane,
+                ProcitaneUkupno = procitane.Count,
                 // Osnovna pretraga
                 Naslov = naslov,
                 Autor = autor,
@@ -432,6 +471,18 @@ namespace SmartLib.Web.Controllers
 
         public async Task<IActionResult> Details(int id, [FromServices] IRecenzijaRepository recenzijaRepository)
         {
+            var userId = GetUserId();
+            var isClan = User.IsInRole("Član");
+            var procitana = false;
+            if (isClan && userId.HasValue)
+            {
+                await MarkBookAsReadAsync(userId.Value, id);
+                var readSet = await GetCombinedReadSetAsync(userId.Value);
+                procitana = readSet.Contains(id);
+            }
+
+            ViewBag.Procitana = procitana;
+
             var cacheKey = $"book_details_v1_{_cacheVersions.BooksVersion}_{_cacheVersions.CategoriesVersion}_{id}";
             var cachedEntry = await _cache.GetRecordAsync<KnjigaDetailsCacheEntry>(cacheKey);
             if (cachedEntry != null)
@@ -524,6 +575,48 @@ namespace SmartLib.Web.Controllers
 
             await SetRezervacijaViewBag(id);
             return View(dto);
+        }
+
+        private static string GetReadSetCacheKey(int userId) => $"user_read_{userId}";
+
+        private static string GetReadStampCacheKey(int userId) => $"user_read_stamp_{userId}";
+
+        private async Task<string> GetReadStampAsync(int userId)
+        {
+            var stamp = await _cache.GetRecordAsync<string>(GetReadStampCacheKey(userId));
+            return string.IsNullOrWhiteSpace(stamp) ? "0" : stamp;
+        }
+
+        private async Task<HashSet<int>> GetCachedReadSetAsync(int userId)
+        {
+            var cached = await _cache.GetRecordAsync<HashSet<int>>(GetReadSetCacheKey(userId));
+            return cached ?? new HashSet<int>();
+        }
+
+        private async Task<HashSet<int>> GetCombinedReadSetAsync(int userId)
+        {
+            var history = await _zaduzenjeRepository.GetHistoryByKorisnikAsync(userId);
+            var procitane = history
+                .Where(z => z.DatumStvarnogVracanja.HasValue || z.Status == "zatvoreno")
+                .Select(z => z.Primjerak?.KnjigaId ?? 0)
+                .Where(id => id > 0)
+                .ToHashSet();
+
+            var cached = await GetCachedReadSetAsync(userId);
+            procitane.UnionWith(cached);
+            return procitane;
+        }
+
+        private async Task MarkBookAsReadAsync(int userId, int bookId)
+        {
+            var readSet = await GetCachedReadSetAsync(userId);
+            if (!readSet.Add(bookId)) return;
+
+            await _cache.SetRecordAsync(GetReadSetCacheKey(userId), readSet, ReadSetCacheTtl);
+            await _cache.SetRecordAsync(
+                GetReadStampCacheKey(userId),
+                DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(),
+                ReadSetCacheTtl);
         }
 
         [Authorize(Roles = RoleNames.Bibliotekar + "," + RoleNames.Administrator)]

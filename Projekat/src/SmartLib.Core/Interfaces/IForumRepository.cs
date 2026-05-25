@@ -22,6 +22,12 @@ namespace SmartLib.Core.Interfaces
         /// <summary>Ukloni komentar sa objave</summary>
         Task<bool> DeleteKomentarAsync(int komentarId);
 
+        /// <summary>PB-63 – Dodaj prijavu komentara</summary>
+        Task<ForumKomentarPrijava> AddKomentarPrijavaAsync(ForumKomentarPrijava prijava);
+
+        /// <summary>PB-63 – Provjeri da li je korisnik vec prijavio komentar</summary>
+        Task<bool> HasKomentarPrijavaAsync(int komentarId, int korisnikId);
+
         /// <summary>PB-60 – Toggle "korisno" reakcija; vraća true ako je dodana, false ako je uklonjena</summary>
         Task<bool> ToggleReakcijaAsync(int objavaId, int korisnikId, string tip = "korisno");
 
