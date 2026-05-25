@@ -13,6 +13,15 @@
     Zatvorena zaduženja iz <strong>posljednje 3 godine</strong> · ukupno: <strong>@lista.Count</strong>
 </p>
 
+@if (TempData["SuccessMessage"] is string successMsg)
+{
+    <div class="alert alert-success">@successMsg</div>
+}
+@if (TempData["ErrorMessage"] is string errorMsg)
+{
+    <div class="alert alert-error">@errorMsg</div>
+}
+
 @if (!lista.Any())
 {
     <div class="card katalog-empty">

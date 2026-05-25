@@ -1929,6 +1929,17 @@ PB-26 Upravljanje korisnicima. <br> PB-20 Profil člana|
 
 ---
 
+### Naziv: Onemogućavanje ponovnog ocjenjivanja iz istorije zaduženja
+### US-134: Kao član biblioteke, želim da u istoriji zaduženja dobijem jasnu informaciju da je recenzija već ostavljena, a u slučaju ručnog pokušaja pristupa formi dobijem upozorenje o grešci, kako bih znao da sam knjigu već ocijenio.
+**Acceptance Criteria:**
+- Kada član otvori sekciju "Historija mojih zaduženja", tada se za svako vraćeno zaduženje koje je već ocijenjeno umjesto dugmeta "Ocijeni knjigu" prikazuje neaktivna oznaka "Recenzija ostavljena".
+- Kada član pokuša ručno pristupiti formi za dodavanje recenzije za knjigu koju je već ocijenio, sistem ga automatski preusmjerava nazad na stranicu "Historija mojih zaduženja".
+- Nakon preusmjeravanja, u vrhu stranice istorije zaduženja prikazuje se jasna poruka o grešci "Već ste ostavili recenziju za ovu knjigu."
+
+<br>
+
+---
+
 | **Prioritet** | Srednji |
 |---------------|---------|
 | **Poslovna vrijednost** | Omogućava korisnicima da dijele mišljenja o knjigama i pomaže drugima u odabiru literature. |
