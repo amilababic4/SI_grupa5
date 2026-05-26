@@ -29,6 +29,10 @@ namespace SmartLib.Core.Models
         public string? ResetToken { get; set; }
         public DateTime? ResetTokenExpiry { get; set; }
 
+        // System penalizacije
+        public int BrojUklonjenihSadrzaja { get; set; } = 0;
+        public DateTime? DatumZabraneDo { get; set; }
+
         // TODO: Book Recommendation System
         // Add navigation properties for user history/ratings when models are implemented
         // public ICollection<Ocjena> Ocjene { get; set; } = new List<Ocjena>();

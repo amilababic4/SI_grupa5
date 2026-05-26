@@ -308,6 +308,7 @@
     var prosjek = recenzije.Any() ? recenzije.Average(r => r.Ocjena) : 0;
     var reviewSuccessMsg = TempData["ReviewSuccessMessage"] as string;
     var reviewErrorMsg = TempData["ReviewErrorMessage"] as string;
+    var reportedRecenzije = ViewBag.ReportedRecenzije as List<int> ?? new List<int>();
 }
 <div id="reviews-section" class="card" style="margin-top: 2rem;">
     <div class="examples-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1.5rem;">
@@ -364,6 +365,23 @@
                                     <input type="hidden" name="knjigaId" value="@Model.Id" />
                                     <button type="submit" class="btn btn-danger btn-sm" title="Ukloni neadekvatnu recenziju">🗑 Ukloni</button>
                                 </form>
+                            }
+                            @if (!jeOsoblje && User.Identity?.IsAuthenticated == true)
+                            {
+                                if (reportedRecenzije.Contains(r.Id))
+                                {
+                                    <span class="status-blizi" title="Recenzija je već prijavljena">Prijavljeno</span>
+                                }
+                                else
+                                {
+                                    <form asp-controller="Recenzija" asp-action="Prijavi" method="post"
+                                          onsubmit="return confirm('Prijaviti ovu recenziju kao neadekvatnu?');">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="recenzijaId" value="@r.Id" />
+                                        <input type="hidden" name="knjigaId" value="@Model.Id" />
+                                        <button type="submit" class="btn btn-outline btn-sm" title="Prijavi recenziju">🚩 Prijavi</button>
+                                    </form>
+                                }
                             }
                         </div>
                     </div>

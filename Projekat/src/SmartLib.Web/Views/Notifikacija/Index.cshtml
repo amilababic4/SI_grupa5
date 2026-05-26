@@ -1,0 +1,62 @@
+@model IEnumerable<SmartLib.Core.Models.Notifikacija>
+@{
+    ViewData["Title"] = "Obavještenja";
+    var imaNotifikacija = Model.Any();
+}
+
+<div class="notif-header">
+    <h2>Obavještenja</h2>
+    @if (imaNotifikacija)
+    {
+        <form asp-action="MarkAllRead" method="post">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-secondary btn-sm">Označi sve kao pročitano</button>
+        </form>
+    }
+</div>
+
+@if (!imaNotifikacija)
+{
+    <div class="card katalog-empty">
+        <p>Nema novih obavještenja.</p>
+    </div>
+}
+else
+{
+    <div class="notif-list">
+        @foreach (var n in Model)
+        {
+            var hasLink = !string.IsNullOrWhiteSpace(n.LinkUrl);
+            <div class="notif-item @(n.Procitano ? "" : "unread") @(hasLink ? "notif-item--clickable" : "")"
+                 @if (hasLink) { <text>onclick="window.location.href='@Url.Action("Otvori", "Notifikacija", new { id = n.Id, url = n.LinkUrl })'" role="link" tabindex="0"</text> }>
+                <div class="notif-title">@n.Naslov</div>
+                <div>@n.Poruka</div>
+                <div class="notif-meta">@n.DatumKreiranja.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</div>
+                @if (!n.Procitano)
+                {
+                    <div class="notif-actions" onclick="event.stopPropagation();">
+                        <form asp-action="MarkRead" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@n.Id" />
+                            <button type="submit" class="btn btn-secondary btn-sm">Označi pročitano</button>
+                        </form>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+}
+
+@section Scripts {
+    <script>
+        // Allow keyboard activation (Enter/Space) for clickable notification items
+        document.querySelectorAll('.notif-item--clickable').forEach(function (el) {
+            el.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    el.click();
+                }
+            });
+        });
+    </script>
+}

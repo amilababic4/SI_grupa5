@@ -1,0 +1,82 @@
+@model SmartLib.Web.Models.PrijaveViewModel
+@{
+    ViewData["Title"] = "Prijave";
+    var imaPrijava = Model.Stavke.Any();
+}
+
+<div class="katalog-header">
+    <h2>Prijave</h2>
+</div>
+
+@if (TempData["SuccessMessage"] is string successMsg)
+{
+    <div class="alert alert-success">@successMsg</div>
+}
+@if (TempData["ErrorMessage"] is string errorMsg)
+{
+    <div class="alert alert-error">@errorMsg</div>
+}
+
+@if (!imaPrijava)
+{
+    <div class="card katalog-empty">
+        <p>Trenutno nema otvorenih prijava.</p>
+    </div>
+}
+else
+{
+    <div class="card katalog-card">
+        <div class="katalog-table-wrap">
+            <table class="katalog-table">
+                <thead>
+                    <tr>
+                        <th>Tip</th>
+                        <th>Naslov</th>
+                        <th>Autor</th>
+                        <th>Razlog</th>
+                        <th>Prijavio</th>
+                        <th>Datum</th>
+                        <th>Akcije</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in Model.Stavke)
+                    {
+                        <tr>
+                            <td data-label="Tip">@p.Tip</td>
+                            <td data-label="Naslov"><strong>@p.Naslov</strong></td>
+                            <td data-label="Autor">@p.Autor</td>
+                            <td data-label="Razlog">@p.Razlog</td>
+                            <td data-label="Prijavio">@p.Prijavio</td>
+                            <td data-label="Datum">@p.Datum.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td>
+                            <td data-label="Akcije">
+                                <div class="katalog-actions">
+                                    @if (!string.IsNullOrWhiteSpace(p.LinkUrl))
+                                    {
+                                        <a class="btn btn-outline btn-sm" href="@p.LinkUrl">Detalji</a>
+                                    }
+                                    @if (p.Source == "forum-komentar" || p.Source == "forum-objava")
+                                    {
+                                        <form asp-action="UkloniSadrzaj" method="post"
+                                              onsubmit="return confirm('Ukloniti ovaj sadržaj? Ova radnja je nepovratna.');">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="prijavaId" value="@p.PrijavaId" />
+                                            <input type="hidden" name="source" value="@p.Source" />
+                                            <button type="submit" class="btn btn-danger btn-sm">🗑 Ukloni</button>
+                                        </form>
+                                    }
+                                    <form asp-action="Razrijesi" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="prijavaId" value="@p.PrijavaId" />
+                                        <input type="hidden" name="source" value="@p.Source" />
+                                        <button type="submit" class="btn btn-secondary btn-sm">Razriješi</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

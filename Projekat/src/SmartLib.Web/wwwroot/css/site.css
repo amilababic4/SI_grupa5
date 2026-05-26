@@ -1163,20 +1163,114 @@ td {
 }
 
 .form-group input.katalog-read-checkbox {
-    width: 16px !important;
-    height: 16px !important;
+    width: 14px !important;
+    height: 14px !important;
     min-height: 0 !important;
+    min-width: 0 !important;
     padding: 0 !important;
     margin: 0 !important;
     border: none !important;
     border-radius: 0 !important;
     background: transparent !important;
     display: inline-block !important;
+    appearance: auto !important;
     accent-color: var(--sl-blue) !important;
     cursor: pointer !important;
     flex-shrink: 0 !important;
     transform: none !important;
     box-shadow: none !important;
+}
+
+/* ================================
+   Notifications
+   ================================ */
+
+.notif-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.notif-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.notif-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding: 1rem 1.15rem;
+    border-radius: 14px;
+    border: 1px solid var(--sl-border);
+    background: rgba(255, 255, 255, 0.9);
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background-color 0.18s ease;
+}
+
+.notif-item--clickable {
+    cursor: pointer;
+}
+
+.notif-item--clickable:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(23, 59, 99, 0.12);
+    border-color: rgba(59, 130, 246, 0.35);
+    background: rgba(239, 246, 255, 0.95);
+}
+
+.notif-item--clickable:active {
+    transform: translateY(0);
+}
+
+.notif-item.unread {
+    border-color: rgba(23, 59, 99, 0.28);
+    box-shadow: 0 8px 22px rgba(23, 59, 99, 0.08);
+}
+
+.notif-title {
+    font-weight: 700;
+    color: var(--sl-text);
+}
+
+.notif-meta {
+    font-size: 0.85rem;
+    color: var(--sl-muted);
+}
+
+.notif-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.notif-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 0.35rem;
+    border-radius: 999px;
+    background: #d14343;
+    color: #ffffff;
+    font-size: 0.72rem;
+    font-weight: 700;
+    line-height: 1;
+    position: absolute;
+    top: -6px;
+    right: -10px;
+    margin-left: 0;
+}
+
+.nav-notif-link {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding-right: 0.35rem;
 }
 
     .katalog-meta strong {
@@ -4852,6 +4946,28 @@ body.home-page footer {
     [data-theme="dark"] .card {
         background: rgba(17, 28, 46, 0.97);
         border-color: rgba(255, 255, 255, 0.07);
+    }
+
+    /* Notifications */
+    [data-theme="dark"] .notif-item {
+        background: rgba(17, 28, 46, 0.97);
+        border-color: rgba(255, 255, 255, 0.08);
+        color: #e2e8f0;
+    }
+
+    [data-theme="dark"] .notif-item.unread {
+        border-color: rgba(96, 165, 250, 0.35);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+    }
+
+    [data-theme="dark"] .notif-item--clickable:hover {
+        background: rgba(30, 58, 95, 0.5);
+        border-color: rgba(96, 165, 250, 0.4);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45);
+    }
+
+    [data-theme="dark"] .notif-meta {
+        color: #94a3b8;
     }
 
     /* Details items */

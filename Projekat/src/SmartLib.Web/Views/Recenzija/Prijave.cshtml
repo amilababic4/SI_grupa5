@@ -1,0 +1,85 @@
+@model IEnumerable<SmartLib.Core.Models.RecenzijaPrijava>
+@{
+    ViewData["Title"] = "Prijave recenzija";
+    var imaPrijava = Model.Any();
+}
+
+<div class="katalog-header">
+    <h2>Prijave recenzija</h2>
+</div>
+
+@if (TempData["SuccessMessage"] is string successMsg)
+{
+    <div class="alert alert-success">@successMsg</div>
+}
+@if (TempData["ErrorMessage"] is string errorMsg)
+{
+    <div class="alert alert-error">@errorMsg</div>
+}
+
+@if (!imaPrijava)
+{
+    <div class="card katalog-empty">
+        <p>Trenutno nema otvorenih prijava recenzija.</p>
+    </div>
+}
+else
+{
+    <div class="card katalog-card">
+        <div class="katalog-table-wrap">
+            <table class="katalog-table">
+                <thead>
+                    <tr>
+                        <th>Knjiga</th>
+                        <th>Autor recenzije</th>
+                        <th>Ocjena</th>
+                        <th>Razlog</th>
+                        <th>Prijavio</th>
+                        <th>Datum</th>
+                        <th>Akcije</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in Model)
+                    {
+                        <tr>
+                            <td data-label="Knjiga">
+                                <strong>@(p.Recenzija?.Knjiga?.Naslov ?? "-")</strong>
+                            </td>
+                            <td data-label="Autor recenzije">
+                                @(p.Recenzija?.Korisnik?.Ime) @(p.Recenzija?.Korisnik?.Prezime)
+                            </td>
+                            <td data-label="Ocjena">@(p.Recenzija?.Ocjena ?? 0) / 5</td>
+                            <td data-label="Razlog">@(string.IsNullOrWhiteSpace(p.Razlog) ? "—" : p.Razlog)</td>
+                            <td data-label="Prijavio">@(p.PrijavioKorisnik?.Ime) @(p.PrijavioKorisnik?.Prezime)</td>
+                            <td data-label="Datum">@p.DatumKreiranja.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td>
+                            <td data-label="Akcije">
+                                <div class="katalog-actions">
+                                    @if (p.Recenzija?.KnjigaId is int knjigaId)
+                                    {
+                                        <a class="btn btn-outline btn-sm" href="@Url.Action("Details", "Knjiga", new { id = knjigaId })">Detalji</a>
+                                    }
+                                    <form asp-action="Razrijesi" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="prijavaId" value="@p.Id" />
+                                        <button type="submit" class="btn btn-secondary btn-sm">Razriješi</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        @if (!string.IsNullOrWhiteSpace(p.Recenzija?.Komentar))
+                        {
+                            <tr>
+                                <td colspan="7" style="background: rgba(248,250,252,0.9);">
+                                    <div style="padding: 0.75rem 1rem; color: var(--sl-muted);">
+                                        @p.Recenzija?.Komentar
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

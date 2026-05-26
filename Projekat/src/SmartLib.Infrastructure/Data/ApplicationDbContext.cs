@@ -25,7 +25,10 @@ namespace SmartLib.Infrastructure.Data
         public DbSet<ForumKomentar> ForumKomentari => Set<ForumKomentar>();
         public DbSet<ForumReakcija> ForumReakcije => Set<ForumReakcija>();
         public DbSet<ForumKomentarPrijava> ForumKomentarPrijave => Set<ForumKomentarPrijava>();
+        public DbSet<ForumObjavaPrijava> ForumObjavaPrijave => Set<ForumObjavaPrijava>();
         public DbSet<Recenzija> Recenzije => Set<Recenzija>();
+        public DbSet<RecenzijaPrijava> RecenzijaPrijave => Set<RecenzijaPrijava>();
+        public DbSet<Notifikacija> Notifikacije => Set<Notifikacija>();
         public DbSet<Vijest> Vijesti => Set<Vijest>();
         public DbSet<Dogadjaj> Dogadjaji => Set<Dogadjaj>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -303,7 +306,9 @@ namespace SmartLib.Infrastructure.Data
             {
                 e.HasKey(p => p.Id);
                 e.Property(p => p.Razlog).HasMaxLength(500);
+                e.Property(p => p.Status).IsRequired().HasMaxLength(30).HasDefaultValue("otvorena");
                 e.Property(p => p.DatumKreiranja).IsRequired();
+                e.Property(p => p.DatumRazrjesenja);
 
                 e.HasOne(p => p.Komentar)
                  .WithMany()
@@ -315,7 +320,39 @@ namespace SmartLib.Infrastructure.Data
                  .HasForeignKey(p => p.PrijavioKorisnikId)
                  .OnDelete(DeleteBehavior.Restrict);
 
+                e.HasOne(p => p.RazrijesioKorisnik)
+                 .WithMany()
+                 .HasForeignKey(p => p.RazrijesioKorisnikId)
+                 .OnDelete(DeleteBehavior.Restrict);
+
                 e.HasIndex(p => new { p.KomentarId, p.PrijavioKorisnikId }).IsUnique();
+            });
+
+            // ─── FORUM OBJAVA PRIJAVA ─────────────────────────────────────────
+            modelBuilder.Entity<ForumObjavaPrijava>(e =>
+            {
+                e.HasKey(p => p.Id);
+                e.Property(p => p.Razlog).HasMaxLength(500);
+                e.Property(p => p.Status).IsRequired().HasMaxLength(30).HasDefaultValue("otvorena");
+                e.Property(p => p.DatumKreiranja).IsRequired();
+                e.Property(p => p.DatumRazrjesenja);
+
+                e.HasOne(p => p.Objava)
+                 .WithMany()
+                 .HasForeignKey(p => p.ObjavaId)
+                 .OnDelete(DeleteBehavior.Cascade);
+
+                e.HasOne(p => p.PrijavioKorisnik)
+                 .WithMany()
+                 .HasForeignKey(p => p.PrijavioKorisnikId)
+                 .OnDelete(DeleteBehavior.Restrict);
+
+                e.HasOne(p => p.RazrijesioKorisnik)
+                 .WithMany()
+                 .HasForeignKey(p => p.RazrijesioKorisnikId)
+                 .OnDelete(DeleteBehavior.Restrict);
+
+                e.HasIndex(p => new { p.ObjavaId, p.PrijavioKorisnikId }).IsUnique();
             });
 
             // ─── RECENZIJA ────────────────────────────────────────────────────────
@@ -335,6 +372,52 @@ namespace SmartLib.Infrastructure.Data
                  .WithMany()
                  .HasForeignKey(r => r.KorisnikId)
                  .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // ─── RECENZIJA PRIJAVA ─────────────────────────────────────────────
+            modelBuilder.Entity<RecenzijaPrijava>(e =>
+            {
+                e.HasKey(p => p.Id);
+                e.Property(p => p.Razlog).HasMaxLength(500);
+                e.Property(p => p.Status).IsRequired().HasMaxLength(30).HasDefaultValue("otvorena");
+                e.Property(p => p.DatumKreiranja).IsRequired();
+                e.Property(p => p.DatumRazrjesenja);
+
+                e.HasOne(p => p.Recenzija)
+                 .WithMany()
+                 .HasForeignKey(p => p.RecenzijaId)
+                 .OnDelete(DeleteBehavior.Cascade);
+
+                e.HasOne(p => p.PrijavioKorisnik)
+                 .WithMany()
+                 .HasForeignKey(p => p.PrijavioKorisnikId)
+                 .OnDelete(DeleteBehavior.Restrict);
+
+                e.HasOne(p => p.RazrijesioKorisnik)
+                 .WithMany()
+                 .HasForeignKey(p => p.RazrijesioKorisnikId)
+                 .OnDelete(DeleteBehavior.Restrict);
+
+                e.HasIndex(p => new { p.RecenzijaId, p.PrijavioKorisnikId }).IsUnique();
+            });
+
+            // ─── NOTIFIKACIJA ──────────────────────────────────────────────────
+            modelBuilder.Entity<Notifikacija>(e =>
+            {
+                e.HasKey(n => n.Id);
+                e.Property(n => n.Naslov).IsRequired().HasMaxLength(200);
+                e.Property(n => n.Poruka).IsRequired().HasColumnType("longtext");
+                e.Property(n => n.Tip).IsRequired().HasMaxLength(50).HasDefaultValue("Sistem");
+                e.Property(n => n.LinkUrl).HasMaxLength(512);
+                e.Property(n => n.Procitano).IsRequired().HasDefaultValue(false);
+                e.Property(n => n.DatumKreiranja).IsRequired();
+
+                e.HasOne(n => n.Korisnik)
+                 .WithMany()
+                 .HasForeignKey(n => n.KorisnikId)
+                 .OnDelete(DeleteBehavior.Cascade);
+
+                e.HasIndex(n => new { n.KorisnikId, n.Procitano });
             });
 
             // ─── VIJEST ───────────────────────────────────────────────────────────

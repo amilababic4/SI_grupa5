@@ -469,7 +469,10 @@ namespace SmartLib.Web.Controllers
             }
         }
 
-        public async Task<IActionResult> Details(int id, [FromServices] IRecenzijaRepository recenzijaRepository)
+        public async Task<IActionResult> Details(
+            int id,
+            [FromServices] IRecenzijaRepository recenzijaRepository,
+            [FromServices] IRecenzijaPrijavaRepository prijavaRepository)
         {
             var userId = GetUserId();
             var isClan = User.IsInRole("Član");
@@ -566,6 +569,11 @@ namespace SmartLib.Web.Controllers
             var primjerci = knjiga.Primjerci.OrderBy(p => p.InventarniBroj).ToList();
             ViewBag.Primjerci = primjerci;
             ViewBag.Recenzije = await recenzijaRepository.GetByKnjigaIdAsync(id);
+            var uId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (int.TryParse(uId, out var korisnikId))
+            {
+                ViewBag.ReportedRecenzije = await prijavaRepository.GetReportedRecenzijaIdsAsync(korisnikId, id);
+            }
 
             await _cache.SetRecordAsync(cacheKey, new KnjigaDetailsCacheEntry
             {

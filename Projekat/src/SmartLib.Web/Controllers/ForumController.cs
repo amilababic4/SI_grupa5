@@ -18,6 +18,7 @@ namespace SmartLib.Web.Controllers
         private readonly IForumRepository _forumRepository;
         private readonly IKorisnikRepository _korisnikRepository;
         private readonly IEmailService _emailService;
+        private readonly INotifikacijaRepository _notifikacijaRepo;
         private readonly ILogger<ForumController> _logger;
         private readonly IDistributedCache _cache;
         private readonly CacheVersionStore _cacheVersions;
@@ -28,6 +29,7 @@ namespace SmartLib.Web.Controllers
             IForumRepository forumRepository,
             IKorisnikRepository korisnikRepository,
             IEmailService emailService,
+            INotifikacijaRepository notifikacijaRepo,
             ILogger<ForumController> logger,
             IDistributedCache cache,
             CacheVersionStore cacheVersions)
@@ -35,6 +37,7 @@ namespace SmartLib.Web.Controllers
             _forumRepository = forumRepository;
             _korisnikRepository = korisnikRepository;
             _emailService = emailService;
+            _notifikacijaRepo = notifikacijaRepo;
             _logger = logger;
             _cache = cache;
             _cacheVersions = cacheVersions;
@@ -98,7 +101,14 @@ namespace SmartLib.Web.Controllers
             var cacheKey = $"forum_details_v1_{_cacheVersions.ForumVersion}_{id}_{userKey}";
             var cached = await _cache.GetRecordAsync<ForumObjavaDto>(cacheKey);
             if (cached != null)
+            {
+                if (uId.HasValue)
+                {
+                    ViewBag.ReportedKomentari = await _forumRepository.GetReportedKomentarIdsAsync(uId.Value, id);
+                    ViewBag.ReportedObjava = await _forumRepository.HasObjavaPrijavaAsync(id, uId.Value);
+                }
                 return View(cached);
+            }
 
             var o = await _forumRepository.GetByIdAsync(id);
             if (o == null) return NotFound();
@@ -132,13 +142,30 @@ namespace SmartLib.Web.Controllers
 
             await _cache.SetRecordAsync(cacheKey, dto, ForumDetailsCacheTtl);
 
+            if (uId.HasValue)
+            {
+                ViewBag.ReportedKomentari = await _forumRepository.GetReportedKomentarIdsAsync(uId.Value, id);
+                ViewBag.ReportedObjava = await _forumRepository.HasObjavaPrijavaAsync(id, uId.Value);
+            }
+
             return View(dto);
         }
 
         // PB-57: Forma za kreiranje
         [HttpGet]
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
+            var uId = GetUserId();
+            if (uId.HasValue)
+            {
+                var user = await _korisnikRepository.GetByIdAsync(uId.Value);
+                if (user?.DatumZabraneDo > DateTime.UtcNow)
+                {
+                    TempData["ErrorMessage"] = $"Imate aktivnu zabranu i ne možete kreirati objave do {user.DatumZabraneDo.Value.ToLocalTime():dd.MM.yyyy HH:mm}.";
+                    return RedirectToAction(nameof(Index));
+                }
+            }
+
             ViewBag.Kategorije = _forumRepository.GetKategorije();
             return View(new ForumObjavaCreateDto());
         }
@@ -156,6 +183,13 @@ namespace SmartLib.Web.Controllers
 
             var uId = GetUserId();
             if (!uId.HasValue) return Challenge();
+
+            var user = await _korisnikRepository.GetByIdAsync(uId.Value);
+            if (user?.DatumZabraneDo > DateTime.UtcNow)
+            {
+                TempData["ErrorMessage"] = $"Imate aktivnu zabranu i ne možete kreirati objave do {user.DatumZabraneDo.Value.ToLocalTime():dd.MM.yyyy HH:mm}.";
+                return RedirectToAction(nameof(Index));
+            }
 
             try
             {
@@ -203,6 +237,13 @@ namespace SmartLib.Web.Controllers
             var uId = GetUserId();
             if (!uId.HasValue) return Challenge();
 
+            var user = await _korisnikRepository.GetByIdAsync(uId.Value);
+            if (user?.DatumZabraneDo > DateTime.UtcNow)
+            {
+                TempData["ErrorMessage"] = $"Imate aktivnu zabranu i ne možete komentarisati do {user.DatumZabraneDo.Value.ToLocalTime():dd.MM.yyyy HH:mm}.";
+                return RedirectToAction(nameof(Details), new { id = model.ObjavaId });
+            }
+
             var objava = await _forumRepository.GetByIdAsync(model.ObjavaId);
             if (objava == null) return NotFound();
             
@@ -245,6 +286,25 @@ namespace SmartLib.Web.Controllers
             return RedirectToAction(nameof(Details), new { id = objavaId });
         }
 
+        [HttpPost]
+        [Authorize(Roles = "Bibliotekar,Administrator")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeletePost(int objavaId)
+        {
+            var deleted = await _forumRepository.DeleteObjavaAsync(objavaId);
+            TempData[deleted ? "SuccessMessage" : "ErrorMessage"] = deleted
+                ? "Objava je uklonjena."
+                : "Objavu nije moguće ukloniti.";
+
+            if (deleted)
+            {
+                _cacheVersions.BumpForumVersion();
+                return RedirectToAction(nameof(Index));
+            }
+
+            return RedirectToAction(nameof(Details), new { id = objavaId });
+        }
+
         // PB-63: Prijava neadekvatnog komentara
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -275,12 +335,28 @@ namespace SmartLib.Web.Controllers
 
             await _forumRepository.AddKomentarPrijavaAsync(prijava);
 
+            var staff = (await _korisnikRepository.GetAllAsync())
+                .Where(k => string.Equals(k.Uloga?.Naziv, RoleNames.Administrator, StringComparison.OrdinalIgnoreCase)
+                         || string.Equals(k.Uloga?.Naziv, RoleNames.Bibliotekar, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            var notifUrl = Url.Action("Index", "Prijave") ?? "/Prijave";
+            var notifList = staff.Select(s => new Notifikacija
+            {
+                KorisnikId = s.Id,
+                Naslov = "Prijavljen forum komentar",
+                Poruka = $"Prijavljen je komentar u forum objavi: {objava.Naslov}.",
+                Tip = "Forum",
+                LinkUrl = notifUrl,
+                DatumKreiranja = DateTime.UtcNow
+            });
+
+            await _notifikacijaRepo.AddRangeAsync(notifList);
+
             try
             {
                 var prijavio = await _korisnikRepository.GetByIdAsync(uId.Value);
-                var admins = (await _korisnikRepository.GetAllAsync())
-                    .Where(k => string.Equals(k.Uloga?.Naziv, RoleNames.Administrator, StringComparison.OrdinalIgnoreCase))
-                    .ToList();
+                var admins = staff.Where(k => string.Equals(k.Uloga?.Naziv, RoleNames.Administrator, StringComparison.OrdinalIgnoreCase)).ToList();
 
                 var detailsUrl = Url.Action(nameof(Details), "Forum", new { id = objavaId }, Request.Scheme) ?? string.Empty;
 
@@ -314,6 +390,54 @@ namespace SmartLib.Web.Controllers
             }
 
             TempData["SuccessMessage"] = "Komentar je prijavljen administratoru.";
+            return RedirectToAction(nameof(Details), new { id = objavaId });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ReportPost(int objavaId, string? razlog)
+        {
+            var uId = GetUserId();
+            if (!uId.HasValue) return Challenge();
+
+            var objava = await _forumRepository.GetByIdAsync(objavaId);
+            if (objava == null) return NotFound();
+
+            if (await _forumRepository.HasObjavaPrijavaAsync(objavaId, uId.Value))
+            {
+                TempData["ErrorMessage"] = "Već ste prijavili ovu objavu.";
+                return RedirectToAction(nameof(Details), new { id = objavaId });
+            }
+
+            var prijava = new ForumObjavaPrijava
+            {
+                ObjavaId = objavaId,
+                PrijavioKorisnikId = uId.Value,
+                Razlog = string.IsNullOrWhiteSpace(razlog) ? null : razlog.Trim(),
+                DatumKreiranja = DateTime.UtcNow
+            };
+
+            await _forumRepository.AddObjavaPrijavaAsync(prijava);
+
+            var staff = (await _korisnikRepository.GetAllAsync())
+                .Where(k => string.Equals(k.Uloga?.Naziv, RoleNames.Administrator, StringComparison.OrdinalIgnoreCase)
+                         || string.Equals(k.Uloga?.Naziv, RoleNames.Bibliotekar, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            var notifUrl = Url.Action("Index", "Prijave") ?? "/Prijave";
+            var notifList = staff.Select(s => new Notifikacija
+            {
+                KorisnikId = s.Id,
+                Naslov = "Prijavljena forum objava",
+                Poruka = $"Prijavljena je forum objava: {objava.Naslov}.",
+                Tip = "Forum",
+                LinkUrl = notifUrl,
+                DatumKreiranja = DateTime.UtcNow
+            });
+
+            await _notifikacijaRepo.AddRangeAsync(notifList);
+
+            TempData["SuccessMessage"] = "Objava je prijavljena administratoru.";
             return RedirectToAction(nameof(Details), new { id = objavaId });
         }
 

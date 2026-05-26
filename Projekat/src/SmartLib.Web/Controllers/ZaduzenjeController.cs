@@ -19,6 +19,7 @@ namespace SmartLib.Web.Controllers
         private readonly IPrimjerakRepository _primjerakRepo;
         private readonly IRezervacijaRepository _rezervacijaRepo;
         private readonly IRecenzijaRepository _recenzijaRepo;
+        private readonly INotifikacijaRepository _notifikacijaRepo;
         private readonly CacheVersionStore _cacheVersions;
 
         public ZaduzenjeController(
@@ -28,6 +29,7 @@ namespace SmartLib.Web.Controllers
             IPrimjerakRepository primjerakRepo,
             IRezervacijaRepository rezervacijaRepo,
             IRecenzijaRepository recenzijaRepo,
+            INotifikacijaRepository notifikacijaRepo,
             CacheVersionStore cacheVersions)
         {
             _zaduzenjeRepo = zaduzenjeRepo;
@@ -36,6 +38,7 @@ namespace SmartLib.Web.Controllers
             _primjerakRepo = primjerakRepo;
             _rezervacijaRepo = rezervacijaRepo;
             _recenzijaRepo = recenzijaRepo;
+            _notifikacijaRepo = notifikacijaRepo;
             _cacheVersions = cacheVersions;
         }
 
@@ -192,6 +195,35 @@ namespace SmartLib.Web.Controllers
             z.DatumStvarnogVracanja = DateTime.UtcNow;
             await _zaduzenjeRepo.UpdateAsync(z);
             await _primjerakRepo.UpdateStatusAsync(z.PrimjerakId, "dostupan");
+
+            var knjigaId = z.Primjerak?.KnjigaId;
+            if (knjigaId.HasValue)
+            {
+                var rezervacija = await _rezervacijaRepo.GetNextActiveForBookAsync(knjigaId.Value);
+                if (rezervacija != null)
+                {
+                    var linkUrl = Url.Action("Moje", "Rezervacija") ?? "/Rezervacija/Moje";
+                    var hasRecent = await _notifikacijaRepo.HasRecentAsync(
+                        rezervacija.KorisnikId,
+                        "Rezervacija",
+                        linkUrl,
+                        TimeSpan.FromHours(12));
+
+                    if (!hasRecent)
+                    {
+                        var naslov = z.Primjerak?.Knjiga?.Naslov ?? "Knjiga";
+                        await _notifikacijaRepo.AddAsync(new Notifikacija
+                        {
+                            KorisnikId = rezervacija.KorisnikId,
+                            Naslov = "Knjiga je dostupna",
+                            Poruka = $"Rezervisana knjiga \"{naslov}\" je sada dostupna za preuzimanje.",
+                            Tip = "Rezervacija",
+                            LinkUrl = linkUrl,
+                            DatumKreiranja = DateTime.UtcNow
+                        });
+                    }
+                }
+            }
 
             _cacheVersions.BumpBooksVersion();
             TempData["SuccessMessage"] = "Vraćanje knjige je uspješno evidentirano.";

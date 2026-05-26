@@ -116,6 +116,8 @@ builder.Services.AddScoped<IClanarinaRepository, ClanarinaRepository>();
 builder.Services.AddScoped<IRezervacijaRepository, RezervacijaRepository>();
 builder.Services.AddScoped<IForumRepository, ForumRepository>();
 builder.Services.AddScoped<IRecenzijaRepository, RecenzijaRepository>();
+builder.Services.AddScoped<IRecenzijaPrijavaRepository, RecenzijaPrijavaRepository>();
+builder.Services.AddScoped<INotifikacijaRepository, NotifikacijaRepository>();
 builder.Services.AddScoped<IVijestRepository, VijestRepository>();
 builder.Services.AddScoped<IDogadjajRepository, DogadjajRepository>();
 builder.Services.AddHostedService<DeactivatedAccountCleanupService>();
@@ -186,7 +188,46 @@ using (var scope = app.Services.CreateScope())
     try
     {
         db.Database.ExecuteSqlRaw(@"
+            ALTER TABLE Korisnici ADD COLUMN BrojUklonjenihSadrzaja INT NOT NULL DEFAULT 0;
+        ");
+    }
+    catch (Exception) { }
+
+    try
+    {
+        db.Database.ExecuteSqlRaw(@"
+            ALTER TABLE Korisnici ADD COLUMN DatumZabraneDo DATETIME(6) NULL;
+        ");
+    }
+    catch (Exception) { }
+
+    try
+    {
+        db.Database.ExecuteSqlRaw(@"
             ALTER TABLE Knjige ADD COLUMN Opis TEXT NULL;
+        ");
+    }
+    catch (Exception) { }
+
+    try
+    {
+        db.Database.ExecuteSqlRaw(@"
+            ALTER TABLE ForumKomentarPrijave ADD COLUMN Status VARCHAR(30) NOT NULL DEFAULT 'otvorena';
+        ");
+    }
+    catch (Exception) { }
+
+    try
+    {
+        db.Database.ExecuteSqlRaw(@"
+            ALTER TABLE ForumKomentarPrijave ADD COLUMN RazrijesioKorisnikId INT NULL;
+        ");
+        db.Database.ExecuteSqlRaw(@"
+            ALTER TABLE ForumKomentarPrijave ADD COLUMN DatumRazrjesenja DATETIME(6) NULL;
+        ");
+        db.Database.ExecuteSqlRaw(@"
+            ALTER TABLE ForumKomentarPrijave ADD CONSTRAINT FK_ForumKomentarPrijave_RazrijesioKorisnik
+            FOREIGN KEY (RazrijesioKorisnikId) REFERENCES Korisnici(Id) ON DELETE RESTRICT;
         ");
     }
     catch (Exception) { }
@@ -231,9 +272,29 @@ using (var scope = app.Services.CreateScope())
                 PrijavioKorisnikId INT NOT NULL,
                 Razlog VARCHAR(500) NULL,
                 DatumKreiranja DATETIME(6) NOT NULL,
+                Status VARCHAR(30) NOT NULL DEFAULT 'otvorena',
+                RazrijesioKorisnikId INT NULL,
+                DatumRazrjesenja DATETIME(6) NULL,
                 UNIQUE KEY UX_ForumKomentarPrijave_KomentarKorisnik (KomentarId, PrijavioKorisnikId),
                 FOREIGN KEY (KomentarId) REFERENCES ForumKomentari(Id) ON DELETE CASCADE,
-                FOREIGN KEY (PrijavioKorisnikId) REFERENCES Korisnici(Id) ON DELETE RESTRICT
+                FOREIGN KEY (PrijavioKorisnikId) REFERENCES Korisnici(Id) ON DELETE RESTRICT,
+                FOREIGN KEY (RazrijesioKorisnikId) REFERENCES Korisnici(Id) ON DELETE RESTRICT
+            );
+        ");
+        db.Database.ExecuteSqlRaw(@"
+            CREATE TABLE IF NOT EXISTS ForumObjavaPrijave (
+                Id INT AUTO_INCREMENT PRIMARY KEY,
+                ObjavaId INT NOT NULL,
+                PrijavioKorisnikId INT NOT NULL,
+                Razlog VARCHAR(500) NULL,
+                DatumKreiranja DATETIME(6) NOT NULL,
+                Status VARCHAR(30) NOT NULL DEFAULT 'otvorena',
+                RazrijesioKorisnikId INT NULL,
+                DatumRazrjesenja DATETIME(6) NULL,
+                UNIQUE KEY UX_ForumObjavaPrijave_ObjavaKorisnik (ObjavaId, PrijavioKorisnikId),
+                FOREIGN KEY (ObjavaId) REFERENCES ForumObjave(Id) ON DELETE CASCADE,
+                FOREIGN KEY (PrijavioKorisnikId) REFERENCES Korisnici(Id) ON DELETE RESTRICT,
+                FOREIGN KEY (RazrijesioKorisnikId) REFERENCES Korisnici(Id) ON DELETE RESTRICT
             );
         ");
         db.Database.ExecuteSqlRaw(@"
@@ -257,6 +318,35 @@ using (var scope = app.Services.CreateScope())
                 DatumKreiranja DATETIME(6) NOT NULL,
                 FOREIGN KEY (KnjigaId) REFERENCES Knjige(Id) ON DELETE CASCADE,
                 FOREIGN KEY (KorisnikId) REFERENCES Korisnici(Id) ON DELETE RESTRICT
+            );
+        ");
+        db.Database.ExecuteSqlRaw(@"
+            CREATE TABLE IF NOT EXISTS RecenzijaPrijave (
+                Id INT AUTO_INCREMENT PRIMARY KEY,
+                RecenzijaId INT NOT NULL,
+                PrijavioKorisnikId INT NOT NULL,
+                Razlog VARCHAR(500) NULL,
+                DatumKreiranja DATETIME(6) NOT NULL,
+                Status VARCHAR(30) NOT NULL DEFAULT 'otvorena',
+                RazrijesioKorisnikId INT NULL,
+                DatumRazrjesenja DATETIME(6) NULL,
+                UNIQUE KEY UX_RecenzijaPrijave_RecenzijaKorisnik (RecenzijaId, PrijavioKorisnikId),
+                FOREIGN KEY (RecenzijaId) REFERENCES Recenzije(Id) ON DELETE CASCADE,
+                FOREIGN KEY (PrijavioKorisnikId) REFERENCES Korisnici(Id) ON DELETE RESTRICT,
+                FOREIGN KEY (RazrijesioKorisnikId) REFERENCES Korisnici(Id) ON DELETE RESTRICT
+            );
+        ");
+        db.Database.ExecuteSqlRaw(@"
+            CREATE TABLE IF NOT EXISTS Notifikacije (
+                Id INT AUTO_INCREMENT PRIMARY KEY,
+                KorisnikId INT NOT NULL,
+                Naslov VARCHAR(200) NOT NULL,
+                Poruka LONGTEXT NOT NULL,
+                Tip VARCHAR(50) NOT NULL DEFAULT 'Sistem',
+                LinkUrl VARCHAR(512) NULL,
+                Procitano BOOLEAN NOT NULL DEFAULT 0,
+                DatumKreiranja DATETIME(6) NOT NULL,
+                FOREIGN KEY (KorisnikId) REFERENCES Korisnici(Id) ON DELETE CASCADE
             );
         ");
     }

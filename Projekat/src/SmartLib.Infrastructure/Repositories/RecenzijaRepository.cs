@@ -27,6 +27,14 @@ namespace SmartLib.Infrastructure.Repositories
                 .ToListAsync();
         }
 
+        public async Task<Recenzija?> GetByIdAsync(int id)
+        {
+            return await _db.Recenzije
+                .Include(r => r.Korisnik).ThenInclude(k => k!.Uloga)
+                .Include(r => r.Knjiga)
+                .FirstOrDefaultAsync(r => r.Id == id);
+        }
+
         public async Task<bool> HasUserReviewedAsync(int knjigaId, int korisnikId)
         {
             return await _db.Recenzije.AnyAsync(r => r.KnjigaId == knjigaId && r.KorisnikId == korisnikId);

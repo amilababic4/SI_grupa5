@@ -22,11 +22,34 @@ namespace SmartLib.Core.Interfaces
         /// <summary>Ukloni komentar sa objave</summary>
         Task<bool> DeleteKomentarAsync(int komentarId);
 
+        /// <summary>Ukloni forum objavu</summary>
+        Task<bool> DeleteObjavaAsync(int objavaId);
+
         /// <summary>PB-63 – Dodaj prijavu komentara</summary>
         Task<ForumKomentarPrijava> AddKomentarPrijavaAsync(ForumKomentarPrijava prijava);
 
         /// <summary>PB-63 – Provjeri da li je korisnik vec prijavio komentar</summary>
         Task<bool> HasKomentarPrijavaAsync(int komentarId, int korisnikId);
+
+        Task<List<int>> GetReportedKomentarIdsAsync(int korisnikId, int objavaId);
+
+        Task<List<ForumKomentarPrijava>> GetOpenKomentarPrijaveAsync();
+
+        Task<ForumKomentarPrijava?> GetKomentarPrijavaByIdAsync(int prijavaId);
+
+        Task<bool> TryResolveKomentarPrijavaAsync(int prijavaId, int resolverId);
+
+        Task<ForumObjavaPrijava> AddObjavaPrijavaAsync(ForumObjavaPrijava prijava);
+
+        Task<bool> HasObjavaPrijavaAsync(int objavaId, int korisnikId);
+
+        Task<List<int>> GetReportedObjavaIdsAsync(int korisnikId);
+
+        Task<List<ForumObjavaPrijava>> GetOpenObjavaPrijaveAsync();
+
+        Task<ForumObjavaPrijava?> GetObjavaPrijavaByIdAsync(int prijavaId);
+
+        Task<bool> TryResolveObjavaPrijavaAsync(int prijavaId, int resolverId);
 
         /// <summary>PB-60 – Toggle "korisno" reakcija; vraća true ako je dodana, false ako je uklonjena</summary>
         Task<bool> ToggleReakcijaAsync(int objavaId, int korisnikId, string tip = "korisno");

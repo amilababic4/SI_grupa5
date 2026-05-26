@@ -1,13 +1,13 @@
 namespace SmartLib.Core.Models
 {
     /// <summary>
-    /// Prijava neadekvatnog komentara na forumu (PB-63)
+    /// Prijava neadekvatne recenzije (moderacija)
     /// </summary>
-    public class ForumKomentarPrijava
+    public class RecenzijaPrijava
     {
         public int Id { get; set; }
-        public int KomentarId { get; set; }
-        public ForumKomentar? Komentar { get; set; }
+        public int RecenzijaId { get; set; }
+        public Recenzija? Recenzija { get; set; }
         public int PrijavioKorisnikId { get; set; }
         public Korisnik? PrijavioKorisnik { get; set; }
         public string? Razlog { get; set; }

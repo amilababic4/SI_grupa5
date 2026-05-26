@@ -45,6 +45,17 @@ namespace SmartLib.Infrastructure.Repositories
                 .FirstOrDefaultAsync(r => r.Id == id);
         }
 
+        public async Task<Rezervacija?> GetNextActiveForBookAsync(int knjigaId)
+        {
+            await CancelExpiredAsync();
+            return await _db.Rezervacije
+                .Include(r => r.Korisnik)
+                .Include(r => r.Knjiga)
+                .Where(r => r.KnjigaId == knjigaId && r.Status == "aktivna")
+                .OrderBy(r => r.DatumRezervacije)
+                .FirstOrDefaultAsync();
+        }
+
         public async Task<bool> HasActiveAsync(int korisnikId, int knjigaId)
         {
             return await _db.Rezervacije
