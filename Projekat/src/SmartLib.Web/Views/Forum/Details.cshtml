@@ -2,6 +2,8 @@
 @{
     ViewData["Title"] = Model.Naslov;
     bool jeOsoblje = User.IsInRole("Bibliotekar") || User.IsInRole("Administrator");
+    var reportedKomentari = ViewBag.ReportedKomentari as List<int> ?? new List<int>();
+    var reportedObjava = ViewBag.ReportedObjava is bool value && value;
 }
 
 <style>
@@ -106,6 +108,31 @@
                 <span class="badge" style="background: rgba(255,255,255,0.2);">@Model.BrojReakcija</span>
             </button>
         </form>
+        @if (jeOsoblje)
+        {
+            <form asp-action="DeletePost" method="post"
+                  onsubmit="return confirm('Ukloniti ovu objavu? Ovaj potez uklanja i komentare.');">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="objavaId" value="@Model.Id" />
+                <button type="submit" class="btn btn-danger btn-sm" title="Ukloni objavu">🗑 Ukloni objavu</button>
+            </form>
+        }
+        else
+        {
+            if (reportedObjava)
+            {
+                <span class="status-blizi" title="Objava je već prijavljena">Prijavljeno</span>
+            }
+            else
+            {
+                <form asp-action="ReportPost" method="post"
+                      onsubmit="return confirm('Prijaviti ovu objavu kao neadekvatnu?');">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="objavaId" value="@Model.Id" />
+                    <button type="submit" class="btn btn-outline btn-sm" title="Prijavi objavu">🚩 Prijavi objavu</button>
+                </form>
+            }
+        }
     </div>
 </div>
 
@@ -145,15 +172,34 @@
                         <div>
                             <strong>@k.AutorIme</strong> (@k.AutorUloga) - @k.DatumKreiranja.ToString("dd.MM.yyyy HH:mm")
                         </div>
-                        @if (jeOsoblje)
-                        {
-                            <form asp-action="DeleteComment" method="post"
-                                  onsubmit="return confirm('Ukloniti ovaj komentar?');">
-                                <input type="hidden" name="komentarId" value="@k.Id" />
-                                <input type="hidden" name="objavaId" value="@Model.Id" />
-                                <button type="submit" class="btn btn-danger btn-sm" title="Ukloni neadekvatan komentar">🗑 Ukloni</button>
-                            </form>
-                        }
+                        <div style="display: flex; gap: 0.5rem;">
+                            @if (jeOsoblje)
+                            {
+                                <form asp-action="DeleteComment" method="post"
+                                      onsubmit="return confirm('Ukloniti ovaj komentar?');">
+                                    <input type="hidden" name="komentarId" value="@k.Id" />
+                                    <input type="hidden" name="objavaId" value="@Model.Id" />
+                                    <button type="submit" class="btn btn-danger btn-sm" title="Ukloni neadekvatan komentar">🗑 Ukloni</button>
+                                </form>
+                            }
+                            else
+                            {
+                                if (reportedKomentari.Contains(k.Id))
+                                {
+                                    <span class="status-blizi" title="Komentar je već prijavljen">Prijavljeno</span>
+                                }
+                                else
+                                {
+                                    <form asp-action="ReportComment" method="post"
+                                          onsubmit="return confirm('Prijaviti ovaj komentar kao neadekvatan?');">
+                                                                                @Html.AntiForgeryToken()
+                                        <input type="hidden" name="komentarId" value="@k.Id" />
+                                        <input type="hidden" name="objavaId" value="@Model.Id" />
+                                        <button type="submit" class="btn btn-outline btn-sm" title="Prijavi neadekvatan komentar">🚩 Prijavi</button>
+                                    </form>
+                                }
+                            }
+                        </div>
                     </div>
                     <div class="comment-body" style="white-space: pre-wrap;">@k.Sadrzaj</div>
                 </div>

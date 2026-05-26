@@ -36,6 +36,8 @@ namespace SmartLib.Core.DTOs
         public string Status { get; set; } = string.Empty;
         public bool JeZakasnilo { get; set; }
         public bool RokSeBliži { get; set; }
+        public bool ProcitanaKnjiga { get; set; }
+        public bool ImaRecenziju { get; set; }
     }
 
     public class AktivnaZaduzenjaViewModel

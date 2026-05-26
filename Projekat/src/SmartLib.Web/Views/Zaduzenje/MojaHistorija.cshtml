@@ -13,6 +13,15 @@
     Zatvorena zaduženja iz <strong>posljednje 3 godine</strong> · ukupno: <strong>@lista.Count</strong>
 </p>
 
+@if (TempData["SuccessMessage"] is string successMsg)
+{
+    <div class="alert alert-success">@successMsg</div>
+}
+@if (TempData["ErrorMessage"] is string errorMsg)
+{
+    <div class="alert alert-error">@errorMsg</div>
+}
+
 @if (!lista.Any())
 {
     <div class="card katalog-empty">
@@ -53,7 +62,15 @@ else
                                 }
                             </td>
                             <td data-label="Akcija">
-                                @if (z.DatumStvarnogVracanja.HasValue)
+                                @if (!z.DatumStvarnogVracanja.HasValue)
+                                {
+                                    <span class="historija-nepoznato">—</span>
+                                }
+                                else if (z.ImaRecenziju)
+                                {
+                                    <span class="katalog-badge" style="background: rgba(245,158,11,0.12); color: #f59e0b;">Recenzija ostavljena</span>
+                                }
+                                else
                                 {
                                     <a asp-controller="Recenzija" asp-action="Dodaj" asp-route-knjigaId="@z.KnjigaId" class="btn btn-primary btn-sm">Ocijeni knjigu</a>
                                 }

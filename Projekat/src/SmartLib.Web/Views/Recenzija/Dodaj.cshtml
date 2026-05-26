@@ -67,6 +67,11 @@
     </div>
 </div>
 
+<div id="review-toast" class="review-toast" role="status" aria-live="polite">
+    <div class="review-toast-body" id="review-toast-body"></div>
+    <div class="review-toast-actions" id="review-toast-actions"></div>
+</div>
+
 <style>
     /* Premium Letterboxd-style Review UI */
     .review-modal-container {
@@ -308,4 +313,135 @@
     .btn-premium-submit:active {
         transform: translateY(0);
     }
+
+    /* Toast validation */
+    .review-toast {
+        position: fixed;
+        left: 50%;
+        bottom: 2rem;
+        transform: translateX(-50%) translateY(120%);
+        background: #0f172a;
+        color: #ffffff;
+        padding: 0.9rem 1.2rem;
+        border-radius: 14px;
+        box-shadow: 0 18px 45px rgba(15, 23, 42, 0.35);
+        max-width: min(520px, 92vw);
+        width: fit-content;
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        z-index: 9999;
+        transition: transform 0.25s ease;
+    }
+
+    .review-toast.show {
+        transform: translateX(-50%) translateY(0);
+    }
+
+    .review-toast-body {
+        font-weight: 600;
+    }
+
+    .review-toast-actions {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .review-toast-actions button {
+        border: none;
+        background: rgba(255, 255, 255, 0.18);
+        color: #ffffff;
+        padding: 0.35rem 0.65rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+    }
+
+    .review-toast-actions button.primary {
+        background: #22c55e;
+        color: #0f172a;
+    }
 </style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var form = document.querySelector('.review-form');
+        var toast = document.getElementById('review-toast');
+        var toastBody = document.getElementById('review-toast-body');
+        var toastActions = document.getElementById('review-toast-actions');
+        var commentField = document.querySelector('textarea[name="Komentar"]');
+        var allowEmptyComment = false;
+        var toastTimeout;
+
+        function hideToast() {
+            toast.classList.remove('show');
+            toastActions.innerHTML = '';
+        }
+
+        function showToast(message, actions, autoHide) {
+            toastBody.textContent = message;
+            toastActions.innerHTML = '';
+
+            if (actions && actions.length) {
+                actions.forEach(function (action) {
+                    var btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.textContent = action.label;
+                    if (action.primary) btn.classList.add('primary');
+                    btn.addEventListener('click', function () {
+                        action.onClick();
+                    });
+                    toastActions.appendChild(btn);
+                });
+            }
+
+            toast.classList.add('show');
+            clearTimeout(toastTimeout);
+            if (autoHide) {
+                toastTimeout = setTimeout(hideToast, 2600);
+            }
+        }
+
+        if (!form) return;
+
+        form.addEventListener('submit', function (event) {
+            var rating = form.querySelector('input[name="Ocjena"]:checked');
+            var comment = commentField ? commentField.value.trim() : '';
+
+            if (!rating) {
+                event.preventDefault();
+                showToast('Morate odabrati ocjenu prije spremanja.', [
+                    { label: 'U redu', onClick: hideToast, primary: true }
+                ], false);
+                return;
+            }
+
+            if (!comment && !allowEmptyComment) {
+                event.preventDefault();
+                showToast('Niste napisali tekst recenzije. Želite li nastaviti bez teksta?', [
+                    {
+                        label: 'Nastavi',
+                        primary: true,
+                        onClick: function () {
+                            allowEmptyComment = true;
+                            hideToast();
+                            if (form.requestSubmit) {
+                                form.requestSubmit();
+                            } else {
+                                form.submit();
+                            }
+                        }
+                    },
+                    {
+                        label: 'Dodaj tekst',
+                        onClick: function () {
+                            hideToast();
+                            if (commentField) commentField.focus();
+                        }
+                    }
+                ], false);
+            }
+        });
+    });
+</script>

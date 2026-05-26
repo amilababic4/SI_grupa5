@@ -1,6 +1,7 @@
 @model SmartLib.Core.DTOs.KatalogViewModel
 @{
     ViewData["Title"] = "Katalog knjiga";
+    bool jeClan = User.IsInRole("Član");
 }
 
 <div class="katalog-header">
@@ -134,6 +135,18 @@
                         </select>
                     </div>
 
+                    @if (jeClan)
+                    {
+                        <div class="form-group filter-group">
+                            <label for="filter-procitane">Status citanja</label>
+                            <label class="katalog-read-toggle">
+                                <input id="filter-procitane" class="katalog-read-checkbox" type="checkbox" name="samoNeprocitane" value="true"
+                                       @(Model.SamoNeprocitane ? "checked" : "") />
+                                Samo neprocitane
+                            </label>
+                        </div>
+                    }
+
                 </div>
             </div>
         </div>
@@ -155,6 +168,7 @@
                    asp-route-kategorijaId="@Model.KategorijaId"
                    asp-route-izdavac="@Model.Izdavac"
                    asp-route-godinaIzdanja="@Model.GodinaIzdanja"
+                   asp-route-samoNeprocitane="@Model.SamoNeprocitane"
                    asp-route-page="1"
                    class="chip-remove" title="Ukloni filter">×</a>
             </span>
@@ -168,6 +182,7 @@
                    asp-route-kategorijaId="@Model.KategorijaId"
                    asp-route-izdavac="@Model.Izdavac"
                    asp-route-godinaIzdanja="@Model.GodinaIzdanja"
+                   asp-route-samoNeprocitane="@Model.SamoNeprocitane"
                    asp-route-page="1"
                    class="chip-remove" title="Ukloni filter">×</a>
             </span>
@@ -182,6 +197,7 @@
                    asp-route-autor="@Model.Autor"
                    asp-route-izdavac="@Model.Izdavac"
                    asp-route-godinaIzdanja="@Model.GodinaIzdanja"
+                   asp-route-samoNeprocitane="@Model.SamoNeprocitane"
                    asp-route-page="1"
                    class="chip-remove" title="Ukloni filter">×</a>
             </span>
@@ -195,6 +211,7 @@
                    asp-route-autor="@Model.Autor"
                    asp-route-kategorijaId="@Model.KategorijaId"
                    asp-route-godinaIzdanja="@Model.GodinaIzdanja"
+                   asp-route-samoNeprocitane="@Model.SamoNeprocitane"
                    asp-route-page="1"
                    class="chip-remove" title="Ukloni filter">×</a>
             </span>
@@ -208,6 +225,22 @@
                    asp-route-autor="@Model.Autor"
                    asp-route-kategorijaId="@Model.KategorijaId"
                    asp-route-izdavac="@Model.Izdavac"
+                   asp-route-samoNeprocitane="@Model.SamoNeprocitane"
+                   asp-route-page="1"
+                   class="chip-remove" title="Ukloni filter">×</a>
+            </span>
+        }
+        @if (Model.SamoNeprocitane)
+        {
+            <span class="filter-chip">
+                Samo neprocitane
+                <a asp-action="Index"
+                   asp-route-naslov="@Model.Naslov"
+                   asp-route-autor="@Model.Autor"
+                   asp-route-kategorijaId="@Model.KategorijaId"
+                   asp-route-izdavac="@Model.Izdavac"
+                   asp-route-godinaIzdanja="@Model.GodinaIzdanja"
+                   asp-route-samoNeprocitane="false"
                    asp-route-page="1"
                    class="chip-remove" title="Ukloni filter">×</a>
             </span>
@@ -224,6 +257,10 @@
     else
     {
         <span>Ukupno knjiga u katalogu: <strong>@Model.UkupnoStavki</strong></span>
+    }
+    @if (jeClan)
+    {
+        <span style="margin-left: 0.75rem; color: var(--text-muted);">Procitano: <strong>@Model.ProcitaneUkupno</strong></span>
     }
 </div>
 
@@ -298,10 +335,14 @@ else
         {
             <div class="lb-list-item">
                 <a asp-action="Details" asp-route-id="@knjiga.Id" class="stretched-link"></a>
-                <div class="lb-cover">
+                <div class="lb-cover" style="position: relative;">
                     <img src="@Url.Action("Korice", "Knjiga", new { isbn = knjiga.Isbn, size = "L", v = 3 })"
                          alt="@knjiga.Naslov"
                          loading="lazy" />
+                    @if (jeClan && knjiga.Procitana)
+                    {
+                        <span style="position:absolute;top:10px;left:10px;background:rgba(16,185,129,0.92);color:#fff;border-radius:999px;padding:0.2rem 0.5rem;font-size:0.75rem;font-weight:600;">✓ Pročitano</span>
+                    }
                 </div>
                 <div class="lb-body">
                     <div class="lb-body-top">
@@ -356,6 +397,10 @@ else
                             {
                                 <span class="lb-tag">@knjiga.Kategorija</span>
                             }
+                            @if (jeClan && knjiga.Procitana)
+                            {
+                                <span class="lb-tag" style="background: rgba(16,185,129,0.12); color: #10b981;">Pročitano</span>
+                            }
                             <span class="lb-availability @(knjiga.BrojDostupnih > 0 ? "available" : "unavailable")">
                                 @(knjiga.BrojDostupnih > 0 ? $"✓ Dostupno ({knjiga.BrojDostupnih})" : "✗ Zauzeto")
                             </span>
@@ -380,10 +425,14 @@ else
         @foreach (var knjiga in Model.Knjige)
         {
             <a asp-action="Details" asp-route-id="@knjiga.Id" class="lb-grid-card">
-                <div class="lb-grid-poster">
+                <div class="lb-grid-poster" style="position: relative;">
                     <img src="@Url.Action("Korice", "Knjiga", new { isbn = knjiga.Isbn, size = "L" })"
                          alt="@knjiga.Naslov"
                          loading="lazy" />
+                    @if (jeClan && knjiga.Procitana)
+                    {
+                        <span class="lb-grid-avail" style="left: 12px; right: auto; background: rgba(16,185,129,0.9);">Pročitano</span>
+                    }
                     <div class="lb-grid-overlay">
                         <div class="lb-grid-overlay-stars">
                             @for (int i = 1; i <= 5; i++)
@@ -427,7 +476,8 @@ else
                    asp-route-autor="@Model.Autor"
                    asp-route-kategorijaId="@Model.KategorijaId"
                    asp-route-izdavac="@Model.Izdavac"
-                   asp-route-godinaIzdanja="@Model.GodinaIzdanja"
+                 asp-route-godinaIzdanja="@Model.GodinaIzdanja"
+                 asp-route-samoNeprocitane="@Model.SamoNeprocitane"
                    asp-route-pageSize="@Model.VelicinaStrane"
                    class="btn btn-secondary">← Prethodna</a>
             }
@@ -448,7 +498,8 @@ else
                    asp-route-autor="@Model.Autor"
                    asp-route-kategorijaId="@Model.KategorijaId"
                    asp-route-izdavac="@Model.Izdavac"
-                   asp-route-godinaIzdanja="@Model.GodinaIzdanja"
+                 asp-route-godinaIzdanja="@Model.GodinaIzdanja"
+                 asp-route-samoNeprocitane="@Model.SamoNeprocitane"
                    asp-route-pageSize="@Model.VelicinaStrane"
                    class="btn btn-secondary">Sljedeća →</a>
             }

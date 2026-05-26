@@ -16,6 +16,7 @@ namespace SmartLib.Core.DTOs
         public int BrojDostupnih { get; set; }
         public double ProsjecnaOcjena { get; set; }
         public int BrojRecenzija { get; set; }
+        public bool Procitana { get; set; }
     }
 
     public class KnjigaCreateDto
@@ -82,6 +83,9 @@ namespace SmartLib.Core.DTOs
         public int UkupnoStavki { get; set; }
         public int VelicinaStrane { get; set; }
 
+        public bool SamoNeprocitane { get; set; }
+        public int ProcitaneUkupno { get; set; }
+
         // Osnovna pretraga
         public string? Naslov { get; set; }
         public string? Autor { get; set; }
@@ -104,7 +108,8 @@ namespace SmartLib.Core.DTOs
             !string.IsNullOrWhiteSpace(Autor) ||
             KategorijaId.HasValue ||
             !string.IsNullOrWhiteSpace(Izdavac) ||
-            GodinaIzdanja.HasValue;
+            GodinaIzdanja.HasValue ||
+            SamoNeprocitane;
 
         /// <summary>
         /// Vraća true ako je aktivan makar jedan napredni filter (ne osnovna pretraga).
@@ -113,7 +118,8 @@ namespace SmartLib.Core.DTOs
         public bool ImaNapredniFilter =>
             KategorijaId.HasValue ||
             !string.IsNullOrWhiteSpace(Izdavac) ||
-            GodinaIzdanja.HasValue;
+            GodinaIzdanja.HasValue ||
+            SamoNeprocitane;
     }
 
     /// <summary>

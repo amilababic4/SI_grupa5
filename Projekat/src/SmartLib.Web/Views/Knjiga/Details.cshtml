@@ -34,6 +34,10 @@
                 <div>
                     <h2>@Model.Naslov</h2>
                     <p class="details-autor">@Model.Autor</p>
+                    @if (jeClan && ViewBag.Procitana is true)
+                    {
+                        <span class="details-read-badge">✓ Pročitano</span>
+                    }
                 </div>
                 @if (jeOsoblje)
                 {
@@ -302,8 +306,11 @@
 @{
     var recenzije = ViewBag.Recenzije as IEnumerable<Recenzija> ?? new List<Recenzija>();
     var prosjek = recenzije.Any() ? recenzije.Average(r => r.Ocjena) : 0;
+    var reviewSuccessMsg = TempData["ReviewSuccessMessage"] as string;
+    var reviewErrorMsg = TempData["ReviewErrorMessage"] as string;
+    var reportedRecenzije = ViewBag.ReportedRecenzije as List<int> ?? new List<int>();
 }
-<div class="card" style="margin-top: 2rem;">
+<div id="reviews-section" class="card" style="margin-top: 2rem;">
     <div class="examples-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1.5rem;">
         <div>
             <h3 class="examples-title" style="margin: 0;">Recenzije čitalaca</h3>
@@ -319,6 +326,15 @@
             <a asp-controller="Recenzija" asp-action="Dodaj" asp-route-knjigaId="@Model.Id" class="btn btn-outline btn-sm">Ocijeni knjigu</a>
         }
     </div>
+
+    @if (!string.IsNullOrWhiteSpace(reviewSuccessMsg))
+    {
+        <div class="alert alert-success" style="margin-bottom: 1rem;">@reviewSuccessMsg</div>
+    }
+    @if (!string.IsNullOrWhiteSpace(reviewErrorMsg))
+    {
+        <div class="alert alert-error" style="margin-bottom: 1rem;">@reviewErrorMsg</div>
+    }
 
     @if (!recenzije.Any())
     {
@@ -350,6 +366,23 @@
                                     <button type="submit" class="btn btn-danger btn-sm" title="Ukloni neadekvatnu recenziju">🗑 Ukloni</button>
                                 </form>
                             }
+                            @if (!jeOsoblje && User.Identity?.IsAuthenticated == true)
+                            {
+                                if (reportedRecenzije.Contains(r.Id))
+                                {
+                                    <span class="status-blizi" title="Recenzija je već prijavljena">Prijavljeno</span>
+                                }
+                                else
+                                {
+                                    <form asp-controller="Recenzija" asp-action="Prijavi" method="post"
+                                          onsubmit="return confirm('Prijaviti ovu recenziju kao neadekvatnu?');">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="recenzijaId" value="@r.Id" />
+                                        <input type="hidden" name="knjigaId" value="@Model.Id" />
+                                        <button type="submit" class="btn btn-outline btn-sm" title="Prijavi recenziju">🚩 Prijavi</button>
+                                    </form>
+                                }
+                            }
                         </div>
                     </div>
                     @if(!string.IsNullOrWhiteSpace(r.Komentar))
@@ -361,3 +394,15 @@
         </div>
     }
 </div>
+
+@if (!string.IsNullOrWhiteSpace(reviewSuccessMsg) || !string.IsNullOrWhiteSpace(reviewErrorMsg))
+{
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var section = document.getElementById('reviews-section');
+            if (section) {
+                section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    </script>
+}
