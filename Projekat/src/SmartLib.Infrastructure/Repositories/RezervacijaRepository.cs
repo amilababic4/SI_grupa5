@@ -87,6 +87,11 @@ namespace SmartLib.Infrastructure.Repositories
         }
 
         // ── Write metode sa audit logom ───────────────────────────────────
+        public async Task<int> CountByKorisnikAsync(int korisnikId)
+        {
+            return await _db.Rezervacije
+                .CountAsync(r => r.KorisnikId == korisnikId);
+        }
 
         public async Task<Rezervacija> CreateAsync(Rezervacija rezervacija)
         {

@@ -122,6 +122,8 @@ builder.Services.AddScoped<IRecenzijaPrijavaRepository, RecenzijaPrijavaReposito
 builder.Services.AddScoped<INotifikacijaRepository, NotifikacijaRepository>();
 builder.Services.AddScoped<IVijestRepository, VijestRepository>();
 builder.Services.AddScoped<IDogadjajRepository, DogadjajRepository>();
+builder.Services.AddScoped<IListaZeljaRepository, ListaZeljaRepository>();
+builder.Services.AddScoped<IListaKolekcijaRepository, ListaKolekcijaRepository>();
 builder.Services.AddHostedService<DeactivatedAccountCleanupService>();
 builder.Services.AddScoped<IIzvjestajService, IzvjestajService>();
 builder.Services.AddScoped<IAuditLogRepository, AuditLogRepository>();
@@ -201,6 +203,14 @@ using (var scope = app.Services.CreateScope())
     {
         db.Database.ExecuteSqlRaw(@"
             ALTER TABLE Korisnici ADD COLUMN DatumZabraneDo DATETIME(6) NULL;
+        ");
+    }
+    catch (Exception) { }
+
+    try
+    {
+        db.Database.ExecuteSqlRaw(@"
+            ALTER TABLE Korisnici ADD COLUMN ListaZeljaJavna BOOLEAN NOT NULL DEFAULT 0;
         ");
     }
     catch (Exception) { }
@@ -351,6 +361,42 @@ using (var scope = app.Services.CreateScope())
                 Procitano BOOLEAN NOT NULL DEFAULT 0,
                 DatumKreiranja DATETIME(6) NOT NULL,
                 FOREIGN KEY (KorisnikId) REFERENCES Korisnici(Id) ON DELETE CASCADE
+            );
+        ");
+        db.Database.ExecuteSqlRaw(@"
+            CREATE TABLE IF NOT EXISTS ListaZeljaStavke (
+                Id INT AUTO_INCREMENT PRIMARY KEY,
+                KorisnikId INT NOT NULL,
+                KnjigaId INT NOT NULL,
+                DatumDodavanja DATETIME(6) NOT NULL,
+                UNIQUE KEY UX_ListaZelja_KorisnikKnjiga (KorisnikId, KnjigaId),
+                FOREIGN KEY (KorisnikId) REFERENCES Korisnici(Id) ON DELETE CASCADE,
+                FOREIGN KEY (KnjigaId) REFERENCES Knjige(Id) ON DELETE CASCADE
+            );
+        ");
+        db.Database.ExecuteSqlRaw(@"
+            CREATE TABLE IF NOT EXISTS ListaKolekcije (
+                Id INT AUTO_INCREMENT PRIMARY KEY,
+                KorisnikId INT NOT NULL,
+                Naziv VARCHAR(200) NOT NULL,
+                Opis VARCHAR(1000) NULL,
+                Javna BOOLEAN NOT NULL DEFAULT 0,
+                DatumKreiranja DATETIME(6) NOT NULL,
+                DatumAzuriranja DATETIME(6) NULL,
+                UNIQUE KEY UX_ListaKolekcije_KorisnikNaziv (KorisnikId, Naziv),
+                FOREIGN KEY (KorisnikId) REFERENCES Korisnici(Id) ON DELETE CASCADE
+            );
+        ");
+        db.Database.ExecuteSqlRaw(@"
+            CREATE TABLE IF NOT EXISTS ListaKolekcijaStavke (
+                Id INT AUTO_INCREMENT PRIMARY KEY,
+                ListaKolekcijaId INT NOT NULL,
+                KnjigaId INT NOT NULL,
+                Redoslijed INT NOT NULL,
+                DatumDodavanja DATETIME(6) NOT NULL,
+                UNIQUE KEY UX_ListaKolekcijaStavke_ListaKnjiga (ListaKolekcijaId, KnjigaId),
+                FOREIGN KEY (ListaKolekcijaId) REFERENCES ListaKolekcije(Id) ON DELETE CASCADE,
+                FOREIGN KEY (KnjigaId) REFERENCES Knjige(Id) ON DELETE CASCADE
             );
         ");
     }

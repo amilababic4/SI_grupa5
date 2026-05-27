@@ -1,0 +1,278 @@
+@model SmartLib.Web.Models.ListaKolekcijaListViewModel
+@{
+    ViewData["Title"] = "Moje kolekcije";
+}
+
+@functions {
+    public string GetStavkeText(int count)
+    {
+        int lastDigit = count % 10;
+        int lastTwoDigits = count % 100;
+
+        if (lastDigit == 1 && lastTwoDigits != 11)
+        {
+            return "stavka";
+        }
+        else if (lastDigit >= 2 && lastDigit <= 4 && (lastTwoDigits < 10 || lastTwoDigits >= 20))
+        {
+            return "stavke";
+        }
+        else
+        {
+            return "stavki";
+        }
+    }
+}
+
+<div class="details-topbar">
+    <a asp-controller="Knjiga" asp-action="Index" class="btn btn-secondary">← Nazad na katalog</a>
+</div>
+
+@if (TempData["SuccessMessage"] is string successMsg)
+{
+    <div class="alert alert-success">@successMsg</div>
+}
+@if (TempData["ErrorMessage"] is string errorMsg)
+{
+    <div class="alert alert-error">@errorMsg</div>
+}
+
+<div class="katalog-header collection-header">
+    <h2>@ViewData["Title"]</h2>
+    <div class="collection-quick-filters">
+        <div class="collection-chip-row">
+            <a asp-controller="ListaKolekcija" asp-action="Index"
+               asp-route-q="@Model.Query"
+               asp-route-visibility="all"
+               asp-route-sort="@Model.Sort"
+               class="collection-chip @(Model.Visibility == "all" ? "is-active" : "")">
+                Sve
+            </a>
+            <a asp-controller="ListaKolekcija" asp-action="Index"
+               asp-route-q="@Model.Query"
+               asp-route-visibility="public"
+               asp-route-sort="@Model.Sort"
+               class="collection-chip @(Model.Visibility == "public" ? "is-active" : "")">
+                Javne
+            </a>
+            <a asp-controller="ListaKolekcija" asp-action="Index"
+               asp-route-q="@Model.Query"
+               asp-route-visibility="private"
+               asp-route-sort="@Model.Sort"
+               class="collection-chip @(Model.Visibility == "private" ? "is-active" : "")">
+                Privatne
+            </a>
+        </div>
+        <button type="button" class="btn btn-primary btn-sm collection-create-trigger">+ Nova kolekcija</button>
+    </div>
+</div>
+
+<div class="card collection-panel" style="margin-bottom: 1.5rem;">
+    <form asp-controller="ListaKolekcija" asp-action="Index" method="get" class="search-row">
+        <div class="form-group" style="flex:2; margin-bottom:0; min-width: 220px;">
+            <label for="Query" class="details-label" style="margin-bottom:0.25rem;">Pretraga</label>
+            <input id="Query" name="q" type="text" value="@Model.Query" placeholder="Naziv ili opis kolekcije" />
+        </div>
+
+        <div class="form-group" style="margin-bottom:0; min-width: 190px;">
+            <label for="Sort" class="details-label" style="margin-bottom:0.25rem;">Sortiranje</label>
+            <select id="Sort" name="sort" class="filter-select">
+                <option value="updated" selected="@(Model.Sort == "updated")">Zadnje azurirane</option>
+                <option value="created" selected="@(Model.Sort == "created")">Najnovije</option>
+                <option value="items" selected="@(Model.Sort == "items")">Najvise stavki</option>
+                <option value="name" selected="@(Model.Sort == "name")">Naziv (A-Z)</option>
+            </select>
+        </div>
+        <div style="display:flex; gap:0.5rem; align-items:flex-end;">
+            <button type="submit" class="btn btn-primary">Primijeni</button>
+            @if (!string.IsNullOrWhiteSpace(Model.Query) || Model.Visibility != "all" || Model.Sort != "updated")
+            {
+                <a asp-controller="ListaKolekcija" asp-action="Index" class="btn btn-secondary">Resetuj</a>
+            }
+        </div>
+    </form>
+    <div class="collection-filter-meta">
+        <span>Prikazano: <strong>@Model.Kolekcije.Count</strong> / @Model.TotalCount</span>
+    </div>
+</div>
+
+@if (!Model.Kolekcije.Any())
+{
+    <p class="empty-note">Nemate kolekcija koje odgovaraju filterima.</p>
+}
+else
+{
+    <div class="collection-grid-wrap">
+        <div class="collection-grid">
+        @foreach (var k in Model.Kolekcije)
+        {
+            var lastUpdate = k.DatumAzuriranja ?? k.DatumKreiranja;
+            var isRecentlyUpdated = lastUpdate >= DateTime.UtcNow.AddDays(-7);
+            <article class="collection-card">
+                <a asp-controller="ListaKolekcija" asp-action="Details" asp-route-id="@k.Id" class="stretched-link" aria-label="Otvori kolekciju @k.Naziv"></a>
+                @if (!k.IsWishlist)
+                {
+                    <form asp-controller="ListaKolekcija" asp-action="Delete" asp-route-id="@k.Id" method="post" class="collection-delete-form">
+                        @Html.AntiForgeryToken()
+                        <button type="button" class="icon-btn danger collection-delete-btn" data-collection-name="@k.Naziv" aria-label="Obrisi kolekciju @k.Naziv">
+                            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                <path d="M9 3h6l1 2h5v2H3V5h5l1-2zm1 6h2v9h-2V9zm4 0h2v9h-2V9zM7 9h2v9H7V9z" />
+                            </svg>
+                        </button>
+                    </form>
+                }
+                <div class="collection-card-header">
+                    <h3 class="collection-card-title">@k.Naziv</h3>
+                    <span class="visibility-pill @(k.Javna ? "is-public" : "is-private")">
+                        @(k.Javna ? "JAVNA" : "PRIVATNA")
+                    </span>
+                    @if (k.IsWishlist)
+                    {
+                        <span class="collection-pinned">Lista želja</span>
+                    }
+                </div>
+                <p class="collection-card-desc">@(string.IsNullOrWhiteSpace(k.Opis) ? "Bez opisa" : k.Opis)</p>
+                <div class="collection-card-meta">
+                    <span class="collection-count">@k.BrojStavki @GetStavkeText(k.BrojStavki)</span>
+                    @if (isRecentlyUpdated)
+                    {
+                        <span class="collection-updated">Azurirano</span>
+                    }
+                </div>
+            </article>
+        }
+        </div>
+    </div>
+}
+
+<div id="collectionDeleteModal" class="confirm-modal-overlay" style="display:none;" aria-hidden="true">
+    <div class="confirm-modal-card" role="dialog" aria-modal="true" aria-labelledby="confirmDeleteTitle">
+        <div class="confirm-modal-header">
+            <h3 id="confirmDeleteTitle">Obrisati kolekciju?</h3>
+        </div>
+        <p class="confirm-modal-text">Da li ste sigurni da želite obrisati kolekciju <span id="confirmDeleteName">—</span>? Ova radnja se ne može poništiti.</p>
+        <div class="confirm-modal-actions">
+            <button type="button" class="btn btn-secondary" id="confirmDeleteCancel">Odustani</button>
+            <button type="button" class="btn btn-danger" id="confirmDeleteConfirm">Obrisi</button>
+        </div>
+    </div>
+</div>
+
+<div id="collectionCreateModal" class="collection-create-overlay" style="display:none;" aria-hidden="true">
+    <div class="collection-create-card" role="dialog" aria-modal="true" aria-labelledby="collectionCreateTitle">
+        <div class="collection-create-header">
+            <h3 id="collectionCreateTitle">Nova kolekcija</h3>
+            <button type="button" class="sl-modal-close" id="collectionCreateClose" aria-label="Zatvori">&times;</button>
+        </div>
+        <form asp-controller="ListaKolekcija" asp-action="Create" method="post" class="collection-create-form">
+            @Html.AntiForgeryToken()
+            <div class="form-group" style="margin-bottom:0;">
+                <label for="NewNaziv" class="details-label" style="margin-bottom:0.25rem;">Naziv kolekcije</label>
+                <input id="NewNaziv" name="NewNaziv" type="text" placeholder="Npr. Ljetno citanje" />
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+                <label for="NewOpis" class="details-label" style="margin-bottom:0.25rem;">Opis (opcionalno)</label>
+                <input id="NewOpis" name="NewOpis" type="text" placeholder="Kratak opis" />
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+                <label class="details-label" style="margin-bottom:0.25rem;">Vidljivost</label>
+                <label class="katalog-read-toggle">
+                    <input type="checkbox" name="NewJavna" value="true" />
+                    Javna
+                </label>
+            </div>
+            <div class="collection-create-actions">
+                <button type="submit" class="btn btn-primary">Kreiraj</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            const modal = document.getElementById('collectionDeleteModal');
+            const nameSpan = document.getElementById('confirmDeleteName');
+            const cancelBtn = document.getElementById('confirmDeleteCancel');
+            const confirmBtn = document.getElementById('confirmDeleteConfirm');
+            const modalCard = modal?.querySelector('.confirm-modal-card');
+            const createModal = document.getElementById('collectionCreateModal');
+            const createClose = document.getElementById('collectionCreateClose');
+            const createTriggers = document.querySelectorAll('.collection-create-trigger');
+            let pendingForm = null;
+
+            function openModal(button) {
+                pendingForm = button.closest('form');
+                nameSpan.textContent = button.dataset.collectionName || 'ovu kolekciju';
+                modal.style.display = 'flex';
+                modal.setAttribute('aria-hidden', 'false');
+                document.body.style.overflow = 'hidden';
+                document.body.classList.add('modal-open');
+                if (modalCard) {
+                    modalCard.classList.remove('is-shake');
+                    void modalCard.offsetWidth;
+                    modalCard.classList.add('is-shake');
+                }
+            }
+
+            function closeModal() {
+                modal.style.display = 'none';
+                modal.setAttribute('aria-hidden', 'true');
+                document.body.style.overflow = '';
+                document.body.classList.remove('modal-open');
+                pendingForm = null;
+            }
+
+            document.querySelectorAll('.collection-delete-btn').forEach((button) => {
+                button.addEventListener('click', () => openModal(button));
+            });
+
+            cancelBtn.addEventListener('click', closeModal);
+            modal.addEventListener('click', (event) => {
+                if (event.target === modal) closeModal();
+            });
+
+            confirmBtn.addEventListener('click', () => {
+                if (pendingForm) {
+                    pendingForm.submit();
+                }
+            });
+
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape' && modal.style.display === 'flex') {
+                    closeModal();
+                }
+            });
+
+            function openCreateModal() {
+                if (!createModal) return;
+                createModal.style.display = 'flex';
+                createModal.setAttribute('aria-hidden', 'false');
+                document.body.style.overflow = 'hidden';
+                document.body.classList.add('modal-open');
+            }
+
+            function closeCreateModal() {
+                if (!createModal) return;
+                createModal.style.display = 'none';
+                createModal.setAttribute('aria-hidden', 'true');
+                document.body.style.overflow = '';
+                document.body.classList.remove('modal-open');
+            }
+
+            createTriggers.forEach((btn) => btn.addEventListener('click', openCreateModal));
+            if (createClose) createClose.addEventListener('click', closeCreateModal);
+            if (createModal) {
+                createModal.addEventListener('click', (event) => {
+                    if (event.target === createModal) closeCreateModal();
+                });
+            }
+
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape' && createModal?.style.display === 'flex') {
+                    closeCreateModal();
+                }
+            });
+        })();
+    </script>
+}

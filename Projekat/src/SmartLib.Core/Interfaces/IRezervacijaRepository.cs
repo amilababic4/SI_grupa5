@@ -9,6 +9,7 @@ namespace SmartLib.Core.Interfaces
         Task<Rezervacija?> GetByIdAsync(int id);
         Task<Rezervacija?> GetNextActiveForBookAsync(int knjigaId);
         Task<bool> HasActiveAsync(int korisnikId, int knjigaId);
+        Task<int> CountByKorisnikAsync(int korisnikId);
         Task<Rezervacija> CreateAsync(Rezervacija rezervacija);
         Task UpdateAsync(Rezervacija rezervacija);
         Task CancelExpiredAsync();

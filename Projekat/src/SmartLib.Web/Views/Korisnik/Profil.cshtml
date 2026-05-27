@@ -1,5 +1,6 @@
 @model SmartLib.Core.Models.Korisnik
 @using SmartLib.Core.DTOs
+@using SmartLib.Web.Models
 @{
     var jeMojProfil = ViewBag.JeMojProfil as bool? ?? true;
     var jeAdmin = User.IsInRole("Administrator");
@@ -13,6 +14,8 @@
     var nazadLabel = ViewBag.NazadLabel as string ?? "← Nazad na članove";
 
     var clanarina = ViewBag.Clanarina as ClanarinaDto;
+    var achievements = ViewBag.Achievements as List<AchievementViewModel> ?? new List<AchievementViewModel>();
+    var kolekcije = ViewBag.Kolekcije as List<SmartLib.Core.Models.ListaKolekcija> ?? new List<SmartLib.Core.Models.ListaKolekcija>();
 }
 
 <div class="details-topbar">
@@ -230,6 +233,51 @@
                         </a>
                     </div>
                 }
+            }
+
+            @if (achievements.Any())
+            {
+                <div class="profil-clanarina-section">
+                    <div class="profil-clanarina-header">
+                        <span class="profil-clanarina-naslov">Postignuca</span>
+                    </div>
+                    <div class="details-grid" style="margin-top: 0.5rem; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
+                        @foreach (var a in achievements)
+                        {
+                            <div class="details-item">
+                                <span class="details-label">@a.Title</span>
+                                <span class="details-value">@a.Description</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            @if (kolekcije.Any())
+            {
+                var vidljive = kolekcije.Take(5).ToList();
+                <div class="profil-clanarina-section">
+                    <div class="profil-clanarina-header">
+                        <span class="profil-clanarina-naslov">Kolekcije</span>
+                        @if (jeMojProfil)
+                        {
+                            <a asp-controller="ListaKolekcija" asp-action="Index" class="btn-clanarina-upravljaj">Moje kolekcije</a>
+                        }
+                    </div>
+                    <div class="details-grid" style="margin-top: 0.5rem; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
+                        @foreach (var k in vidljive)
+                        {
+                            <div class="details-item">
+                                <span class="details-label">@k.Naziv</span>
+                                <span class="details-value">
+                                    <a asp-controller="ListaKolekcija" asp-action="@(jeMojProfil ? "Details" : "Public")" asp-route-id="@k.Id">
+                                        @(k.Javna ? "Javna kolekcija" : "Privatna kolekcija")
+                                    </a>
+                                </span>
+                            </div>
+                        }
+                    </div>
+                </div>
             }
 
         </div>

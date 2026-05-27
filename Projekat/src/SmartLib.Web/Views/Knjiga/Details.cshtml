@@ -6,6 +6,8 @@
     bool jeOsoblje = User.IsInRole("Bibliotekar") || User.IsInRole("Administrator");
     bool jeClan = User.IsInRole("Član");
     bool imaAktivnuRezervaciju = ViewBag.ImaAktivnuRezervaciju is true;
+    var returnUrl = $"{Context.Request.Path}{Context.Request.QueryString}";
+    var kolekcije = ViewBag.Kolekcije as List<SmartLib.Core.Models.ListaKolekcija> ?? new List<SmartLib.Core.Models.ListaKolekcija>();
 }
 
 <div class="details-topbar">
@@ -50,25 +52,32 @@
                         </form>
                     </div>
                 }
-                @if (jeClan && Model.BrojDostupnih == 0)
+                @if (jeClan)
                 {
-                    <div class="details-actions">
-                        @if (imaAktivnuRezervaciju)
+                    <div class="details-actions details-actions--primary" style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+                        <button type="button" class="btn btn-secondary" style="background: rgba(30, 58, 95, 0.4); border-color: rgba(255,255,255,0.1); color: #fff;" onclick="openCollectionModal()">
+                            Dodaj u kolekciju
+                        </button>
+
+                        @if (Model.BrojDostupnih == 0)
                         {
-                            <button class="btn btn-secondary" disabled title="Već imate aktivnu rezervaciju za ovu knjigu">
-                                Rezervisano
-                            </button>
-                        }
-                        else
-                        {
-                            <form asp-controller="Rezervacija" asp-action="Create" method="post">
-                                @Html.AntiForgeryToken()
-                                <input type="hidden" name="knjigaId" value="@Model.Id" />
-                                <button type="submit" class="btn btn-primary"
-                                        onclick="return confirm('Rezervisati knjigu: @Model.Naslov?')">
-                                    Rezerviši
+                            @if (imaAktivnuRezervaciju)
+                            {
+                                <button class="btn btn-secondary" disabled title="Već imate aktivnu rezervaciju za ovu knjigu">
+                                    Rezervisano
                                 </button>
-                            </form>
+                            }
+                            else
+                            {
+                                <form asp-controller="Rezervacija" asp-action="Create" method="post" style="margin: 0;">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="knjigaId" value="@Model.Id" />
+                                    <button type="submit" class="btn btn-primary"
+                                            onclick="return confirm('Rezervisati knjigu: @Model.Naslov?')">
+                                        Rezerviši
+                                    </button>
+                                </form>
+                            }
                         }
                     </div>
                 }
@@ -122,6 +131,91 @@
     </div>
 </div>
 
+<div id="collectionModal" class="sl-modal-overlay" onclick="closeCollectionModal()" style="display:none;">
+    <div class="sl-modal-card" onclick="event.stopPropagation()">
+        <div class="sl-modal-header">
+            <h3>Dodaj u kolekciju</h3>
+            <button type="button" class="sl-modal-close" onclick="closeCollectionModal()">&times;</button>
+        </div>
+
+        <div class="sl-modal-section">
+            <h4>Postojece kolekcije</h4>
+            @if (kolekcije.Any())
+            {
+                <div class="sl-modal-list">
+                    @foreach (var lista in kolekcije)
+                    {
+                        var isWishlist = string.Equals(lista.Naziv, "Lista želja", StringComparison.Ordinal);
+                        <form asp-controller="ListaKolekcija" asp-action="AddItem" method="post" class="sl-modal-collection-row @(isWishlist ? "wishlist-row" : "")" data-ajax-url="@Url.Action("AddItemAjax", "ListaKolekcija")" data-list-name="@lista.Naziv">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="knjigaId" value="@Model.Id" />
+                            <input type="hidden" name="returnUrl" value="@returnUrl" />
+                            <input type="hidden" name="listaId" value="@lista.Id" />
+                            <div class="sl-modal-collection-info">
+                                <span class="sl-modal-collection-name">@lista.Naziv</span>
+                                <span class="visibility-pill @(lista.Javna ? "is-public" : "is-private")">
+                                    @(lista.Javna ? "JAVNA" : "PRIVATNA")
+                                </span>
+                                @if (isWishlist)
+                                {
+                                    <span class="wishlist-chip">Podrazumijevano</span>
+                                }
+                            </div>
+                            <button type="submit" class="btn @(isWishlist ? "btn-primary" : "btn-secondary") btn-sm">
+                                @(isWishlist ? "Dodaj u listu želja" : "Dodaj")
+                            </button>
+                        </form>
+                    }
+                </div>
+            }
+            else
+            {
+                <p class="empty-note">Nemate kolekcija. Kreirajte novu ispod.</p>
+            }
+        </div>
+
+        <div class="sl-modal-section">
+            <button type="button" class="btn btn-primary" style="width: 100%; padding: 0.8rem; font-weight: 700; border-radius: 12px; background: rgba(59, 130, 246, 0.1); color: #2563eb; border: 1.5px dashed rgba(59, 130, 246, 0.4); transition: all 0.2s ease;" onmouseover="this.style.background='rgba(59, 130, 246, 0.15)'; this.style.borderColor='rgba(59, 130, 246, 0.6)';" onmouseout="this.style.background='rgba(59, 130, 246, 0.1)'; this.style.borderColor='rgba(59, 130, 246, 0.4)';" onclick="openCreateCollectionModal()">
+                + Kreiraj novu kolekciju
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="collection-create-overlay" id="collectionCreateModal" style="display:none;" onclick="if(event.target === this) closeCreateCollectionModal()">
+    <div class="collection-create-card">
+        <div class="collection-create-header">
+            <h3 id="collectionCreateTitle">Nova kolekcija</h3>
+            <button type="button" class="sl-modal-close" onclick="closeCreateCollectionModal()" aria-label="Zatvori">&times;</button>
+        </div>
+        <form asp-controller="ListaKolekcija" asp-action="Create" method="post" class="collection-create-form">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="knjigaId" value="@Model.Id" />
+            <input type="hidden" name="returnUrl" value="@returnUrl" />
+            <div class="form-group" style="margin-bottom:0;">
+                <label for="NewNaziv" class="details-label" style="margin-bottom:0.25rem;">Naziv kolekcije</label>
+                <input id="NewNaziv" name="NewNaziv" type="text" placeholder="Npr. Ljetno citanje" required />
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+                <label for="NewOpis" class="details-label" style="margin-bottom:0.25rem;">Opis (opcionalno)</label>
+                <input id="NewOpis" name="NewOpis" type="text" placeholder="Kratak opis" />
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+                <label class="details-label" style="margin-bottom:0.25rem;">Vidljivost</label>
+                <label class="katalog-read-toggle">
+                    <input type="checkbox" name="NewJavna" value="true" />
+                    Javna
+                </label>
+            </div>
+            <div class="collection-create-actions">
+                <button type="submit" class="btn btn-primary">Kreiraj</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="sl-toast" id="collection-toast" role="status" aria-live="polite"></div>
+
 <div id="imageModal" class="image-modal-overlay" onclick="closeImageModal()" style="display:none;">
     <div class="image-modal-content">
         <span class="image-modal-close" onclick="closeImageModal()">&times;</span>
@@ -151,7 +245,101 @@
         document.addEventListener('keydown', function(event) {
             if (event.key === "Escape") {
                 closeImageModal();
+                closeCreateCollectionModal();
+                closeCollectionModal();
             }
+        });
+
+        function openCollectionModal() {
+            var modal = document.getElementById('collectionModal');
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            document.body.classList.add('modal-open');
+        }
+
+        function closeCollectionModal() {
+            var modal = document.getElementById('collectionModal');
+            if (!modal) return;
+            modal.style.display = 'none';
+            document.body.style.overflow = '';
+            document.body.classList.remove('modal-open');
+        }
+
+        function openCreateCollectionModal() {
+            closeCollectionModal();
+            var modal = document.getElementById('collectionCreateModal');
+            if (!modal) return;
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            document.body.classList.add('modal-open');
+        }
+
+        function closeCreateCollectionModal() {
+            var modal = document.getElementById('collectionCreateModal');
+            if (!modal) return;
+            modal.style.display = 'none';
+            document.body.style.overflow = '';
+            document.body.classList.remove('modal-open');
+        }
+
+        var collectionToast = document.getElementById('collection-toast');
+        var collectionToastTimer = null;
+
+        function showCollectionToast(message, isError) {
+            if (!collectionToast) return;
+            collectionToast.textContent = message;
+            collectionToast.classList.toggle('is-error', Boolean(isError));
+            collectionToast.classList.add('show');
+
+            if (collectionToastTimer) {
+                clearTimeout(collectionToastTimer);
+            }
+
+            collectionToastTimer = setTimeout(function () {
+                collectionToast.classList.remove('show');
+            }, 2800);
+        }
+
+        document.querySelectorAll('.sl-modal-collection-row').forEach(function (form) {
+            form.addEventListener('submit', async function (event) {
+                event.preventDefault();
+
+                var ajaxUrl = form.getAttribute('data-ajax-url') || form.action;
+                var listName = form.getAttribute('data-list-name') || 'kolekciju';
+                var tokenInput = form.querySelector('input[name="__RequestVerificationToken"]');
+                var token = tokenInput ? tokenInput.value : '';
+                var formData = new FormData(form);
+
+                try {
+                    var response = await fetch(ajaxUrl, {
+                        method: 'POST',
+                        headers: {
+                            'RequestVerificationToken': token
+                        },
+                        body: formData
+                    });
+
+                    if (!response.ok) {
+                        showCollectionToast('Došlo je do greške. Pokušajte ponovo.', true);
+                        return;
+                    }
+
+                    var data = await response.json();
+                    var added = data && data.added === true;
+                    var already = data && data.added === false;
+                    var message = data && data.message ? data.message : null;
+
+                    if (!message) {
+                        message = added
+                            ? 'Dodano u kolekciju "' + listName + '".'
+                            : 'Knjiga je već u kolekciji "' + listName + '".';
+                    }
+
+                    showCollectionToast(message, already);
+                } catch (error) {
+                    showCollectionToast('Došlo je do greške. Pokušajte ponovo.', true);
+                }
+            });
         });
     </script>
 }
@@ -314,12 +502,15 @@
     <div class="examples-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1.5rem;">
         <div>
             <h3 class="examples-title" style="margin: 0;">Recenzije čitalaca</h3>
-            @if(recenzije.Any())
-            {
-                <div style="color: #fbbf24; font-size: 1.2rem; margin-top: 0.25rem;">
-                    @prosjek.ToString("0.0") ⭐ <span style="font-size: 0.9rem; color: var(--text-muted);">(@recenzije.Count() recenzija)</span>
-                </div>
-            }
+            <div class="reviews-meta-row">
+                @if (recenzije.Any())
+                {
+                    <div class="reviews-rating">
+                        @prosjek.ToString("0.0") ⭐ <span>(@recenzije.Count() recenzija)</span>
+                    </div>
+                }
+                <span class="reviews-popularity">Popularnost: @((ViewBag.BrojZaduzenja as int? ?? 0))</span>
+            </div>
         </div>
         @if(!jeOsoblje)
         {
