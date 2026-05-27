@@ -1,18 +1,40 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using SmartLib.Core.Interfaces;
 using SmartLib.Core.Models;
 using SmartLib.Infrastructure.Data;
+using SmartLib.Infrastructure.Services;
 
 namespace SmartLib.Infrastructure.Repositories
 {
     public class KnjigaRepository : IKnjigaRepository
     {
         private readonly ApplicationDbContext _db;
+        private readonly AuditLogService _audit;
+        private readonly IHttpContextAccessor _httpContext;
 
-        public KnjigaRepository(ApplicationDbContext db)
+        public KnjigaRepository(
+            ApplicationDbContext db,
+            AuditLogService audit,
+            IHttpContextAccessor httpContext)
         {
             _db = db;
+            _audit = audit;
+            _httpContext = httpContext;
         }
+
+        // ── Helper: čita KorisnikId iz JWT claims ─────────────────────────
+        private int? TrenutniKorisnikId()
+        {
+            var claim = _httpContext.HttpContext?.User?.FindFirst("korisnikId")
+                     ?? _httpContext.HttpContext?.User?.FindFirst("id")
+                     ?? _httpContext.HttpContext?.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+
+            if (claim is null) return null;
+            return int.TryParse(claim.Value, out var id) ? id : null;
+        }
+
+        // ── Read metode (nepromijenjene) ──────────────────────────────────
 
         public async Task<IEnumerable<Knjiga>> GetAllAsync(int page, int pageSize)
         {
@@ -52,10 +74,6 @@ namespace SmartLib.Infrastructure.Repositories
             return await query.OrderBy(k => k.Naslov).ToListAsync();
         }
 
-        /// <summary>
-        /// PB-44: Proširena paginirana pretraga — kombinuje sve aktivne filtere (US-74, US-75, US-76, US-78).
-        /// Svaki filter je opcionalan; aktivni filteri se kombinuju AND logikom.
-        /// </summary>
         public async Task<(IEnumerable<Knjiga> Knjige, int UkupnoBroj)> GetPagedAsync(
             string? naslov,
             string? autor,
@@ -72,23 +90,19 @@ namespace SmartLib.Infrastructure.Repositories
                 .AsNoTracking()
                 .AsQueryable();
 
-            // Osnovna pretraga
             if (!string.IsNullOrWhiteSpace(naslov))
                 query = query.Where(k => k.Naslov.ToLower().Contains(naslov.ToLower()));
 
             if (!string.IsNullOrWhiteSpace(autor))
                 query = query.Where(k => k.Autor.ToLower().Contains(autor.ToLower()));
 
-            // PB-44 / US-74: Filter po kategoriji
             if (kategorijaId.HasValue)
                 query = query.Where(k => k.KategorijaId == kategorijaId.Value);
 
-            // PB-44 / US-75: Filter po izdavaču
             if (!string.IsNullOrWhiteSpace(izdavac))
                 query = query.Where(k => k.Izdavac != null &&
                                          k.Izdavac.ToLower().Contains(izdavac.ToLower()));
 
-            // PB-44 / US-76: Filter po godini izdanja
             if (godinaIzdanja.HasValue)
                 query = query.Where(k => k.GodinaIzdanja == godinaIzdanja.Value);
 
@@ -102,10 +116,6 @@ namespace SmartLib.Infrastructure.Repositories
             return (knjige, ukupno);
         }
 
-        /// <summary>
-        /// PB-44: Dohvata sve unikatne izdavače koji postoje u bazi, sortirane abecedno.
-        /// Koristi se za popunjavanje filter dropdowna.
-        /// </summary>
         public async Task<IEnumerable<string>> GetDistinctIzdavaciAsync()
         {
             return await _db.Knjige
@@ -117,10 +127,6 @@ namespace SmartLib.Infrastructure.Repositories
                 .ToListAsync();
         }
 
-        /// <summary>
-        /// PB-44: Dohvata sve unikatne godine izdanja koje postoje u bazi, sortirane opadajuće.
-        /// Koristi se za popunjavanje filter dropdowna.
-        /// </summary>
         public async Task<IEnumerable<int>> GetDistinctGodineAsync()
         {
             return await _db.Knjige
@@ -140,17 +146,42 @@ namespace SmartLib.Infrastructure.Repositories
                 .FirstOrDefaultAsync(k => k.Isbn == isbn);
         }
 
+        // ── Write metode sa audit logom ───────────────────────────────────
+
         public async Task<Knjiga> CreateAsync(Knjiga knjiga)
         {
             _db.Knjige.Add(knjiga);
             await _db.SaveChangesAsync();
+
+            await _audit.LogCreateAsync(
+                new { knjiga.Id, knjiga.Naslov, knjiga.Autor, knjiga.Isbn, knjiga.KategorijaId, knjiga.Izdavac, knjiga.GodinaIzdanja },
+                entitetTip: "Knjiga",
+                entitetId: knjiga.Id,
+                korisnikId: TrenutniKorisnikId()
+            );
+
             return knjiga;
         }
 
         public async Task UpdateAsync(Knjiga knjiga)
         {
+            var staro = await _db.Knjige
+                .AsNoTracking()
+                .FirstOrDefaultAsync(k => k.Id == knjiga.Id);
+
             _db.Knjige.Update(knjiga);
             await _db.SaveChangesAsync();
+
+            if (staro is not null)
+            {
+                await _audit.LogUpdateAsync(
+                    new { staro.Id, staro.Naslov, staro.Autor, staro.Isbn, staro.KategorijaId, staro.Izdavac, staro.GodinaIzdanja, staro.Opis },
+                    new { knjiga.Id, knjiga.Naslov, knjiga.Autor, knjiga.Isbn, knjiga.KategorijaId, knjiga.Izdavac, knjiga.GodinaIzdanja, knjiga.Opis },
+                    entitetTip: "Knjiga",
+                    entitetId: knjiga.Id,
+                    korisnikId: TrenutniKorisnikId()
+                );
+            }
         }
 
         public async Task<bool> DeleteAsync(int id)
@@ -160,6 +191,14 @@ namespace SmartLib.Infrastructure.Repositories
                 .FirstOrDefaultAsync(k => k.Id == id);
 
             if (knjiga == null) return false;
+
+            // Audit PRIJE brisanja
+            await _audit.LogDeleteAsync(
+                new { knjiga.Id, knjiga.Naslov, knjiga.Autor, knjiga.Isbn, knjiga.KategorijaId, knjiga.Izdavac, knjiga.GodinaIzdanja },
+                entitetTip: "Knjiga",
+                entitetId: knjiga.Id,
+                korisnikId: TrenutniKorisnikId()
+            );
 
             if (knjiga.Primjerci != null && knjiga.Primjerci.Any())
                 _db.Primjerci.RemoveRange(knjiga.Primjerci);
@@ -177,12 +216,10 @@ namespace SmartLib.Infrastructure.Repositories
 
         public async Task<IEnumerable<Knjiga>> GetRandomAsync(int count)
         {
-            if (count <= 0)
-                return Array.Empty<Knjiga>();
+            if (count <= 0) return Array.Empty<Knjiga>();
 
             var total = await _db.Knjige.CountAsync();
-            if (total == 0)
-                return Array.Empty<Knjiga>();
+            if (total == 0) return Array.Empty<Knjiga>();
 
             var take = Math.Min(count, total);
             if (take == total)
@@ -233,9 +270,7 @@ namespace SmartLib.Infrastructure.Repositories
                 firstBatch.AddRange(secondBatch);
             }
 
-            return firstBatch
-                .OrderBy(_ => Random.Shared.Next())
-                .ToList();
+            return firstBatch.OrderBy(_ => Random.Shared.Next()).ToList();
         }
 
         public async Task<bool> TryUpdateOpisByIsbnAsync(string isbn, string opis)

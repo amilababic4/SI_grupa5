@@ -1,41 +1,54 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
-using SmartLib.Core.Models;
+using SmartLib.Core.Interfaces;
 
 namespace SmartLib.Web.Controllers
 {
-    /// <summary>
-    /// Članarina, Rezervacije, Admin panel (MVC)
-    /// </summary>
-    [Authorize(Roles = RoleNames.Administrator)]
     public class AdminController : Controller
     {
-        // TODO: Inject potrebne repozitorije
+        private readonly IAuditLogRepository _auditRepo;
+        private readonly IKorisnikRepository _korisnikRepo;
 
-        public Task<IActionResult> Korisnici()
+        public AdminController(IAuditLogRepository auditRepo, IKorisnikRepository korisnikRepo)
         {
-            // TODO: Pregled svih korisnika (samo admin)
-            return Task.FromResult<IActionResult>(View());
+            _auditRepo = auditRepo;
+            _korisnikRepo = korisnikRepo;
         }
 
-        public Task<IActionResult> AuditLog(int page = 1)
+        // ── Korisnici ─────────────────────────────────────────────────────────
+
+        public async Task<IActionResult> Korisnici()
         {
-            // TODO: Pregled audit log zapisa (samo admin)
-            return Task.FromResult<IActionResult>(View());
+            var korisnici = await _korisnikRepo.GetAllAsync();
+            return View(korisnici);
         }
 
-        [HttpPost]
-        public Task<IActionResult> PromijeniUlogu(int id /*, TODO: string novaUloga */)
-        {
-            // TODO: Promjena uloge korisnika
-            return Task.FromResult<IActionResult>(RedirectToAction("Korisnici"));
-        }
+        // ── Audit Log ─────────────────────────────────────────────────────────
 
-        [HttpPost]
-        public Task<IActionResult> DeaktivirajKorisnika(int id)
+        public async Task<IActionResult> AuditLog(
+            int page = 1,
+            int pageSize = 30,
+            string? entitetTip = null,
+            string? akcija = null,
+            int? korisnikId = null,
+            DateTime? odDatuma = null,
+            DateTime? doDatuma = null)
         {
-            // TODO: Deaktivacija bilo kojeg korisnika
-            return Task.FromResult<IActionResult>(RedirectToAction("Korisnici"));
+            var logovi = await _auditRepo.GetFilteredAsync(
+                page, pageSize, entitetTip, akcija, korisnikId, odDatuma, doDatuma);
+
+            var ukupno = await _auditRepo.GetTotalCountAsync(entitetTip, akcija, korisnikId);
+
+            ViewBag.Stranica = page;
+            ViewBag.PageSize = pageSize;
+            ViewBag.UkupnoStrana = (int)Math.Ceiling(ukupno / (double)pageSize);
+            ViewBag.UkupnoBroj = ukupno;
+            ViewBag.EntitetTip = entitetTip;
+            ViewBag.Akcija = akcija;
+            ViewBag.KorisnikId = korisnikId;
+            ViewBag.OdDatuma = odDatuma?.ToString("yyyy-MM-dd");
+            ViewBag.DoDatuma = doDatuma?.ToString("yyyy-MM-dd");
+
+            return View(logovi);
         }
     }
 }
