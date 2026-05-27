@@ -1,16 +1,365 @@
+﻿@model IEnumerable<SmartLib.Core.Models.AuditLog>
 @{
-    ViewData["Title"] = "Audit Log (Admin)";
+    ViewData["Title"] = "Audit Log";
+    int stranica = ViewBag.Stranica;
+    int pageSize = ViewBag.PageSize;
+    int ukupnoStrana = ViewBag.UkupnoStrana;
+    int ukupnoBroj = ViewBag.UkupnoBroj;
+
+    string? filterEntitet = ViewBag.EntitetTip as string;
+    string? filterAkcija = ViewBag.Akcija as string;
+
+    // Bosna/Hercegovina = UTC+2 (UTC+3 ljeti) — koristimo fiksni offset +2
+    // Ako koristiš TimeZoneInfo možeš zamijeniti s: TimeZoneInfo.FindSystemTimeZoneById("Central European Standard Time")
+    var localOffset = TimeSpan.FromHours(2);
+
+    string LocalTime(DateTime utc) =>
+        utc.Add(localOffset).ToString("dd.MM.yyyy HH:mm:ss");
+
+    // Sigurna serijalizacija za data atribut — Base64 da izbjegnemo HTML encode probleme
+    string ToBase64(string? json) =>
+        string.IsNullOrEmpty(json)
+            ? ""
+            : Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(json));
 }
 
-<h2>Audit Log</h2>
+<div class="page-shell">
 
-<div class="card">
-    <table>
-        <thead>
-            <tr><th>Datum</th><th>Korisnik</th><th>Akcija</th><th>Entitet</th><th>ID</th><th>Detalji</th></tr>
-        </thead>
-        <tbody>
-            @* TODO: foreach (var log in Model) { ... } *@
-        </tbody>
-    </table>
+    <!-- ── Header ─────────────────────────────────────────────────────── -->
+    <div class="audit-header">
+        <div class="audit-header-left">
+            <span class="audit-header-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"
+                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                    <line x1="16" y1="13" x2="8" y2="13" />
+                    <line x1="16" y1="17" x2="8" y2="17" />
+                    <polyline points="10 9 9 9 8 9" />
+                </svg>
+            </span>
+            <div>
+                <h1 class="audit-title">Audit Log</h1>
+                <p class="audit-subtitle">Historija svih promjena u sistemu — ukupno <strong>@ukupnoBroj</strong> zapisa</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Filter forma ───────────────────────────────────────────────── -->
+    <div class="audit-filter-card">
+        <form method="get" asp-action="AuditLog" asp-controller="Admin" class="audit-filter-form">
+
+            <div class="audit-filter-row">
+
+                <!-- Ikonica + naslov sekcije -->
+                <div class="audit-filter-heading">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+                    </svg>
+                    Filteri
+                </div>
+
+                <div class="audit-filter-grid">
+
+                    <!-- Entitet -->
+                    <div class="audit-filter-group">
+                        <label class="audit-filter-label">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24"
+                                 fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="7" height="7" />
+                                <rect x="14" y="3" width="7" height="7" />
+                                <rect x="14" y="14" width="7" height="7" />
+                                <rect x="3" y="14" width="7" height="7" />
+                            </svg>
+                            Entitet
+                        </label>
+                        @{
+                            var entitetOpcije = new List<SelectListItem>
+                                                {
+                                                new SelectListItem { Value = "",            Text = "Svi entiteti",   Selected = string.IsNullOrEmpty(filterEntitet) },
+                                                new SelectListItem { Value = "Korisnik",    Text = "Korisnik",       Selected = filterEntitet == "Korisnik" },
+                                                new SelectListItem { Value = "Knjiga",      Text = "Knjiga",         Selected = filterEntitet == "Knjiga" },
+                                                new SelectListItem { Value = "Primjerak",   Text = "Primjerak",      Selected = filterEntitet == "Primjerak" },
+                                                new SelectListItem { Value = "Zaduzenje",   Text = "Zaduženje",      Selected = filterEntitet == "Zaduzenje" },
+                                                new SelectListItem { Value = "Clanarina",   Text = "Članarina",      Selected = filterEntitet == "Clanarina" },
+                                                new SelectListItem { Value = "Rezervacija", Text = "Rezervacija",    Selected = filterEntitet == "Rezervacija" },
+                                                };
+                        }
+                        @Html.DropDownList("entitetTip", entitetOpcije, new { @class = "sl-select" })
+                    </div>
+
+                    <!-- Akcija -->
+                    <div class="audit-filter-group">
+                        <label class="audit-filter-label">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24"
+                                 fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="13 2 13 9 20 9" />
+                                <polygon points="22 12 2 12 13 2 13 22" />
+                            </svg>
+                            Akcija
+                        </label>
+                        @{
+                            var akcijaOpcije = new List<SelectListItem>
+                                                {
+                                                new SelectListItem { Value = "",       Text = "Sve akcije", Selected = string.IsNullOrEmpty(filterAkcija) },
+                                                new SelectListItem { Value = "CREATE", Text = "CREATE",     Selected = filterAkcija == "CREATE" },
+                                                new SelectListItem { Value = "UPDATE", Text = "UPDATE",     Selected = filterAkcija == "UPDATE" },
+                                                new SelectListItem { Value = "DELETE", Text = "DELETE",     Selected = filterAkcija == "DELETE" },
+                                                };
+                        }
+                        @Html.DropDownList("akcija", akcijaOpcije, new { @class = "sl-select" })
+                    </div>
+
+                    <!-- Od datuma -->
+                    <div class="audit-filter-group">
+                        <label class="audit-filter-label">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24"
+                                 fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                                <line x1="16" y1="2" x2="16" y2="6" />
+                                <line x1="8" y1="2" x2="8" y2="6" />
+                                <line x1="3" y1="10" x2="21" y2="10" />
+                            </svg>
+                            Od datuma
+                        </label>
+                        <input type="date" name="odDatuma" value="@ViewBag.OdDatuma" class="sl-input" />
+                    </div>
+
+                    <!-- Do datuma -->
+                    <div class="audit-filter-group">
+                        <label class="audit-filter-label">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24"
+                                 fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                                <line x1="16" y1="2" x2="16" y2="6" />
+                                <line x1="8" y1="2" x2="8" y2="6" />
+                                <line x1="3" y1="10" x2="21" y2="10" />
+                            </svg>
+                            Do datuma
+                        </label>
+                        <input type="date" name="doDatuma" value="@ViewBag.DoDatuma" class="sl-input" />
+                    </div>
+
+                </div>
+
+                <!-- Akcije -->
+                <div class="audit-filter-actions">
+                    <button type="submit" class="btn-primary-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                             fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8" />
+                            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                        </svg>
+                        Filtriraj
+                    </button>
+                    <a asp-action="AuditLog" asp-controller="Admin" class="btn-ghost-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
+                             fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="1 4 1 10 7 10" />
+                            <path d="M3.51 15a9 9 0 1 0 .49-3.5" />
+                        </svg>
+                        Resetuj
+                    </a>
+                </div>
+
+            </div>
+        </form>
+    </div>
+
+    <!-- ── Tabela ─────────────────────────────────────────────────────── -->
+    @if (!Model.Any())
+    {
+        <div class="audit-empty">
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24"
+                 fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+            <p>Nema zapisa za odabrane filtere.</p>
+        </div>
+    }
+    else
+    {
+        <div class="audit-table-wrap">
+            <table class="audit-table">
+                <thead>
+                    <tr>
+                        <th>Datum i vrijeme</th>
+                        <th>Akcija</th>
+                        <th>Entitet</th>
+                        <th>Izvršio</th>
+                        <th>Detalji</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var log in Model)
+                    {
+                        // Opis akcije za "Nakon" kolonu kad je DELETE
+                        string nakonTekst = log.Akcija == "DELETE"
+                        ? $"Zapis je obrisan ({log.EntitetTip} je trajno uklonjen iz sistema)."
+                        : (log.VrijednostiNakon ?? "");
+
+                        <tr class="audit-row">
+
+                            <!-- Datum — UTC+2 -->
+                            <td class="audit-date">
+                                <span class="audit-date-day">@log.DatumAkcije.Add(localOffset).ToString("dd.MM.yyyy")</span>
+                                <span class="audit-date-time">@log.DatumAkcije.Add(localOffset).ToString("HH:mm:ss")</span>
+                            </td>
+
+                            <!-- Akcija badge -->
+                            <td>
+                                <span class="audit-badge audit-badge--@log.Akcija.ToLower()">@log.Akcija</span>
+                            </td>
+
+                            <!-- Entitet (bez ID kolone) -->
+                            <td class="audit-entitet">@log.EntitetTip</td>
+
+                            <!-- Korisnik koji je izvršio -->
+                            <td class="audit-korisnik">
+                                @if (log.Korisnik is not null)
+                                {
+                                    <span class="audit-korisnik-ime">@log.Korisnik.Ime @log.Korisnik.Prezime</span>
+                                    <span class="audit-korisnik-email">@log.Korisnik.Email</span>
+                                }
+                                else
+                                {
+                                    <span class="audit-system">sistem</span>
+                                }
+                            </td>
+
+                            <!-- Detalji — dugme Prikaži / Sakrij -->
+                            <td class="audit-diff-cell">
+                                @if (!string.IsNullOrEmpty(log.VrijednostiPrije) || !string.IsNullOrEmpty(log.VrijednostiNakon) || log.Akcija == "DELETE")
+                                {
+                                    <button class="audit-diff-btn"
+                                            onclick="toggleDiff(this)"
+                                            data-prije="@ToBase64(log.VrijednostiPrije)"
+                                            data-nakon="@ToBase64(nakonTekst)"
+                                            data-akcija="@log.Akcija">
+                                        Prikaži
+                                    </button>
+                                }
+                            </td>
+                        </tr>
+
+                        <!-- Expandable diff red -->
+                        <tr class="audit-diff-row" style="display:none;">
+                            <td colspan="5">
+                                <div class="audit-diff-wrap">
+                                    <div class="audit-diff-col">
+                                        <div class="audit-diff-label audit-diff-label--prije">
+                                            @(log.Akcija == "CREATE" ? "Kreirani podaci" : "Prije promjene")
+                                        </div>
+                                        <div class="audit-diff-pre"></div>
+                                    </div>
+                                    <div class="audit-diff-col">
+                                        <div class="audit-diff-label audit-diff-label--nakon">
+                                            @(log.Akcija == "DELETE" ? "Status" : "Nakon promjene")
+                                        </div>
+                                        <div class="audit-diff-pre @(log.Akcija == "DELETE" ? "audit-diff-pre--deleted" : "")"></div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ── Paginacija ─────────────────────────────────────────────── -->
+        @if (ukupnoStrana > 1)
+        {
+            <div class="pagination">
+                @for (int i = 1; i <= ukupnoStrana; i++)
+                {
+                    <a asp-action="AuditLog"
+                       asp-controller="Admin"
+                       asp-route-page="@i"
+                       asp-route-pageSize="@pageSize"
+                       asp-route-entitetTip="@ViewBag.EntitetTip"
+                       asp-route-akcija="@ViewBag.Akcija"
+                       asp-route-odDatuma="@ViewBag.OdDatuma"
+                       asp-route-doDatuma="@ViewBag.DoDatuma"
+                       class="page-link @(i == stranica ? "active" : "")">@i</a>
+                }
+            </div>
+        }
+    }
+
 </div>
+
+@section Scripts {
+    <script>
+        function toggleDiff(btn) {
+            const row    = btn.closest('tr').nextElementSibling;
+            const isOpen = row.style.display === 'table-row';
+            row.style.display = isOpen ? 'none' : 'table-row';
+            btn.textContent   = isOpen ? 'Prikaži' : 'Sakrij';
+
+            if (!isOpen) {
+                const pres   = row.querySelectorAll('pre.audit-diff-pre');
+                const akcija = btn.dataset.akcija;
+
+                // Dekodiramo Base64 → čisti JSON string (bez &quot; problema)
+                const prijeJson = decodeBase64(btn.dataset.prije);
+                const nakonJson = decodeBase64(btn.dataset.nakon);
+
+                // Lijeva strana: za CREATE nema "prije", prikaži poruku
+                if (akcija === 'CREATE') {
+                    pres[0].textContent = '— Novi zapis, nema prethodnog stanja —';
+                } else {
+                    pres[0].innerHTML = tryPretty(prijeJson);
+                }
+
+                // Desna strana: za DELETE prikaži tekstualnu poruku, ne JSON
+                if (akcija === 'DELETE') {
+                    pres[1].textContent = nakonJson; // već je čitljiv tekst, ne JSON
+                } else {
+                    pres[1].innerHTML = tryPretty(nakonJson);
+                }
+            }
+        }
+
+        function decodeBase64(b64) {
+            if (!b64) return '';
+            try {
+                return decodeURIComponent(
+                    atob(b64).split('').map(c =>
+                        '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+                    ).join('')
+                );
+            } catch {
+                return b64; // fallback ako nije base64
+            }
+        }
+
+                function tryPretty(jsonStr) {
+            if (!jsonStr) return '—';
+
+            try {
+                const obj = JSON.parse(jsonStr);
+
+                let html = '<div class="audit-json-table">';
+
+                for (const key in obj) {
+                    html += `
+                        <div class="audit-json-row">
+                            <span class="audit-json-key">${key}</span>
+                            <span class="audit-json-value">${obj[key]}</span>
+                        </div>
+                    `;
+                }
+
+                html += '</div>';
+
+                return html;
+            }
+            catch {
+                return jsonStr;
+            }
+        }
+    </script>
+}

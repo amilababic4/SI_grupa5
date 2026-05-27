@@ -106,6 +106,8 @@ else
     Console.WriteLine("[Redis] Using in-memory distributed cache (missing Redis TCP credentials)");
 }
 
+builder.Services.AddHttpContextAccessor();
+
 // Repositories
 builder.Services.AddScoped<IKorisnikRepository, KorisnikRepository>();
 builder.Services.AddScoped<IKnjigaRepository, KnjigaRepository>();
@@ -124,6 +126,8 @@ builder.Services.AddScoped<IListaZeljaRepository, ListaZeljaRepository>();
 builder.Services.AddScoped<IListaKolekcijaRepository, ListaKolekcijaRepository>();
 builder.Services.AddHostedService<DeactivatedAccountCleanupService>();
 builder.Services.AddScoped<IIzvjestajService, IzvjestajService>();
+builder.Services.AddScoped<IAuditLogRepository, AuditLogRepository>();
+builder.Services.AddScoped<AuditLogService>();
 
 // Services
 builder.Services.AddTransient<IEmailService, SmartLib.Infrastructure.Services.EmailService>();
