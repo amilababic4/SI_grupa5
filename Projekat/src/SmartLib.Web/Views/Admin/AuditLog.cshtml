@@ -253,13 +253,13 @@
                                         <div class="audit-diff-label audit-diff-label--prije">
                                             @(log.Akcija == "CREATE" ? "Kreirani podaci" : "Prije promjene")
                                         </div>
-                                        <div class="audit-diff-pre"></div>
+                                        <pre class="audit-diff-pre"></pre>
                                     </div>
                                     <div class="audit-diff-col">
                                         <div class="audit-diff-label audit-diff-label--nakon">
                                             @(log.Akcija == "DELETE" ? "Status" : "Nakon promjene")
                                         </div>
-                                        <div class="audit-diff-pre @(log.Akcija == "DELETE" ? "audit-diff-pre--deleted" : "")"></div>
+                                        <pre class="audit-diff-pre @(log.Akcija == "DELETE" ? "audit-diff-pre--deleted" : "")"></pre>
                                     </div>
                                 </div>
                             </td>
