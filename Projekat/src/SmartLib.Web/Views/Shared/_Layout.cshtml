@@ -44,7 +44,9 @@
         /* ── Drawer overlay ─────────────────────────────────── */
         .nav-drawer-overlay {
             position: fixed; inset: 0; z-index: 9000;
-            background: rgba(6,15,58,.52); backdrop-filter: blur(4px);
+            background: radial-gradient(circle at top left, rgba(37, 99, 235, 0.18), transparent 45%),
+                        rgba(6,15,58,.6);
+            backdrop-filter: blur(6px);
             opacity: 0; pointer-events: none; transition: opacity .3s ease;
         }
         .nav-drawer-overlay.open { opacity: 1; pointer-events: all; }
@@ -52,14 +54,17 @@
         /* ── Drawer panel ───────────────────────────────────── */
         .nav-drawer {
             position: fixed; top: 0; left: 0; bottom: 0; z-index: 9001;
-            width: 270px; max-width: 90vw; background: #ffffff;
-            box-shadow: 6px 0 40px rgba(6,15,58,.12);
+            width: 300px; max-width: 90vw;
+            background: linear-gradient(180deg, #ffffff 0%, #f5f8ff 55%, #eef2ff 100%);
+            box-shadow: 12px 0 45px rgba(6,15,58,.18);
             transform: translateX(-100%);
             transition: transform .38s cubic-bezier(.16,1,.3,1);
             display: flex; flex-direction: column; overflow-y: auto;
         }
         .nav-drawer.open { transform: translateX(0); }
-        [data-theme="dark"] .nav-drawer { background: #0d1b2e; }
+        [data-theme="dark"] .nav-drawer {
+            background: linear-gradient(180deg, #0b1626 0%, #0f1f36 60%, #132842 100%);
+        }
 
         .nav-drawer-header {
             display: flex; align-items: center; justify-content: space-between;
@@ -96,19 +101,38 @@
         .nav-drawer-links li { padding: 0 0.5rem; margin-bottom: 0.6rem; }
         .nav-drawer-links li a,
         .nav-drawer-links li .nd-logout-btn {
-            display: block; padding: 0.75rem 1.25rem; border-radius: 50px; /* pill shape */
-            color: #1a202c; font-size: 1rem; font-weight: 500;
+            display: block; padding: 0.75rem 1.25rem; border-radius: 14px;
+            color: #1a202c; font-size: 0.98rem; font-weight: 600;
             text-decoration: none; transition: all .2s ease;
-            border: none; background: transparent; cursor: pointer;
+            border: 1px solid transparent; background: transparent; cursor: pointer;
             width: 100%; text-align: left; font-family: "Manrope", sans-serif;
         }
-        .nav-drawer-links li a:hover { background: #f1f5f9; color: #0f172a; transform: translateX(4px); }
+        .nav-drawer-links li a:hover {
+            background: rgba(37, 99, 235, 0.08);
+            border-color: rgba(37, 99, 235, 0.18);
+            color: #0f172a; transform: translateX(4px);
+        }
         [data-theme="dark"] .nav-drawer-links li a,
         [data-theme="dark"] .nav-drawer-links li .nd-logout-btn { color: #cbd5e1; }
-        [data-theme="dark"] .nav-drawer-links li a:hover { background: #1e293b; color: #f8fafc; }
+        [data-theme="dark"] .nav-drawer-links li a:hover {
+            background: rgba(59, 130, 246, 0.18);
+            border-color: rgba(59, 130, 246, 0.3);
+            color: #f8fafc;
+        }
 
         .nav-drawer-sep { height: 1px; background: rgba(27,61,143,.07); margin: .35rem 1.3rem; }
         [data-theme="dark"] .nav-drawer-sep { background: rgba(90,128,200,.1); }
+
+        .nav-drawer-section {
+            padding: 0 1.2rem;
+            margin: 1rem 0 0.35rem;
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: rgba(27,61,143,.6);
+        }
+        [data-theme="dark"] .nav-drawer-section { color: rgba(148,163,184,.7); }
 
         .nd-logout-btn { color: #b42318 !important; }
         .nd-logout-btn:hover { background: rgba(180,35,24,.05) !important; color: #b42318 !important; }
@@ -317,8 +341,7 @@
                         <li><a asp-controller="Knjiga" asp-action="Index">Katalog</a></li>
                         <li><a asp-controller="Zaduzenje" asp-action="Moja">Moja zaduženja</a></li>
                         <li><a asp-controller="Rezervacija" asp-action="Moje">Moje rezervacije</a></li>
-                        <li><a asp-controller="Forum" asp-action="Index">Forum</a></li>
-                        <li><a asp-controller="Knjiga" asp-action="Explore" class="nav-explore-link">Želiš nešto novo?</a></li>
+                        <li><a asp-controller="ListaKolekcija" asp-action="Index">Kolekcije</a></li>
                     }
                     <li>
                         <a asp-controller="Notifikacija" asp-action="Index" class="nav-notif-link">
@@ -329,13 +352,16 @@
                             }
                         </a>
                     </li>
-                    <li class="nav-sep" role="separator"></li>
-                    <li><a asp-controller="Korisnik" asp-action="Profil">Moj profil</a></li>
-                    <li>
-                        <form asp-controller="Auth" asp-action="Logout" method="post" style="display:contents">
-                            <button type="submit" class="nav-link-btn">Odjava</button>
-                        </form>
-                    </li>
+                    @if (!User.IsInRole("Član"))
+                    {
+                        <li class="nav-sep" role="separator"></li>
+                        <li><a asp-controller="Korisnik" asp-action="Profil">Moj profil</a></li>
+                        <li>
+                            <form asp-controller="Auth" asp-action="Logout" method="post" style="display:contents">
+                                <button type="submit" class="nav-link-btn">Odjava</button>
+                            </form>
+                        </li>
+                    }
                 }
                 else
                 {
@@ -381,12 +407,14 @@
                 </button>
             </div>
             <ul class="nav-drawer-links">
+                <li class="nav-drawer-section">Glavno</li>
                 <li><a asp-controller="Home" asp-action="Index">Početna</a></li>
                 <li><a asp-controller="Vijest" asp-action="Index">Vijesti</a></li>
                 <li><a asp-controller="Kalendar" asp-action="Index">Kalendar</a></li>
                 <li><a asp-controller="Knjiga" asp-action="Index">Katalog</a></li>
                 @if (User.IsInRole("Administrator"))
                 {
+                    <li class="nav-drawer-section">Upravljanje</li>
                     <li><a asp-controller="Zaduzenje" asp-action="Index">Zaduženja</a></li>
                     <li><a asp-controller="Rezervacija" asp-action="Index">Rezervacije</a></li>
                     <li><a asp-controller="Prijave" asp-action="Index">Prijave</a></li>
@@ -399,6 +427,7 @@
                 }
                 else if (User.IsInRole("Bibliotekar"))
                 {
+                    <li class="nav-drawer-section">Upravljanje</li>
                     <li><a asp-controller="Zaduzenje" asp-action="Index">Zaduženja</a></li>
                     <li><a asp-controller="Rezervacija" asp-action="Index">Rezervacije</a></li>
                     <li><a asp-controller="Prijave" asp-action="Index">Prijave</a></li>
@@ -408,11 +437,14 @@
                 }
                 else
                 {
+                    <li class="nav-drawer-section">Moje</li>
                     <li><a asp-controller="Zaduzenje" asp-action="Moja">Moja zaduženja</a></li>
                     <li><a asp-controller="Rezervacija" asp-action="Moje">Moje rezervacije</a></li>
+                    <li><a asp-controller="ListaKolekcija" asp-action="Index">Kolekcije</a></li>
                     <li><a asp-controller="Forum" asp-action="Index">Forum</a></li>
                     <li><a asp-controller="Knjiga" asp-action="Explore">Želiš nešto novo?</a></li>
                 }
+                <li class="nav-drawer-section">Nalog</li>
                 <li>
                     <a asp-controller="Notifikacija" asp-action="Index" class="nav-notif-link">
                         Obavještenja

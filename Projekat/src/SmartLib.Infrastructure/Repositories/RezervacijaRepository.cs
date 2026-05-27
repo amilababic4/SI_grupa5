@@ -64,6 +64,12 @@ namespace SmartLib.Infrastructure.Repositories
                             && r.Status == "aktivna");
         }
 
+        public async Task<int> CountByKorisnikAsync(int korisnikId)
+        {
+            return await _db.Rezervacije
+                .CountAsync(r => r.KorisnikId == korisnikId);
+        }
+
         public async Task<Rezervacija> CreateAsync(Rezervacija rezervacija)
         {
             _db.Rezervacije.Add(rezervacija);

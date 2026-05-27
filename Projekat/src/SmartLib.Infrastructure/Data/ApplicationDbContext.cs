@@ -31,6 +31,9 @@ namespace SmartLib.Infrastructure.Data
         public DbSet<Notifikacija> Notifikacije => Set<Notifikacija>();
         public DbSet<Vijest> Vijesti => Set<Vijest>();
         public DbSet<Dogadjaj> Dogadjaji => Set<Dogadjaj>();
+        public DbSet<ListaZeljaStavka> ListaZeljaStavke => Set<ListaZeljaStavka>();
+        public DbSet<ListaKolekcija> ListaKolekcije => Set<ListaKolekcija>();
+        public DbSet<ListaKolekcijaStavka> ListaKolekcijaStavke => Set<ListaKolekcijaStavka>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // ─── ULOGA ───────────────────────────────────────────────────────────
@@ -59,6 +62,7 @@ namespace SmartLib.Infrastructure.Data
                 e.Property(k => k.ResetToken).HasMaxLength(256);
                 e.Property(k => k.ResetTokenExpiry);
                 e.Property(k => k.Status).IsRequired().HasDefaultValue("aktivan");
+                e.Property(k => k.ListaZeljaJavna).IsRequired().HasDefaultValue(false);
                 e.Property(k => k.DatumKreiranja).IsRequired();
                 e.Property(k => k.DatumDeaktivacije);
                 e.HasIndex(k => k.Email).IsUnique();
@@ -230,6 +234,58 @@ namespace SmartLib.Infrastructure.Data
                  .WithMany(k => k.Rezervacije)
                  .HasForeignKey(r => r.KnjigaId)
                  .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // ─── LISTA ZELJA ───────────────────────────────────────────────────
+            modelBuilder.Entity<ListaZeljaStavka>(e =>
+            {
+                e.HasKey(l => l.Id);
+                e.Property(l => l.DatumDodavanja).IsRequired();
+                e.HasIndex(l => new { l.KorisnikId, l.KnjigaId }).IsUnique();
+
+                e.HasOne(l => l.Korisnik)
+                 .WithMany(k => k.ListaZelja)
+                 .HasForeignKey(l => l.KorisnikId)
+                 .OnDelete(DeleteBehavior.Cascade);
+
+                e.HasOne(l => l.Knjiga)
+                 .WithMany(k => k.ListaZeljaStavke)
+                 .HasForeignKey(l => l.KnjigaId)
+                 .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // ─── LISTA KOLEKCIJA ───────────────────────────────────────────────
+            modelBuilder.Entity<ListaKolekcija>(e =>
+            {
+                e.HasKey(l => l.Id);
+                e.Property(l => l.Naziv).IsRequired().HasMaxLength(200);
+                e.Property(l => l.Opis).HasMaxLength(1000);
+                e.Property(l => l.Javna).IsRequired().HasDefaultValue(false);
+                e.Property(l => l.DatumKreiranja).IsRequired();
+                e.Property(l => l.DatumAzuriranja);
+                e.HasIndex(l => new { l.KorisnikId, l.Naziv }).IsUnique();
+
+                e.HasOne(l => l.Korisnik)
+                 .WithMany()
+                 .HasForeignKey(l => l.KorisnikId)
+                 .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<ListaKolekcijaStavka>(e =>
+            {
+                e.HasKey(s => s.Id);
+                e.Property(s => s.DatumDodavanja).IsRequired();
+                e.HasIndex(s => new { s.ListaKolekcijaId, s.KnjigaId }).IsUnique();
+
+                e.HasOne(s => s.ListaKolekcija)
+                 .WithMany(l => l.Stavke)
+                 .HasForeignKey(s => s.ListaKolekcijaId)
+                 .OnDelete(DeleteBehavior.Cascade);
+
+                e.HasOne(s => s.Knjiga)
+                 .WithMany()
+                 .HasForeignKey(s => s.KnjigaId)
+                 .OnDelete(DeleteBehavior.Cascade);
             });
 
             // ─── AUDIT LOG ────────────────────────────────────────────────────────

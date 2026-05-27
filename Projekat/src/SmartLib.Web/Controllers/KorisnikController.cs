@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using SmartLib.Core.DTOs;
 using SmartLib.Core.Interfaces;
 using SmartLib.Core.Models;
+using SmartLib.Web.Models;
 using System.Security.Claims;
 
 namespace SmartLib.Web.Controllers
@@ -16,15 +17,21 @@ namespace SmartLib.Web.Controllers
         private readonly IKorisnikRepository _korisnikRepository;
         private readonly IClanarinaRepository _clanarinaRepository;
         private readonly IZaduzenjeRepository _zaduzenjeRepository;
+        private readonly IRezervacijaRepository _rezervacijaRepository;
+        private readonly IListaKolekcijaRepository _listaKolekcijaRepository;
 
         public KorisnikController(
             IKorisnikRepository korisnikRepository,
             IClanarinaRepository clanarinaRepository,
-            IZaduzenjeRepository zaduzenjeRepository)
+            IZaduzenjeRepository zaduzenjeRepository,
+            IRezervacijaRepository rezervacijaRepository,
+            IListaKolekcijaRepository listaKolekcijaRepository)
         {
             _korisnikRepository = korisnikRepository;
             _clanarinaRepository = clanarinaRepository;
             _zaduzenjeRepository = zaduzenjeRepository;
+            _rezervacijaRepository = rezervacijaRepository;
+            _listaKolekcijaRepository = listaKolekcijaRepository;
         }
 
         public async Task<IActionResult> Index(string? pretraga = null, bool prikaziDeaktivirane = false)
@@ -134,6 +141,8 @@ namespace SmartLib.Web.Controllers
             }
 
             ViewBag.JeMojProfil = true;
+            ViewBag.Achievements = await BuildAchievementsAsync(id);
+            ViewBag.Kolekcije = await GetVisibleCollectionsAsync(id, true);
             return View("Profil", korisnik);
         }
 
@@ -157,6 +166,8 @@ namespace SmartLib.Web.Controllers
 
             ViewBag.JeMojProfil = false;
             ViewBag.ProfilKorisnikId = id;
+            ViewBag.Achievements = await BuildAchievementsAsync(id);
+            ViewBag.Kolekcije = await GetVisibleCollectionsAsync(id, false);
 
             var uloga = korisnik.Uloga?.Naziv ?? string.Empty;
             if (string.Equals(uloga, RoleNames.Bibliotekar, StringComparison.OrdinalIgnoreCase))
@@ -173,6 +184,99 @@ namespace SmartLib.Web.Controllers
             }
 
             return View("Profil", korisnik);
+        }
+
+        private async Task<List<ListaKolekcija>> GetVisibleCollectionsAsync(int korisnikId, bool isOwner)
+        {
+            var lists = await _listaKolekcijaRepository.GetByKorisnikAsync(korisnikId);
+            return isOwner ? lists : lists.Where(l => l.Javna).ToList();
+        }
+
+        private async Task<List<AchievementViewModel>> BuildAchievementsAsync(int korisnikId)
+        {
+            var achievements = new List<AchievementViewModel>();
+
+            var history = await _zaduzenjeRepository.GetHistoryByKorisnikAsync(korisnikId);
+            var procitane = history
+                .Where(z => z.DatumStvarnogVracanja.HasValue || z.Status == "zatvoreno")
+                .Select(z => z.Primjerak?.Knjiga)
+                .Where(k => k != null)
+                .DistinctBy(k => k!.Id)
+                .ToList();
+
+            var procitanoCount = procitane.Count;
+            if (procitanoCount > 0)
+            {
+                achievements.Add(new AchievementViewModel
+                {
+                    Title = "Prva procitana knjiga",
+                    Description = "Cestitamo! Zavrsili ste svoju prvu knjigu."
+                });
+            }
+
+            if (procitanoCount >= 5)
+            {
+                achievements.Add(new AchievementViewModel
+                {
+                    Title = "5 procitanih knjiga",
+                    Description = "Odlicno! Procitali ste najmanje 5 knjiga."
+                });
+            }
+
+            if (procitanoCount >= 10)
+            {
+                achievements.Add(new AchievementViewModel
+                {
+                    Title = "10 procitanih knjiga",
+                    Description = "Impresivno! Procitali ste najmanje 10 knjiga."
+                });
+            }
+
+            var firstGenre = history
+                .Where(z => z.Primjerak?.Knjiga?.Kategorija?.Naziv != null)
+                .OrderBy(z => z.DatumZaduzivanja)
+                .Select(z => z.Primjerak!.Knjiga!.Kategorija!.Naziv!)
+                .FirstOrDefault();
+
+            if (!string.IsNullOrWhiteSpace(firstGenre))
+            {
+                achievements.Add(new AchievementViewModel
+                {
+                    Title = "Prva knjiga zanra",
+                    Description = $"Otkrili ste zanr: {firstGenre}."
+                });
+            }
+
+            var rezervacijaCount = await _rezervacijaRepository.CountByKorisnikAsync(korisnikId);
+            if (rezervacijaCount > 0)
+            {
+                achievements.Add(new AchievementViewModel
+                {
+                    Title = "Prva rezervacija",
+                    Description = "Uspjesno ste napravili prvu rezervaciju."
+                });
+            }
+
+            var genreCounts = history
+                .Where(z => z.Primjerak?.Knjiga?.Kategorija?.Naziv != null)
+                .GroupBy(z => z.Primjerak!.Knjiga!.Kategorija!.Naziv!)
+                .Select(g => new { Genre = g.Key, Count = g.Count() })
+                .OrderByDescending(g => g.Count)
+                .ToList();
+
+            var topGenres = genreCounts.Take(2).Select(g => g.Genre).ToHashSet(StringComparer.OrdinalIgnoreCase);
+            var unusual = genreCounts.FirstOrDefault(g => !topGenres.Contains(g.Genre));
+
+            if (unusual != null && genreCounts.Count >= 3)
+            {
+                achievements.Add(new AchievementViewModel
+                {
+                    Title = "Promijenjen ukus",
+                    Description = $"Cestitamo, prosirili ste ukus kroz zanr: {unusual.Genre}."
+                });
+            }
+
+            return achievements;
         }
 
         [HttpGet]

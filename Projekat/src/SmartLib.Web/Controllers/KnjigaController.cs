@@ -21,6 +21,7 @@ namespace SmartLib.Web.Controllers
         private readonly IKategorijaRepository _kategorijaRepository;
         private readonly IZaduzenjeRepository _zaduzenjeRepository;
         private readonly IRezervacijaRepository _rezervacijaRepository;
+        private readonly IListaKolekcijaRepository _listaKolekcijaRepository;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IDistributedCache _cache;
         private readonly IConfiguration _configuration;
@@ -38,6 +39,7 @@ namespace SmartLib.Web.Controllers
             IKategorijaRepository kategorijaRepository,
             IZaduzenjeRepository zaduzenjeRepository,
             IRezervacijaRepository rezervacijaRepository,
+            IListaKolekcijaRepository listaKolekcijaRepository,
             IHttpClientFactory httpClientFactory,
             IDistributedCache cache,
             IConfiguration configuration,
@@ -49,6 +51,7 @@ namespace SmartLib.Web.Controllers
             _kategorijaRepository = kategorijaRepository;
             _zaduzenjeRepository = zaduzenjeRepository;
             _rezervacijaRepository = rezervacijaRepository;
+            _listaKolekcijaRepository = listaKolekcijaRepository;
             _httpClientFactory = httpClientFactory;
             _cache = cache;
             _configuration = configuration;
@@ -482,9 +485,20 @@ namespace SmartLib.Web.Controllers
                 await MarkBookAsReadAsync(userId.Value, id);
                 var readSet = await GetCombinedReadSetAsync(userId.Value);
                 procitana = readSet.Contains(id);
+
+                var wishlist = await _listaKolekcijaRepository.EnsureWishlistCollectionAsync(userId.Value);
+                ViewBag.WishlistId = wishlist.Id;
+                ViewBag.UListiZelja = await _listaKolekcijaRepository.HasItemAsync(wishlist.Id, id);
+
+                var lists = await _listaKolekcijaRepository.GetByKorisnikAsync(userId.Value);
+                ViewBag.Kolekcije = lists
+                    .OrderByDescending(l => string.Equals(l.Naziv, "Lista želja", StringComparison.Ordinal))
+                    .ThenByDescending(l => l.DatumAzuriranja ?? l.DatumKreiranja)
+                    .ToList();
             }
 
             ViewBag.Procitana = procitana;
+            ViewBag.BrojZaduzenja = await _zaduzenjeRepository.CountByKnjigaIdAsync(id);
 
             var cacheKey = $"book_details_v1_{_cacheVersions.BooksVersion}_{_cacheVersions.CategoriesVersion}_{id}";
             var cachedEntry = await _cache.GetRecordAsync<KnjigaDetailsCacheEntry>(cacheKey);

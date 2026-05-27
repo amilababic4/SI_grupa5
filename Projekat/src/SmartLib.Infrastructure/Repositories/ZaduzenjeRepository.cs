@@ -108,5 +108,13 @@ namespace SmartLib.Infrastructure.Repositories
                 .ToListAsync();
         }
 
+        public async Task<int> CountByKnjigaIdAsync(int knjigaId)
+        {
+            return await _db.Zaduzenja
+                .Include(z => z.Primjerak)
+                .Where(z => z.Primjerak!.KnjigaId == knjigaId)
+                .CountAsync();
+        }
+
     }
 }

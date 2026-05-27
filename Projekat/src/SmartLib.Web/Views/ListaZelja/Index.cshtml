@@ -1,0 +1,146 @@
+@model SmartLib.Web.Models.ListaZeljaViewModel
+@{
+    var isOwner = Model.IsOwner;
+    var returnUrl = $"{Context.Request.Path}{Context.Request.QueryString}";
+    ViewData["Title"] = isOwner ? "Moja lista želja" : $"Lista želja — {Model.OwnerName}";
+}
+
+<div class="details-topbar">
+    <a asp-controller="Knjiga" asp-action="Index" class="btn btn-secondary">← Nazad na katalog</a>
+</div>
+
+@if (TempData["SuccessMessage"] is string successMsg)
+{
+    <div class="alert alert-success">@successMsg</div>
+}
+@if (TempData["ErrorMessage"] is string errorMsg)
+{
+    <div class="alert alert-error">@errorMsg</div>
+}
+
+<div class="katalog-header">
+    <h2>@ViewData["Title"]</h2>
+    @if (isOwner)
+    {
+        <div class="details-actions">
+            <form asp-controller="ListaZelja" asp-action="TogglePublic" method="post">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-secondary">
+                    @(Model.IsPublic ? "Postavi privatno" : "Postavi javno")
+                </button>
+            </form>
+        </div>
+    }
+</div>
+
+@if (isOwner)
+{
+    <div class="card" style="margin-bottom: 1.25rem;">
+        <div class="details-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
+            <div class="details-item">
+                <span class="details-label">Vidljivost</span>
+                <span class="visibility-pill @(Model.IsPublic ? "is-public" : "is-private")">
+                    @(Model.IsPublic ? "JAVNA" : "PRIVATNA")
+                </span>
+            </div>
+            <div class="details-item">
+                <span class="details-label">Javni link</span>
+                @if (Model.IsPublic)
+                {
+                    <span class="details-value">
+                        <a class="public-link" asp-controller="ListaZelja" asp-action="Public" asp-route-id="@Model.OwnerId">Otvori javnu listu</a>
+                    </span>
+                }
+                else
+                {
+                    <span class="details-value">—</span>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+<div class="card" style="margin-bottom: 1.25rem;">
+    @if (isOwner)
+    {
+        <form asp-controller="ListaZelja" asp-action="Index" method="get" class="search-row">
+            <div class="form-group" style="margin-bottom:0;">
+                <label for="sort" class="details-label" style="margin-bottom:0.25rem;">Sortiranje</label>
+                <select id="sort" name="sort" class="filter-select">
+                    <option value="added" selected="@(Model.Sort == "added")">Datum dodavanja</option>
+                    <option value="year" selected="@(Model.Sort == "year")">Godina izdanja</option>
+                    <option value="random" selected="@(Model.Sort == "random")">Nasumicno</option>
+                </select>
+            </div>
+            <div style="display:flex; gap:0.5rem; align-items:flex-end;">
+                <button type="submit" class="btn btn-primary">Primijeni</button>
+            </div>
+        </form>
+    }
+    else
+    {
+        <form asp-controller="ListaZelja" asp-action="Public" asp-route-id="@Model.OwnerId" method="get" class="search-row">
+            <div class="form-group" style="margin-bottom:0;">
+                <label for="sort" class="details-label" style="margin-bottom:0.25rem;">Sortiranje</label>
+                <select id="sort" name="sort" class="filter-select">
+                    <option value="added" selected="@(Model.Sort == "added")">Datum dodavanja</option>
+                    <option value="year" selected="@(Model.Sort == "year")">Godina izdanja</option>
+                    <option value="random" selected="@(Model.Sort == "random")">Nasumicno</option>
+                </select>
+            </div>
+            <div style="display:flex; gap:0.5rem; align-items:flex-end;">
+                <button type="submit" class="btn btn-primary">Primijeni</button>
+            </div>
+        </form>
+    }
+</div>
+
+@if (!Model.Items.Any())
+{
+    <p class="empty-note">Lista želja je trenutno prazna.</p>
+}
+else
+{
+    <div class="lb-list-layout">
+        @foreach (var item in Model.Items)
+        {
+            var coverUrl = !string.IsNullOrWhiteSpace(item.Isbn)
+                ? Url.Action("Korice", "Knjiga", new { isbn = item.Isbn, size = "L", v = 3 })
+                : item.SlikaUrl ?? string.Empty;
+            <div class="lb-list-item">
+                <a asp-controller="Knjiga" asp-action="Details" asp-route-id="@item.KnjigaId" class="stretched-link"></a>
+                <div class="lb-cover">
+                    @if (!string.IsNullOrWhiteSpace(coverUrl))
+                    {
+                        <img src="@coverUrl" alt="@item.Naslov" loading="lazy" />
+                    }
+                </div>
+                <div class="lb-body">
+                    <div class="lb-body-top">
+                        <h3 class="lb-title">@item.Naslov</h3>
+                        <span class="lb-author">@item.Autor@(item.GodinaIzdanja.HasValue ? $", {item.GodinaIzdanja}" : "")</span>
+                    </div>
+                    <div class="lb-body-bottom" style="margin-top: 0.75rem;">
+                        <div class="lb-tags">
+                            <span class="lb-tag">Dodano: @item.DatumDodavanja.ToString("dd.MM.yyyy")</span>
+                            <span class="lb-availability @(item.BrojDostupnih > 0 ? "available" : "unavailable")">
+                                @(item.BrojDostupnih > 0 ? $"✓ Dostupno ({item.BrojDostupnih})" : "✗ Zauzeto")
+                            </span>
+                        </div>
+                        @if (isOwner)
+                        {
+                            <div class="lb-actions">
+                                <form asp-controller="ListaZelja" asp-action="Ukloni" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="knjigaId" value="@item.KnjigaId" />
+                                    <input type="hidden" name="returnUrl" value="@returnUrl" />
+                                    <button type="submit" class="btn btn-secondary btn-sm">Ukloni</button>
+                                </form>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

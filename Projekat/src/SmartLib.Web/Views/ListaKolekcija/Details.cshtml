@@ -1,0 +1,189 @@
+@model SmartLib.Web.Models.ListaKolekcijaDetailsViewModel
+@{
+    var returnUrl = $"{Context.Request.Path}{Context.Request.QueryString}";
+    ViewData["Title"] = Model.Naziv;
+}
+
+<form id="reorder-token-form" asp-controller="ListaKolekcija" asp-action="Reorder" method="post">
+    @Html.AntiForgeryToken()
+</form>
+
+<div class="details-topbar">
+    <a asp-controller="ListaKolekcija" asp-action="Index" class="btn btn-secondary">← Nazad na kolekcije</a>
+</div>
+
+@if (TempData["SuccessMessage"] is string successMsg)
+{
+    <div class="alert alert-success">@successMsg</div>
+}
+@if (TempData["ErrorMessage"] is string errorMsg)
+{
+    <div class="alert alert-error">@errorMsg</div>
+}
+
+<div class="katalog-header">
+    <div>
+        <div class="details-title-row">
+            <h2>@Model.Naziv</h2>
+            <span class="visibility-pill @(Model.Javna ? "is-public" : "is-private")">
+                @(Model.Javna ? "JAVNA" : "PRIVATNA")
+            </span>
+        </div>
+        @if (!string.IsNullOrWhiteSpace(Model.Opis))
+        {
+            <p class="details-autor">@Model.Opis</p>
+        }
+    </div>
+    @if (Model.IsOwner)
+    {
+        <div class="details-actions">
+            <form asp-controller="ListaKolekcija" asp-action="TogglePublic" asp-route-id="@Model.Id" method="post">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-secondary">
+                    @(Model.Javna ? "Postavi privatno" : "Postavi javno")
+                </button>
+            </form>
+        </div>
+    }
+</div>
+
+<div class="card" style="margin-bottom: 1.25rem;">
+    <div class="details-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
+        <div class="details-item">
+            <span class="details-label">Vidljivost</span>
+            <span class="visibility-pill @(Model.Javna ? "is-public" : "is-private")">
+                @(Model.Javna ? "JAVNA" : "PRIVATNA")
+            </span>
+        </div>
+        <div class="details-item">
+            <span class="details-label">Javni link</span>
+            @if (Model.Javna)
+            {
+                <span class="details-value">
+                    <a class="public-link" asp-controller="ListaKolekcija" asp-action="Public" asp-route-id="@Model.Id">Otvori javnu kolekciju</a>
+                </span>
+            }
+            else
+            {
+                <span class="details-value">—</span>
+            }
+        </div>
+    </div>
+</div>
+
+@if (!Model.Stavke.Any())
+{
+    <p class="empty-note">Kolekcija je trenutno prazna.</p>
+}
+else
+{
+    <div id="collection-list" class="lb-list-layout" data-list-id="@Model.Id" data-reorder="@(Model.IsOwner ? "true" : "false")">
+        @foreach (var item in Model.Stavke)
+        {
+            var coverUrl = !string.IsNullOrWhiteSpace(item.Isbn)
+                ? Url.Action("Korice", "Knjiga", new { isbn = item.Isbn, size = "L", v = 3 })
+                : item.SlikaUrl ?? string.Empty;
+            <div class="lb-list-item collection-item" data-item-id="@item.StavkaId" draggable="@(Model.IsOwner ? "true" : "false")">
+                <a asp-controller="Knjiga" asp-action="Details" asp-route-id="@item.KnjigaId" class="stretched-link"></a>
+                <div class="lb-cover">
+                    @if (!string.IsNullOrWhiteSpace(coverUrl))
+                    {
+                        <img src="@coverUrl" alt="@item.Naslov" loading="lazy" />
+                    }
+                </div>
+                <div class="lb-body">
+                    <div class="lb-body-top">
+                        <h3 class="lb-title">@item.Naslov</h3>
+                        <span class="lb-author">@item.Autor@(item.GodinaIzdanja.HasValue ? $", {item.GodinaIzdanja}" : "")</span>
+                    </div>
+                    <div class="lb-body-bottom" style="margin-top: 0.75rem;">
+                        <div class="lb-tags">
+                            <span class="lb-tag">Dodano: @item.DatumDodavanja.ToString("dd.MM.yyyy")</span>
+                            <span class="lb-availability @(item.BrojDostupnih > 0 ? "available" : "unavailable")">
+                                @(item.BrojDostupnih > 0 ? $"✓ Dostupno ({item.BrojDostupnih})" : "✗ Zauzeto")
+                            </span>
+                        </div>
+                        @if (Model.IsOwner)
+                        {
+                            <div class="lb-actions">
+                                <button type="button" class="collection-drag-handle" aria-label="Promijeni redoslijed">⋮⋮</button>
+                                <form asp-controller="ListaKolekcija" asp-action="RemoveItem" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="listaId" value="@Model.Id" />
+                                    <input type="hidden" name="knjigaId" value="@item.KnjigaId" />
+                                    <button type="submit" class="btn btn-secondary btn-sm">Ukloni</button>
+                                </form>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@section Scripts {
+    <script>
+        (function () {
+            const list = document.getElementById('collection-list');
+            if (!list || list.dataset.reorder !== 'true') return;
+
+            let dragSrc = null;
+
+            function handleDragStart(e) {
+                dragSrc = this;
+                this.classList.add('collection-dragging');
+                e.dataTransfer.effectAllowed = 'move';
+            }
+
+            function handleDragOver(e) {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                return false;
+            }
+
+            function handleDrop(e) {
+                e.stopPropagation();
+                if (dragSrc !== this) {
+                    const nodes = Array.from(list.querySelectorAll('.collection-item'));
+                    const srcIndex = nodes.indexOf(dragSrc);
+                    const targetIndex = nodes.indexOf(this);
+                    if (srcIndex < targetIndex) {
+                        list.insertBefore(dragSrc, this.nextSibling);
+                    } else {
+                        list.insertBefore(dragSrc, this);
+                    }
+                    persistOrder();
+                }
+                return false;
+            }
+
+            function handleDragEnd() {
+                this.classList.remove('collection-dragging');
+            }
+
+            async function persistOrder() {
+                const token = document.querySelector('#reorder-token-form input[name="__RequestVerificationToken"]');
+                const listId = parseInt(list.dataset.listId, 10);
+                const ids = Array.from(list.querySelectorAll('.collection-item'))
+                    .map(el => parseInt(el.dataset.itemId, 10));
+
+                await fetch('@Url.Action("Reorder", "ListaKolekcija")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': token ? token.value : ''
+                    },
+                    body: JSON.stringify({ listaId: listId, stavkaIds: ids })
+                });
+            }
+
+            list.querySelectorAll('.collection-item').forEach((item) => {
+                item.addEventListener('dragstart', handleDragStart, false);
+                item.addEventListener('dragover', handleDragOver, false);
+                item.addEventListener('drop', handleDrop, false);
+                item.addEventListener('dragend', handleDragEnd, false);
+            });
+        })();
+    </script>
+}

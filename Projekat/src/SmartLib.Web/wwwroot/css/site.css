@@ -1,4 +1,4 @@
-/* SmartLib — Clean Final CSS */
+/* SmartLib â€” Clean Final CSS */
 
 /* ================================
    Reset & Variables
@@ -64,6 +64,18 @@ body {
     line-height: 1.6;
     font-family: "Manrope", Arial, sans-serif;
     background: radial-gradient(circle at top left, rgba(147, 197, 253, 0.38), transparent 34%), radial-gradient(circle at top right, rgba(191, 219, 254, 0.48), transparent 32%), linear-gradient(135deg, var(--sl-blue-light) 0%, var(--sl-blue-light-2) 48%, #f8fbff 100%);
+}
+
+body.modal-open {
+    overflow: hidden;
+}
+
+body.modal-open main,
+body.modal-open .page-shell,
+body.modal-open .card,
+body.modal-open .katalog-header,
+body.modal-open .pagination {
+    transform: none !important;
 }
 
     body.home-page {
@@ -139,7 +151,7 @@ main,
 #main-nav.smartlib-navbar {
     position: sticky;
     top: 0;
-    z-index: 999;
+    z-index: 1300;
     padding: 0.85rem 2rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.12);
     animation: navSlideDown 0.5s ease both;
@@ -206,7 +218,7 @@ main,
 .smartlib-navbar-dark .theme-toggle-btn { color: rgba(255, 255, 255, 0.7); }
 .smartlib-navbar-dark .theme-toggle-btn:hover { color: #ffffff; }
 
-/* Vijesti public page — cream body so no blue gradient bleeds through */
+/* Vijesti public page â€” cream body so no blue gradient bleeds through */
 body.vijesti-public-page {
     background: #F7F2EB;
 }
@@ -1098,6 +1110,47 @@ body.vijesti-public-page {
     border-color: rgba(180, 35, 24, 0.14);
 }
 
+.sl-toast {
+    position: absolute;
+    top: 1.1rem;
+    right: -0.5rem;
+    transform: translateX(100%) translateY(10px);
+    background: var(--sl-text);
+    color: white;
+    padding: 0.8rem 1.6rem;
+    border-radius: 999px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    z-index: 10100;
+    transition: transform 0.35s cubic-bezier(.16, 1, .3, 1), opacity 0.2s ease;
+    opacity: 0;
+    pointer-events: none;
+    white-space: nowrap;
+    box-shadow: 0 8px 24px rgba(6, 15, 58, 0.3);
+}
+
+.sl-toast.is-error {
+    background: var(--sl-danger);
+}
+
+.sl-toast.show {
+    transform: translateX(100%) translateY(0);
+    opacity: 1;
+}
+
+@media (max-width: 900px) {
+    .sl-toast {
+        top: auto;
+        bottom: -3.2rem;
+        right: 50%;
+        transform: translateX(50%) translateY(10px);
+    }
+
+    .sl-toast.show {
+        transform: translateX(50%) translateY(0);
+    }
+}
+
 /* ================================
    General Tables
    ================================ */
@@ -1341,6 +1394,55 @@ td {
             border-bottom: none;
         }
 
+        .wishlist-table .wishlist-book {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .wishlist-table .wishlist-cover {
+            width: 64px;
+            height: 92px;
+            object-fit: cover;
+            border-radius: 8px;
+            box-shadow: 0 6px 18px rgba(15, 23, 42, 0.18);
+            background: #e2e8f0;
+        }
+
+        .wishlist-table .wishlist-cover--empty {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        .wishlist-table .wishlist-title {
+            font-weight: 700;
+            color: var(--sl-text);
+        }
+
+        .wishlist-table .wishlist-author {
+            color: var(--sl-muted);
+            font-size: 0.95rem;
+        }
+
+        .wishlist-table .wishlist-details-link {
+            display: inline-block;
+            margin-top: 0.35rem;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: none;
+            letter-spacing: 0.02em;
+            color: var(--sl-blue);
+            text-decoration: none;
+        }
+
+        .wishlist-table .wishlist-details-link:hover {
+            text-decoration: underline;
+        }
+
 @keyframes tableRowIn {
     from {
         opacity: 0;
@@ -1452,6 +1554,11 @@ td {
     flex-shrink: 0;
 }
 
+.details-actions--primary {
+    gap: 0.4rem;
+    align-items: center;
+}
+
 .details-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1495,6 +1602,51 @@ td {
     text-align: center;
 }
 
+.details-title-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.visibility-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.7rem;
+    font-size: 0.72rem;
+    font-weight: 800;
+    border-radius: 999px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    background: rgba(15, 23, 42, 0.06);
+    color: var(--sl-text);
+}
+
+.visibility-pill.is-public {
+    background: rgba(2, 122, 72, 0.12);
+    color: var(--sl-success);
+    border: 1px solid rgba(2, 122, 72, 0.2);
+}
+
+.visibility-pill.is-private {
+    background: rgba(148, 163, 184, 0.18);
+    color: #475569;
+    border: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+.public-link {
+    text-decoration: none;
+    font-style: italic;
+    color: var(--sl-blue);
+    font-weight: 600;
+}
+
+.public-link:hover {
+    text-decoration: none;
+    color: var(--sl-blue);
+    opacity: 0.85;
+}
+
 .examples-card {
     margin-top: 1rem;
 }
@@ -1512,7 +1664,7 @@ td {
 }
 
 /* ================================
-   Details — poboljšan book layout
+   Details â€” poboljÅ¡an book layout
    ================================ */
 
 .details-book-layout {
@@ -2232,7 +2384,7 @@ body.home-page footer {
 }
 
 /* ================================
-   Primjerci — US-21, US-22, US-23, US-24
+   Primjerci â€” US-21, US-22, US-23, US-24
    ================================ */
 
 /* Header sekcije primjeraka */
@@ -2332,13 +2484,13 @@ body.home-page footer {
     opacity: 0.58;
 }
 
-/* Inventarni broj deaktiviranog primjerka — precrtano */
+/* Inventarni broj deaktiviranog primjerka â€” precrtano */
 .inv-broj--deaktiviran {
     text-decoration: line-through;
     color: var(--sl-muted);
 }
 
-/* Label umjesto dugmeta za već deaktivirane */
+/* Label umjesto dugmeta za veÄ‡ deaktivirane */
 .deaktiviran-label {
     display: inline-flex;
     align-items: center;
@@ -2371,7 +2523,7 @@ body.home-page footer {
 }
 
 /* ================================
-   Kategorije — US-30, US-31, US-32, US-33, US-34
+   Kategorije â€” US-30, US-31, US-32, US-33, US-34
    ================================ */
 
 /* Forma za dodavanje nove kategorije */
@@ -2401,7 +2553,7 @@ body.home-page footer {
     padding-bottom: 0.05rem;
 }
 
-/* US-33: Modal za uređivanje */
+/* US-33: Modal za ureÄ‘ivanje */
 .kat-modal-overlay {
     position: fixed;
     inset: 0;
@@ -2512,7 +2664,7 @@ body.home-page footer {
     }
 }
 /* ================================
-   Zaduženje — Status badges & row highlights
+   ZaduÅ¾enje â€” Status badges & row highlights
    ================================ */
 
 .status-kasni,
@@ -2548,7 +2700,7 @@ body.home-page footer {
 }
 
 /* ================================
-   Home — Features section
+   Home â€” Features section
    ================================ */
 
 .home-features {
@@ -2646,7 +2798,7 @@ body.home-page footer {
 }
 
 /* ================================
-   Zaduženje — Create form
+   ZaduÅ¾enje â€” Create form
    ================================ */
 
 .zad-page-wrap {
@@ -2692,7 +2844,7 @@ body.home-page footer {
     background: var(--sl-border);
 }
 
-/* ── Combobox ─────────────────────────────── */
+/* â”€â”€ Combobox â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .zad-combo {
     position: relative;
@@ -2791,7 +2943,7 @@ body.home-page footer {
     font-style: italic;
 }
 
-/* ── Optional label tag ───────────────────── */
+/* â”€â”€ Optional label tag â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .zad-optional {
     font-size: 0.79rem;
@@ -2801,7 +2953,7 @@ body.home-page footer {
     font-style: normal;
 }
 
-/* ── Date input ───────────────────────────── */
+/* â”€â”€ Date input â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .zad-date-input {
     display: block;
@@ -2843,7 +2995,7 @@ body.home-page footer {
     line-height: 1.5;
 }
 
-/* ── Validation summary ───────────────────── */
+/* â”€â”€ Validation summary â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .zad-validation-summary:not(:empty) {
     margin-bottom: 1rem;
@@ -2961,6 +3113,25 @@ body.home-page footer {
     transition: background 0.2s ease;
     text-decoration: none;
     color: inherit;
+}
+
+.collection-item {
+    cursor: grab;
+}
+
+.collection-item.collection-dragging {
+    opacity: 0.7;
+}
+
+.collection-drag-handle {
+    border: none;
+    background: rgba(148, 163, 184, 0.18);
+    color: var(--sl-muted);
+    padding: 0.25rem 0.45rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    line-height: 1;
+    cursor: grab;
 }
 
     .lb-list-item:first-child {
@@ -3129,6 +3300,418 @@ body.home-page footer {
     gap: 0.5rem;
 }
 
+/* Collection tiles */
+.collection-grid-wrap {
+    max-width: 980px;
+    margin: 0 auto;
+}
+
+.collection-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.collection-panel {
+    max-width: 980px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.collection-panel-grid {
+    max-width: 980px;
+    margin-left: auto;
+    margin-right: auto;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.25rem;
+}
+
+@media (max-width: 980px) {
+    .collection-panel-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.collection-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1.25rem;
+    justify-items: stretch;
+}
+
+.collection-card {
+    position: relative;
+    padding: 1.25rem 1.35rem;
+    border-radius: var(--sl-radius-lg);
+    background: #ffffff;
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    overflow: visible;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    cursor: pointer;
+}
+
+.collection-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 26px 60px rgba(15, 23, 42, 0.16);
+    border-color: rgba(59, 130, 246, 0.35);
+}
+
+.collection-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.collection-card-title {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--sl-text);
+}
+
+.collection-card-desc {
+    margin: 0;
+    color: var(--sl-muted);
+    font-size: 0.9rem;
+    line-height: 1.4;
+    min-height: 2.6rem;
+}
+
+.collection-card-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.collection-count {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.65rem;
+    border-radius: 999px;
+    background: rgba(59, 130, 246, 0.12);
+    color: #1d4ed8;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.collection-delete-form {
+    position: absolute;
+    top: -14px;
+    right: -14px;
+    z-index: 3;
+}
+
+.collection-delete-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 999px;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+}
+
+.collection-filter-meta {
+    margin-top: 0.75rem;
+    color: var(--sl-muted);
+    font-size: 0.88rem;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.collection-quick-filters {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.collection-chip-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.collection-create-trigger {
+    margin-left: 0.35rem;
+}
+
+.collection-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.28rem 0.75rem;
+    border-radius: 999px;
+    background: rgba(59, 130, 246, 0.08);
+    color: var(--sl-blue);
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.collection-chip:hover {
+    background: rgba(59, 130, 246, 0.16);
+    color: var(--sl-blue);
+    transform: translateY(-1px);
+    text-decoration: none;
+}
+
+.collection-chip.is-active {
+    background: var(--sl-blue);
+    color: #ffffff;
+    box-shadow: 0 10px 20px rgba(23, 59, 99, 0.25);
+}
+
+.collection-updated {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    background: rgba(16, 185, 129, 0.12);
+    color: #047857;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.collection-pinned {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    background: rgba(59, 130, 246, 0.12);
+    color: #1d4ed8;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.icon-btn {
+    border: none;
+    background: rgba(148, 163, 184, 0.18);
+    color: #475569;
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.icon-btn svg {
+    width: 18px;
+    height: 18px;
+    fill: currentColor;
+}
+
+.icon-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
+}
+
+.icon-btn.danger {
+    background: rgba(220, 38, 38, 0.18);
+    color: #dc2626;
+}
+
+.icon-btn.danger:hover {
+    background: rgba(220, 38, 38, 0.28);
+    box-shadow: 0 12px 24px rgba(220, 38, 38, 0.35);
+}
+
+.collection-delete-btn:hover {
+    animation: badgePulse 0.7s ease;
+}
+
+@keyframes badgePulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+    100% { transform: scale(1); }
+}
+.confirm-modal-card.is-shake {
+    animation: confirmShake 0.45s ease;
+}
+
+@keyframes confirmShake {
+    0% { transform: translateX(0); }
+    20% { transform: translateX(-6px); }
+    40% { transform: translateX(6px); }
+    60% { transform: translateX(-4px); }
+    80% { transform: translateX(4px); }
+    100% { transform: translateX(0); }
+}
+
+[data-theme="dark"] .sl-modal-card {
+    background: #0f172a;
+    border-color: rgba(148, 163, 184, 0.2);
+}
+
+[data-theme="dark"] .sl-modal-section h4 {
+    color: rgba(226, 232, 240, 0.7);
+}
+
+[data-theme="dark"] .sl-modal-collection-row {
+    background: rgba(15, 23, 42, 0.7);
+    border-color: rgba(148, 163, 184, 0.18);
+}
+
+[data-theme="dark"] .sl-modal-collection-row.wishlist-row {
+    border-color: rgba(16, 185, 129, 0.3);
+    background: rgba(16, 185, 129, 0.16);
+}
+
+[data-theme="dark"] .sl-modal-collection-name {
+    color: rgba(226, 232, 240, 0.95);
+}
+
+[data-theme="dark"] .sl-modal-close {
+    background: rgba(148, 163, 184, 0.18);
+    color: rgba(226, 232, 240, 0.85);
+}
+
+[data-theme="dark"] .sl-modal-close:hover {
+    background: rgba(148, 163, 184, 0.3);
+    color: #ffffff;
+}
+
+.reviews-meta-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    margin-top: 0.35rem;
+}
+
+.reviews-rating {
+    color: #fbbf24;
+    font-size: 1.15rem;
+    font-weight: 700;
+}
+
+.reviews-rating span {
+    font-size: 0.9rem;
+    color: var(--sl-muted);
+    font-weight: 500;
+}
+
+.reviews-popularity {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.65rem;
+    border-radius: 999px;
+    background: rgba(99, 102, 241, 0.12);
+    color: #4338ca;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+[data-theme="dark"] .reviews-popularity {
+    background: rgba(99, 102, 241, 0.2);
+    color: #c7d2fe;
+}
+
+[data-theme="dark"] .collection-card {
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.92), rgba(17, 24, 39, 0.96));
+    border-color: rgba(148, 163, 184, 0.18);
+    box-shadow: 0 18px 40px rgba(2, 6, 23, 0.55);
+}
+
+[data-theme="dark"] .collection-card-desc {
+    color: rgba(226, 232, 240, 0.7);
+}
+
+[data-theme="dark"] .collection-count {
+    background: rgba(59, 130, 246, 0.2);
+    color: #bfdbfe;
+}
+
+[data-theme="dark"] .collection-updated {
+    background: rgba(16, 185, 129, 0.2);
+    color: #a7f3d0;
+}
+
+[data-theme="dark"] .icon-btn {
+    background: rgba(148, 163, 184, 0.18);
+    color: #e2e8f0;
+}
+
+[data-theme="dark"] .icon-btn.danger {
+    background: rgba(248, 113, 113, 0.22);
+    color: #fecaca;
+}
+
+/* Confirm modal */
+.confirm-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2200;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+}
+
+.confirm-modal-card {
+    width: min(420px, 100%);
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 1.5rem;
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    box-shadow: 0 24px 65px rgba(15, 23, 42, 0.25);
+}
+
+.confirm-modal-header h3 {
+    margin: 0 0 0.6rem 0;
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--sl-text);
+}
+
+.confirm-modal-text {
+    margin: 0 0 1.2rem 0;
+    color: var(--sl-muted);
+}
+
+.confirm-modal-text span {
+    color: var(--sl-text);
+    font-weight: 700;
+}
+
+.confirm-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.65rem;
+}
+
+[data-theme="dark"] .confirm-modal-card {
+    background: #0f172a;
+    border-color: rgba(148, 163, 184, 0.2);
+}
+
+[data-theme="dark"] .confirm-modal-text {
+    color: rgba(226, 232, 240, 0.75);
+}
+
 /* ================================
    Letterboxd-style Grid Layout
    ================================ */
@@ -3286,7 +3869,7 @@ body.home-page footer {
     display: none !important;
 }
 
-/* Responsive — List */
+/* Responsive â€” List */
 @media (max-width: 768px) {
     .lb-cover {
         width: 85px;
@@ -3329,7 +3912,7 @@ body.home-page footer {
         }
 }
 
-/* Responsive — Grid */
+/* Responsive â€” Grid */
 @media (max-width: 480px) {
     .lb-grid-layout {
         grid-template-columns: repeat(2, 1fr);
@@ -3410,6 +3993,243 @@ body.home-page footer {
     margin-top: 1.5rem;
 }
 
+/* Modal for collection picker */
+.sl-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 8000;
+    background: rgba(6, 15, 58, 0.55);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 5vh 1.5rem 4vh;
+    overflow-y: auto;
+}
+
+[data-theme="dark"] .sl-modal-overlay {
+    background: rgba(2, 6, 23, 0.7);
+    backdrop-filter: blur(6px);
+}
+
+/* Collection create modal */
+.collection-create-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    background: rgba(8, 12, 20, 0.78);
+    backdrop-filter: blur(6px);
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 10vh 1.5rem 4vh;
+    overflow-y: auto;
+}
+
+.wishlist-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.5rem;
+    border-radius: 999px;
+    background: rgba(16, 185, 129, 0.15);
+    color: #047857;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+[data-theme="dark"] .collection-pinned {
+    background: rgba(59, 130, 246, 0.2);
+    color: #bfdbfe;
+}
+
+[data-theme="dark"] .wishlist-chip {
+    background: rgba(16, 185, 129, 0.2);
+    color: #a7f3d0;
+}
+
+.collection-create-card {
+    width: min(520px, 100%);
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 1.5rem;
+    box-shadow: 0 24px 65px rgba(15, 23, 42, 0.25);
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.collection-create-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.collection-create-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--sl-text);
+}
+
+.collection-create-form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.9rem;
+}
+
+.collection-create-form .form-group:last-of-type,
+.collection-create-actions {
+    grid-column: span 2;
+}
+
+.collection-create-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+[data-theme="dark"] .collection-create-overlay {
+    background: rgba(2, 6, 23, 0.7);
+    backdrop-filter: blur(6px);
+}
+
+[data-theme="dark"] .collection-create-card {
+    background: #0f172a;
+    border-color: rgba(148, 163, 184, 0.2);
+}
+
+[data-theme="dark"] .collection-create-header h3 {
+    color: #f8fafc;
+}
+
+.sl-modal-card {
+    width: min(700px, calc(100% - 2rem));
+    background: var(--sl-card-solid);
+    border-radius: var(--sl-radius-lg);
+    box-shadow: 0 32px 80px rgba(7, 17, 31, 0.25),
+                0 0 0 1px rgba(30, 58, 95, 0.08);
+    border: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    max-height: 80vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    animation: slModalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slModalSlideUp {
+    from { opacity: 0; transform: translateY(20px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.sl-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem 0.75rem;
+    border-bottom: 1px solid var(--sl-border, rgba(30, 58, 95, 0.08));
+    flex-shrink: 0;
+}
+
+.sl-modal-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 800;
+}
+
+.sl-modal-close {
+    border: none;
+    background: rgba(148, 163, 184, 0.2);
+    color: var(--sl-muted);
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    font-size: 1.2rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.sl-modal-close:hover {
+    background: rgba(148, 163, 184, 0.35);
+    color: var(--sl-text);
+}
+
+.sl-modal-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+}
+
+.sl-modal-section + .sl-modal-section {
+    border-top: 1px solid var(--sl-border, rgba(30, 58, 95, 0.06));
+}
+
+.sl-modal-section h4 {
+    margin: 0;
+    font-size: 0.92rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--sl-muted);
+}
+
+.sl-modal-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+}
+
+.sl-modal-collection-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.75rem 0.9rem;
+    border-radius: 14px;
+    border: 1px solid var(--sl-border);
+    background: rgba(248, 250, 252, 0.8);
+}
+
+.sl-modal-collection-row.wishlist-row {
+    border-color: rgba(16, 185, 129, 0.25);
+    background: rgba(16, 185, 129, 0.08);
+}
+
+.sl-modal-collection-info {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    flex-wrap: wrap;
+}
+
+.sl-modal-collection-name {
+    font-weight: 700;
+    color: var(--sl-text);
+}
+
+.sl-modal-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+}
+
+.sl-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 0.4rem;
+}
+
 /* Modal for expanding cover images */
 .image-modal-overlay {
     position: fixed;
@@ -3456,7 +4276,7 @@ body.home-page footer {
     }
 
 .details-cover-wrapper::after {
-    content: "🔍 Klikni za uvećanje";
+    content: "ðŸ” Klikni za uveÄ‡anje";
     position: absolute;
     bottom: 0;
     left: 0;
@@ -3580,7 +4400,7 @@ body.home-page footer {
 }
 
 /* ================================
-   Home — Featured Books (YTS Style)
+   Home â€” Featured Books (YTS Style)
    ================================ */
 
 .home-featured-books {
@@ -3849,7 +4669,7 @@ body.home-page footer {
 }
 
 /* ================================
-   Members — klikabilni redovi
+   Members â€” klikabilni redovi
    ================================ */
 
 .members-row-link {
@@ -3892,7 +4712,7 @@ body.home-page footer {
 }
 
 /* ================================
-   Profil — bar dugmadi za zaduženja (dodati na kraj site.css)
+   Profil â€” bar dugmadi za zaduÅ¾enja (dodati na kraj site.css)
    ================================ */
 
 .profil-zaduzenja-bar {
@@ -3946,7 +4766,7 @@ body.home-page footer {
     }
 
 /* ================================
-   Profil — Sekcija članarine (US-55, US-56, US-57)
+   Profil â€” Sekcija Älanarine (US-55, US-56, US-57)
    Dodaj na kraj site.css
    ================================ */
 
@@ -3971,7 +4791,7 @@ body.home-page footer {
     color: var(--sl-muted);
 }
 
-/* Dugme "Upravljanje članarinom" — isti stil kao btn-zaduzenja-historija */
+/* Dugme "Upravljanje Älanarinom" â€” isti stil kao btn-zaduzenja-historija */
 .btn-clanarina-upravljaj {
     display: inline-flex;
     align-items: center;
@@ -4010,7 +4830,7 @@ body.home-page footer {
     flex-wrap: wrap;
 }
 
-/* Svaki datum blok — isti izgled kao .details-item */
+/* Svaki datum blok â€” isti izgled kao .details-item */
 .profil-clanarina-datum {
     display: flex;
     flex-direction: column;
@@ -4022,7 +4842,7 @@ body.home-page footer {
     margin-left: auto;
 }
 
-/* Poruka kad nema članarine */
+/* Poruka kad nema Älanarine */
 .profil-clanarina-prazno {
     color: var(--sl-muted);
     font-size: 0.9rem;
@@ -4033,7 +4853,7 @@ body.home-page footer {
     justify-content: flex-start;
 }
 
-/* ── FIX: Članarina — kad nema evidentirane, dugme i tekst u jednom redu */
+/* â”€â”€ FIX: ÄŒlanarina â€” kad nema evidentirane, dugme i tekst u jednom redu */
 
 .profil-clanarina-section {
     display: flex;
@@ -4042,10 +4862,10 @@ body.home-page footer {
 }
 
 .profil-clanarina-header {
-    align-items: center; /* već postoji, samo potvrđujemo */
+    align-items: center; /* veÄ‡ postoji, samo potvrÄ‘ujemo */
 }
 
-/* Kad nema članarine — wrapper koji drži dugme i poruku zajedno */
+/* Kad nema Älanarine â€” wrapper koji drÅ¾i dugme i poruku zajedno */
 .profil-clanarina-prazno-row {
     display: flex;
     align-items: center;
@@ -4059,8 +4879,8 @@ body.home-page footer {
 }
 
 /* ================================
-   Members — Search bar 
-   Isti stil kao katalog-search, prilagođen za members
+   Members â€” Search bar 
+   Isti stil kao katalog-search, prilagoÄ‘en za members
    ================================ */
 
 .members-header {
@@ -4072,7 +4892,7 @@ body.home-page footer {
     flex-wrap: wrap;
 }
 
-/* Checkbox toggle "Prikaži deaktivirane" */
+/* Checkbox toggle "PrikaÅ¾i deaktivirane" */
 .members-search-toggle input[type="checkbox"] {
     width: 16px;
     height: 16px;
@@ -4142,7 +4962,7 @@ body.home-page footer {
 }
 
 /* ================================
-   Izvještaji
+   IzvjeÅ¡taji
    ================================ */
 
 /* Page Header */
@@ -4192,7 +5012,7 @@ body.home-page footer {
     gap: 0.75rem;
 }
 
-/* Layout dvostupčani */
+/* Layout dvostupÄani */
 .izvjestaj-layout {
     display: grid;
     grid-template-columns: 1fr 1.5fr;
@@ -4227,7 +5047,7 @@ body.home-page footer {
     margin: 0;
 }
 
-/* Tip izvještaja lista */
+/* Tip izvjeÅ¡taja lista */
 .izvjestaj-tip-lista {
     padding: 1rem;
     display: flex;
@@ -4715,7 +5535,7 @@ body.home-page footer {
 }
 
 /* ================================
-   Status — deaktiviran (gray pill)
+   Status â€” deaktiviran (gray pill)
    Consistent with katalog-badge /
    status-dostupan visual language
    ================================ */
@@ -4864,7 +5684,7 @@ body.home-page footer {
    ================================ */
 
 [data-theme="dark"] {
-    /* NOTE: --sl-dark (#07111f) intentionally kept unchanged —
+    /* NOTE: --sl-dark (#07111f) intentionally kept unchanged â€”
        it is the background of home page sections and must stay dark. */
     --sl-blue: #60a5fa;
     --sl-blue-light: #0d1421;
@@ -5251,7 +6071,7 @@ body.home-page footer {
 }
 
 /* ================================
-   Vijesti Public Page — Dark Mode
+   Vijesti Public Page â€” Dark Mode
    ================================ */
 
 /* Filter bar */
@@ -5345,9 +6165,9 @@ body.home-page footer {
     color: #64748b;
 }
 
-/* Category tag pills — dark mode */
-[data-theme="dark"] .tc-obavještenje,
-[data-theme="dark"] .tc-obaviještenje {
+/* Category tag pills â€” dark mode */
+[data-theme="dark"] .tc-obavjeÅ¡tenje,
+[data-theme="dark"] .tc-obavijeÅ¡tenje {
     background: rgba(96, 165, 250, 0.18);
     color: #93c5fd;
 }
@@ -5359,7 +6179,7 @@ body.home-page footer {
     background: rgba(90, 128, 200, 0.22);
     color: #a5b4fc;
 }
-[data-theme="dark"] .tc-događaji {
+[data-theme="dark"] .tc-dogaÄ‘aji {
     background: rgba(30, 64, 130, 0.35);
     color: #7dd3fc;
 }
@@ -5756,11 +6576,11 @@ body.home-page footer {
     }
 
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   PB-44: Dodatni filteri pretrage — dodaj na kraj site.css
-   ═══════════════════════════════════════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   PB-44: Dodatni filteri pretrage â€” dodaj na kraj site.css
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
-/* ── Toggle dugme sa aktivnim indikatorom ──────────────────────────────────── */
+/* â”€â”€ Toggle dugme sa aktivnim indikatorom â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 #btn-advanced-toggle {
     position: relative;
     display: inline-flex;
@@ -5781,7 +6601,7 @@ body.home-page footer {
     margin-left: 1px;
 }
 
-/* ── Collapsible filter panel ──────────────────────────────────────────────── */
+/* â”€â”€ Collapsible filter panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .advanced-filters-panel {
     max-height: 0;
     overflow: hidden;
@@ -5798,7 +6618,7 @@ body.home-page footer {
     margin-top: 0.75rem;
 }
 
-/* ── Grid layout za 3 filter kolone ───────────────────────────────────────── */
+/* â”€â”€ Grid layout za 3 filter kolone â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .advanced-filters-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -5812,7 +6632,7 @@ body.home-page footer {
     }
 }
 
-/* ── Individualni filter group ─────────────────────────────────────────────── */
+/* â”€â”€ Individualni filter group â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .filter-group label {
     display: flex;
     align-items: center;
@@ -5843,14 +6663,14 @@ body.home-page footer {
         border-color: var(--accent, #6366f1);
     }
 
-/* ── Akcijski gumbi u panelu ───────────────────────────────────────────────── */
+/* â”€â”€ Akcijski gumbi u panelu â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .advanced-filters-actions {
     display: flex;
     gap: 0.5rem;
     flex-wrap: wrap;
 }
 
-/* ── Aktivni filteri — chip bar ────────────────────────────────────────────── */
+/* â”€â”€ Aktivni filteri â€” chip bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .active-filters-bar {
     display: flex;
     flex-wrap: wrap;
@@ -6818,7 +7638,7 @@ body.home-page footer {
     }
 
 /* ================================
-   Landing Sections — Responsive
+   Landing Sections â€” Responsive
    ================================ */
 
 @media (max-width: 940px) {
@@ -6894,7 +7714,7 @@ body.home-page footer {
 }
 
 /* ================================
-   Landing Sections — Dark Mode
+   Landing Sections â€” Dark Mode
    ================================ */
 
 [data-theme="dark"] .sec-about {
@@ -7117,7 +7937,7 @@ body.home-page footer {
         color: rgba(255,255,255,0.4);
     }
 
-/* ── Gallery ─────────────────────────────────────────────────────────── */
+/* â”€â”€ Gallery â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .sec-gallery {
     background: var(--cream-2);
     padding: 8rem 2rem;
@@ -7191,7 +8011,7 @@ body.home-page footer {
         display: block;
     }
 
-/* ── Roles two-column variant ─────────────────────────────────────────── */
+/* â”€â”€ Roles two-column variant â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .roles-grid--two {
     grid-template-columns: repeat(2, 1fr);
     max-width: 800px;
@@ -7199,7 +8019,7 @@ body.home-page footer {
     margin-right: auto;
 }
 
-/* ── News ─────────────────────────────────────────────────────────────── */
+/* â”€â”€ News â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .sec-news {
     background: var(--sl-dark, #060F3A);
     padding: 8rem 2rem;
@@ -7364,7 +8184,7 @@ body.home-page footer {
         padding: 1.4rem 1.6rem 1.4rem 1.2rem;
     }
 
-/* ── Gallery dark mode ────────────────────────────────────────────────── */
+/* â”€â”€ Gallery dark mode â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 [data-theme="dark"] .sec-gallery {
     background: #1a1f2e;
 }
@@ -7385,7 +8205,7 @@ body.home-page footer {
     background: rgba(255,255,255,0.05);
 }
 
-/* ── Responsive – Gallery & News ─────────────────────────────────────── */
+/* â”€â”€ Responsive â€“ Gallery & News â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 @media (max-width: 940px) {
     .gallery-grid {
         grid-template-columns: 1fr 1fr;
@@ -7473,7 +8293,7 @@ body.home-page footer {
 }
 
 /* ================================
-   Katalog — View Toggle & Page Size
+   Katalog â€” View Toggle & Page Size
    ================================ */
 
 .view-toggle-container {
@@ -7579,7 +8399,7 @@ body.home-page footer {
     display: none !important;
 }
 
-/* ── Dark mode overrides ── */
+/* â”€â”€ Dark mode overrides â”€â”€ */
 
 [data-theme="dark"] .view-toggle-container {
     background: var(--sl-card, #111c2e);
@@ -7676,3 +8496,213 @@ body.home-page footer {
         border-color: var(--sl-blue, #818cf8);
         box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
     }
+
+/* ================================================================
+   COLLECTION / WISHLIST SYSTEM
+   ================================================================ */
+
+/* â”€â”€ Toast notification â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.sl-toast {
+    position: fixed;
+    top: 2rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(-24px);
+    z-index: 10000;
+    min-width: 280px;
+    max-width: 480px;
+    padding: 0.9rem 1.6rem;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #0f2742 0%, #173b63 100%);
+    color: #f0f6ff;
+    font-size: 0.92rem;
+    font-weight: 600;
+    text-align: center;
+    box-shadow: 0 16px 48px rgba(7, 17, 31, 0.35),
+                0 0 0 1px rgba(255, 255, 255, 0.08);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), visibility 0s 0.35s;
+}
+
+.sl-toast.show {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateX(-50%) translateY(0);
+    transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), visibility 0s;
+}
+
+.sl-toast.is-error {
+    background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%);
+    box-shadow: 0 16px 48px rgba(127, 29, 29, 0.35),
+                0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+[data-theme="dark"] .sl-toast {
+    background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5),
+                0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .sl-toast.is-error {
+    background: linear-gradient(135deg, #991b1b 0%, #dc2626 100%);
+}
+
+/* ── Visibility pill ─────────────────────────────────────────────── */
+.visibility-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.65rem;
+    border-radius: 999px;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    line-height: 1.4;
+}
+
+.visibility-pill.is-public {
+    background: rgba(16, 185, 129, 0.1);
+    color: #047857;
+    border: 1px solid rgba(16, 185, 129, 0.18);
+}
+
+.visibility-pill.is-private {
+    background: rgba(100, 116, 139, 0.08);
+    color: #64748b;
+    border: 1px solid rgba(100, 116, 139, 0.14);
+}
+
+[data-theme="dark"] .visibility-pill.is-public {
+    background: rgba(16, 185, 129, 0.14);
+    color: #6ee7b7;
+    border-color: rgba(16, 185, 129, 0.25);
+}
+
+[data-theme="dark"] .visibility-pill.is-private {
+    background: rgba(148, 163, 184, 0.12);
+    color: #94a3b8;
+    border-color: rgba(148, 163, 184, 0.2);
+}
+
+/* ── Public link ─────────────────────────────────────────────────── */
+.public-link {
+    color: var(--sl-blue, #173b63);
+    text-decoration: none;
+    font-style: italic;
+    font-weight: 600;
+    font-size: 0.9rem;
+    border-bottom: 1px dashed rgba(23, 59, 99, 0.25);
+    padding-bottom: 1px;
+    transition: all 0.18s ease;
+}
+
+.public-link:hover {
+    color: #2563eb;
+    border-bottom-color: #2563eb;
+    border-bottom-style: solid;
+}
+
+[data-theme="dark"] .public-link {
+    color: #93c5fd;
+    border-bottom-color: rgba(147, 197, 253, 0.3);
+}
+
+[data-theme="dark"] .public-link:hover {
+    color: #bfdbfe;
+    border-bottom-color: #bfdbfe;
+}
+
+/* ── Details title row ───────────────────────────────────────────── */
+.details-title-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+/* ── Stretched link (makes entire card clickable) ────────────────── */
+.stretched-link {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    text-decoration: none;
+    color: transparent;
+    outline: none;
+}
+
+/* ── Empty note ──────────────────────────────────────────────────── */
+.empty-note {
+    text-align: center;
+    color: var(--sl-muted, #64748b);
+    padding: 2rem;
+    font-size: 0.95rem;
+}
+
+/* ── Search row ──────────────────────────────────────────────────── */
+.search-row {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+/* ── Collection drag handle ──────────────────────────────────────── */
+.collection-drag-handle {
+    border: none;
+    background: transparent;
+    cursor: grab;
+    font-size: 1.1rem;
+    color: var(--sl-muted, #64748b);
+    padding: 0.25rem;
+    border-radius: 4px;
+    transition: background 0.15s;
+    line-height: 1;
+    position: relative;
+    z-index: 3;
+}
+
+.collection-drag-handle:hover {
+    background: rgba(30, 58, 95, 0.06);
+}
+
+.collection-drag-handle:active {
+    cursor: grabbing;
+}
+
+.collection-dragging {
+    opacity: 0.5;
+    border-style: dashed;
+}
+
+/* ── Responsive overrides ────────────────────────────────────────── */
+@media (max-width: 640px) {
+    .search-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .collection-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .lb-list-item {
+        grid-template-columns: 64px 1fr;
+    }
+
+    .lb-cover {
+        width: 64px;
+        height: 88px;
+    }
+
+    .collection-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .sl-modal-card {
+        width: calc(100% - 2rem);
+        max-height: 90vh;
+    }
+}
