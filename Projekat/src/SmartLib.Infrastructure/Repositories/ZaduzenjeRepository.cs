@@ -161,5 +161,58 @@ namespace SmartLib.Infrastructure.Repositories
                 .Where(z => z.Primjerak!.KnjigaId == knjigaId)
                 .CountAsync();
         }
+
+        public async Task<IEnumerable<Zaduzenje>> GetAktivnaZaDatumAsync(DateTime datum)
+        {
+            var targetDate = datum.Date;
+
+            return await _db.Zaduzenja
+                .AsNoTracking()
+                .Include(z => z.Korisnik)
+                .Include(z => z.Primjerak)
+                    .ThenInclude(p => p!.Knjiga)
+                .Where(z => z.Status == "aktivno" &&
+                            z.DatumPlaniranogVracanja.Date == targetDate)
+                .OrderBy(z => z.KorisnikId)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Zaduzenje>> GetKasnaAktivnaAsync(DateTime danas)
+        {
+            var danasDate = danas.Date;
+
+            return await _db.Zaduzenja
+                .AsNoTracking()
+                .Include(z => z.Korisnik)
+                .Include(z => z.Primjerak)
+                    .ThenInclude(p => p!.Knjiga)
+                .Where(z => z.Status == "aktivno" &&
+                            z.DatumPlaniranogVracanja.Date < danasDate)
+                .OrderBy(z => z.DatumPlaniranogVracanja)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Zaduzenje>> GetAktivnaZaDatumRangeAsync(DateTime od, DateTime doo)
+        {
+            return await _db.Zaduzenja
+                .AsNoTracking()
+                .Include(z => z.Korisnik)
+                .Include(z => z.Primjerak)
+                    .ThenInclude(p => p!.Knjiga)
+                .Where(z => z.Status == "aktivno" &&
+                            z.DatumPlaniranogVracanja.Date >= od.Date &&
+                            z.DatumPlaniranogVracanja.Date <= doo.Date)
+        .OrderBy(z => z.DatumPlaniranogVracanja)
+        .ToListAsync();
+        }
+
+        public async Task<bool> ImaKasnelaZaduzenjaAsync(int korisnikId)
+        {
+            var danas = DateTime.UtcNow;
+            return await _db.Zaduzenja
+                .AnyAsync(z => z.KorisnikId == korisnikId &&
+                               z.Status == "aktivno" &&
+                               z.DatumPlaniranogVracanja < danas);
+        }
     }
 }

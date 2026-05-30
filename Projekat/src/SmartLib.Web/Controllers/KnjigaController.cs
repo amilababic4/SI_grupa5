@@ -982,6 +982,7 @@ namespace SmartLib.Web.Controllers
             var korisnikIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (!int.TryParse(korisnikIdStr, out var uid)) return;
             ViewBag.ImaAktivnuRezervaciju = await _rezervacijaRepository.HasActiveAsync(uid, knjigaId);
+            ViewBag.ImaKasnelaZaduzenja = await _zaduzenjeRepository.ImaKasnelaZaduzenjaAsync(uid); // NOVO
         }
     }
 }

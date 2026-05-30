@@ -125,12 +125,14 @@ builder.Services.AddScoped<IDogadjajRepository, DogadjajRepository>();
 builder.Services.AddScoped<IListaZeljaRepository, ListaZeljaRepository>();
 builder.Services.AddScoped<IListaKolekcijaRepository, ListaKolekcijaRepository>();
 builder.Services.AddHostedService<DeactivatedAccountCleanupService>();
+builder.Services.AddHostedService<RokVracanjaReminderService>();
 builder.Services.AddScoped<IIzvjestajService, IzvjestajService>();
 builder.Services.AddScoped<IAuditLogRepository, AuditLogRepository>();
 builder.Services.AddScoped<AuditLogService>();
 
 // Services
 builder.Services.AddTransient<IEmailService, SmartLib.Infrastructure.Services.EmailService>();
+builder.Services.AddTransient<BibliotekariNotifikacijaService>();
 builder.Services.AddScoped<IBookRecommender, SmartLib.Infrastructure.Services.BookRecommender>();
 
 // Authentication (COOKIE - za Web)
