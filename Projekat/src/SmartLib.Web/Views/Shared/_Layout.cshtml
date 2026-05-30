@@ -351,17 +351,14 @@
                                 <span class="notif-badge">@notifCount</span>
                             }
                         </a>
-                    </li>
-                    @if (!User.IsInRole("Član"))
-                    {
-                        <li class="nav-sep" role="separator"></li>
-                        <li><a asp-controller="Korisnik" asp-action="Profil">Moj profil</a></li>
-                        <li>
-                            <form asp-controller="Auth" asp-action="Logout" method="post" style="display:contents">
-                                <button type="submit" class="nav-link-btn">Odjava</button>
-                            </form>
-                        </li>
-                    }
+                    </li>                                     
+                    <li class="nav-sep" role="separator"></li>
+                    <li><a asp-controller="Korisnik" asp-action="Profil">Moj profil</a></li>
+                    <li>
+                        <form asp-controller="Auth" asp-action="Logout" method="post" style="display:contents">
+                            <button type="submit" class="nav-link-btn">Odjava</button>
+                        </form>
+                    </li>                    
                 }
                 else
                 {
@@ -424,6 +421,14 @@
                     <li><a asp-controller="Forum" asp-action="Index">Forum</a></li>
                     <li><a asp-controller="Izvjestaj" asp-action="Index">Izvještaji</a></li>
                     <li><a asp-controller="Admin" asp-action="AuditLog">Audit Log</a></li>
+                    <li>
+                        <a asp-controller="Clanarina" asp-action="ZahtjeviProduzenja">
+                            Produženja članarine
+                            @* Za badge: inject IZahtjevProduzenjaRepository i dohvati broj *@
+                        </a>
+                    </li>
+                    <li><a asp-controller="Nabavka" asp-action="Zahtjev">Nabavka knjiga</a></li>
+
                 }
                 else if (User.IsInRole("Bibliotekar"))
                 {
@@ -434,6 +439,13 @@
                     <li><a asp-controller="Korisnik" asp-action="Index">Članovi</a></li>
                     <li><a asp-controller="Forum" asp-action="Index">Forum</a></li>
                     <li><a asp-controller="Izvjestaj" asp-action="Index">Izvještaji</a></li>
+                    <li>
+                        <a asp-controller="Clanarina" asp-action="ZahtjeviProduzenja">
+                            Produženja članarine
+                            @* Za badge: inject IZahtjevProduzenjaRepository i dohvati broj *@
+                        </a>
+                    </li>
+                    <li><a asp-controller="Nabavka" asp-action="Zahtjev">Nabavka knjiga</a></li>
                 }
                 else
                 {

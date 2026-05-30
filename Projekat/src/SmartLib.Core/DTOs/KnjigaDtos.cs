@@ -1,3 +1,4 @@
+using SmartLib.Core.Models;
 using System.ComponentModel.DataAnnotations;
 
 namespace SmartLib.Core.DTOs
@@ -129,5 +130,36 @@ namespace SmartLib.Core.DTOs
     {
         public int Id { get; set; }
         public string Naziv { get; set; } = string.Empty;
+    }
+
+    public class NabavkaZahtjevDto
+    {
+        [Required(ErrorMessage = "Naziv knjige je obavezan.")]
+        public string NazivKnjige { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Autor je obavezan.")]
+        public string Autor { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Izdavač je obavezan.")]
+        public string Izdavac { get; set; } = string.Empty;
+
+        [Required, Range(1, 999, ErrorMessage = "Broj primjeraka mora biti između 1 i 999.")]
+        public int BrojPrimjeraka { get; set; }
+
+        public string? Napomena { get; set; }
+    }
+
+    public class NabavkaPageViewModel
+    {
+        public NabavkaZahtjevDto Forma { get; set; } = new();
+        public List<NabavkaZahtjev> ZadnjeNabavke { get; set; } = new();
+        public string DistributerEmail { get; set; } = string.Empty;
+    }
+
+    public class PromijeniDistributerDto
+    {
+        [Required(ErrorMessage = "Email adresa je obavezna.")]
+        [EmailAddress(ErrorMessage = "Unesite ispravnu email adresu.")]
+        public string Email { get; set; } = string.Empty;
     }
 }

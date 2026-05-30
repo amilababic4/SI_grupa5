@@ -1,0 +1,232 @@
+﻿@* Lokacija: SmartLib.Web/Views/Nabavka/Zahtjev.cshtml *@
+@model SmartLib.Core.DTOs.NabavkaPageViewModel
+@{
+    ViewData["Title"] = "Zahtjev za nabavku";
+}
+
+<div class="page-shell">
+
+    @if (TempData["Uspjeh"] is string uspjeh)
+    {
+        <div class="alert-banner alert-banner--success">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
+            @uspjeh
+        </div>
+    }
+    @if (TempData["Greska"] is string greska)
+    {
+        <div class="alert-banner alert-banner--danger">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
+            @greska
+        </div>
+    }
+
+    <div class="izvjestaj-page-header">
+        <div class="izvjestaj-page-header__left">
+            <div class="izvjestaj-page-header__icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+                    <line x1="3" y1="6" x2="21" y2="6" />
+                    <path d="M16 10a4 4 0 0 1-8 0" />
+                </svg>
+            </div>
+            <div>
+                <h1 class="izvjestaj-page-header__title">Nabavka knjiga</h1>
+                <p class="izvjestaj-page-header__subtitle">Pošaljite zahtjev distributeru za nabavku novih knjiga</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="nabavka-layout">
+
+        @* ── Lijevo: Forma ── *@
+        <div>
+            <div class="izvjestaj-card">
+                <div class="izvjestaj-card__head">
+                    <div class="prod3-card-head-inner">
+                        <div class="prod3-card-head-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <line x1="12" y1="5" x2="12" y2="19" />
+                                <line x1="5" y1="12" x2="19" y2="12" />
+                            </svg>
+                        </div>
+                        <span class="izvjestaj-card__title">Podaci o knjizi</span>
+                    </div>
+                </div>
+
+                <form asp-action="Zahtjev" asp-controller="Nabavka" method="post" class="nabavka-forma">
+                    @Html.AntiForgeryToken()
+
+                    <div class="nabavka-forma-grid">
+                        <div class="form-group">
+                            <label asp-for="Forma.NazivKnjige" class="form-label">
+                                Naziv knjige <span class="nabavka-required">*</span>
+                            </label>
+                            <input asp-for="Forma.NazivKnjige" name="NazivKnjige"
+                                   class="form-control" placeholder="Npr. Zločin i kazna" autocomplete="off" />
+                            <span asp-validation-for="Forma.NazivKnjige" class="validation-message"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="Forma.Autor" class="form-label">
+                                Autor <span class="nabavka-required">*</span>
+                            </label>
+                            <input asp-for="Forma.Autor" name="Autor"
+                                   class="form-control" placeholder="Npr. Fjodor Dostojevski" autocomplete="off" />
+                            <span asp-validation-for="Forma.Autor" class="validation-message"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="Forma.Izdavac" class="form-label">
+                                Izdavač <span class="nabavka-required">*</span>
+                            </label>
+                            <input asp-for="Forma.Izdavac" name="Izdavac"
+                                   class="form-control" placeholder="Npr. Buybook" autocomplete="off" />
+                            <span asp-validation-for="Forma.Izdavac" class="validation-message"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="Forma.BrojPrimjeraka" class="form-label">
+                                Broj primjeraka <span class="nabavka-required">*</span>
+                            </label>
+                            <input asp-for="Forma.BrojPrimjeraka" name="BrojPrimjeraka"
+                                   type="number" min="1" max="999"
+                                   class="form-control" placeholder="Npr. 5" />
+                            <span asp-validation-for="Forma.BrojPrimjeraka" class="validation-message"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group nabavka-napomena-group">
+                        <label asp-for="Forma.Napomena" class="form-label">
+                            Napomena
+                            <span class="form-help" style="display:inline;margin-left:0.3rem;">(opcionalno)</span>
+                        </label>
+                        <textarea asp-for="Forma.Napomena" name="Napomena" rows="3"
+                                  placeholder="Npr. hitno potrebno za ljetni semestar..."></textarea>
+                        <span asp-validation-for="Forma.Napomena" class="validation-message"></span>
+                    </div>
+
+                    <div class="nabavka-actions">
+                        <button type="submit" class="btn btn-primary nabavka-btn-submit">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="22" y1="2" x2="11" y2="13" />
+                                <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                            </svg>
+                            Pošalji zahtjev distributeru
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        @* ── Desno: Historija + Email ── *@
+        <div class="nabavka-desna-kolona">
+
+            @* Zadnje nabavke *@
+            <div class="izvjestaj-card">
+                <div class="izvjestaj-card__head">
+                    <div class="prod3-card-head-inner">
+                        <div class="prod3-card-head-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <circle cx="12" cy="12" r="10" />
+                                <polyline points="12 6 12 12 16 14" />
+                            </svg>
+                        </div>
+                        <span class="izvjestaj-card__title">Zadnje nabavke</span>
+                    </div>
+                </div>
+
+                @if (!Model.ZadnjeNabavke.Any())
+                {
+                    <div class="nabavka-historija-prazno">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3">
+                            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+                            <line x1="3" y1="6" x2="21" y2="6" />
+                        </svg>
+                        <span>Još nema poslanih zahtjeva.</span>
+                    </div>
+                }
+                else
+                {
+                    <ul class="nabavka-historija-lista">
+                        @foreach (var n in Model.ZadnjeNabavke)
+                        {
+                            <li class="nabavka-historija-stavka">
+                                <div class="nabavka-historija-row">
+                                    <div class="nabavka-historija-info">
+                                        <span class="nabavka-historija-naziv">@n.NazivKnjige</span>
+                                        <span class="nabavka-historija-autor">@n.Autor</span>
+                                    </div>
+                                    <span class="nabavka-historija-kom">@n.BrojPrimjeraka kom.</span>
+                                </div>
+                                <div class="nabavka-historija-meta">
+                                    <span class="nabavka-historija-datum">@n.VrijemePodnosenja.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</span>
+                                    @if (n.EmailPoslan)
+                                    {
+                                        <span class="nabavka-historija-status nabavka-historija-status--ok">
+                                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12" /></svg>
+                                            Poslano
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="nabavka-historija-status nabavka-historija-status--err">
+                                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
+                                            Nije poslano
+                                        </span>
+                                    }
+                                </div>
+                            </li>
+                        }
+                    </ul>
+                }
+            </div>
+
+            @* Email distributera *@
+            <div class="izvjestaj-card" style="margin-top:1.25rem;">
+                <div class="izvjestaj-card__head">
+                    <div class="prod3-card-head-inner">
+                        <div class="prod3-card-head-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                                <polyline points="22,6 12,13 2,6" />
+                            </svg>
+                        </div>
+                        <span class="izvjestaj-card__title">Email distributera</span>
+                    </div>
+                </div>
+                <div class="nabavka-email-body">
+                    <p class="nabavka-email-trenutni">
+                        <span class="nabavka-email-label">Trenutna adresa</span>
+                        <span class="nabavka-email-val">@Model.DistributerEmail</span>
+                    </p>
+                    <form asp-action="PromijeniEmail" asp-controller="Nabavka" method="post">
+                        @Html.AntiForgeryToken()
+                        <div class="form-group" style="margin-bottom:0.75rem;">
+                            <label class="form-label" for="Email">Nova adresa</label>
+                            <input type="email" name="Email" id="Email"
+                                   class="form-control"
+                                   placeholder="npr. novi@distributer.ba"
+                                   autocomplete="off" />
+                            <span class="validation-message"></span>
+                        </div>
+                        <button type="submit" class="btn btn-secondary btn-sm nabavka-btn-submit">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                            </svg>
+                            Sačuvaj novu adresu
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

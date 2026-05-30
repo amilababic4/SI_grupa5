@@ -1,0 +1,289 @@
+﻿@* Lokacija: SmartLib.Web/Views/Clanarina/ProduzenjeClanarine.cshtml *@
+@model SmartLib.Core.DTOs.ProduzenjeViewModel
+@{
+    ViewData["Title"] = "Produženje članarine";
+    string bazaDatumStr = Model.TrenutniDatumIsteka.HasValue
+        ? (Model.TrenutniDatumIsteka.Value.Date < DateTime.UtcNow.Date
+            ? DateTime.UtcNow.Date.ToString("yyyy-MM-dd")
+            : Model.TrenutniDatumIsteka.Value.Date.ToString("yyyy-MM-dd"))
+        : DateTime.UtcNow.Date.ToString("yyyy-MM-dd");
+}
+
+<div class="page-shell">
+
+    @if (TempData["Uspjeh"] is string uspjeh)
+    {
+        <div class="alert-banner alert-banner--success">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
+            @uspjeh
+        </div>
+    }
+    @if (TempData["Greska"] is string greska)
+    {
+        <div class="alert-banner alert-banner--danger">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
+            @greska
+        </div>
+    }
+
+    <div class="izvjestaj-page-header">
+        <div class="izvjestaj-page-header__left">
+            <div class="izvjestaj-page-header__icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                    <line x1="16" y1="2" x2="16" y2="6" />
+                    <line x1="8" y1="2" x2="8" y2="6" />
+                    <line x1="3" y1="10" x2="21" y2="10" />
+                    <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01" />
+                </svg>
+            </div>
+            <div>
+                <h1 class="izvjestaj-page-header__title">Produženje članarine</h1>
+                <p class="izvjestaj-page-header__subtitle">Podnesi zahtjev za produženje ili pregledaj historiju zahtjeva</p>
+            </div>
+        </div>
+        <a asp-controller="Korisnik" asp-action="Profil" class="btn btn-secondary">&larr; Moj profil</a>
+    </div>
+
+    @if (Model.ImaClanarinu)
+    {
+        <div class="prod3-status-banner @(string.Equals(Model.TrenutniStatus, "aktivna") ? "prod3-status-banner--aktivan" : "prod3-status-banner--istekla")">
+            <div class="prod3-status-banner__left">
+                @if (string.Equals(Model.TrenutniStatus, "aktivna"))
+                {
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
+                    <span>Vaša članarina je <strong>aktivna</strong></span>
+                }
+                else
+                {
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
+                    <span>Vaša članarina je <strong>istekla</strong> — podnesi zahtjev za obnovu</span>
+                }
+            </div>
+            @if (Model.TrenutniDatumIsteka.HasValue)
+            {
+                <div class="prod3-status-banner__datum">
+                    <span class="prod3-status-datum-label">Važi do</span>
+                    <span class="prod3-status-datum-val">@Model.TrenutniDatumIsteka.Value.ToString("dd.MM.yyyy")</span>
+                </div>
+            }
+        </div>
+    }
+
+    <div class="prod3-layout">
+
+        <div>
+            @if (Model.ImaAktivniZahtjev)
+            {
+                <div class="izvjestaj-card prod3-cekanje-card">
+                    <div class="izvjestaj-card__head prod3-card-head--amber">
+                        <div class="prod3-card-head-inner">
+                            <div class="prod3-card-head-icon prod3-card-head-icon--amber">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+                            </div>
+                            <span class="izvjestaj-card__title">Zahtjev na čekanju</span>
+                        </div>
+                        <span class="prod2-badge-cekanje">
+                            <span class="prod2-badge-dot"></span>
+                            Na čekanju
+                        </span>
+                    </div>
+
+                    <div class="prod3-cekanje-body">
+                        <p class="prod3-cekanje-poruka">
+                            Vaš zahtjev za produženje je poslan i čeka obradu bibliotekara.
+                        </p>
+
+                        <div class="izvjestaj-stat-grid prod3-stat-mini-grid">
+                            <div class="izvjestaj-stat-card izvjestaj-stat-card--primary">
+                                <div class="izvjestaj-stat-card__label">Traženo trajanje</div>
+                                <div class="izvjestaj-stat-card__val">@Model.AktivniZahtjev!.TrajanjeMjeseci <span style="font-size:1rem;font-weight:600;letter-spacing:0;">mj.</span></div>
+                            </div>
+                            <div class="izvjestaj-stat-card izvjestaj-stat-card--muted">
+                                <div class="izvjestaj-stat-card__label">Podneseno</div>
+                                <div class="prod3-stat-datum">@Model.AktivniZahtjev.DatumPodnosenja.ToLocalTime().ToString("dd.MM.yyyy")</div>
+                            </div>
+                        </div>
+
+                        @if (Model.AktivniZahtjev.ProcijenjeniNoviDatumIsteka.HasValue)
+                        {
+                            <div class="izvjestaj-period-preview" style="margin:0;">
+                                <div class="izvjestaj-period-preview__label">Procijenjeni novi datum isteka</div>
+                                <div class="izvjestaj-period-preview__val">@Model.AktivniZahtjev.ProcijenjeniNoviDatumIsteka.Value.ToString("dd.MM.yyyy")</div>
+                            </div>
+                        }
+
+                        @if (!string.IsNullOrEmpty(Model.AktivniZahtjev.Napomena))
+                        {
+                            <div class="prod2-napomena">
+                                <span class="prod2-napomena-label">Vaša napomena</span>
+                                <p class="prod2-napomena-tekst">@Model.AktivniZahtjev.Napomena</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="izvjestaj-card">
+                    <div class="izvjestaj-card__head">
+                        <div class="prod3-card-head-inner">
+                            <div class="prod3-card-head-icon">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+                            </div>
+                            <span class="izvjestaj-card__title">Novi zahtjev za produženje</span>
+                        </div>
+                    </div>
+
+                    <form asp-action="PodnesizahtjevProduzenja" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <div class="prod3-trajanje-sekcija">
+                            <p class="prod3-trajanje-naslov">Odaberite trajanje</p>
+                            <div class="prod3-trajanje-grid" id="trajanjeGrid">
+                                @foreach (var item in new[] {
+                                                        new { Mj = 1,  Broj = "1",  Label = "Mjesec",   Opis = "Kratkoročno" },
+                                                        new { Mj = 3,  Broj = "3",  Label = "Mjeseca",  Opis = "Kvartalno"   },
+                                                        new { Mj = 6,  Broj = "6",  Label = "Mjeseci",  Opis = "Polugodišnje"},
+                                                        new { Mj = 12, Broj = "12", Label = "Mjeseci",  Opis = "Godišnje"    }
+                                                        })
+                                {
+                                    <label class="prod3-trajanje-tile" data-mj="@item.Mj">
+                                        <input type="radio" name="TrajanjeMjeseci" value="@item.Mj"
+                                               style="position:absolute;opacity:0;width:0;height:0;" />
+                                        <div class="prod3-tile-check">
+                                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12" /></svg>
+                                        </div>
+                                        <span class="prod3-tile-broj">@item.Broj</span>
+                                        <span class="prod3-tile-label">@item.Label</span>
+                                        <span class="prod3-tile-opis">@item.Opis</span>
+                                    </label>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="izvjestaj-period-preview prod3-preview-blok" id="previewBlok" style="display:none;">
+                            <div class="izvjestaj-period-preview__label">Novi datum isteka (procjena)</div>
+                            <div class="izvjestaj-period-preview__val" id="previewDatum">—</div>
+                        </div>
+
+                        <div class="prod3-forma-donji">
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label asp-for="NoviZahtjev.Napomena">
+                                    Napomena
+                                    <span class="form-help" style="display:inline;margin-left:0.3rem;">(opcionalno)</span>
+                                </label>
+                                <textarea name="Napomena" id="Napomena" rows="3"
+                                          placeholder="Npr. molim za hitnu obradu..."></textarea>
+                                <span asp-validation-for="NoviZahtjev.Napomena" class="validation-message"></span>
+                            </div>
+                            <div class="form-actions" style="margin-top:1rem;">
+                                <button type="submit" class="btn btn-primary prod3-btn-submit" id="submitBtn" disabled>
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" /></svg>
+                                    Pošalji zahtjev
+                                </button>
+                                <a asp-controller="Korisnik" asp-action="Profil" class="btn btn-secondary">Odustani</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            }
+        </div>
+
+        <div>
+            <div class="izvjestaj-card">
+                <div class="izvjestaj-card__head">
+                    <div class="prod3-card-head-inner">
+                        <div class="prod3-card-head-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+                        </div>
+                        <span class="izvjestaj-card__title">Historija zahtjeva</span>
+                    </div>
+                </div>
+
+                @{
+                    var historija = Model.Historija.ToList();
+                }
+
+                @if (!historija.Any())
+                {
+                    <div class="prod3-historija-prazno">
+                        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
+                        <span>Nema prethodnih zahtjeva.</span>
+                    </div>
+                }
+                else
+                {
+                    <ul class="prod3-historija-lista">
+                        @foreach (var z in historija)
+                        {
+                            <li class="prod3-historija-stavka prod3-historija-stavka--@z.Status">
+                                <div class="prod3-historija-row">
+                                    <div class="prod3-historija-left">
+                                        <span class="prod3-historija-trajanje">@z.TrajanjeMjeseci mjes.</span>
+                                        <span class="prod3-historija-datum">@z.DatumPodnosenja.ToLocalTime().ToString("dd.MM.yyyy")</span>
+                                    </div>
+                                    <div>
+                                        @if (z.Status == "na_cekanju")
+                                        {
+                                            <span class="prod2-badge-cekanje prod2-badge-cekanje--xs">
+                                                <span class="prod2-badge-dot"></span>Na čekanju
+                                            </span>
+                                        }
+                                        else if (z.Status == "odobreno")
+                                        {
+                                            <span class="status-badge status-badge--aktivno">Odobreno</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="status-badge status-badge--zakasnelo">Odbijeno</span>
+                                        }
+                                    </div>
+                                </div>
+                                @if (z.Status == "odobreno" && z.NoviDatumIsteka.HasValue)
+                                {
+                                    <span class="prod3-historija-ishod prod3-historija-ishod--ok">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12" /></svg>
+                                        Važi do: @z.NoviDatumIsteka.Value.ToString("dd.MM.yyyy")
+                                    </span>
+                                }
+                                @if (z.Status == "odbijeno" && !string.IsNullOrEmpty(z.RazlogOdbijanja))
+                                {
+                                    <span class="prod3-historija-ishod prod3-historija-ishod--err">@z.RazlogOdbijanja</span>
+                                }
+                            </li>
+                        }
+                    </ul>
+                }
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            var baza = new Date('@bazaDatumStr');
+            function addMonths(d, m) { var r = new Date(d); r.setMonth(r.getMonth() + m); return r; }
+            function fmt(d) {
+                return String(d.getDate()).padStart(2,'0') + '.' +
+                       String(d.getMonth()+1).padStart(2,'0') + '.' + d.getFullYear() + '.';
+            }
+            var tiles     = document.querySelectorAll('.prod3-trajanje-tile');
+            var submitBtn = document.getElementById('submitBtn');
+            var preview   = document.getElementById('previewBlok');
+            var previewD  = document.getElementById('previewDatum');
+            tiles.forEach(function(t) {
+                t.addEventListener('click', function() {
+                    tiles.forEach(function(x) { x.classList.remove('selected'); });
+                    this.classList.add('selected');
+                    var mj = parseInt(this.dataset.mj, 10);
+                    previewD.textContent = fmt(addMonths(baza, mj));
+                    preview.style.display = 'flex';
+                    if (submitBtn) submitBtn.removeAttribute('disabled');
+                });
+            });
+        })();
+    </script>
+}

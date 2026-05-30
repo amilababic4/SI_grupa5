@@ -128,6 +128,8 @@ builder.Services.AddHostedService<DeactivatedAccountCleanupService>();
 builder.Services.AddScoped<IIzvjestajService, IzvjestajService>();
 builder.Services.AddScoped<IAuditLogRepository, AuditLogRepository>();
 builder.Services.AddScoped<AuditLogService>();
+builder.Services.AddScoped<IZahtjevProduzenjaRepository, ZahtjevProduzenjaRepository>();
+builder.Services.AddScoped<INabavkaRepository, NabavkaRepository>();
 
 // Services
 builder.Services.AddTransient<IEmailService, SmartLib.Infrastructure.Services.EmailService>();

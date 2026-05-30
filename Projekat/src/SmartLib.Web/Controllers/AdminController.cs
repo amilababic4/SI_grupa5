@@ -1,8 +1,10 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SmartLib.Core.Interfaces;
+using SmartLib.Core.Models;
 
 namespace SmartLib.Web.Controllers
-{
+{   
     public class AdminController : Controller
     {
         private readonly IAuditLogRepository _auditRepo;
@@ -23,7 +25,7 @@ namespace SmartLib.Web.Controllers
         }
 
         // ── Audit Log ─────────────────────────────────────────────────────────
-
+        [Authorize(Roles = RoleNames.Administrator)]
         public async Task<IActionResult> AuditLog(
             int page = 1,
             int pageSize = 30,

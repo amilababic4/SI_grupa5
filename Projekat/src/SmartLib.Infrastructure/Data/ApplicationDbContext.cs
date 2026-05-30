@@ -19,6 +19,7 @@ namespace SmartLib.Infrastructure.Data
         public DbSet<Primjerak> Primjerci => Set<Primjerak>();
         public DbSet<Zaduzenje> Zaduzenja => Set<Zaduzenje>();
         public DbSet<Clanarina> Clanarine => Set<Clanarina>();
+        public DbSet<ZahtjevProduzenja> ZahtjeviProduzenja => Set<ZahtjevProduzenja>();
         public DbSet<Rezervacija> Rezervacije => Set<Rezervacija>();
         public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
         public DbSet<ForumObjava> ForumObjave => Set<ForumObjava>();
@@ -34,6 +35,8 @@ namespace SmartLib.Infrastructure.Data
         public DbSet<ListaZeljaStavka> ListaZeljaStavke => Set<ListaZeljaStavka>();
         public DbSet<ListaKolekcija> ListaKolekcije => Set<ListaKolekcija>();
         public DbSet<ListaKolekcijaStavka> ListaKolekcijaStavke => Set<ListaKolekcijaStavka>();
+        public DbSet<NabavkaZahtjev> NabavkaZahtjevi { get; set; }
+        public DbSet<AppPostavka> AppPostavke { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // ─── ULOGA ───────────────────────────────────────────────────────────
@@ -216,6 +219,40 @@ namespace SmartLib.Infrastructure.Data
                  .HasForeignKey(c => c.KorisnikId)
                  .OnDelete(DeleteBehavior.Restrict);
             });
+
+            // ─── ZAHTJEV PRODUZENJA ───────────────────────────────────────────────
+            modelBuilder.Entity<ZahtjevProduzenja>(e =>
+            {
+                e.HasKey(z => z.Id);
+
+                e.Property(z => z.TrajanjeMjeseci).IsRequired();
+                e.Property(z => z.Status)
+                    .IsRequired()
+                    .HasMaxLength(30)
+                    .HasDefaultValue("na_cekanju");
+                e.Property(z => z.DatumPodnosenja).IsRequired();
+                e.Property(z => z.Napomena).HasMaxLength(500);
+                e.Property(z => z.RazlogOdbijanja).HasMaxLength(500);
+                e.Property(z => z.DatumObrade);
+                e.Property(z => z.NoviDatumIsteka);
+
+                // FK: korisnik koji je podnio zahtjev
+                e.HasOne(z => z.Korisnik)
+                 .WithMany()
+                 .HasForeignKey(z => z.KorisnikId)
+                 .OnDelete(DeleteBehavior.Restrict);
+
+                // FK: bibliotekar koji je obradio (nullable)
+                e.HasOne(z => z.ObradioKorisnik)
+                 .WithMany()
+                 .HasForeignKey(z => z.ObradioKorisnikId)
+                 .IsRequired(false)
+                 .OnDelete(DeleteBehavior.Restrict);
+
+                // Index za brzo dohvatanje zahtjeva po korisniku i statusu
+                e.HasIndex(z => new { z.KorisnikId, z.Status });
+            });
+
 
             // ─── REZERVACIJA ──────────────────────────────────────────────────────
             modelBuilder.Entity<Rezervacija>(e =>
