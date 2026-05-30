@@ -184,6 +184,13 @@
                                 @(clanarina is not null ? "Upravljanje članarinom" : "Evidentiraj članarinu")
                             </a>
                         }
+                        @if (jeMojProfil && User.IsInRole("Član"))
+                        {
+                            <a asp-controller="Clanarina" asp-action="ProduzenjeClanarine"
+                               class="btn-clanarina-upravljaj">
+                                Produži članarinu
+                            </a>
+                        }
                     </div>
 
                     @* Tijelo: ako postoji članarina prikaži detalje, inače poruku *@

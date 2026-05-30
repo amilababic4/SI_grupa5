@@ -1,0 +1,178 @@
+﻿@* Lokacija: SmartLib.Web/Views/Clanarina/ZahtjeviProduzenja.cshtml *@
+@model SmartLib.Core.DTOs.ZahtjeviProduzenjaViewModel
+@{
+    ViewData["Title"] = "Zahtjevi za produženje";
+}
+
+<div class="page-shell">
+
+    @if (TempData["Uspjeh"] is string uspjeh)
+    {
+        <div class="alert-banner alert-banner--success">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
+            @uspjeh
+        </div>
+    }
+    @if (TempData["Greska"] is string greska)
+    {
+        <div class="alert-banner alert-banner--danger">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
+            @greska
+        </div>
+    }
+
+    <div class="izvjestaj-page-header">
+        <div class="izvjestaj-page-header__left">
+            <div class="izvjestaj-page-header__icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+            </div>
+            <div>
+                <h1 class="izvjestaj-page-header__title">
+                    Zahtjevi za produženje članarine
+                    @if (Model.UkupnoNaCekanju > 0)
+                    {
+                        <span class="zah3-count-badge">@Model.UkupnoNaCekanju na čekanju</span>
+                    }
+                </h1>
+                <p class="izvjestaj-page-header__subtitle">Obradite zahtjeve članova za produženje članarine</p>
+            </div>
+        </div>
+        <a asp-controller="Korisnik" asp-action="Index" class="btn btn-secondary">&larr; Članovi</a>
+    </div>
+
+    @if (!Model.NaCekanju.Any())
+    {
+        <div class="izvjestaj-card zah3-prazno-card">
+            <div class="zah3-prazno-ikona">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                    <polyline points="22 4 12 14.01 9 11.01" />
+                </svg>
+            </div>
+            <h3 class="zah3-prazno-naslov">Nema zahtjeva na čekanju</h3>
+            <p class="zah3-prazno-opis">Svi zahtjevi su obrađeni.</p>
+        </div>
+    }
+    else
+    {
+        <div class="zah3-lista">
+            @foreach (var z in Model.NaCekanju)
+            {
+                <div class="izvjestaj-card zah3-kartica">
+
+                    <div class="izvjestaj-card__head zah3-kartica-head">
+                        <div class="zah3-clan-wrap">
+                            <div class="zah3-avatar">@z.ImeClana[0]@z.PrezimeClana[0]</div>
+                            <div class="zah3-clan-info">
+                                <span class="zah3-clan-ime">@z.ImeClana @z.PrezimeClana</span>
+                                <span class="zah3-clan-email">@z.EmailClana</span>
+                            </div>
+                        </div>
+                        <span class="prod2-badge-cekanje">
+                            <span class="prod2-badge-dot"></span>
+                            Na čekanju
+                        </span>
+                    </div>
+
+                    <div class="zah3-detalji-body">
+                        <div class="izvjestaj-stat-grid zah3-stat-grid">
+                            <div class="izvjestaj-stat-card izvjestaj-stat-card--primary">
+                                <div class="izvjestaj-stat-card__label">Traženo trajanje</div>
+                                <div class="izvjestaj-stat-card__val">@z.TrajanjeMjeseci <span style="font-size:1rem;font-weight:600;letter-spacing:0;">mj.</span></div>
+                            </div>
+                            <div class="izvjestaj-stat-card izvjestaj-stat-card--muted">
+                                <div class="izvjestaj-stat-card__label">Podneseno</div>
+                                <div class="prod3-stat-datum">@z.DatumPodnosenja.ToLocalTime().ToString("dd.MM.yyyy")</div>
+                            </div>
+                            <div class="izvjestaj-stat-card @(z.TrenutniStatus == "istekla" ? "izvjestaj-stat-card--danger" : "izvjestaj-stat-card--success")">
+                                <div class="izvjestaj-stat-card__label">Trenutna članarina</div>
+                                @if (z.TrenutniDatumIsteka.HasValue)
+                                {
+                                    <div class="prod3-stat-datum">@z.TrenutniDatumIsteka.Value.ToString("dd.MM.yyyy")</div>
+                                }
+                                else
+                                {
+                                    <div class="prod3-stat-datum" style="color:var(--sl-muted);font-style:italic;">Nije evidentirana</div>
+                                }
+                            </div>
+                            @if (z.ProcijenjeniNoviDatumIsteka.HasValue)
+                            {
+                                <div class="izvjestaj-stat-card izvjestaj-stat-card--primary">
+                                    <div class="izvjestaj-stat-card__label">Novi datum (procjena)</div>
+                                    <div class="prod3-stat-datum prod3-stat-datum--blue">@z.ProcijenjeniNoviDatumIsteka.Value.ToString("dd.MM.yyyy")</div>
+                                </div>
+                            }
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(z.Napomena))
+                        {
+                            <div class="prod2-napomena" style="margin-top:0;">
+                                <span class="prod2-napomena-label">Napomena člana</span>
+                                <p class="prod2-napomena-tekst" style="font-style:italic;">@z.Napomena</p>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="zah3-akcije">
+                        <form asp-action="ObradiZahtjev" method="post" style="display:inline;">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="ZahtjevId" value="@z.Id" />
+                            <input type="hidden" name="Akcija" value="odobreno" />
+                            <button type="submit" class="btn btn-primary btn-sm zah3-btn">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12" /></svg>
+                                Odobri
+                            </button>
+                        </form>
+                        <button type="button" class="btn btn-secondary btn-sm zah3-btn"
+                                onclick="toggleOdbij(@z.Id)">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                            Odbij
+                        </button>
+                    </div>
+
+                    <div class="zah3-odbij-wrap" id="odbijWrap_@z.Id" style="display:none;">
+                        <div class="zah3-odbij-head">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
+                            Unesite razlog odbijanja
+                        </div>
+                        <form asp-action="ObradiZahtjev" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="ZahtjevId" value="@z.Id" />
+                            <input type="hidden" name="Akcija" value="odbijeno" />
+                            <div class="form-group" style="margin-bottom:0.75rem;">
+                                <textarea name="RazlogOdbijanja" rows="2"
+                                  placeholder="Unesite razlog odbijanja..." required></textarea>
+                            </div>
+                            <div class="form-actions" style="margin-top:0.5rem;">
+                                <button type="submit" class="btn btn-danger btn-sm">Potvrdi odbijanje</button>
+                                <button type="button" class="btn btn-secondary btn-sm"
+                                        onclick="toggleOdbij(@z.Id)">
+                                    Odustani
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+            }
+        </div>
+    }
+
+</div>
+
+@section Scripts {
+    <script>
+        function toggleOdbij(id) {
+            var w = document.getElementById('odbijWrap_' + id);
+            if (w) {
+                var open = w.style.display === 'none' || w.style.display === '';
+                w.style.display = open ? 'block' : 'none';
+            }
+        }
+    </script>
+}
