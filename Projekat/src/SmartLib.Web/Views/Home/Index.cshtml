@@ -310,7 +310,7 @@
         <div class="home-hero-actions" style="margin-top: 1.5rem;">
             @if (User.Identity?.IsAuthenticated ?? false)
             {
-                <a asp-controller="Knjiga" asp-action="Index" class="btn btn-secondary immersive-btn-secondary">Pregledaj katalog</a>
+                <a asp-controller="Knjiga" asp-action="Index" class="btn btn-secondary immersive-btn-secondary katalog-nav-link">Pregledaj katalog</a>
             }
             @if (!(User.Identity?.IsAuthenticated ?? false))
             {

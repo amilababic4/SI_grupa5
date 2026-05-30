@@ -299,6 +299,47 @@
 
 
 
+    <!-- Catalog Entrance Transition (one-time per session) -->
+    <div id="catalog-transition-shelf" style="display:none;" aria-hidden="true">
+        <!-- Dark backdrop -->
+        <div class="cts-backdrop"></div>
+        
+        <!-- Shelf structure -->
+        <div class="cts-shelf">
+            <div class="cts-spotlight"></div>
+            <div class="cts-books-row">
+                <!-- Books to the LEFT of the gap -->
+                <div class="cts-book" style="--h:220px;--w:38px;--bg:linear-gradient(180deg,#5c1a2a,#3d1018);--c:#ffc8b4;">KLASICI</div>
+                <div class="cts-book" style="--h:210px;--w:35px;--bg:linear-gradient(180deg,#1e3a5f,#162d4a);--c:#b0c4de;">MUDROST</div>
+                <div class="cts-book" style="--h:230px;--w:42px;--bg:linear-gradient(180deg,#2d4a3a,#1e3328);--c:#b4d2b4;">NAUKA</div>
+                
+                <!-- THE target book that slides out — MUST have id="cts-target-book" -->
+                <div class="cts-book cts-target" id="cts-target-book"
+                     style="--h:240px;--w:48px;--bg:linear-gradient(180deg,#173b63,#0e2a4a);--c:#c8974a;">
+                    KATALOG
+                </div>
+                
+                <!-- The gap that appears when the book slides out -->
+                <div class="cts-gap"></div>
+                
+                <!-- Books to the RIGHT of the gap -->
+                <div class="cts-book" style="--h:215px;--w:40px;--bg:linear-gradient(180deg,#6b2020,#4a1515);--c:#ffc896;">POETIKA</div>
+                <div class="cts-book" style="--h:200px;--w:33px;--bg:linear-gradient(180deg,#d4c9a8,#b8a88a);--c:#3d2b1f;">ISTORIJA</div>
+                <div class="cts-book" style="--h:225px;--w:36px;--bg:linear-gradient(180deg,#0f1e3d,#0a142a);--c:#c8c8dc;">FILOZOFIJA</div>
+                <div class="cts-book" style="--h:205px;--w:34px;--bg:linear-gradient(180deg,#4a4a2a,#333320);--c:#d2d2aa;">ROMANI</div>
+            </div>
+            
+            <!-- Wooden shelf plank (the surface the books rest on) -->
+            <div class="cts-plank"></div>
+        </div>
+        
+        <!-- Warm glow that expands from the gap -->
+        <div class="cts-gap-glow"></div>
+        
+        <!-- White wash overlay for the transition -->
+        <div class="cts-whiteout"></div>
+    </div>
+
     <nav id="main-nav" class="smartlib-navbar @(isFrontPage ? "smartlib-navbar-front" : isDarkNavPage ? "smartlib-navbar-dark" : "smartlib-navbar-app")">
         <div class="smartlib-nav-inner">
 

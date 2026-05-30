@@ -14,72 +14,48 @@ document.addEventListener('DOMContentLoaded', () => {
   const book = document.querySelector('.book');
   const $menu = document.getElementById('nav-menu');
 
-  // ─── Navbar Katalog Link Interception ───────────────────────────────────────────────
+  // ─── Catalog Transition: Bookshelf → Pull Book → Zoom Gap → Navigate ─────────
   const katalogLinks = document.querySelectorAll('.katalog-nav-link');
   katalogLinks.forEach(link => {
       link.addEventListener('click', function(e) {
-          if (disableAnimations || prefersReduced) return;
-          
+          if (disableAnimations || prefersReduced) return; // normal navigation
+
           try {
-              if (sessionStorage.getItem('smartlib-catalog-seen')) {
-                  return; // proceed normally
-              }
+              if (sessionStorage.getItem('smartlib-catalog-seen')) return; // normal navigation
           } catch(err) {}
 
           e.preventDefault();
           const targetUrl = this.href;
-          
-          try { sessionStorage.setItem('smartlib-catalog-seen','1'); } catch(err){}
 
-          // Determine if we are on the home page (has .hero-book-showcase)
-          const homeHero = document.querySelector('.hero-book-showcase');
-          let zoomTarget = homeHero;
+          try { sessionStorage.setItem('smartlib-catalog-seen', '1'); } catch(err) {}
 
-          if (!homeHero) {
-              // Create overlay if not on home page
-              const overlay = document.createElement('div');
-              overlay.id = 'realistic-transition-overlay';
-              document.body.appendChild(overlay);
-              // Force reflow
-              void overlay.offsetWidth;
-              overlay.classList.add('is-active');
-              zoomTarget = overlay;
-          } else {
-              // Smooth out other elements on home page
-              const content = document.querySelector('.home-hero-content');
-              if(content) content.style.opacity = '0';
+          const shelf = document.getElementById('catalog-transition-shelf');
+          if (!shelf) {
+              window.location.href = targetUrl;
+              return;
           }
 
-          // Create the 3D book container
-          const bookContainer = document.createElement('div');
-          bookContainer.id = 'realistic-3d-book-container';
-          bookContainer.innerHTML = `
-              <div class="realistic-book">
-                  <div class="realistic-book-cover"></div>
-                  <div class="realistic-book-pages">
-                      <span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;color:#173b63;letter-spacing:2px;font-size:1.5rem;">KATALOG</span>
-                  </div>
-                  <div class="realistic-book-glow"></div>
-              </div>
-          `;
-          document.body.appendChild(bookContainer);
+          // Show the shelf container
+          shelf.style.display = 'block';
+          void shelf.offsetWidth; // force reflow
 
-          // Delay slightly to allow overlay fade in if applicable
+          // BEAT 1: Backdrop fades in, shelf appears
+          shelf.classList.add('cts-active');
+
+          // BEAT 2: Target book slides out, gap opens
           setTimeout(() => {
-              if (zoomTarget) {
-                  zoomTarget.classList.add('hero-zoom-in');
-              }
-              
-              // Delay pulling out the book until the zoom is well underway
-              setTimeout(() => {
-                  bookContainer.classList.add('pull-out');
-                  
-                  // Navigate right as the glow peaks
-                  setTimeout(() => {
-                      window.location.href = targetUrl;
-                  }, 1800);
-              }, 600);
-          }, homeHero ? 0 : 500); // Wait for overlay to fade in if not on home page
+              shelf.classList.add('cts-pull');
+          }, 500);
+
+          // BEAT 3 & 4: Zoom into the gap, glow expands, white-out
+          setTimeout(() => {
+              shelf.classList.add('cts-zoom');
+          }, 1400);
+
+          // BEAT 5: Navigate
+          setTimeout(() => {
+              window.location.href = targetUrl;
+          }, 2800);
       });
   });
 
@@ -138,7 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
     //                 ──────────── ──────────── ──────────── ────────────
     //                 (still going) (overlaps!) (overlaps!)  (overlaps!)
     //
-    const T_ZOOM     = 150;    // Phase 1: Start zoom approach (cover title already visible)
+    const T_ZOOM     = 0;      // Phase 1: Start zoom approach (cover title already visible)
     const T_SHIMMER  = 1200;   // Phase 2: Gold shimmer begins WHILE zoom still happening
     const T_OPEN     = 2500;   // Phase 3: Pullback + open begins BEFORE shimmer ends
     const T_CONTENT  = 4300;   // Phase 4: Content appears WHILE book still settling
