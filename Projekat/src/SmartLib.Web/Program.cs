@@ -434,6 +434,73 @@ using (var scope = app.Services.CreateScope())
     }
     catch (Exception) { }
 
+    try
+    {
+        db.Database.ExecuteSqlRaw(@"
+            CREATE TABLE IF NOT EXISTS `ZahtjeviProduzenja` (
+                `Id` int NOT NULL AUTO_INCREMENT,
+                `KorisnikId` int NOT NULL,
+                `TrajanjeMjeseci` int NOT NULL,
+                `Napomena` varchar(500) NULL,
+                `Status` varchar(30) NOT NULL DEFAULT 'na_cekanju',
+                `DatumPodnosenja` datetime(6) NOT NULL,
+                `DatumObrade` datetime(6) NULL,
+                `ObradioKorisnikId` int NULL,
+                `RazlogOdbijanja` varchar(500) NULL,
+                `NoviDatumIsteka` datetime(6) NULL,
+                PRIMARY KEY (`Id`),
+                KEY `IX_ZahtjeviProduzenja_KorisnikId_Status` (`KorisnikId`, `Status`),
+                CONSTRAINT `FK_ZahtjevProduzenja_Korisnici` FOREIGN KEY (`KorisnikId`) REFERENCES `Korisnici` (`Id`),
+                CONSTRAINT `FK_ZahtjevProduzenja_ObradioKorisnik` FOREIGN KEY (`ObradioKorisnikId`) REFERENCES `Korisnici` (`Id`)
+            );
+        ");
+    }
+    catch (Exception) { }
+
+    try
+    {
+        db.Database.ExecuteSqlRaw(@"
+            CREATE TABLE IF NOT EXISTS `NabavkaZahtjevi` (
+                `Id` int NOT NULL AUTO_INCREMENT,
+                `NazivKnjige` varchar(300) NOT NULL,
+                `Autor` varchar(200) NOT NULL,
+                `Izdavac` varchar(200) NOT NULL,
+                `BrojPrimjeraka` int NOT NULL,
+                `Napomena` varchar(500) NULL,
+                `VrijemePodnosenja` datetime(6) NOT NULL,
+                `EmailPoslan` tinyint(1) NOT NULL DEFAULT 0,
+                `PodnosilacId` int NOT NULL,
+                PRIMARY KEY (`Id`),
+                KEY `IX_NabavkaZahtjevi_PodnosilacId` (`PodnosilacId`),
+                CONSTRAINT `FK_NabavkaZahtjevi_Korisnici` FOREIGN KEY (`PodnosilacId`) REFERENCES `Korisnici` (`Id`)
+            );
+        ");
+    }
+    catch (Exception) { }
+
+    try
+    {
+        db.Database.ExecuteSqlRaw(@"
+            CREATE TABLE IF NOT EXISTS `AppPostavke` (
+                `Id` int NOT NULL AUTO_INCREMENT,
+                `Kljuc` varchar(100) NOT NULL,
+                `Vrijednost` varchar(500) NOT NULL,
+                PRIMARY KEY (`Id`),
+                UNIQUE KEY `UK_AppPostavke_Kljuc` (`Kljuc`)
+            );
+        ");
+    }
+    catch (Exception) { }
+
+    try
+    {
+        db.Database.ExecuteSqlRaw(@"
+            INSERT IGNORE INTO `AppPostavke` (`Kljuc`, `Vrijednost`)
+            VALUES ('distributer_email', 'distributersmartlib@gmail.com');
+        ");
+    }
+    catch (Exception) { }
+
     // Hardkodirani seed podataka (Opis i Slika) za knjige kako se ne bismo oslanjali na nepouzdan Google Books/OpenLibrary API
     db.Database.ExecuteSqlRaw(@"
         UPDATE Knjige SET Opis = 'A heartfelt novel about a flawed man reflecting on his life, marriages, and friendships in Montreal.' WHERE Isbn = '3404921038' AND Opis IS NULL;
