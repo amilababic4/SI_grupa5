@@ -4,13 +4,16 @@
     bool jeClan = User.IsInRole("Član");
 }
 
-<div class="katalog-header">
-    <h2>Katalog knjiga</h2>
-    @if (User.IsInRole("Bibliotekar") || User.IsInRole("Administrator"))
-    {
-        <a asp-action="Create" class="btn btn-primary">+ Nova knjiga</a>
-    }
-</div>
+<section class="catalog-entrance" aria-labelledby="catalog-title">
+    <div class="catalog-entrance__veil" aria-hidden="true"></div>
+    <div class="catalog-entrance__content">
+        <div class="katalog-header">
+            <h2 id="catalog-title" class="catalog-title-zoom">Katalog knjiga</h2>
+            @if (User.IsInRole("Bibliotekar") || User.IsInRole("Administrator"))
+            {
+                <a asp-action="Create" class="btn btn-primary">+ Nova knjiga</a>
+            }
+        </div>
 
 @if (TempData["SuccessMessage"] is string successMsg)
 {
@@ -264,27 +267,29 @@
     }
 </div>
 
-<!-- View Toggle -->
-<div class="view-toggle-container">
-    <div class="view-toggle">
-        <button type="button" class="toggle-btn active" id="btn-list-view" title="Lista">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
-        </button>
-        <button type="button" class="toggle-btn" id="btn-grid-view" title="Mreža">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
-        </button>
+        <!-- View Toggle -->
+        <div class="view-toggle-container">
+            <div class="view-toggle">
+                <button type="button" class="toggle-btn active" id="btn-list-view" title="Lista">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
+                </button>
+                <button type="button" class="toggle-btn" id="btn-grid-view" title="Mreža">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                </button>
+            </div>
+            <div class="katalog-page-size">
+                <label for="pageSizeSelect">📖 Prikaži:</label>
+                <select id="pageSizeSelect" aria-label="Broj knjiga po stranici">
+                    <option value="8" selected="@(Model.VelicinaStrane == 8)">8 knjiga</option>
+                    <option value="12" selected="@(Model.VelicinaStrane == 12)">12 knjiga</option>
+                    <option value="16" selected="@(Model.VelicinaStrane == 16)">16 knjiga</option>
+                    <option value="20" selected="@(Model.VelicinaStrane == 20)">20 knjiga</option>
+                    <option value="24" selected="@(Model.VelicinaStrane == 24)">24 knjiga</option>
+                </select>
+            </div>
+        </div>
     </div>
-    <div class="katalog-page-size">
-        <label for="pageSizeSelect">📖 Prikaži:</label>
-        <select id="pageSizeSelect" aria-label="Broj knjiga po stranici">
-            <option value="8" selected="@(Model.VelicinaStrane == 8)">8 knjiga</option>
-            <option value="12" selected="@(Model.VelicinaStrane == 12)">12 knjiga</option>
-            <option value="16" selected="@(Model.VelicinaStrane == 16)">16 knjiga</option>
-            <option value="20" selected="@(Model.VelicinaStrane == 20)">20 knjiga</option>
-            <option value="24" selected="@(Model.VelicinaStrane == 24)">24 knjiga</option>
-        </select>
-    </div>
-</div>
+</section>
 
 @if (!Model.Knjige.Any())
 {

@@ -255,7 +255,7 @@ namespace SmartLib.Web.Controllers
 
             var k = new ForumKomentar
             {
-                Sadrzaj = model.Sadrzaj.Trim(),
+                Sadrzaj = model.Sadrzaj?.Trim() ?? string.Empty,
                 ObjavaId = model.ObjavaId,
                 KorisnikId = uId.Value,
                 DatumKreiranja = DateTime.UtcNow

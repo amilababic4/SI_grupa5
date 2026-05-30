@@ -19,7 +19,7 @@
     <link rel="stylesheet" href="~/css/animations.css" asp-append-version="true" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
         /* ── Hamburger ──────────────────────────────────────── */
         .nav-brand { display: flex; align-items: center; gap: .4rem; }
@@ -167,12 +167,6 @@
         {
             shouldShowAnimation = true;
         }
-        else if (isCatalogPage && isAuthenticated && !isAdminOrLib && showCatalogWelcomeOnce)
-        {
-            shouldShowAnimation = true;
-            Context.Session.Remove("ShowCatalogWelcomeOnce");
-            Context.Session.Remove("CatalogWelcomeName");
-        }
 
         var notifCount = 0;
         if (isAuthenticated)
@@ -234,6 +228,8 @@
     {
         <!-- Book opening overlay (removed after animation or click) -->
         <div id="book-overlay" aria-hidden="true">
+            <!-- Cinematic vignette — darkens edges for depth -->
+            <div class="book-vignette" aria-hidden="true"></div>
             <!-- Floating ambient particles -->
             <div class="book-particles" aria-hidden="true">
                 <span class="particle p1"></span>
@@ -254,7 +250,10 @@
             <div class="book-container">
                 <div class="book" role="img" aria-label="Opening book animation">
                     <div class="cover front">
-                        <div class="cover-side outer"></div>
+                        <div class="cover-side outer">
+                            <span class="cover-title-shimmer" aria-hidden="true"></span>
+                            <span class="cover-title" aria-hidden="false">SMARTLIB</span>
+                        </div>
                         <div class="cover-side inner"></div>
                     </div>
                     <div class="pages">
@@ -298,6 +297,8 @@
         </div>
     }
 
+
+
     <nav id="main-nav" class="smartlib-navbar @(isFrontPage ? "smartlib-navbar-front" : isDarkNavPage ? "smartlib-navbar-dark" : "smartlib-navbar-app")">
         <div class="smartlib-nav-inner">
 
@@ -320,7 +321,7 @@
                 {
                     @if (User.IsInRole("Administrator"))
                     {
-                        <li><a asp-controller="Knjiga" asp-action="Index">Katalog</a></li>
+                        <li><a asp-controller="Knjiga" asp-action="Index" class="katalog-nav-link">Katalog</a></li>
                         <li><a asp-controller="Zaduzenje" asp-action="Index">Zaduženja</a></li>
                         <li><a asp-controller="Rezervacija" asp-action="Index">Rezervacije</a></li>
                         <li><a asp-controller="Korisnik" asp-action="Index">Članovi</a></li>
@@ -329,7 +330,7 @@
                     }
                     else if (User.IsInRole("Bibliotekar"))
                     {
-                        <li><a asp-controller="Knjiga" asp-action="Index">Katalog</a></li>
+                        <li><a asp-controller="Knjiga" asp-action="Index" class="katalog-nav-link">Katalog</a></li>
                         <li><a asp-controller="Zaduzenje" asp-action="Index">Zaduženja</a></li>
                         <li><a asp-controller="Rezervacija" asp-action="Index">Rezervacije</a></li>
                         <li><a asp-controller="Korisnik" asp-action="Index">Članovi</a></li>
@@ -338,7 +339,7 @@
                     }
                     else
                     {
-                        <li><a asp-controller="Knjiga" asp-action="Index">Katalog</a></li>
+                        <li><a asp-controller="Knjiga" asp-action="Index" class="katalog-nav-link">Katalog</a></li>
                         <li><a asp-controller="Zaduzenje" asp-action="Moja">Moja zaduženja</a></li>
                         <li><a asp-controller="Rezervacija" asp-action="Moje">Moje rezervacije</a></li>
                         <li><a asp-controller="ListaKolekcija" asp-action="Index">Kolekcije</a></li>
@@ -411,7 +412,7 @@
                 <li><a asp-controller="Home" asp-action="Index">Početna</a></li>
                 <li><a asp-controller="Vijest" asp-action="Index">Vijesti</a></li>
                 <li><a asp-controller="Kalendar" asp-action="Index">Kalendar</a></li>
-                <li><a asp-controller="Knjiga" asp-action="Index">Katalog</a></li>
+                <li><a asp-controller="Knjiga" asp-action="Index" class="katalog-nav-link">Katalog</a></li>
                 @if (User.IsInRole("Administrator"))
                 {
                     <li class="nav-drawer-section">Upravljanje</li>

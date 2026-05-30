@@ -1,4 +1,4 @@
-﻿@model IEnumerable<SmartLib.Core.Models.AuditLog>
+@model IEnumerable<SmartLib.Core.Models.AuditLog>
 @{
     ViewData["Title"] = "Audit Log";
     int stranica = ViewBag.Stranica;
@@ -12,9 +12,6 @@
     // Bosna/Hercegovina = UTC+2 (UTC+3 ljeti) — koristimo fiksni offset +2
     // Ako koristiš TimeZoneInfo možeš zamijeniti s: TimeZoneInfo.FindSystemTimeZoneById("Central European Standard Time")
     var localOffset = TimeSpan.FromHours(2);
-
-    string LocalTime(DateTime utc) =>
-        utc.Add(localOffset).ToString("dd.MM.yyyy HH:mm:ss");
 
     // Sigurna serijalizacija za data atribut — Base64 da izbjegnemo HTML encode probleme
     string ToBase64(string? json) =>
