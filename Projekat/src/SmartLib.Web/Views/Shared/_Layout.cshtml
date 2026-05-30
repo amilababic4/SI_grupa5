@@ -19,7 +19,7 @@
     <link rel="stylesheet" href="~/css/animations.css" asp-append-version="true" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
         /* ── Hamburger ──────────────────────────────────────── */
         .nav-brand { display: flex; align-items: center; gap: .4rem; }
@@ -167,12 +167,6 @@
         {
             shouldShowAnimation = true;
         }
-        else if (isCatalogPage && isAuthenticated && !isAdminOrLib && showCatalogWelcomeOnce)
-        {
-            shouldShowAnimation = true;
-            Context.Session.Remove("ShowCatalogWelcomeOnce");
-            Context.Session.Remove("CatalogWelcomeName");
-        }
 
         var notifCount = 0;
         if (isAuthenticated)
@@ -234,6 +228,8 @@
     {
         <!-- Book opening overlay (removed after animation or click) -->
         <div id="book-overlay" aria-hidden="true">
+            <!-- Cinematic vignette — darkens edges for depth -->
+            <div class="book-vignette" aria-hidden="true"></div>
             <!-- Floating ambient particles -->
             <div class="book-particles" aria-hidden="true">
                 <span class="particle p1"></span>
@@ -254,7 +250,10 @@
             <div class="book-container">
                 <div class="book" role="img" aria-label="Opening book animation">
                     <div class="cover front">
-                        <div class="cover-side outer"></div>
+                        <div class="cover-side outer">
+                            <span class="cover-title-shimmer" aria-hidden="true"></span>
+                            <span class="cover-title" aria-hidden="false">SMARTLIB</span>
+                        </div>
                         <div class="cover-side inner"></div>
                     </div>
                     <div class="pages">
@@ -298,6 +297,49 @@
         </div>
     }
 
+
+
+    <!-- Catalog Entrance Transition (one-time per session) -->
+    <div id="catalog-transition-shelf" style="display:none;" aria-hidden="true">
+        <!-- Dark backdrop -->
+        <div class="cts-backdrop"></div>
+        
+        <!-- Shelf structure -->
+        <div class="cts-shelf">
+            <div class="cts-spotlight"></div>
+            <div class="cts-books-row">
+                <!-- Books to the LEFT of the gap -->
+                <div class="cts-book" style="--h:220px;--w:38px;--bg:linear-gradient(180deg,#5c1a2a,#3d1018);--c:#ffc8b4;">KLASICI</div>
+                <div class="cts-book" style="--h:210px;--w:35px;--bg:linear-gradient(180deg,#1e3a5f,#162d4a);--c:#b0c4de;">MUDROST</div>
+                <div class="cts-book" style="--h:230px;--w:42px;--bg:linear-gradient(180deg,#2d4a3a,#1e3328);--c:#b4d2b4;">NAUKA</div>
+                
+                <!-- THE target book that slides out — MUST have id="cts-target-book" -->
+                <div class="cts-book cts-target" id="cts-target-book"
+                     style="--h:240px;--w:48px;--bg:linear-gradient(180deg,#173b63,#0e2a4a);--c:#c8974a;">
+                    KATALOG
+                </div>
+                
+                <!-- The gap that appears when the book slides out -->
+                <div class="cts-gap"></div>
+                
+                <!-- Books to the RIGHT of the gap -->
+                <div class="cts-book" style="--h:215px;--w:40px;--bg:linear-gradient(180deg,#6b2020,#4a1515);--c:#ffc896;">POETIKA</div>
+                <div class="cts-book" style="--h:200px;--w:33px;--bg:linear-gradient(180deg,#d4c9a8,#b8a88a);--c:#3d2b1f;">ISTORIJA</div>
+                <div class="cts-book" style="--h:225px;--w:36px;--bg:linear-gradient(180deg,#0f1e3d,#0a142a);--c:#c8c8dc;">FILOZOFIJA</div>
+                <div class="cts-book" style="--h:205px;--w:34px;--bg:linear-gradient(180deg,#4a4a2a,#333320);--c:#d2d2aa;">ROMANI</div>
+            </div>
+            
+            <!-- Wooden shelf plank (the surface the books rest on) -->
+            <div class="cts-plank"></div>
+        </div>
+        
+        <!-- Warm glow that expands from the gap -->
+        <div class="cts-gap-glow"></div>
+        
+        <!-- White wash overlay for the transition -->
+        <div class="cts-whiteout"></div>
+    </div>
+
     <nav id="main-nav" class="smartlib-navbar @(isFrontPage ? "smartlib-navbar-front" : isDarkNavPage ? "smartlib-navbar-dark" : "smartlib-navbar-app")">
         <div class="smartlib-nav-inner">
 
@@ -320,7 +362,7 @@
                 {
                     @if (User.IsInRole("Administrator"))
                     {
-                        <li><a asp-controller="Knjiga" asp-action="Index">Katalog</a></li>
+                        <li><a asp-controller="Knjiga" asp-action="Index" class="katalog-nav-link">Katalog</a></li>
                         <li><a asp-controller="Zaduzenje" asp-action="Index">Zaduženja</a></li>
                         <li><a asp-controller="Rezervacija" asp-action="Index">Rezervacije</a></li>
                         <li><a asp-controller="Korisnik" asp-action="Index">Članovi</a></li>
@@ -329,7 +371,7 @@
                     }
                     else if (User.IsInRole("Bibliotekar"))
                     {
-                        <li><a asp-controller="Knjiga" asp-action="Index">Katalog</a></li>
+                        <li><a asp-controller="Knjiga" asp-action="Index" class="katalog-nav-link">Katalog</a></li>
                         <li><a asp-controller="Zaduzenje" asp-action="Index">Zaduženja</a></li>
                         <li><a asp-controller="Rezervacija" asp-action="Index">Rezervacije</a></li>
                         <li><a asp-controller="Korisnik" asp-action="Index">Članovi</a></li>
@@ -338,7 +380,7 @@
                     }
                     else
                     {
-                        <li><a asp-controller="Knjiga" asp-action="Index">Katalog</a></li>
+                        <li><a asp-controller="Knjiga" asp-action="Index" class="katalog-nav-link">Katalog</a></li>
                         <li><a asp-controller="Zaduzenje" asp-action="Moja">Moja zaduženja</a></li>
                         <li><a asp-controller="Rezervacija" asp-action="Moje">Moje rezervacije</a></li>
                         <li><a asp-controller="ListaKolekcija" asp-action="Index">Kolekcije</a></li>
@@ -411,7 +453,7 @@
                 <li><a asp-controller="Home" asp-action="Index">Početna</a></li>
                 <li><a asp-controller="Vijest" asp-action="Index">Vijesti</a></li>
                 <li><a asp-controller="Kalendar" asp-action="Index">Kalendar</a></li>
-                <li><a asp-controller="Knjiga" asp-action="Index">Katalog</a></li>
+                <li><a asp-controller="Knjiga" asp-action="Index" class="katalog-nav-link">Katalog</a></li>
                 @if (User.IsInRole("Administrator"))
                 {
                     <li class="nav-drawer-section">Upravljanje</li>
