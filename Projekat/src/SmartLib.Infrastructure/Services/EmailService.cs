@@ -82,7 +82,7 @@ namespace SmartLib.Infrastructure.Services
                     using var smtpClient = new SmtpClient(smtpServer, smtpPort)
                     {
                         Credentials = new NetworkCredential(username, password),
-                        EnableSsl = true,
+                        EnableSsl = true, //ovo je trenutno iskljuceno za testiranje
                         Timeout = 15000
                     };
 

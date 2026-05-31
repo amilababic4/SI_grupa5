@@ -59,6 +59,10 @@
                             Dodaj u kolekciju
                         </button>
 
+                        @{
+                            bool imaKasnelaZaduzenja = ViewBag.ImaKasnelaZaduzenja is true;
+                        }
+
                         @if (Model.BrojDostupnih == 0)
                         {
                             @if (imaAktivnuRezervaciju)
@@ -66,6 +70,16 @@
                                 <button class="btn btn-secondary" disabled title="Već imate aktivnu rezervaciju za ovu knjigu">
                                     Rezervisano
                                 </button>
+                            }
+                            else if (imaKasnelaZaduzenja)
+                            {
+                                <button class="btn btn-secondary" disabled
+                                        title="Imate zakasnijela zaduženja — kontaktirajte biblioteku">
+                                    Rezervacija blokirana
+                                </button>
+                                <p style="color:#ef4444;font-size:0.82rem;margin-top:0.4rem;">
+                                    ⚠️ Imate zakasnijela zaduženja. Rezervacija nije moguća.
+                                </p>
                             }
                             else
                             {

@@ -1,9 +1,10 @@
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SmartLib.Core.DTOs;
 using SmartLib.Core.Interfaces;
 using SmartLib.Core.Models;
+using SmartLib.Infrastructure.Services;
+using System.Security.Claims;
 
 namespace SmartLib.Web.Controllers
 {
@@ -16,13 +17,19 @@ namespace SmartLib.Web.Controllers
     {
         private readonly IRezervacijaRepository _rezervacijaRepo;
         private readonly IKnjigaRepository _knjigaRepo;
+        private readonly BibliotekariNotifikacijaService _bibliotekariNotifikacija;
+        private readonly IZaduzenjeRepository _zaduzenjeRepo;
 
         public RezervacijaController(
             IRezervacijaRepository rezervacijaRepo,
-            IKnjigaRepository knjigaRepo)
+            IKnjigaRepository knjigaRepo,
+            IZaduzenjeRepository zaduzenjeRepo,
+            BibliotekariNotifikacijaService bibliotekariNotifikacija)
         {
             _rezervacijaRepo = rezervacijaRepo;
             _knjigaRepo = knjigaRepo;
+            _zaduzenjeRepo = zaduzenjeRepo;
+            _bibliotekariNotifikacija = bibliotekariNotifikacija;
         }
 
         // US-73: Pregled svih aktivnih rezervacija (bibliotekar/administrator)
@@ -93,6 +100,14 @@ namespace SmartLib.Web.Controllers
                 return RedirectToAction("Details", "Knjiga", new { id = knjigaId });
             }
 
+            bool imaKasnela = await _zaduzenjeRepo.ImaKasnelaZaduzenjaAsync(korisnikId);
+            if (imaKasnela)
+            {
+                TempData["ErrorMessage"] =
+                    "Nije moguće kreirati rezervaciju — imate jedno ili više zakasnjelih zaduženja koja nisu vraćena. Molimo vas da kontaktirate biblioteku.";
+                return RedirectToAction("Details", "Knjiga", new { id = knjigaId });
+            }
+
             var rezervacija = new Rezervacija
             {
                 KorisnikId = korisnikId,
@@ -103,6 +118,17 @@ namespace SmartLib.Web.Controllers
             };
 
             await _rezervacijaRepo.CreateAsync(rezervacija);
+
+            var rezervacijaZaEmail = await _rezervacijaRepo.GetByIdAsync(rezervacija.Id);
+            if (rezervacijaZaEmail != null)
+            {
+                try
+                {
+                    await _bibliotekariNotifikacija.ObavijestiBibliotekareNovaRezervacijaAsync(rezervacijaZaEmail);
+                }
+                catch { /* greška u emailu ne smije blokirati akciju */ }
+            }
+
             TempData["SuccessMessage"] = "Rezervacija je uspješno kreirana. Knjiga čeka vas 7 dana.";
             return RedirectToAction("Details", "Knjiga", new { id = knjigaId });
         }

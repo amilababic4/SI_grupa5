@@ -21,6 +21,8 @@ namespace SmartLib.Web.Controllers
         private readonly IRecenzijaRepository _recenzijaRepo;
         private readonly INotifikacijaRepository _notifikacijaRepo;
         private readonly CacheVersionStore _cacheVersions;
+        private readonly BibliotekariNotifikacijaService _bibliotekariNotifikacija;
+        private readonly ILogger<ZaduzenjeController> _logger;
 
         public ZaduzenjeController(
             IZaduzenjeRepository zaduzenjeRepo,
@@ -30,7 +32,9 @@ namespace SmartLib.Web.Controllers
             IRezervacijaRepository rezervacijaRepo,
             IRecenzijaRepository recenzijaRepo,
             INotifikacijaRepository notifikacijaRepo,
-            CacheVersionStore cacheVersions)
+            CacheVersionStore cacheVersions,
+            BibliotekariNotifikacijaService bibliotekariNotifikacija,
+            ILogger<ZaduzenjeController> logger)
         {
             _zaduzenjeRepo = zaduzenjeRepo;
             _korisnikRepo = korisnikRepo;
@@ -40,6 +44,8 @@ namespace SmartLib.Web.Controllers
             _recenzijaRepo = recenzijaRepo;
             _notifikacijaRepo = notifikacijaRepo;
             _cacheVersions = cacheVersions;
+            _bibliotekariNotifikacija = bibliotekariNotifikacija;
+            _logger = logger;
         }
 
         // US-65, US-66, US-68: Aktivna zaduženja (bibliotekar)
@@ -93,7 +99,6 @@ namespace SmartLib.Web.Controllers
             return View(MapToViewModel(z));
         }
 
-
         // US-44: Forma za novo zaduživanje (bibliotekar)
         [Authorize(Roles = RoleNames.Bibliotekar + "," + RoleNames.Administrator)]
         [HttpGet]
@@ -133,6 +138,15 @@ namespace SmartLib.Web.Controllers
                 return View("Create", model);
             }
 
+            var imaKasnela = await _zaduzenjeRepo.ImaKasnelaZaduzenjaAsync(model.KorisnikId);
+            if (imaKasnela)
+            {
+                ModelState.AddModelError(string.Empty,
+                    "Nije moguće kreirati zaduženje — odabrani član ima jedno ili više zakasnjelih zaduženja koja nisu vraćena.");
+                await PopulateCreateDropdowns(model);
+                return View("Create", model);
+            }
+
             // Provjera da rok vraćanja nije u prošlosti
             if (model.DatumPovratka.HasValue && model.DatumPovratka.Value.Date < DateTime.Today)
             {
@@ -160,6 +174,28 @@ namespace SmartLib.Web.Controllers
             await _primjerakRepo.UpdateStatusAsync(model.PrimjerakId, "zadužen");
             await _rezervacijaRepo.FulfillAsync(model.KorisnikId, primjerak.KnjigaId);
 
+            // ── Email notifikacija bibliotekarima ────────────────────────────
+            _logger.LogWarning(">>> DEBUG Zaduzi: Zaduzenje kreirano ID={Id}, dohvatam sa navigacijom...", zaduzenje.Id);
+            try
+            {
+                var zaduzenjeZaEmail = await _zaduzenjeRepo.GetByIdAsync(zaduzenje.Id);
+                _logger.LogWarning(">>> DEBUG Zaduzi: GetByIdAsync={Null}, Korisnik={Korisnik}, Knjiga={Knjiga}",
+                    zaduzenjeZaEmail == null ? "NULL" : "OK",
+                    zaduzenjeZaEmail?.Korisnik?.Email ?? "NULL",
+                    zaduzenjeZaEmail?.Primjerak?.Knjiga?.Naslov ?? "NULL");
+
+                if (zaduzenjeZaEmail != null)
+                {
+                    await _bibliotekariNotifikacija.ObavijestiBibliotekareNovoZaduzenjeAsync(zaduzenjeZaEmail);
+                    _logger.LogWarning(">>> DEBUG Zaduzi: ObavijestiBibliotekare dovršeno.");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ">>> DEBUG Zaduzi: GREŠKA pri slanju email notifikacije za zaduženje #{Id}", zaduzenje.Id);
+            }
+            // ─────────────────────────────────────────────────────────────────
+
             _cacheVersions.BumpBooksVersion();
             TempData["SuccessMessage"] = "Zaduživanje je uspješno evidentirano.";
             return RedirectToAction(nameof(Index));
@@ -185,21 +221,14 @@ namespace SmartLib.Web.Controllers
             var z = await _zaduzenjeRepo.GetByIdAsync(id);
             if (z == null) return NotFound();
 
-            if (z.Status != "aktivno")
+            if (z.Status == "aktivno")
             {
-                TempData["ErrorMessage"] = "Zaduženje nije aktivno.";
-                return RedirectToAction(nameof(Index));
-            }
+                z.Status = "zatvoreno";
+                z.DatumStvarnogVracanja = DateTime.UtcNow;
+                await _zaduzenjeRepo.UpdateAsync(z);
+                await _primjerakRepo.UpdateStatusAsync(z.PrimjerakId, "dostupan");
 
-            z.Status = "zatvoreno";
-            z.DatumStvarnogVracanja = DateTime.UtcNow;
-            await _zaduzenjeRepo.UpdateAsync(z);
-            await _primjerakRepo.UpdateStatusAsync(z.PrimjerakId, "dostupan");
-
-            var knjigaId = z.Primjerak?.KnjigaId;
-            if (knjigaId.HasValue)
-            {
-                var rezervacija = await _rezervacijaRepo.GetNextActiveForBookAsync(knjigaId.Value);
+                var rezervacija = await _rezervacijaRepo.GetNextActiveForBookAsync(z.Primjerak!.KnjigaId);
                 if (rezervacija != null)
                 {
                     var linkUrl = Url.Action("Moje", "Rezervacija") ?? "/Rezervacija/Moje";
@@ -230,7 +259,7 @@ namespace SmartLib.Web.Controllers
             return RedirectToAction(nameof(Details), new { id });
         }
 
-        // US-54: Evidencija vraćanja knjige (bibliotekar)
+        // US-54: Historija zaduženja (bibliotekar)
         [Authorize(Roles = RoleNames.Bibliotekar + "," + RoleNames.Administrator)]
         public async Task<IActionResult> Historija(string? clan)
         {
@@ -254,7 +283,6 @@ namespace SmartLib.Web.Controllers
             return View(model);
         }
 
-        // Nema user story, dodao jer mi je bilo logično 
         [Authorize]
         public async Task<IActionResult> MojaHistorija()
         {
@@ -263,21 +291,16 @@ namespace SmartLib.Web.Controllers
                 return RedirectToAction("Login", "Auth");
 
             var granica = DateTime.UtcNow.AddYears(-3);
-
             var mojaZaduzenja = await _zaduzenjeRepo.GetClosedHistoryForKorisnikAsync(korisnikId, granica);
-
             var model = mojaZaduzenja.Select(MapToViewModel).ToList();
 
             foreach (var item in model)
             {
                 item.ProcitanaKnjiga = item.DatumStvarnogVracanja.HasValue;
                 if (item.KnjigaId > 0)
-                {
                     item.ImaRecenziju = await _recenzijaRepo.HasUserReviewedAsync(item.KnjigaId, korisnikId);
-                }
             }
 
-            // Promijeni samo ovu liniju na dnu:
             return View("MojaHistorija", model);
         }
 
@@ -288,12 +311,8 @@ namespace SmartLib.Web.Controllers
             if (korisnik == null) return NotFound();
 
             var granica = DateTime.UtcNow.AddYears(-3);
-
             var zatvorenaZaduzenja = await _zaduzenjeRepo.GetClosedHistoryForKorisnikAsync(korisnikId, granica);
-
-            var historija = zatvorenaZaduzenja
-                .Select(MapToViewModel)
-                .ToList();
+            var historija = zatvorenaZaduzenja.Select(MapToViewModel).ToList();
 
             ViewBag.KorisnikId = korisnikId;
             ViewBag.KorisnikIme = $"{korisnik.Ime} {korisnik.Prezime}";
@@ -335,7 +354,8 @@ namespace SmartLib.Web.Controllers
 
             return View(model);
         }
-        // ── Helpers ──────────────────────────────────────────────────────────────
+
+        // ── Helpers ───────────────────────────────────────────────────────────
 
         private static ZaduzenjeViewModel MapToViewModel(Zaduzenje z)
         {

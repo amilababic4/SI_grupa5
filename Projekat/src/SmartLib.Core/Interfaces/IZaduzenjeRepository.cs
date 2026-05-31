@@ -14,5 +14,9 @@ namespace SmartLib.Core.Interfaces
         Task<IEnumerable<Zaduzenje>> GetClosedHistoryForKorisnikAsync(int korisnikId, DateTime granica);
         Task<IEnumerable<Zaduzenje>> GetByPrimjerakAsync(int primjerakId);
         Task<int> CountByKnjigaIdAsync(int knjigaId);
+        Task<IEnumerable<Zaduzenje>> GetAktivnaZaDatumAsync(DateTime datum);
+        Task<IEnumerable<Zaduzenje>> GetKasnaAktivnaAsync(DateTime danas);
+        Task<IEnumerable<Zaduzenje>> GetAktivnaZaDatumRangeAsync(DateTime od, DateTime doo);
+        Task<bool> ImaKasnelaZaduzenjaAsync(int korisnikId);
     }
 }
