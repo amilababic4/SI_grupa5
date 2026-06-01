@@ -18,6 +18,8 @@ namespace SmartLib.Tests.Unit.WebTests
     {
         private readonly Mock<IKnjigaRepository> _knjigaMock;
         private readonly Mock<IBookRecommender> _recommenderMock;
+        private readonly Mock<IVijestRepository> _vijestMock;       
+        private readonly Mock<IDogadjajRepository> _dogadjajMock;   
         private readonly IDistributedCache _cache;
         private readonly CacheVersionStore _cacheVersions;
         private readonly HomeController _controller;
@@ -26,6 +28,8 @@ namespace SmartLib.Tests.Unit.WebTests
         {
             _knjigaMock = new Mock<IKnjigaRepository>();
             _recommenderMock = new Mock<IBookRecommender>();
+            _vijestMock = new Mock<IVijestRepository>();             
+            _dogadjajMock = new Mock<IDogadjajRepository>();        
             _cache = new MemoryDistributedCache(Options.Create(new MemoryDistributedCacheOptions()));
             _cacheVersions = new CacheVersionStore();
 
@@ -33,7 +37,13 @@ namespace SmartLib.Tests.Unit.WebTests
                 _knjigaMock.Object,
                 _recommenderMock.Object,
                 _cache,
-                _cacheVersions);
+                _cacheVersions,
+                _vijestMock.Object,      
+                _dogadjajMock.Object);
+
+            _vijestMock.Setup(r => r.GetAllAsync()).ReturnsAsync(new List<Vijest>());
+            _dogadjajMock.Setup(r => r.GetAllAsync()).ReturnsAsync(new List<Dogadjaj>());
+
 
             var httpContext = new DefaultHttpContext();
             _controller.ControllerContext = new ControllerContext

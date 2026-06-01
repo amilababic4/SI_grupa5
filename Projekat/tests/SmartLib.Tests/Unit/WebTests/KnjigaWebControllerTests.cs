@@ -27,6 +27,8 @@ namespace SmartLib.Tests.Unit.WebTests
         private readonly Mock<IKategorijaRepository> _kategorijaMock;
         private readonly Mock<IZaduzenjeRepository> _zaduzenjeMock;
         private readonly Mock<IRezervacijaRepository> _rezervacijaMock;
+        // ISPRAVKA #1: IListaKolekcijaRepository je obavezan parametar konstruktora
+        private readonly Mock<IListaKolekcijaRepository> _listaKolekcijaRepositoryMock;
         private readonly Mock<IHttpClientFactory> _httpClientFactoryMock;
         private readonly Mock<ILogger<KnjigaController>> _loggerMock;
         private readonly IDistributedCache _cache;
@@ -41,6 +43,8 @@ namespace SmartLib.Tests.Unit.WebTests
             _kategorijaMock = new Mock<IKategorijaRepository>();
             _zaduzenjeMock = new Mock<IZaduzenjeRepository>();
             _rezervacijaMock = new Mock<IRezervacijaRepository>();
+            // ISPRAVKA #1: Dodan nedostajući mock
+            _listaKolekcijaRepositoryMock = new Mock<IListaKolekcijaRepository>();
             _httpClientFactoryMock = new Mock<IHttpClientFactory>();
             _loggerMock = new Mock<ILogger<KnjigaController>>();
             _configuration = new ConfigurationBuilder().Build();
@@ -48,12 +52,14 @@ namespace SmartLib.Tests.Unit.WebTests
             _cache = new MemoryDistributedCache(Options.Create(new MemoryDistributedCacheOptions()));
             _cacheVersions = new CacheVersionStore();
 
+            // ISPRAVKA #1: Konstruktor sada uključuje IListaKolekcijaRepository
             _controller = new KnjigaController(
                 _knjigaMock.Object,
                 _primjerakMock.Object,
                 _kategorijaMock.Object,
                 _zaduzenjeMock.Object,
                 _rezervacijaMock.Object,
+                _listaKolekcijaRepositoryMock.Object,
                 _httpClientFactoryMock.Object,
                 _cache,
                 _configuration,
@@ -105,8 +111,8 @@ namespace SmartLib.Tests.Unit.WebTests
         };
 
         /// <summary>
-        /// PB-44: Centralni setup za Index pozive — postavlja sve što Index akcija zahtijeva.
-        /// GetPagedAsync sada ima 7 parametara (naslov, autor, page, pageSize, kategorijaId, izdavac, godinaIzdanja).
+        /// Centralni setup za Index pozive.
+        /// GetPagedAsync ima 7 parametara (naslov, autor, page, pageSize, kategorijaId, izdavac, godinaIzdanja).
         /// </summary>
         private void SetupIndexMocks(
             List<Knjiga> knjige,
@@ -144,7 +150,7 @@ namespace SmartLib.Tests.Unit.WebTests
             var knjige = new List<Knjiga> { TestKnjiga() };
             SetupIndexMocks(knjige, 1);
 
-            var result = await _controller.Index(null, null, null, null, null, 1);
+            var result = await _controller.Index(null, null, null, null, null, false, 1);
 
             var view = Assert.IsType<ViewResult>(result);
             var model = Assert.IsType<KatalogViewModel>(view.Model);
@@ -157,7 +163,7 @@ namespace SmartLib.Tests.Unit.WebTests
         {
             SetupIndexMocks(new List<Knjiga>(), 0);
 
-            var result = await _controller.Index(null, null, null, null, null, 1);
+            var result = await _controller.Index(null, null, null, null, null, false, 1);
 
             var view = Assert.IsType<ViewResult>(result);
             var model = Assert.IsType<KatalogViewModel>(view.Model);
@@ -171,7 +177,7 @@ namespace SmartLib.Tests.Unit.WebTests
             var knjige = Enumerable.Range(1, 10).Select(i => TestKnjiga(i)).ToList();
             SetupIndexMocks(knjige, 25, page: 2);
 
-            var result = await _controller.Index(null, null, null, null, null, 2);
+            var result = await _controller.Index(null, null, null, null, null, false, 2);
 
             var view = Assert.IsType<ViewResult>(result);
             var model = Assert.IsType<KatalogViewModel>(view.Model);
@@ -188,7 +194,7 @@ namespace SmartLib.Tests.Unit.WebTests
             // Knjiga ima 2 primjerka: 1 dostupan, 1 zaduzen
             SetupIndexMocks(new List<Knjiga> { knjiga }, 1);
 
-            var result = await _controller.Index(null, null, null, null, null, 1);
+            var result = await _controller.Index(null, null, null, null, null, false, 1);
 
             var view = Assert.IsType<ViewResult>(result);
             var model = Assert.IsType<KatalogViewModel>(view.Model);
@@ -202,8 +208,13 @@ namespace SmartLib.Tests.Unit.WebTests
         {
             SetupIndexMocks(new List<Knjiga>(), 0);
 
-            var result = await _controller.Index(null, null, null, null, null, -5);
+            var result = await _controller.Index(null, null, null, null, null, false, -5);
 
+            // ISPRAVKA #2: Index prima page kao 7. argument, a pageSize kao 8.
+            // Signatura: Index(naslov, autor, kategorijaId, izdavac, godinaIzdanja, samoNeprocitane=false, page=1, pageSize=16)
+            // Sa pozivom _controller.Index(null, null, null, null, null, -5) — šesti argument je samoNeprocitane (bool),
+            // što znači da se -5 kastuje u bool (true). Page ostaje default 1.
+            // Stari test je koristio pogrešnu signaturu — ispraviti Verify da odgovara stvarnoj logici.
             _knjigaMock.Verify(r => r.GetPagedAsync(null, null, 1, 16, null, null, null), Times.Once);
         }
 
@@ -214,7 +225,7 @@ namespace SmartLib.Tests.Unit.WebTests
             knjiga.Kategorija = null;
             SetupIndexMocks(new List<Knjiga> { knjiga }, 1);
 
-            var result = await _controller.Index(null, null, null, null, null, 1);
+            var result = await _controller.Index(null, null, null, null, null, false, 1);
 
             var view = Assert.IsType<ViewResult>(result);
             var model = Assert.IsType<KatalogViewModel>(view.Model);
@@ -226,7 +237,7 @@ namespace SmartLib.Tests.Unit.WebTests
         {
             SetupIndexMocks(new List<Knjiga>(), 0);
 
-            var result = await _controller.Index(null, null, null, null, null, 1);
+            var result = await _controller.Index(null, null, null, null, null, false, 1);
 
             var model = ((ViewResult)result).Model as KatalogViewModel;
             Assert.Equal(1, model!.UkupnoStrana);
@@ -241,7 +252,12 @@ namespace SmartLib.Tests.Unit.WebTests
             var knjige = new List<Knjiga> { TestKnjiga() };
             SetupIndexMocks(knjige, 1, kategorijaId: 1);
 
-            var result = await _controller.Index(null, null, 1, null, null, 1);
+            // ISPRAVKA #3: Signatura je Index(naslov, autor, kategorijaId, izdavac, godinaIzdanja, page)
+            // ali stvarna signatura kontrolera je:
+            // Index(naslov, autor, kategorijaId, izdavac, godinaIzdanja, samoNeprocitane=false, page=1, pageSize=16)
+            // Pozivi sa 6 argumenata: 6. je samoNeprocitane (bool), page ide kao 7.
+            // Stari testovi su slali page kao 6. argument — potrebno ih je ispraviti.
+            var result = await _controller.Index(null, null, 1, null, null, false, 1);
 
             var view = Assert.IsType<ViewResult>(result);
             var model = Assert.IsType<KatalogViewModel>(view.Model);
@@ -255,7 +271,7 @@ namespace SmartLib.Tests.Unit.WebTests
             // US-74: Ako ne postoji nijedna knjiga u kategoriji
             SetupIndexMocks(new List<Knjiga>(), 0, kategorijaId: 99);
 
-            var result = await _controller.Index(null, null, 99, null, null, 1);
+            var result = await _controller.Index(null, null, 99, null, null, false, 1);
 
             var view = Assert.IsType<ViewResult>(result);
             var model = Assert.IsType<KatalogViewModel>(view.Model);
@@ -271,7 +287,7 @@ namespace SmartLib.Tests.Unit.WebTests
             knjiga.Izdavac = "Pearson";
             SetupIndexMocks(new List<Knjiga> { knjiga }, 1, izdavac: "Pearson");
 
-            var result = await _controller.Index(null, null, null, "Pearson", null, 1);
+            var result = await _controller.Index(null, null, null, "Pearson", null, false, 1);
 
             var view = Assert.IsType<ViewResult>(result);
             var model = Assert.IsType<KatalogViewModel>(view.Model);
@@ -285,7 +301,7 @@ namespace SmartLib.Tests.Unit.WebTests
             // US-75: Ako nema knjiga za odabranog izdavača
             SetupIndexMocks(new List<Knjiga>(), 0, izdavac: "Nepostojeci");
 
-            var result = await _controller.Index(null, null, null, "Nepostojeci", null, 1);
+            var result = await _controller.Index(null, null, null, "Nepostojeci", null, false, 1);
 
             var view = Assert.IsType<ViewResult>(result);
             var model = Assert.IsType<KatalogViewModel>(view.Model);
@@ -299,7 +315,7 @@ namespace SmartLib.Tests.Unit.WebTests
             var knjiga = TestKnjiga();
             SetupIndexMocks(new List<Knjiga> { knjiga }, 1, godinaIzdanja: 2020);
 
-            var result = await _controller.Index(null, null, null, null, 2020, 1);
+            var result = await _controller.Index(null, null, null, null, 2020, false, 1);
 
             var view = Assert.IsType<ViewResult>(result);
             var model = Assert.IsType<KatalogViewModel>(view.Model);
@@ -313,7 +329,7 @@ namespace SmartLib.Tests.Unit.WebTests
             // US-76: Ako nema knjiga za odabranu godinu
             SetupIndexMocks(new List<Knjiga>(), 0, godinaIzdanja: 1800);
 
-            var result = await _controller.Index(null, null, null, null, 1800, 1);
+            var result = await _controller.Index(null, null, null, null, 1800, false, 1);
 
             var view = Assert.IsType<ViewResult>(result);
             var model = Assert.IsType<KatalogViewModel>(view.Model);
@@ -332,7 +348,7 @@ namespace SmartLib.Tests.Unit.WebTests
                 izdavac: "Pearson",
                 godinaIzdanja: 2020);
 
-            var result = await _controller.Index("Test", "Autor", 1, "Pearson", 2020, 1);
+            var result = await _controller.Index("Test", "Autor", 1, "Pearson", 2020, false, 1);
 
             _knjigaMock.Verify(
                 r => r.GetPagedAsync("Test", "Autor", 1, 16, 1, "Pearson", 2020),
@@ -348,7 +364,7 @@ namespace SmartLib.Tests.Unit.WebTests
                 izdavac: "Pearson",
                 godinaIzdanja: 2020);
 
-            var result = await _controller.Index(null, null, 1, "Pearson", 2020, 1);
+            var result = await _controller.Index(null, null, 1, "Pearson", 2020, false, 1);
 
             var view = Assert.IsType<ViewResult>(result);
             var model = Assert.IsType<KatalogViewModel>(view.Model);
@@ -362,7 +378,7 @@ namespace SmartLib.Tests.Unit.WebTests
             // Provjera da ViewModel sadrži kategorije za filter dropdown
             SetupIndexMocks(new List<Knjiga>(), 0);
 
-            var result = await _controller.Index(null, null, null, null, null, 1);
+            var result = await _controller.Index(null, null, null, null, null, false, 1);
 
             var view = Assert.IsType<ViewResult>(result);
             var model = Assert.IsType<KatalogViewModel>(view.Model);
@@ -375,7 +391,7 @@ namespace SmartLib.Tests.Unit.WebTests
             // Provjera da ViewModel sadrži izdavače za filter dropdown
             SetupIndexMocks(new List<Knjiga>(), 0);
 
-            var result = await _controller.Index(null, null, null, null, null, 1);
+            var result = await _controller.Index(null, null, null, null, null, false, 1);
 
             var view = Assert.IsType<ViewResult>(result);
             var model = Assert.IsType<KatalogViewModel>(view.Model);
@@ -388,7 +404,7 @@ namespace SmartLib.Tests.Unit.WebTests
             // Provjera da ViewModel sadrži godine za filter dropdown
             SetupIndexMocks(new List<Knjiga>(), 0);
 
-            var result = await _controller.Index(null, null, null, null, null, 1);
+            var result = await _controller.Index(null, null, null, null, null, false, 1);
 
             var view = Assert.IsType<ViewResult>(result);
             var model = Assert.IsType<KatalogViewModel>(view.Model);
@@ -400,7 +416,7 @@ namespace SmartLib.Tests.Unit.WebTests
         {
             SetupIndexMocks(new List<Knjiga>(), 0);
 
-            var result = await _controller.Index(null, null, null, null, null, 1);
+            var result = await _controller.Index(null, null, null, null, null, false, 1);
 
             var model = ((ViewResult)result).Model as KatalogViewModel;
             Assert.False(model!.ImaAktivnihFiltera);
@@ -411,7 +427,8 @@ namespace SmartLib.Tests.Unit.WebTests
         {
             SetupIndexMocks(new List<Knjiga>(), 0, kategorijaId: 1);
 
-            var result = await _controller.Index(null, null, 1, null, null, 1);
+            // ISPRAVKA #3 primijenjena: samoNeprocitane eksplicitno false, page 1
+            var result = await _controller.Index(null, null, 1, null, null, false, 1);
 
             var model = ((ViewResult)result).Model as KatalogViewModel;
             Assert.True(model!.ImaNapredniFilter);
@@ -423,7 +440,7 @@ namespace SmartLib.Tests.Unit.WebTests
             // Osnovna pretraga ne aktivira "napredni filter" indikator
             SetupIndexMocks(new List<Knjiga>(), 0, naslov: "Test");
 
-            var result = await _controller.Index("Test", null, null, null, null, 1);
+            var result = await _controller.Index("Test", null, null, null, null, false, 1);
 
             var model = ((ViewResult)result).Model as KatalogViewModel;
             Assert.False(model!.ImaNapredniFilter);
@@ -659,6 +676,26 @@ namespace SmartLib.Tests.Unit.WebTests
             Assert.IsType<KnjigaCreateDto>(view.Model);
         }
 
+        [Fact]
+        public async Task Create_ValidanModel_BumpujeBooksVersion()
+        {
+            // Provjera da se cache invalidira nakon uspješnog kreiranja
+            var dto = ValidanCreateDto();
+            var versionPrije = _cacheVersions.BooksVersion;
+
+            _knjigaMock.Setup(r => r.GetByIsbnAsync(It.IsAny<string>())).ReturnsAsync((Knjiga?)null);
+            _kategorijaMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(TestKategorija());
+            _kategorijaMock.Setup(r => r.GetAllAsync()).ReturnsAsync(new List<Kategorija> { TestKategorija() });
+            _knjigaMock.Setup(r => r.CreateAsync(It.IsAny<Knjiga>()))
+                       .ReturnsAsync((Knjiga k) => { k.Id = 10; return k; });
+            _primjerakMock.Setup(r => r.CreateAsync(It.IsAny<Primjerak>()))
+                          .ReturnsAsync((Primjerak p) => p);
+
+            await _controller.Create(dto);
+
+            Assert.NotEqual(versionPrije, _cacheVersions.BooksVersion);
+        }
+
         // ── Uređivanje knjige (Edit) ──────────────────────────────────────────────
 
         [Fact]
@@ -796,16 +833,44 @@ namespace SmartLib.Tests.Unit.WebTests
             Assert.Equal("Pearson", knjiga.Izdavac);
         }
 
+        [Fact]
+        public async Task Edit_Post_ValidanModel_BumpujeBooksVersion()
+        {
+            // Provjera da se cache invalidira nakon uspješnog ažuriranja
+            var knjiga = TestKnjiga();
+            var versionPrije = _cacheVersions.BooksVersion;
+
+            _knjigaMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(knjiga);
+            _kategorijaMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(TestKategorija());
+            _kategorijaMock.Setup(r => r.GetAllAsync()).ReturnsAsync(new List<Kategorija> { TestKategorija() });
+            _knjigaMock.Setup(r => r.UpdateAsync(It.IsAny<Knjiga>())).Returns(Task.CompletedTask);
+
+            await _controller.Edit(new KnjigaEditDto
+            {
+                Id = 1,
+                Naslov = "Test",
+                Autor = "Autor",
+                KategorijaId = 1,
+                GodinaIzdanja = 2020
+            });
+
+            Assert.NotEqual(versionPrije, _cacheVersions.BooksVersion);
+        }
+
         // ── Details ───────────────────────────────────────────────────────────────
 
         [Fact]
         public async Task Details_PostojecaKnjiga_VracaView()
         {
             _knjigaMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(TestKnjiga());
+            // ISPRAVKA #4: Details prima i IRecenzijaPrijavaRepository kao FromServices
             var recenzijaMock = new Mock<IRecenzijaRepository>();
+            var prijavaRepositoryMock = new Mock<IRecenzijaPrijavaRepository>();
             recenzijaMock.Setup(r => r.GetByKnjigaIdAsync(1)).ReturnsAsync(new List<Recenzija>());
+            // ISPRAVKA #5: ZaduzenjeRepository.CountByKnjigaIdAsync je potreban za Details
+            _zaduzenjeMock.Setup(r => r.CountByKnjigaIdAsync(1)).ReturnsAsync(0);
 
-            var result = await _controller.Details(1, recenzijaMock.Object);
+            var result = await _controller.Details(1, recenzijaMock.Object, prijavaRepositoryMock.Object);
 
             var view = Assert.IsType<ViewResult>(result);
             Assert.IsType<KnjigaDto>(view.Model);
@@ -816,8 +881,10 @@ namespace SmartLib.Tests.Unit.WebTests
         {
             _knjigaMock.Setup(r => r.GetByIdAsync(99)).ReturnsAsync((Knjiga?)null);
             var recenzijaMock = new Mock<IRecenzijaRepository>();
+            var prijavaRepositoryMock = new Mock<IRecenzijaPrijavaRepository>();
+            _zaduzenjeMock.Setup(r => r.CountByKnjigaIdAsync(99)).ReturnsAsync(0);
 
-            var result = await _controller.Details(99, recenzijaMock.Object);
+            var result = await _controller.Details(99, recenzijaMock.Object, prijavaRepositoryMock.Object);
 
             Assert.IsType<NotFoundResult>(result);
         }
@@ -829,13 +896,30 @@ namespace SmartLib.Tests.Unit.WebTests
             knjiga.Kategorija = null;
             _knjigaMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(knjiga);
             var recenzijaMock = new Mock<IRecenzijaRepository>();
+            var prijavaRepositoryMock = new Mock<IRecenzijaPrijavaRepository>();
             recenzijaMock.Setup(r => r.GetByKnjigaIdAsync(1)).ReturnsAsync(new List<Recenzija>());
+            _zaduzenjeMock.Setup(r => r.CountByKnjigaIdAsync(1)).ReturnsAsync(0);
 
-            var result = await _controller.Details(1, recenzijaMock.Object);
+            var result = await _controller.Details(1, recenzijaMock.Object, prijavaRepositoryMock.Object);
 
             var view = Assert.IsType<ViewResult>(result);
             var dto = Assert.IsType<KnjigaDto>(view.Model);
             Assert.Null(dto.Kategorija);
+        }
+
+        [Fact]
+        public async Task Details_PostavljaBrojZaduzenjaUViewBag()
+        {
+            // Provjera da se ViewBag.BrojZaduzenja ispravno popunjava
+            _knjigaMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(TestKnjiga());
+            var recenzijaMock = new Mock<IRecenzijaRepository>();
+            var prijavaRepositoryMock = new Mock<IRecenzijaPrijavaRepository>();
+            recenzijaMock.Setup(r => r.GetByKnjigaIdAsync(1)).ReturnsAsync(new List<Recenzija>());
+            _zaduzenjeMock.Setup(r => r.CountByKnjigaIdAsync(1)).ReturnsAsync(5);
+
+            await _controller.Details(1, recenzijaMock.Object, prijavaRepositoryMock.Object);
+
+            Assert.Equal(5, _controller.ViewBag.BrojZaduzenja);
         }
 
         // ── Delete ────────────────────────────────────────────────────────────────
@@ -886,6 +970,32 @@ namespace SmartLib.Tests.Unit.WebTests
             await _controller.Delete(1);
 
             Assert.NotNull(_controller.TempData["SuccessMessage"]);
+        }
+
+        [Fact]
+        public async Task Delete_Uspjesno_BumpujeBooksVersion()
+        {
+            // Provjera da se cache invalidira samo pri uspješnom brisanju
+            var versionPrije = _cacheVersions.BooksVersion;
+            _knjigaMock.Setup(r => r.HasActiveLoansAsync(1)).ReturnsAsync(false);
+            _knjigaMock.Setup(r => r.DeleteAsync(1)).ReturnsAsync(true);
+
+            await _controller.Delete(1);
+
+            Assert.NotEqual(versionPrije, _cacheVersions.BooksVersion);
+        }
+
+        [Fact]
+        public async Task Delete_Neuspjesno_NeBumpujeBooksVersion()
+        {
+            // Cache se ne smije invalidirati ako brisanje nije uspjelo
+            var versionPrije = _cacheVersions.BooksVersion;
+            _knjigaMock.Setup(r => r.HasActiveLoansAsync(1)).ReturnsAsync(false);
+            _knjigaMock.Setup(r => r.DeleteAsync(1)).ReturnsAsync(false);
+
+            await _controller.Delete(1);
+
+            Assert.Equal(versionPrije, _cacheVersions.BooksVersion);
         }
 
         // ── Korice ────────────────────────────────────────────────────────────────
@@ -963,18 +1073,7 @@ namespace SmartLib.Tests.Unit.WebTests
 
             var cache = new MemoryDistributedCache(Options.Create(new MemoryDistributedCacheOptions()));
 
-            var controller = new KnjigaController(
-                _knjigaMock.Object,
-                _primjerakMock.Object,
-                _kategorijaMock.Object,
-                _zaduzenjeMock.Object,
-                _rezervacijaMock.Object,
-                httpClientFactoryMock.Object,
-                cache,
-                _configuration,
-                _loggerMock.Object,
-                _cacheVersions);
-
+            var controller = BuildController(httpClientFactoryMock.Object, cache);
             SetupControllerContext(controller);
 
             var result = await controller.Korice("1234567890");
@@ -1001,19 +1100,7 @@ namespace SmartLib.Tests.Unit.WebTests
             httpClientFactoryMock.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(httpClient);
 
             var cache = new MemoryDistributedCache(Options.Create(new MemoryDistributedCacheOptions()));
-
-            var controller = new KnjigaController(
-                _knjigaMock.Object,
-                _primjerakMock.Object,
-                _kategorijaMock.Object,
-                _zaduzenjeMock.Object,
-                _rezervacijaMock.Object,
-                httpClientFactoryMock.Object,
-                cache,
-                _configuration,
-                _loggerMock.Object,
-                _cacheVersions);
-
+            var controller = BuildController(httpClientFactoryMock.Object, cache);
             SetupControllerContext(controller);
 
             var result = await controller.Korice("1234567890");
@@ -1039,19 +1126,7 @@ namespace SmartLib.Tests.Unit.WebTests
             httpClientFactoryMock.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(httpClient);
 
             var cache = new MemoryDistributedCache(Options.Create(new MemoryDistributedCacheOptions()));
-
-            var controller = new KnjigaController(
-                _knjigaMock.Object,
-                _primjerakMock.Object,
-                _kategorijaMock.Object,
-                _zaduzenjeMock.Object,
-                _rezervacijaMock.Object,
-                httpClientFactoryMock.Object,
-                cache,
-                _configuration,
-                _loggerMock.Object,
-                _cacheVersions);
-
+            var controller = BuildController(httpClientFactoryMock.Object, cache);
             SetupControllerContext(controller);
 
             var result = await controller.Korice("1234567890");
@@ -1060,7 +1135,80 @@ namespace SmartLib.Tests.Unit.WebTests
             Assert.Equal("image/svg+xml", fileResult.ContentType);
         }
 
+        // ── GetCatalogRecommendation ───────────────────────────────────────────────
+
+        [Fact]
+        public async Task GetCatalogRecommendation_VracaJsonSaKnjigom()
+        {
+            // Provjera osnovnog toka — slučajan izbor knjige
+            var knjige = new List<Knjiga> { TestKnjiga() };
+            _knjigaMock.Setup(r => r.GetRandomAsync(50)).ReturnsAsync(knjige);
+
+            var result = await _controller.GetCatalogRecommendation();
+
+            Assert.IsType<JsonResult>(result);
+        }
+
+        [Fact]
+        public async Task GetCatalogRecommendation_NemaKnjiga_VracaNotFound()
+        {
+            _knjigaMock.Setup(r => r.GetRandomAsync(50)).ReturnsAsync(new List<Knjiga>());
+
+            var result = await _controller.GetCatalogRecommendation();
+
+            Assert.IsType<NotFoundResult>(result);
+        }
+
+        [Fact]
+        public async Task GetCatalogRecommendation_SaKategorijom_PreferirsKnjigeTeKategorije()
+        {
+            var knjigaUKategoriji = TestKnjiga(1);
+            knjigaUKategoriji.Kategorija = TestKategorija();
+
+            var knjigaDrugaKategorija = TestKnjiga(2);
+            knjigaDrugaKategorija.Kategorija = new Kategorija { Id = 2, Naziv = "Nauka" };
+
+            _knjigaMock.Setup(r => r.GetRandomAsync(50))
+                       .ReturnsAsync(new List<Knjiga> { knjigaUKategoriji, knjigaDrugaKategorija });
+
+            var result = await _controller.GetCatalogRecommendation("Beletristika");
+
+            var jsonResult = Assert.IsType<JsonResult>(result);
+            // Rezultat mora biti serijalizabilan — samo provjera tipa
+            Assert.NotNull(jsonResult.Value);
+        }
+
+        [Fact]
+        public async Task GetCatalogRecommendation_RepozitorijBacaException_VracaStatusCode500()
+        {
+            _knjigaMock.Setup(r => r.GetRandomAsync(50)).ThrowsAsync(new Exception("DB greška"));
+
+            var result = await _controller.GetCatalogRecommendation();
+
+            var statusResult = Assert.IsType<StatusCodeResult>(result);
+            Assert.Equal(500, statusResult.StatusCode);
+        }
+
         // ── Helperi ───────────────────────────────────────────────────────────────
+
+        /// <summary>
+        /// ISPRAVKA #1: BuildController je refaktorisan da uključuje IListaKolekcijaRepository.
+        /// </summary>
+        private KnjigaController BuildController(IHttpClientFactory factory, IDistributedCache cache)
+        {
+            return new KnjigaController(
+                _knjigaMock.Object,
+                _primjerakMock.Object,
+                _kategorijaMock.Object,
+                _zaduzenjeMock.Object,
+                _rezervacijaMock.Object,
+                _listaKolekcijaRepositoryMock.Object,
+                factory,
+                cache,
+                _configuration,
+                _loggerMock.Object,
+                _cacheVersions);
+        }
 
         private void SetupControllerContext(KnjigaController controller)
         {

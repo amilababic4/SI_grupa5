@@ -1395,23 +1395,22 @@ PB-26 Upravljanje korisnicima. <br> PB-20 Profil člana|
 
 ## PB-47: Kazne za kasno vraćanje knjiga
 ### Naziv: Evidentiranje kazne po zaduženju
-### US-93: Kao sistem, želim automatski obračunati kaznu za svaku knjigu koja nije vraćena u predviđenom roku kako bi se osigurala disciplina i poštovanje pravila korištenja.
+### US-93: Kao sistem, želim spriječiti kreiranje novog zaduženja članu koji ima jedno ili više zakašnjelih zaduženja koja nisu vraćena, kako bi se osiguralo poštovanje pravila korištenja.
 **Acceptance Criteria:**
-- Kada je knjiga vraćena nakon isteka roka, tada sistem automatski obračunava kaznu po danu kašnjenja
-- Kazna se računa za svaki dan kašnjenja
-- Kazna se veže za konkretno zaduženje i člana
+- Kada osoblje pokuša kreirati zaduženje za člana koji ima zakašnjela nevraćena zaduženja, sistem onemogućava kreiranje
+- Sistem prikazuje poruku: "Nije moguće kreirati zaduženje – odabrani član ima jedno ili više zakašnjelih zaduženja koja nisu vraćena."
+- Kada član nema zakašnjelih zaduženja, kreiranje zaduženja je moguće normalno
 
 <br>
 
 ---
 
-### Naziv: Prikaz ukupnog duga člana
-### US-94: Kao član biblioteke, želim da mogu pregledati ukupne kazne kako bih bio informisan o svojim obavezama.
+### Naziv: Blokiranje rezervacije za člana sa zakašnjelim zaduženjima
+### US-94: Kao sistem, želim spriječiti rezervaciju knjige članu koji ima nevraćena zaduženja, kako bi se osiguralo poštovanje pravila korištenja.
 **Acceptance Criteria:**
-- Kada član pristupi svom profilu, tada vidi pregled svih kazni
-- Sistem prikazuje ukupni iznos kazne
-- Ako član nema kazni, sistem prikazuje poruku da nema dugovanja
-- Podaci o kaznama se ažuriraju nakon svakog vraćanja knjige
+- Kada član sa zakašnjelim zaduženjima pokuša rezervisati knjigu koja trenutno nije dostupna, sistem onemogućava rezervaciju
+- Sistem prikazuje poruku: "Imate zakasnijela zaduženja. Rezervacija nije moguća."
+- Kada član nema zakašnjelih zaduženja, rezervacija je moguća normalno
 
 <br>
 

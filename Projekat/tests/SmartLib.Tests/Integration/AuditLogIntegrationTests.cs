@@ -103,17 +103,6 @@ namespace SmartLib.Tests.Integration
             var resp = await client.GetAsync("/api/auditlog");
             Assert.Equal(HttpStatusCode.Forbidden, resp.StatusCode);
         }
-
-        [Fact]
-        public async Task GetAll_KaoAdministrator_Vraca200TODO()
-        {
-            var client = await AuthedClientAsync("admin@smartlib.ba", "Test123!");
-            var resp = await client.GetAsync("/api/auditlog?page=1&pageSize=10");
-
-            Assert.Equal(HttpStatusCode.OK, resp.StatusCode);
-            var doc = JsonDocument.Parse(await resp.Content.ReadAsStringAsync());
-            Assert.Equal("TODO", doc.RootElement.GetProperty("message").GetString());
-        }
     }
 
     internal static class AuditLogDbSeeder

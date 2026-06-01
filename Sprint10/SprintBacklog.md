@@ -27,31 +27,8 @@ Tokom ovog sprinta implementiraju se funkcionalnosti vezane za:
 ## Sprint Backlog stavke:
 ## PB-41: Slanje email upozorenja
 
-### Naziv: Slanje emaila samo korisnicima sa validnom email adresom
-### US-81: Kao sistem, želim slati podsjetnike samo članovima koji imaju evidentiranu validnu email adresu, kako bih izbjegao neuspješna slanja.
-**Acceptance Criteria:**
-- Prije slanja sistem provjerava da član ima email adresu.
-- Ako email ne postoji, poruka se ne šalje.
-- Neuspjelo slanje se evidentira u sistemu ako postoji logging.
-- Ostala validna slanja se izvršavaju normalno.
-
-<br>
-
----
-
-### Naziv: Zaustavljanje podsjetnika nakon vraćanja knjige
-### US-82: Kao sistem, želim prestati slati podsjetnike kada je knjiga vraćena, kako član ne bi dobijao netačne poruke.
-**Acceptance Criteria:**
-- Kada je zaduženje završeno, sistem ga ne uključuje u buduća slanja podsjetnika.
-- Knjige vraćene prije roka ne dobijaju podsjetnik na istek.
-- Knjige vraćene nakon zakašnjenja ne dobijaju nove mailove nakon povrata.
-- Slanje se zasniva samo na aktivnim zaduženjima.
-
-<br>
-
----
 ### Naziv: Notifikacija članu o podsjetniku isteka roka vraćanja
-### US-83: Kao član biblioteke, želim da dobijem email podsjetnik prije isteka roka vraćanja knjige kako bih je mogao na vrijeme vratiti.
+### US-81: Kao član biblioteke, želim da dobijem email podsjetnik prije isteka roka vraćanja knjige kako bih je mogao na vrijeme vratiti.
 **Acceptance Criteria:**
 - Kada je rok vraćanja knjige 2 dana od isteka, tada sistem automatski šalje email podsjetnik
 - Kada član ima više zaduženih knjiga, tada se šalje podsjetnik za svaku knjigu posebno
@@ -63,7 +40,7 @@ Tokom ovog sprinta implementiraju se funkcionalnosti vezane za:
 ---
 
 ### Naziv: Notifikacija članu o upozorenju isteka roka vraćanja
-### US-84: Kao član biblioteke, želim dobiti email upozorenje na dan kada mi ističe rok vraćanja knjige kako bih znao da trebam odmah vratiti knjigu.
+### US-82: Kao član biblioteke, želim dobiti email upozorenje na dan kada mi ističe rok vraćanja knjige kako bih znao da trebam odmah vratiti knjigu.
 **Acceptance Criteria:**
 - Kada rok vraćanja knjige istekne, tada sistem automatski šalje email upozorenje
 - Kada član ima više knjiga kojima ističe rok, tada se šalje upozorenje za svaku knjigu posebno
@@ -75,11 +52,34 @@ Tokom ovog sprinta implementiraju se funkcionalnosti vezane za:
 ---
 
 ### Naziv: Podsjetnik o kašnjenju
-### US-85: Kao član biblioteke, želim dobiti podsjetnik ako kasnim s vraćanjem knjige kako bih bio svjestan da trebam što prije vratiti knjigu.
+### US-83: Kao član biblioteke, želim dobiti podsjetnik ako kasnim s vraćanjem knjige kako bih bio svjestan da trebam što prije vratiti knjigu.
 **Acceptance Criteria:**
 - Kada je knjiga zakasnila više od 1 dana, tada sistem šalje podsjetnik o kašnjenju
 - Email mora sadržavati naziv knjige i broj dana kašnjenja
 - Podsjetnici se zaustavljaju kada se knjiga vrati
+
+<br>
+
+---
+### Naziv: Slanje emaila samo korisnicima sa validnom email adresom
+### US-84: Kao sistem, želim slati podsjetnike samo članovima koji imaju evidentiranu validnu email adresu, kako bih izbjegao neuspješna slanja.
+**Acceptance Criteria:**
+- Prije slanja sistem provjerava da član ima email adresu.
+- Ako email ne postoji, poruka se ne šalje.
+- Neuspjelo slanje se evidentira u sistemu ako postoji logging.
+- Ostala validna slanja se izvršavaju normalno.
+
+<br>
+
+---
+
+### Naziv: Zaustavljanje podsjetnika nakon vraćanja knjige
+### US-85: Kao sistem, želim prestati slati podsjetnike kada je knjiga vraćena, kako član ne bi dobijao netačne poruke.
+**Acceptance Criteria:**
+- Kada je zaduženje završeno, sistem ga ne uključuje u buduća slanja podsjetnika.
+- Knjige vraćene prije roka ne dobijaju podsjetnik na istek.
+- Knjige vraćene nakon zakašnjenja ne dobijaju nove mailove nakon povrata.
+- Slanje se zasniva samo na aktivnim zaduženjima.
 
 <br>
 
@@ -120,65 +120,82 @@ Tokom ovog sprinta implementiraju se funkcionalnosti vezane za:
 
 ## PB-46: Audit log promjena
 
-### Naziv: Automatsko evidentiranje promjena
-### US-91: Kao član osoblja, želim da sistem automatski evidentira svako dodavanje, izmjenu i brisanje knjiga kako bih mogao pratiti promjene u bibliotečkom fondu.
+### Naziv: Pregled audit log zapisa
+### US-91: Kao administrator, želim imati pristup svim audit log zapisima na jednom mjestu kako bih mogao pratiti sve promjene u sistemu.
 **Acceptance Criteria:**
-- Kada se knjiga doda, izmijeni ili obriše, tada sistem automatski kreira audit zapis
-- Audit zapis sadrži naziv akcije, datum i vrijeme promjene
-- Audit zapis sadrži korisnika koji je izvršio promjenu
-- Svi zapisi se čuvaju u sistemu i nisu dostupni za izmjenu
+- Administrator može pristupiti Audit Log stranici putem sidebar-a
+- Stranica prikazuje listu svih audit log zapisa
+- Svaki zapis u listi prikazuje: entitet, vrstu akcije, korisnika koji je izvršio akciju i datum i vrijeme promjene
+- Zapisi su sortirani od najnovijeg prema najstarijem
 
 <br>
 
 ---
-### Naziv: Bilježenje promjena korisničkih naloga
-### US-92: Kao administrator, želim da sistem bilježi promjene nad korisničkim nalozima kako bih mogao pratiti sigurnost i aktivnosti korisnika.
+
+### Naziv: Filtriranje audit log zapisa
+### US-92: Kao administrator, želim moći filtrirati audit log zapise po entitetu, vrsti akcije i datumu kako bih brže pronašao relevantne promjene.
 **Acceptance Criteria:**
-- Kada se korisnik kreira, izmijeni ili deaktivira, tada se kreira audit zapis
-- Zapis sadrži vrstu promjene i korisnika koji je izvršio akciju
-- Zapis sadrži datum i vrijeme promjene
+- Administrator može filtrirati zapise po entitetu (npr. Knjiga, Korisnik, Zaduženje)
+- Administrator može filtrirati zapise po vrsti akcije (Kreiranje, Izmjena, Brisanje)
+- Administrator može filtrirati zapise po datumskom rasponu (od – do)
+- Lista se ažurira prema odabranim filterima
+- Kada nijedan zapis ne odgovara filterima, prikazuje se odgovarajuća poruka
 
 <br>
 
 ---
+
+### Naziv: Pregled detalja audit log zapisa
+### US-92.1: Kao administrator, želim moći otvoriti detalje pojedinog audit log zapisa kako bih vidio stanje entiteta prije i nakon izmjene.
+**Acceptance Criteria:**
+- Administrator može otvoriti detalje zapisa klikom na zapis u listi
+- Detalji prikazuju stanje entiteta prije izmjene
+- Detalji prikazuju stanje entiteta nakon izmjene
+- Za akcije kreiranja prikazuje se samo stanje nakon (prije ne postoji)
+- Za akcije brisanja prikazuje se samo stanje prije (nakon ne postoji)
+
+<br>
+
+---
+
 | **Prioritet** | Nizak |
 |---------------|-------|
 | **Poslovna vrijednost** | Omogućava transparentnost i sigurnost sistema kroz praćenje svih važnih promjena, olakšava dijagnostiku problema i reviziju aktivnosti korisnika. |
-| **Pretpostavke / Otvorena pitanja** | Sve promjene se u sistemu čuvaju 30 dana. |
- **Veze i zavisnosti** | PB-25: Evidencija zaduživanja i vraćanja knjiga. <br> PB-24: Rezervacija knjiga. <br> PB-26: Upravljanje korisnicima. |
+| **Pretpostavke / Otvorena pitanja** | Sve promjene se u sistemu čuvaju 30 dana. <br> Sistem bilježi stanje entiteta prije i nakon svake izmjene. |
+| **Veze i zavisnosti** | PB-25: Evidencija zaduživanja i vraćanja knjiga. <br> PB-24: Rezervacija knjiga. <br> PB-26: Upravljanje korisnicima. |
 
 ---
 
 <br>
 
 ## PB-47: Kazne za kasno vraćanje knjiga
-### Naziv: Evidentiranje kazne po zaduženju
-### US-93: Kao sistem, želim automatski obračunati kaznu za svaku knjigu koja nije vraćena u predviđenom roku kako bi se osigurala disciplina i poštovanje pravila korištenja.
+### Naziv: Blokiranje kreiranja novog zaduženja
+### US-93: Kao sistem, želim spriječiti kreiranje novog zaduženja članu koji ima jedno ili više zakašnjelih zaduženja koja nisu vraćena, kako bi se osiguralo poštovanje pravila korištenja.
 **Acceptance Criteria:**
-- Kada je knjiga vraćena nakon isteka roka, tada sistem automatski obračunava kaznu po danu kašnjenja
-- Kazna se računa za svaki dan kašnjenja
-- Kazna se veže za konkretno zaduženje i člana
+- Kada osoblje pokuša kreirati zaduženje za člana koji ima zakašnjela nevraćena zaduženja, sistem onemogućava kreiranje
+- Sistem prikazuje poruku: "Nije moguće kreirati zaduženje – odabrani član ima jedno ili više zakašnjelih zaduženja koja nisu vraćena."
+- Kada član nema zakašnjelih zaduženja, kreiranje zaduženja je moguće normalno
 
 <br>
 
 ---
 
-### Naziv: Prikaz ukupnog duga člana
-### US-94: Kao član biblioteke, želim da mogu pregledati ukupne kazne kako bih bio informisan o svojim obavezama.
+### Naziv: Blokiranje rezervacije za člana sa zakašnjelim zaduženjima
+### US-94: Kao sistem, želim spriječiti rezervaciju knjige članu koji ima nevraćena zaduženja, kako bi se osiguralo poštovanje pravila korištenja.
 **Acceptance Criteria:**
-- Kada član pristupi svom profilu, tada vidi pregled svih kazni
-- Sistem prikazuje ukupni iznos kazne
-- Ako član nema kazni, sistem prikazuje poruku da nema dugovanja
-- Podaci o kaznama se ažuriraju nakon svakog vraćanja knjige
+- Kada član sa zakašnjelim zaduženjima pokuša rezervisati knjigu koja trenutno nije dostupna, sistem onemogućava rezervaciju
+- Sistem prikazuje poruku: "Imate zakasnijela zaduženja. Rezervacija nije moguća."
+- Kada član nema zakašnjelih zaduženja, rezervacija je moguća normalno
 
 <br>
 
 ---
-| **Prioritet** | Nizak |
-|---------------|-------|
-| **Poslovna vrijednost** | Omogućava disciplinu u korištenju bibliotečkog fonda, smanjuje kašnjenja u vraćanju knjiga i obezbjeđuje dodatnu kontrolu nad zaduženjima. |
-| **Pretpostavke / Otvorena pitanja** | Postoji definisana pravila obračuna kazni. |
- **Veze i zavisnosti** | PB-25: Evidencija zaduživanja i vraćanja knjiga. |
+
+| **Prioritet** | Srednji |
+|---------------|---------|
+| **Poslovna vrijednost** | Osigurava poštovanje pravila korištenja biblioteke i smanjuje broj nevrácenih knjiga ograničavanjem pristupa novim uslugama članovima koji kasne s vraćanjem. |
+| **Pretpostavke / Otvorena pitanja** | Ograničenja se primjenjuju samo na aktivna zakašnjela zaduženja — po povratku knjige, član ponovo dobija pristup. |
+| **Veze i zavisnosti** | PB-25: Evidencija zaduživanja i vraćanja knjiga. <br> PB-24: Rezervacija knjiga. |
 
 ---
 
