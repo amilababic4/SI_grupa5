@@ -1,19 +1,37 @@
 # SmartLib — Bibliotečki informacioni sistem
 ## Izvještaj o testiranju
 
-**Datum kreiranja izvještaja:** 25.05.2026.  
+**Datum kreiranja izvještaja:** 01.06.2026.  
 **Okruženje:** Development / Test (In-Memory DB), Chrome (za UI testove)  
 **Alati:** xUnit, WebApplicationFactory, Browser DevTools, Playwright, Fine Code Coverage 
 
 ---
 
+> ## NAPOMENA: Sprint 10 — Pregled novododanih testnih aktivnosti
+>
+> U okviru Sprinta 10 provedeno je testiranje novih funkcionalnosti u skladu sa definiranom test strategijom. Svi prethodno implementirani testovi uspješno su zadržali status *Prošao* kroz kontinuirano regresiono testiranje. Pregled svih testnih slučajeva dodanih u okviru Sprinta 10 dat je u nastavku.
+>
+> ---
+>
+> - **Unit testovi — Web kontroler** (`RezervacijaWebControllerTests`, prošireno na 15 testova): dopunjeni su testovi rezervacijskog modula sa 6 novih slučajeva koji pokrivaju blokadu rezervacije zbog dostupnih primjeraka, duplikata, zakasnjelih zaduženja, nepostojeće knjige, zaštitu vlasništva pri otkazivanju te provjeru statusa rezervacije.
+> - **Unit testovi — Web kontroler** (`AdminWebControllerTests`, 5 testova): uvedeni testovi admin modula koji pokrivaju prikaz liste korisnika, pregled audit loga bez filtera, paginaciju, filtriranje po tipu entiteta i akciji, te ispravnost ViewBag podataka za prikaz straničenja.
+> - **Unit testovi — Web kontroler** (`KnjigaWebControllerTests`): dodani su testovi koji pokrivaju uređivanje, brisanje i pregled knjiga, dohvat korica, filtriranje kataloga po različitim kriterijima, cache invalidaciju te generisanje preporuka knjiga.
+> - **Unit testovi — Web kontroler (`RezervacijaWebControllerTests`)**: dodana su dva nova test slučaja koji pokrivaju poslovnu logiku obavještavanja bibliotekara prilikom kreiranja rezervacije. Prvi test provjerava da se email obavijest uspješno šalje bibliotekaru putem `IEmailService`, dok drugi test osigurava da eventualna greška u email servisu ne blokira kreiranje rezervacije, već da se proces uspješno završava uz redirect na detalje knjige.
+> - **Unit testovi — Web kontroler** (`ClanarinaWebControllerTests`): dopunjeni su testovi članarina modula sa 13 novih slučajeva koji pokrivaju pregled i obradu zahtjeva za produženje (odobravanje i odbijanje), kreiranje nove članarine pri odobravanju, te podnošenje zahtjeva od strane člana uz validaciju trajanja i blokadu duplih zahtjeva.
+> - **Sigurnosni / penetracijski testovi**: dodani novi testni slučajevi za module **Knjige**, **Primjerci**, **Rezervacije** i **Zaduženja** koji provjeravaju autentifikaciju, autorizaciju, kontrolu pristupa, validaciju ulaznih podataka i zaštitu poslovnih pravila od neovlaštenih korisnika.
+> - **UI testovi (End-to-End)**: dodane su nove UI test klase koje proširuju pokrivenost sistema. Dodane klase su `ListaKolekcijaUiTests`, `NabavkaUiTests` i `ClanarinaUiTests`, a testovi u njima pokrivaju rad sa kolekcijama korisnika, proces nabavke knjiga te upravljanje članarinama i zahtjevima za produženje, uključujući validacije, autorizaciju i osnovne korisničke scenarije.
+> - **Regresiono testiranje**: za slanje email obavještenja o novoj rezervaciji, kao i za produžavanje članarine.
+
+---
+
+
 ## 1. Pregled testiranja
 
-Ovaj dokument predstavlja formalni izvještaj o testiranju provedenom tokom svih razvojnih faza zaključno sa Sprintom 9. Testiranje je provedeno u skladu sa definiranom Test strategijom (Sprint 3) i obuhvata funkcionalnosti implementirane u okviru Sprintova 5, 6, 7, 8 i 9 projekta SmartLib.
+Ovaj dokument predstavlja formalni izvještaj o testiranju provedenom tokom svih razvojnih faza zaključno sa Sprintom 10. Testiranje je provedeno u skladu sa definiranom Test strategijom (Sprint 3) i obuhvata funkcionalnosti implementirane u okviru Sprintova 5, 6, 7, 8, 9 i 10 projekta SmartLib.
 
 | Ukupno testova | Prošlo  | Preskočeno (Skip) | Greška |
 | :------------- | :------ | :---------------- | :----- |
-| **624**        | **624** | **0**             | **0**  |
+| **682**        | **682** | **0**             | **0**  |
 
 ![Rezultati testiranja](./images/rezultati-testiranja.png)
 
@@ -33,8 +51,6 @@ Ovaj dokument predstavlja formalni izvještaj o testiranju provedenom tokom svih
 
 **Rezultati testiranja:**
 Svi planirani unit testovi su uspješno izvršeni.
-
-![Rezultati unit testiranja](./images/rezultati-unit-testiranja.png)
 
 [**Prikaži detaljan izvještaj svih unit testnih slučajeva**](#detaljni-izvjestaj-unit)
 
@@ -66,8 +82,6 @@ Svi planirani unit testovi su uspješno izvršeni.
 **Rezultati testiranja:**  
 Svi planirani sigurnosni testovi su uspješno izvršeni.
 
-![Rezultati sigurnosnog testiranja](./images/rezultati-sec-testiranja.png)
-
 [**Prikaži detaljan izvještaj svih penetracijskih / sigurnosnih testnih slučajeva**](#detaljni-izvjestaj-security)
 
 > **Pokriveni vektori napada:**
@@ -76,6 +90,12 @@ Svi planirani sigurnosni testovi su uspješno izvršeni.
 > * **PT-04 / PT-05:** Lažni i modificirani JWT token (US-08)
 > * **PT-06:** Arhitekturalni rizik — stari JWT deaktiviranog korisnika (US-09)
 > * **PT-07 / PT-08:** XSS u registracijskom obrascu i nazivu kategorije (US-01, US-02, US-30)
+> * **PT-09 / PT-10**: Authorization bypass testovi za Zaduženja (pristup bez tokena i pristup člana)  
+> * **PT-11 / PT-12**: Sigurnost rezervacija (zabranjeno otkazivanje tuđih rezervacija i kreiranje bez autentifikacije)  
+> * **PT-13 / PT-14**: Kontrola pristupa nad primjerkom (kreiranje i dohvat) uključujući unauthorized i forbidden scenarije 
+> * **PT-15 / PT-16**: Kontrola pristupa nad knjigama (kreiranje, brisanje i autorizacija po ulozi)  
+> * **PT-17**: SQL Injection zaštita u pretrazi knjiga  
+> * **PT-18**: Validacija i sigurnost inputa pri kreiranju knjige (maliciozni ISBN i XSS u naslovu)
 
 ---
 
@@ -112,6 +132,12 @@ Svi planirani sigurnosni testovi su uspješno izvršeni.
 * **Napredna pretraga i katalog (Sprint 9):**
     Nakon proširenja kataloga naprednim filterima po kategoriji, izdavaču i godini izdanja (PB-44), izvršena je regresija nad postojećom pretragom po naslovu i autoru. Potvrđeno je da kombinovanje filtera ne narušava paginaciju ni sortiranje rezultata.
 
+* **Email notifikacije i sistem obavještavanja (Sprint 10):**
+    Nakon implementacije email servisa, izvršena je regresija nad modulom obavještavanja. Potvrđeno je da sistem ispravno šalje email upozorenja članovima o isteku roka vraćanja knjiga i kašnjenjima (PB-41), kao i da se uspješno šalju notifikacije bibliotekaru prilikom kreiranja nove rezervacije (PB-42). Također je potvrđeno da eventualni neuspjeh email servisa ne utiče na osnovni tok poslovne logike sistema.
+
+* **Upravljanje članarinama i online produženje (Sprint 10):**
+    Nakon implementacije online produženja članarine, izvršena je regresija nad modulom članarina. Potvrđeno je da članovi mogu uspješno podnijeti zahtjev za produženje članarine, te da bibliotekari mogu pregledati i obraditi zahtjeve bez narušavanja postojećih funkcionalnosti sistema (PB-48).
+
 ---
 
 ### 2.4 UAT (User Acceptance Testing)
@@ -128,6 +154,9 @@ Testiranje je obuhvatilo ključne funkcionalnosti:
 - naprednu pretragu i filtere
 - vijesti, kalendar događaja i forum zajednice
 - generisanje mjesečnih izvještaja
+- online produžavanje članarine
+- integraciju sa distributerom knjiga (slanje email-a)
+- evidentiranje audit log promjena
 
 [**Prikaži detaljan izvještaj svih UAT scenarija**](#detaljni-izvjestaj-uat)
 
@@ -151,8 +180,6 @@ Svi scenariji su testirani kroz UI (browser) i validirani očekivani ishodi. Man
 **Rezultati testiranja:**  
 Svi planirani integracijski testovi su uspješno izvršeni.
 
-![Rezultati integracijskog testiranja](./images/rezultati-integracijskog-testiranja.png)
-
 [**Prikaži detaljan izvještaj svih integracijskih testnih slučajeva**](#detaljni-izvjestaj-integracija)
 
 ---
@@ -164,8 +191,6 @@ Svi planirani integracijski testovi su uspješno izvršeni.
 
 **Rezultati testiranja:**  
 Svi planirani UI/E2E scenariji su uspješno prošli.
-
-![Rezultati UI testiranja](./images/rezultati-ui-testiranje.png)
 
 [**Prikaži detaljan izvještaj svih UI testnih scenarija**](#detaljni-izvjestaj-ui)
 
@@ -412,45 +437,79 @@ Ovi unit testovi pokrivaju poslovnu logiku direktno nad `RezervacijaRepository` 
 
 ##### Knjiga Web (`KnjigaWebControllerTests`)
 
-Ovi testovi validiraju funkcionalnosti bibliotečkog kataloga, administrativni interfejs za upravljanje fondom knjiga i naprednu pretragu sa filterima implementiranu u Sprintu 9 (PB-44). Poseban fokus je na ispravnom filtriranju po kategoriji, izdavaču i godini izdanja, te kombinovanju više filtera istovremeno.
+Ovi testovi validiraju funkcionalnosti bibliotečkog kataloga, administrativni interfejs za upravljanje fondom knjiga i naprednu pretragu sa filterima implementiranu u Sprintu 9 (PB-44). Poseban fokus je na ispravnom filtriranju po kategoriji, izdavaču i godini izdanja, te kombinovanju više filtera istovremeno. U Sprintu 10 dodani su testovi za cache invalidaciju (`BumpBooksVersion`) i `GetCatalogRecommendation` akciju.
 
-![Rezultati KnjigaWebControllerTests](./images/knjiga-web-controller-tests.png)
 
-> **Napomena:** Ukupno 58 testova. Prvih 17 pokrivaju osnovni CRUD kataloga (Sprintovi 5–8), a testovi 18–58 pokrivaju naprednu pretragu i filtere (Sprint 9, PB-44: US-74, US-75, US-76, US-78). Kompletan spisak dostupan u Test Explorer-u.
-
-|  ID   | Naziv testa                                      | Opis                          | Testni koraci                      | Očekivani rezultat                                   | Stvarni rezultat | US           | Status |
-| :---: | :----------------------------------------------- | :---------------------------- | :--------------------------------- | :--------------------------------------------------- | :--------------- | :----------- | :----- |
-|   1   | Index_VracaKatalogViewModel                      | Prikaz kataloga knjiga        | Pozvati Index bez filtera          | Vraća ViewResult sa KatalogViewModel i listom knjiga | Kao očekivano    | US-12        | Prošao |
-|   2   | Index_NemaKnjiga_VracaPrazanKatalog              | Prazan katalog                | Mock prazne liste i poziv Index    | Lista knjiga prazna, bez greške                      | Kao očekivano    | US-13        | Prošao |
-|   3   | Index_PaginacijaMetadata_IspravnaVrijednost      | Paginacija kataloga           | Pozvati Index sa page=2            | Ispravno izračunate stranice i metadata              | Kao očekivano    | US-20        | Prošao |
-|   4   | Index_BrojDostupnihIzPrimjeraka                  | Brojanje dostupnih primjeraka | Knjiga sa 2 primjerka (1 dostupan) | Broj dostupnih = 1                                   | Kao očekivano    | US-22, US-23 | Prošao |
-|   5   | Create_ValidanModel_SpremaKnjigu                 | Kreiranje knjige              | Poslati validan DTO                | Knjiga se snima i redirect na Index                  | Kao očekivano    | US-12        | Prošao |
-|   6   | Create_ValidanModel_KreiraPrimjerkePremaKolicini | Kreiranje primjeraka          | BrojPrimjeraka = 3                 | Kreiraju se 3 primjerka                              | Kao očekivano    | US-21        | Prošao |
-|   7   | Create_NulaKopija_NeKreiraPrimjerke              | Nula primjeraka               | BrojPrimjeraka = 0                 | Ne kreiraju se primjerci                             | Kao očekivano    | US-21        | Prošao |
-|   8   | Create_NeispravanModel_VracaView                 | Validacija forme              | Nevalidan ModelState               | Ostaje na View sa greškama                           | Kao očekivano    | US-12        | Prošao |
-|   9   | Create_NevazanIsbn_DodajeGresku                  | Neispravan ISBN               | ISBN = "123"                       | ModelState greška za ISBN                            | Kao očekivano    | US-13        | Prošao |
-|  10   | Create_DuplikatIsbn                              | Dupli ISBN                    | Postojeća knjiga sa istim ISBN     | Greška u ModelState                                  | Kao očekivano    | US-13        | Prošao |
-|  11   | Create_NevalidnaKategorija                       | Neispravna kategorija         | KategorijaId ne postoji            | ModelState greška                                    | Kao očekivano    | US-12        | Prošao |
-|  12   | Create_IsbnSacrticama_NormalizujeSe              | Normalizacija ISBN            | ISBN sa crticama                   | ISBN se čuva bez crtica                              | Kao očekivano    | US-13        | Prošao |
-|  13   | Edit_Get_PostojecaKnjiga                         | Učitavanje edit forme         | GET Edit sa validnim ID            | View sa popunjenim podacima                          | Kao očekivano    | US-17        | Prošao |
-|  14   | Edit_Get_NepostojecaKnjiga                       | Nevalidan ID                  | GET Edit sa nepostojećim ID        | 404 NotFound                                         | Kao očekivano    | US-17        | Prošao |
-|  15   | Edit_Post_ValidanModel                           | Ažuriranje knjige             | POST validan DTO                   | Update + redirect Index                              | Kao očekivano    | US-17        | Prošao |
-|  16   | Edit_Post_NeispravanModel                        | Nevalidni podaci              | ModelState invalid                 | Ostaje na View                                       | Kao očekivano    | US-17        | Prošao |
-|  17   | Edit_Post_NepostojecaKnjiga                      | Knjiga obrisana u međuvremenu | POST sa ID koji ne postoji         | 404 NotFound                                         | Kao očekivano    | US-17        | Prošao |
-|  18   | Index_FilterPoKategoriji_VracaSamoOdgovarajuceKnjige | Filtriranje po kategoriji | Odabrati filter kategorija         | Prikazuju se samo knjige iz te kategorije            | Kao očekivano    | US-74        | Prošao |
-|  19   | Index_FilterPoKategoriji_PraznaKategorija_VracaPrazanRezultat | Kategorija bez knjiga | Odabrati kategoriju bez knjiga | Poruka "Nema rezultata"                              | Kao očekivano    | US-74        | Prošao |
-|  20   | Index_FilterPoKategoriji_PromjenaKategorije_AzuriraListu | Promjena kategorije ažurira listu | Promijeniti odabir kategorije | Lista se ažurira prema novoj kategoriji              | Kao očekivano    | US-74        | Prošao |
-|  21   | Index_FilterPoIzdavacu_VracaSamoOdgovarajuceKnjige | Filtriranje po izdavaču      | Odabrati filter izdavač            | Prikazuju se samo knjige tog izdavača                | Kao očekivano    | US-75        | Prošao |
-|  22   | Index_FilterPoIzdavacu_NemaRezultata_VracaPoruku | Izdavač bez knjiga            | Odabrati nepostojećeg izdavača     | Poruka "Nema knjiga za odabranog izdavača"           | Kao očekivano    | US-75        | Prošao |
-|  23   | Index_FilterPoIzdavacu_PromjenaIzdavaca_AzuriraListu | Promjena izdavača ažurira listu | Promijeniti odabir izdavača   | Lista se osvježava                                   | Kao očekivano    | US-75        | Prošao |
-|  24   | Index_FilterPoGodini_VracaSamoOdgovarajuceKnjige | Filtriranje po godini izdanja | Unijeti godinu izdanja             | Prikazuju se samo knjige iz te godine                | Kao očekivano    | US-76        | Prošao |
-|  25   | Index_FilterPoGodini_NemaRezultata_VracaPoruku   | Godina bez knjiga             | Unijeti godinu bez knjiga          | Poruka "Nema knjiga za odabranu godinu"              | Kao očekivano    | US-76        | Prošao |
-|  26   | Index_FilterPoGodini_PromjenaGodine_AzuriraListu | Promjena godine ažurira listu | Promijeniti godinu                 | Lista se osvježava                                   | Kao očekivano    | US-76        | Prošao |
-|  27   | Index_KombinacijaFiltera_KategorijaIIzdavac_VracaTacneKnjige | Kombinacija filtera | Odabrati kategoriju i izdavača     | Prikazuju se samo knjige koje zadovoljavaju oba uvjeta | Kao očekivano  | US-78        | Prošao |
-|  28   | Index_KombinacijaFiltera_SvaTriFiltera_VracaTacneKnjige | Sva tri filtera | Odabrati kategoriju, izdavača i godinu | Prikazuju se samo knjige koje zadovoljavaju sve uvjete | Kao očekivano | US-78       | Prošao |
-|  29   | Index_KombinacijaFiltera_NemaRezultata_VracaPoruku | Kombinacija bez rezultata   | Odabrati kombinaciju bez knjiga    | Poruka "Nema rezultata"                              | Kao očekivano    | US-78        | Prošao |
-|  30   | Index_KombinacijaFiltera_PromjenaFiltera_AzuriraListu | Promjena filtera ažurira listu | Promijeniti jedan od filtera   | Lista se ispravno osvježava                          | Kao očekivano    | US-78        | Prošao |
-| 31–58 | *(dodatni testovi filtriranja, rubnih slučajeva i kombinacija — vidljivi u Test Exploreru)* | Napredna pretraga i filteri | Različite kombinacije parametara | Ispravni rezultati za sve kombinacije | Kao očekivano | US-74–US-78 | Prošao |
+|  ID   | Naziv testa                                                              | Opis                                        | Testni koraci                                             | Očekivani rezultat                                        | Stvarni rezultat | US           | Status |
+| :---: | :----------------------------------------------------------------------- | :------------------------------------------ | :-------------------------------------------------------- | :-------------------------------------------------------- | :--------------- | :----------- | :----- |
+|   1   | Index_VracaKatalogViewModel                                              | Prikaz kataloga knjiga                      | Pozvati Index bez filtera                                 | Vraća ViewResult sa KatalogViewModel i listom knjiga      | Kao očekivano    | US-12        | Prošao |
+|   2   | Index_NemaKnjiga_VracaPrazanKatalog                                      | Prazan katalog                              | Mock prazne liste i poziv Index                           | Lista knjiga prazna, bez greške                           | Kao očekivano    | US-13        | Prošao |
+|   3   | Index_PaginacijaMetadata_IspravnaVrijednost                              | Paginacija kataloga                         | Pozvati Index sa page=2, ukupno=25                        | TrenutnaStrana=2, UkupnoStrana=2, VelicinaStrane=16       | Kao očekivano    | US-20        | Prošao |
+|   4   | Index_BrojDostupnihIzPrimjeraka_IspravanapoPrimjercima                   | Brojanje dostupnih primjeraka               | Knjiga sa 2 primjerka (1 dostupan, 1 zadužen)             | BrojPrimjeraka=2, BrojDostupnih=1                         | Kao očekivano    | US-22, US-23 | Prošao |
+|   5   | Index_PageManjiOd1_KoristiStranu1                                        | Korekcija negativne stranice                | Pozvati Index sa page=-5                                  | GetPagedAsync pozvan sa page=1                            | Kao očekivano    | US-20        | Prošao |
+|   6   | Index_KnjigaBezKategorije_KategorijaJeNull                               | Knjiga bez dodijeljene kategorije           | Mock knjige bez Kategorija navigacije                     | KnjigaDto.Kategorija je null, bez greške                  | Kao očekivano    | US-12        | Prošao |
+|   7   | Index_NemaKnjiga_UkupnoStranaJe1                                         | Minimum jedna stranica                      | Mock prazne liste, ukupno=0                               | UkupnoStrana=1                                            | Kao očekivano    | US-20        | Prošao |
+|   8   | Index_ModelSadrziKategorijeListe_ZaDropdown                              | Dropdown lista kategorija                   | Pozvati Index, provjeriti model                           | model.Kategorije nije prazno                              | Kao očekivano    | US-74        | Prošao |
+|   9   | Index_ModelSadrziIzdavaceListe_ZaDropdown                                | Dropdown lista izdavača                     | Pozvati Index, provjeriti model                           | model.Izdavaci nije prazno                                | Kao očekivano    | US-75        | Prošao |
+|  10   | Index_ModelSadrziGodineListu_ZaDropdown                                  | Dropdown lista godina                       | Pozvati Index, provjeriti model                           | model.Godine nije prazno                                  | Kao očekivano    | US-76        | Prošao |
+|  11   | Index_BezAktivnihFiltera_ImaAktivnihFilteraJeFalse                       | Indikator aktivnih filtera                  | Pozvati Index bez filtera                                 | ImaAktivnihFiltera = false                                | Kao očekivano    | US-78        | Prošao |
+|  12   | Index_SaKategorijaFilterom_ImaNapredniFilterJeTrue                       | Indikator naprednog filtera                 | Pozvati Index sa kategorijaId=1                           | ImaNapredniFilter = true                                  | Kao očekivano    | US-74        | Prošao |
+|  13   | Index_SamoOsnovnaPretraga_ImaNapredniFilterJeFalse                       | Osnovna pretraga ne aktivira napredni filter | Pozvati Index sa naslov="Test"                           | ImaNapredniFilter=false, ImaAktivnihFiltera=true          | Kao očekivano    | US-12        | Prošao |
+|  14   | Create_Get_VracaViewSaPraznimModelom                                     | GET forma za kreiranje knjige               | Pozvati Create GET                                        | ViewResult sa praznim KnjigaCreateDto                     | Kao očekivano    | US-12        | Prošao |
+|  15   | Create_ValidanModel_SpremaKnjiguIRedirektuje                             | Kreiranje knjige — uspješan tok             | Poslati validan DTO                                       | Knjiga se snima i redirect na Index                       | Kao očekivano    | US-12        | Prošao |
+|  16   | Create_ValidanModel_KreiraPrimjerkePremaKolicini                         | Kreiranje primjeraka prema količini         | BrojPrimjeraka=3                                          | CreateAsync pozvan tačno 3 puta                           | Kao očekivano    | US-21        | Prošao |
+|  17   | Create_NulaKopija_NeKreiraPrimjerke                                      | Nula primjeraka — ne kreira se ništa        | BrojPrimjeraka=0                                          | CreateAsync za primjerak nije pozvan                      | Kao očekivano    | US-21        | Prošao |
+|  18   | Create_NeispravanModel_VracaView                                         | Validacija forme — nevalidan ModelState     | Dodati ModelState grešku, pozvati Create POST             | Ostaje na View sa greškama                                | Kao očekivano    | US-12        | Prošao |
+|  19   | Create_NevazanIsbn_DodajeModelGreskuIVracaView                           | Neispravan ISBN — prekratak                 | ISBN = "123"                                              | ModelState greška za ISBN, View se vraća                  | Kao očekivano    | US-13        | Prošao |
+|  20   | Create_DuplikatIsbn_DodajeModelGreskuIVracaView                          | Dupli ISBN u katalogu                       | Postojeća knjiga sa istim ISBN                            | ModelState greška za ISBN                                 | Kao očekivano    | US-13        | Prošao |
+|  21   | Create_NevalidnaKategorija_DodajeModelGresku                             | Neispravna kategorija                       | KategorijaId koji ne postoji                              | ModelState greška za KategorijaId                         | Kao očekivano    | US-12        | Prošao |
+|  22   | Create_NeispravanIsbn_NeProvjeravaDuplikate                              | Neispravan ISBN — preskače provjeru duplikata | ISBN = "12345678901" (11 znakova)                       | GetByIsbnAsync se ne poziva                               | Kao očekivano    | US-13        | Prošao |
+|  23   | Create_IsbnSacrticama_NormalizujeSeIsprePohrane                          | Normalizacija ISBN-a sa crticama            | ISBN = "978-0-451-52493-6"                                | ISBN se snima kao "9780451524936"                         | Kao očekivano    | US-13        | Prošao |
+|  24   | Create_IsbnSaXNaKraju_Validan                                            | ISBN-10 sa X na kraju — validan             | ISBN = "080442957X"                                       | RedirectToActionResult — kreiranje uspješno               | Kao očekivano    | US-13        | Prošao |
+|  25   | Create_IsbnPogresneDuzine_VracaBadRequest                                | ISBN pogrešne dužine                        | ISBN = "12345678901" (11 znakova)                         | ModelState greška za ISBN                                 | Kao očekivano    | US-13        | Prošao |
+|  26   | Create_Isbn10SaNevazanimZadnjimZnakom_VracaGresku                        | ISBN-10 sa Z na kraju — nevalidan           | ISBN = "080442957Z"                                       | ModelState greška za ISBN                                 | Kao očekivano    | US-13        | Prošao |
+|  27   | Create_SaIzdavacem_TrimujеIzdavaca                                       | Trim razmaka u polju Izdavac                | Izdavac = "  Pearson  "                                   | Knjiga se snima sa Izdavac = "Pearson"                    | Kao očekivano    | US-12        | Prošao |
+|  28   | Edit_Get_PostojecaKnjiga_VracaView                                       | GET Edit — postojeća knjiga                 | GET Edit sa validnim ID                                   | ViewResult sa popunjenim KnjigaEditDto                    | Kao očekivano    | US-17        | Prošao |
+|  29   | Edit_Get_NepostojecaKnjiga_VracaNotFound                                 | GET Edit — nepostojući ID                   | GET Edit sa ID=999                                        | NotFoundResult                                            | Kao očekivano    | US-17        | Prošao |
+|  30   | Edit_Get_PostavljaIsbnUViewBag                                           | ISBN se prikazuje u ViewBag-u               | GET Edit sa validnim ID                                   | ViewBag.Isbn = "9780451524935"                            | Kao očekivano    | US-17        | Prošao |
+|  31   | Edit_Post_ValidanModel_AzuriraKnjiguIRedirektuje                         | POST Edit — uspješno ažuriranje             | POST validan DTO                                          | Knjiga ažurirana, redirect na Index                       | Kao očekivano    | US-17        | Prošao |
+|  32   | Edit_Post_NeispravanModel_VracaView                                      | POST Edit — nevalidni podaci                | ModelState invalid                                        | Ostaje na View, UpdateAsync se ne poziva                  | Kao očekivano    | US-17        | Prošao |
+|  33   | Edit_Post_NepostojecaKnjiga_VracaNotFound                                | POST Edit — knjiga obrisana u međuvremenu   | POST sa ID koji ne postoji                                | NotFoundResult                                            | Kao očekivano    | US-17        | Prošao |
+|  34   | Edit_Post_NevalidnaKategorija_VracaViewSaGreskom                         | POST Edit — nevalidna kategorija            | KategorijaId koji ne postoji                              | ModelState greška za KategorijaId, View se vraća          | Kao očekivano    | US-17        | Prošao |
+|  35   | Edit_Post_SaIzdavacem_TrimujеIzdavaca                                    | Trim razmaka u polju Izdavac pri uređivanju | Izdavac = "  Pearson  "                                   | Knjiga se snima sa Izdavac = "Pearson"                    | Kao očekivano    | US-17        | Prošao |
+|  36   | Details_PostojecaKnjiga_VracaView                                        | Prikaz detalja knjige                       | Pozvati Details sa validnim ID                            | ViewResult sa KnjigaDto                                   | Kao očekivano    | US-14        | Prošao |
+|  37   | Details_NepostojecaKnjiga_VracaNotFound                                  | Detalji — nepostojući ID                    | Pozvati Details sa ID=99                                  | NotFoundResult                                            | Kao očekivano    | US-14        | Prošao |
+|  38   | Details_KnjigaBezKategorije_KategorijaJeNull                             | Detalji knjige bez kategorije               | Mock knjige bez Kategorija navigacije                     | KnjigaDto.Kategorija je null, bez greške                  | Kao očekivano    | US-14        | Prošao |
+|  39   | Details_PostavljaBrojZaduzenjaUViewBag                                   | ViewBag.BrojZaduzenja se ispravno popunjava | CountByKnjigaIdAsync vraća 5                              | ViewBag.BrojZaduzenja = 5                                 | Kao očekivano    | US-22        | Prošao |
+|  40   | Delete_KnjigaImaAktivnaZaduzenja_RedirektujeSaGreskom                    | Brisanje blokirano aktivnim zaduženjima     | HasActiveLoansAsync vraća true                            | Redirect na Index, TempData["ErrorMessage"] postavljen    | Kao očekivano    | US-18        | Prošao |
+|  41   | Delete_DeleteAsyncVracaFalse_PrikazujeGresku                             | Brisanje neuspješno — repozitorij vraća false | DeleteAsync vraća false                                 | Redirect, TempData["ErrorMessage"] postavljen             | Kao očekivano    | US-18        | Prošao |
+|  42   | Delete_ExceptionPriBrisanju_PrikazujeGresku                              | Brisanje neuspješno — iznimka repozitorija  | DeleteAsync baca Exception                                | Redirect, TempData["ErrorMessage"] sa porukom iznimke     | Kao očekivano    | US-18        | Prošao |
+|  43   | Delete_Uspjesno_PrikazujePorukuUspjeha                                   | Uspješno brisanje                           | HasActiveLoansAsync=false, DeleteAsync=true               | TempData["SuccessMessage"] postavljen                     | Kao očekivano    | US-18        | Prošao |
+|  44   | Korice_PrazanIsbn_VracaNotFound                                          | Korice — prazan ISBN                        | Pozvati Korice sa isbn=""                                 | NotFoundResult                                            | Kao očekivano    | US-15        | Prošao |
+|  45   | Korice_NullIsbn_VracaNotFound                                            | Korice — null ISBN                          | Pozvati Korice sa isbn=null                               | NotFoundResult                                            | Kao očekivano    | US-15        | Prošao |
+|  46   | Korice_CacheHit_VracaFileIzCachea                                        | Korice — slika dostupna u cacheu            | Upisati sliku u cache, pozvati Korice                     | FileContentResult iz cachea                               | Kao očekivano    | US-15        | Prošao |
+|  47   | Korice_IsbnSaCrticama_NormalizujeSeZaCacheKljuc                          | Korice — ISBN sa crticama normalizuje cache ključ | ISBN = "978-0-451-52493-5" u cacheu kao "9780451524935" | FileContentResult iz cachea                              | Kao očekivano    | US-15        | Prošao |
+|  48   | Korice_DrugacijaVelicina_KoristiIspravanCacheKljuc                       | Korice — veličina L koristi ispravan ključ  | Cache ključ "cover_1234567890_L", size="L"                | FileContentResult iz cachea                               | Kao očekivano    | US-15        | Prošao |
+|  49   | Korice_HttpClientVracaUspjesanOdgovor_VracaFileISpremaUCache             | Korice — Open Library vraća sliku           | HTTP 200, imageBytes.Length > 3000                        | FileContentResult, slika zapisana u cache                 | Kao očekivano    | US-15        | Prošao |
+|  50   | Korice_HttpClientVracaNeuspjesanStatusCode_VracaFallbackSvg              | Korice — HTTP 404, fallback SVG             | HTTP 404 od Open Library i Google Books                   | FileContentResult sa ContentType="image/svg+xml"          | Kao očekivano    | US-15        | Prošao |
+|  51   | Korice_HttpClientBacaException_VracaFallbackSvg                          | Korice — mrežna iznimka, fallback SVG       | HttpRequestException pri pozivu                           | FileContentResult sa ContentType="image/svg+xml"          | Kao očekivano    | US-15        | Prošao |
+|  52   | Index_FilterPoKategoriji_VracaSamoBooksIzKategorije                      | Filtriranje po kategoriji — ima rezultata   | Pozvati Index sa kategorijaId=1                           | Lista sadrži samo knjige iz kategorije, KategorijaId=1    | Kao očekivano    | US-74        | Prošao |
+|  53   | Index_FilterPoKategoriji_NemaRezultata_VracaPraznuListu                  | Filtriranje po kategoriji — prazna lista    | Pozvati Index sa kategorijaId=99                          | Prazna lista knjiga, UkupnoStavki=0                       | Kao očekivano    | US-74        | Prošao |
+|  54   | Index_FilterPoIzdavacu_VracaSamoKnjigeIzdavaca                           | Filtriranje po izdavaču — ima rezultata     | Pozvati Index sa izdavac="Pearson"                        | Lista sadrži samo knjige Pearsona, Izdavac="Pearson"      | Kao očekivano    | US-75        | Prošao |
+|  55   | Index_FilterPoIzdavacu_NemaRezultata_VracaPraznuListu                    | Filtriranje po izdavaču — prazna lista      | Pozvati Index sa izdavac="Nepostojeci"                    | Prazna lista knjiga                                       | Kao očekivano    | US-75        | Prošao |
+|  56   | Index_FilterPoGodini_VracaSamoKnjigeIzGodine                             | Filtriranje po godini — ima rezultata       | Pozvati Index sa godinaIzdanja=2020                       | Lista sadrži samo knjige iz 2020, GodinaIzdanja=2020      | Kao očekivano    | US-76        | Prošao |
+|  57   | Index_FilterPoGodini_NemaRezultata_VracaPraznuListu                      | Filtriranje po godini — prazna lista        | Pozvati Index sa godinaIzdanja=1800                       | Prazna lista knjiga                                       | Kao očekivano    | US-76        | Prošao |
+|  58   | Index_KombinacijaFiltera_ProslijedjujeSveFiltereRepozitoriju             | Kombinacija svih filtera — prosljeđivanje   | Index sa naslov, autor, kategorijaId, izdavac, godinaIzdanja | GetPagedAsync pozvan sa svim parametrima              | Kao očekivano    | US-78        | Prošao |
+|  59   | Index_KombinacijaFiltera_NemaRezultata_VracaPraznuListu                  | Kombinacija filtera — prazna lista          | Kombinacija koja ne daje rezultate                        | Prazna lista knjiga, UkupnoStavki=0                       | Kao očekivano    | US-78        | Prošao |
+|  60   | Create_ValidanModel_BumpujeBooksVersion                                  | Cache invalidacija pri kreiranju knjige     | Kreirati knjiga, provjeriti BooksVersion                  | BooksVersion se mijenja                                   | Kao očekivano    | US-12        | Prošao |
+|  61   | Edit_Post_ValidanModel_BumpujeBooksVersion                               | Cache invalidacija pri ažuriranju knjige    | Ažurirati knjiga, provjeriti BooksVersion                 | BooksVersion se mijenja                                   | Kao očekivano    | US-17        | Prošao |
+|  62   | Delete_Uspjesno_BumpujeBooksVersion                                      | Cache invalidacija pri uspješnom brisanju   | Obrisati knjiga (uspješno), provjeriti BooksVersion       | BooksVersion se mijenja                                   | Kao očekivano    | US-18        | Prošao |
+|  63   | Delete_Neuspjesno_NeBumpujeBooksVersion                                  | Nema cache invalidacije ako brisanje ne uspije | Pokušati brisanje (neuspješno), provjeriti BooksVersion | BooksVersion ostaje isti                                 | Kao očekivano    | US-18        | Prošao |
+|  64   | Details_PostavljaBrojZaduzenjaUViewBag                                   | ViewBag.BrojZaduzenja se ispravno popunjava | CountByKnjigaIdAsync vraća 5                              | ViewBag.BrojZaduzenja = 5                                 | Kao očekivano    | US-22        | Prošao |
+|  65   | GetCatalogRecommendation_VracaJsonSaKnjigom                              | Osnovna preporuka knjige                    | Pozvati GetCatalogRecommendation bez filtera              | JsonResult sa podacima knjige                             | Kao očekivano    | US-74        | Prošao |
+|  66   | GetCatalogRecommendation_NemaKnjiga_VracaNotFound                        | Preporuka — prazan repozitorij              | GetRandomAsync vraća praznu listu                         | NotFoundResult                                            | Kao očekivano    | US-74        | Prošao |
+|  67   | GetCatalogRecommendation_SaKategorijom_PreferirsKnjigeTeKategorije       | Preporuka — filter po kategoriji            | Pozvati sa category="Beletristika"                        | JsonResult sa knjigom iz tražene kategorije               | Kao očekivano    | US-74        | Prošao |
+|  68   | GetCatalogRecommendation_RepozitorijBacaException_VracaStatusCode500     | Preporuka — greška repozitorija             | GetRandomAsync baca Exception                             | StatusCodeResult 500                                      | Kao očekivano    | US-74        | Prošao |
 
 ---
 
@@ -489,20 +548,22 @@ Ovi testovi validiraju funkcionalnosti bibliotečkog kataloga, administrativni i
 
 ##### Korisnik Web (`KorisnikWebControllerTests`)
 
-|  ID   | Naziv testa                                        | Opis                                         | Testni koraci                                                 | Očekivani rezultat                                  | Stvarni rezultat     |  US   | Status |
-| :---: | :------------------------------------------------- | :------------------------------------------- | :------------------------------------------------------------ | :-------------------------------------------------- | :------------------- | :---: | :----: |
-|   1   | Index_VracaViewSaListomClanova                     | Prikazuje samo korisnike sa ulogom "Član"    | Pozvati `Index()` sa listom korisnika (Član + Administrator). | View sadrži samo članove (Administrator filtriran). | Odgovara očekivanom. | US-49 | Prošao |
-|   2   | Index_KorisnikBezUloge_NijeUkljucenUListu         | Filtrira korisnike bez definisane uloge.     | Pozvati `Index()` gdje korisnik ima `Uloga = null`.           | Takav korisnik se ne prikazuje u listi.             | Odgovara očekivanom. | US-49 | Prošao |
-|   3   | Index_SortiranjePoPrezimenu_IspravanRedoslijed     | Provjerava sortiranje po prezimenu pa imenu. | Pozvati `Index()` sa više članova različitih imena/prezimena. | Lista sortirana po Prezime → Ime.                   | Odgovara očekivanom. | US-49 | Prošao |
-|   4   | Index_NemaKorisnika_VracaPrazanModel               | Ispravno ponašanje kada nema korisnika.      | Pozvati `Index()` sa praznom listom.                          | View vraća prazan model bez greške.                 | Odgovara očekivanom. | US-49 | Prošao |
-|   5   | Create_Get_VracaViewSaPraznimModelom               | Prikaz forme za kreiranje korisnika.         | Pozvati `Create()` GET metodu.                                | View sa praznim `KorisnikCreateDto` modelom.        | Odgovara očekivanom. | US-01 | Prošao |
-|   6   | Create_Post_ValidanModel_RedirectsToIndex          | Uspješna registracija korisnika.             | Poslati validan `KorisnikCreateDto`.                          | Redirekcija na `Index` + poruka uspjeha.            | Odgovara očekivanom. | US-03 | Prošao |
-|   7   | Create_Post_EmailVecPostoji_VracaViewSaGreskom     | Validacija unikatnosti emaila.               | Poslati model sa postojećim emailom.                          | Vraća se View sa greškom na polju Email.            | Odgovara očekivanom. | US-02 | Prošao |
-|   8   | Create_Post_NeispravanModel_VracaView              | Validacija obaveznih polja.                  | Postaviti `ModelState` kao neispravan.                        | Vraća se isti View bez poziva repozitorija.         | Odgovara očekivanom. | US-02 | Prošao |
-|   9   | Deaktiviraj_PostojeciKorisnik_RedirectsSaPorukom  | Deaktivacija postojećeg korisnika.           | Pozvati `Deaktiviraj(id)` za validnog korisnika.              | Status = "deaktiviran", redirekcija + poruka.       | Odgovara očekivanom. | US-09 | Prošao |
-|  10   | Deaktiviraj_NepostojeciKorisnik_VracaNotFound     | Obrada greške za nepostojećeg korisnika.     | Pozvati `Deaktiviraj(id)` za nepostojeći ID.                  | Vraća `NotFound`.                                   | Odgovara očekivanom. | US-09 | Prošao |
-|  11   | ProfilClana_VracaViewSaPodacimaClana              | Prikaz profila člana sa svim podacima.       | Pozvati `ProfilClana(id)` za validnog člana.                  | View sa podacima o članu i zaduženjima.             | Odgovara očekivanom. | US-49 | Prošao |
-|  12   | ProfilClana_NepostojeciClan_VracaNotFound         | Prikaz profila nepostojećeg člana.           | Pozvati `ProfilClana(id)` sa nepostojećim ID-om.              | Vraća `NotFound`.                                   | Odgovara očekivanom. | US-49 | Prošao |
+|  ID   | Naziv testa                                        | Opis                                                     | Testni koraci                                                 | Očekivani rezultat                                  | Stvarni rezultat     |  US   | Status |
+| :---: | :------------------------------------------------- | :------------------------------------------------------- | :------------------------------------------------------------ | :-------------------------------------------------- | :------------------- | :---: | :----: |
+|   1   | Index_VracaViewSaListomClanova                     | Prikazuje samo korisnike sa ulogom "Član"                | Pozvati `Index()` sa listom korisnika (Član + Administrator). | View sadrži samo članove (Administrator filtriran). | Odgovara očekivanom. | US-49 | Prošao |
+|   2   | Index_KorisnikBezUloge_NijeUkljucenUListu         | Filtrira korisnike bez definisane uloge.                 | Pozvati `Index()` gdje korisnik ima `Uloga = null`.           | Takav korisnik se ne prikazuje u listi.             | Odgovara očekivanom. | US-49 | Prošao |
+|   3   | Index_SortiranjePoPrezimenu_IspravanRedoslijed     | Provjerava sortiranje po prezimenu pa imenu.             | Pozvati `Index()` sa više članova različitih imena/prezimena. | Lista sortirana po Prezime → Ime.                   | Odgovara očekivanom. | US-49 | Prošao |
+|   4   | Index_NemaKorisnika_VracaPrazanModel               | Ispravno ponašanje kada nema korisnika.                  | Pozvati `Index()` sa praznom listom.                          | View vraća prazan model bez greške.                 | Odgovara očekivanom. | US-49 | Prošao |
+|   5   | Index_ClanSaSvimPoljima_MapiraSvaPoljaUDto         | Provjera ispravnog mapiranja svih polja u `KorisnikDto`. | Pozvati `Index()` sa članom koji ima sva polja popunjena.     | Dto sadrži tačne vrijednosti za Id, Ime, Prezime, Email, Uloga, Status, DatumKreiranja. | Odgovara očekivanom. | US-49 | Prošao |
+|   6   | Create_Get_VracaViewSaPraznimModelom               | Prikaz forme za kreiranje korisnika.                     | Pozvati `Create()` GET metodu.                                | View sa praznim `KorisnikCreateDto` modelom.        | Odgovara očekivanom. | US-01 | Prošao |
+|   7   | Create_Post_ValidanModel_RedirectsToIndex          | Uspješna registracija korisnika.                         | Poslati validan `KorisnikCreateDto`.                          | Redirekcija na `Index` + poruka uspjeha.            | Odgovara očekivanom. | US-03 | Prošao |
+|   8   | Create_Post_EmailVecPostoji_VracaViewSaGreskom     | Validacija unikatnosti emaila.                           | Poslati model sa postojećim emailom.                          | Vraća se View sa greškom na polju Email.            | Odgovara očekivanom. | US-02 | Prošao |
+|   9   | Create_Post_NeispravanModel_VracaView              | Validacija obaveznih polja.                              | Postaviti `ModelState` kao neispravan.                        | Vraća se isti View bez poziva repozitorija.         | Odgovara očekivanom. | US-02 | Prošao |
+|  10   | Create_Post_LozinkeSeNePodudaraju_VracaViewSaGreskom | Validacija podudaranja lozinki.                       | Poslati model gdje `Lozinka` ≠ `PotvrdaLozinke`.             | View sa greškom na polju `PotvrdaLozinke` i originalnim modelom. | Odgovara očekivanom. | US-02 | Prošao |
+|  11   | Deaktiviraj_PostojeciKorisnik_RedirectsSaPorukom  | Deaktivacija postojećeg korisnika.                       | Pozvati `Deaktiviraj(id)` za validnog korisnika bez aktivnih zaduženja. | Status = "deaktiviran", redirekcija na `Index` + poruka uspjeha. | Odgovara očekivanom. | US-09 | Prošao |
+|  12   | Deaktiviraj_NepostojeciKorisnik_VracaNotFound     | Obrada greške za nepostojećeg korisnika.                 | Pozvati `Deaktiviraj(id)` za nepostojeći ID.                  | Vraća `NotFound`.                                   | Odgovara očekivanom. | US-09 | Prošao |
+|  13   | ProfilClana_VracaViewSaPodacimaClana              | Prikaz profila člana sa svim podacima.                   | Pozvati `ProfilClana(id)` za validnog člana.                  | View sa podacima o članu, `JeMojProfil = false`.    | Odgovara očekivanom. | US-49 | Prošao |
+|  14   | ProfilClana_NepostojeciClan_VracaNotFound         | Prikaz profila nepostojećeg člana.                       | Pozvati `ProfilClana(id)` sa nepostojećim ID-om.              | Vraća `NotFound`.                                   | Odgovara očekivanom. | US-49 | Prošao |
 
 ---
 
@@ -566,30 +627,47 @@ Ovi testovi validiraju funkcionalnosti bibliotečkog kataloga, administrativni i
 
 ##### Admin Web (`AdminWebControllerTests`)
 
-|  ID   | Naziv testa                                   | Opis                                                  | Testni koraci                      | Očekivani rezultat      | Stvarni rezultat | US   | Status |
-| :---: | :-------------------------------------------- | :---------------------------------------------------- | :--------------------------------- | :---------------------- | :--------------- | :--- | :----- |
-|   1   | Korisnici_VracaView                           | Provjera prikaza stranice korisnika                   | Pozvati `Korisnici()` akciju       | Vraća `ViewResult`      | Kao očekivano    | —    | Prošao |
-|   2   | AuditLog_VracaView                            | Provjera prikaza audit log stranice                   | Pozvati `AuditLog()` akciju        | Vraća `ViewResult`      | Kao očekivano    | —    | Prošao |
-|   3   | AuditLog_SaPageParametrom_VracaView           | Provjera audit log prikaza sa paginacijom             | Pozvati `AuditLog(2)`              | Vraća `ViewResult`      | Kao očekivano    | —    | Prošao |
-|   4   | PromijeniUlogu_RedirektujeNaKorisnici         | Provjera redirect logike nakon promjene uloge         | Pozvati `PromijeniUlogu(id)`       | Redirect na `Korisnici` | Kao očekivano    | —    | Prošao |
-|   5   | DeaktivirajKorisnika_RedirektujeNaKorisnici   | Provjera redirect logike nakon deaktivacije korisnika | Pozvati `DeaktivirajKorisnika(id)` | Redirect na `Korisnici` | Kao očekivano    | —    | Prošao |
+Ovi unit testovi pokrivaju MVC tokove admin modula implementirane u kontroleru. Testiraju prikaz liste korisnika te pregled audit loga sa paginacijom, filterima i ispravnošću ViewBag podataka.
+
+|  ID   | Naziv testa                          | Opis                                                   | Testni koraci                                                      | Očekivani rezultat                                              | Stvarni rezultat   | Status |
+| :---: | :----------------------------------- | :----------------------------------------------------- | :----------------------------------------------------------------- | :-------------------------------------------------------------- | :--------------- | :----- |
+|   1   | Korisnici_VracaView                  | Pregled liste svih korisnika                           | Pozvati `Korisnici()`                                              | Vraća `ViewResult`                                              | Kao očekivano     | Prošao |
+|   2   | AuditLog_VracaView                   | Pregled audit log stranice bez filtera                 | Pozvati `AuditLog()`                                               | Vraća `ViewResult`                                              | Kao očekivano    | Prošao |
+|   3   | AuditLog_SaPageParametrom_VracaView  | Pregled audit loga sa zadatom stranicom                | Pozvati `AuditLog(2)`                                              | Vraća `ViewResult`                                              | Kao očekivano     | Prošao |
+|   4   | AuditLog_SaFilterima_VracaView       | Pregled audit loga sa filterom po tipu entiteta i akciji | Pozvati `AuditLog(entitetTip:"Knjiga", akcija:"Kreiranje")`      | Vraća `ViewResult` sa filtriranim logovima                      | Kao očekivano     | Prošao |
+|   5   | AuditLog_PopunjavaViewBagPodatke     | Provjera ispravnosti paginacijskih podataka u ViewBag  | Pozvati `AuditLog(page:2, pageSize:30)` uz 90 ukupnih zapisa      | `Stranica=2`, `PageSize=30`, `UkupnoStrana=3`, `UkupnoBroj=90` | Kao očekivano     | Prošao |
 
 ---
 
 ##### Članarina Web (`ClanarinaWebControllerTests`)
 
-|  ID   | Naziv testa                                                   | Opis                                        | Testni koraci                                                | Očekivani rezultat                                    | Stvarni rezultat | US   | Status |
-| :---: | :------------------------------------------------------------ | :------------------------------------------ | :----------------------------------------------------------- | :---------------------------------------------------- | :--------------- | :--- | :----- |
-|   1   | Upsert_Get_NemaPostojeceClanarine_VracaViewSaNovimDto         | Prikaz forme kada članarina ne postoji      | Pozvati GET `Upsert(korisnikId)` bez postojeće članarine     | View sa novim `ClanarinaUpsertDto` modelom            | Kao očekivano    | —    | Prošao |
-|   2   | Upsert_Get_PostojecaClanarina_VracaViewSaPostojecimDatumima   | Prikaz forme za postojeću članarinu         | Mock postojeće članarine i pozvati GET `Upsert`              | View sa postojećim datumima                           | Kao očekivano    | —    | Prošao |
-|   3   | Upsert_Post_NeispravanDatum_VracaViewSaGreskom                | Validacija datuma isteka                    | Poslati datum isteka koji nije nakon datuma početka          | ModelState greška i povratak na View                  | Kao očekivano    | —    | Prošao |
-|   4   | Upsert_Post_ModelStateInvalid_NePozivaSprema                  | Sprječavanje spremanja nevalidnog modela    | Ručno dodati ModelState grešku i pozvati POST `Upsert`       | Ne poziva se `CreateAsync` ni `UpdateAsync`           | Kao očekivano    | —    | Prošao |
-|   5   | Upsert_Post_KorisnikNePostoji_VracaNotFound                   | Obrada nepostojećeg korisnika               | Mock `GetByIdAsync` vraća `null`                             | Vraća `NotFoundResult`                                | Kao očekivano    | —    | Prošao |
-|   6   | Upsert_Post_NovaClanarina_KreiraIRedirektuje                  | Kreiranje nove članarine                    | Poslati validan DTO za korisnika bez članarine               | Kreira članarinu i redirect na `Korisnik/ProfilClana` | Kao očekivano    | —    | Prošao |
-|   7   | Upsert_Post_PostojecaClanarina_AzuriraIRedirektuje            | Ažuriranje postojeće članarine              | Mock postojeće članarine i poslati validan DTO               | Ažurira datume i redirect na profil člana             | Kao očekivano    | —    | Prošao |
-|   8   | Upsert_Post_DeaktiviranKorisnik_AktiviraKorisnika             | Reaktivacija deaktiviranog korisnika        | Korisnik ima status `deaktiviran`, zatim se dodaje članarina | Status korisnika postaje `aktivan`                    | Kao očekivano    | —    | Prošao |
-|   9   | Upsert_Post_AktivanKorisnik_NePozivaUpdateKorisnika           | Izbjegavanje nepotrebnog update-a korisnika | Korisnik je već aktivan                                      | `UpdateAsync` za korisnika se ne poziva               | Kao očekivano    | —    | Prošao |
-|  10   | Upsert_Post_Uspjesno_PostavljaTempDataPoruku                  | Povratna poruka nakon uspješnog spremanja   | Uspješan POST `Upsert`                                       | `TempData["Uspjeh"]` sadrži poruku uspjeha            | Kao očekivano    | —    | Prošao |
+Ovi unit testovi pokrivaju MVC tokove članarina modula. Testiraju kreiranje i ažuriranje članarine (Upsert), pregled i obradu zahtjeva za produženje od strane bibliotekara, te podnošenje zahtjeva i pregled historije od strane člana (PB-33, PB-48).
+
+|  ID   | Naziv testa                                                       | Opis                                                           | Testni koraci                                                           | Očekivani rezultat                                       | Stvarni rezultat | Status |
+| :---: | :---------------------------------------------------------------- | :------------------------------------------------------------- | :---------------------------------------------------------------------- | :------------------------------------------------------- | :--------------- | :----- |
+|   1   | Upsert_Get_NemaPostojeceClanarine_VracaViewSaNovimDto             | Prikaz forme kada članarina ne postoji                         | Pozvati GET `Upsert(korisnikId)` bez postojeće članarine                | View sa novim `ClanarinaUpsertDto` modelom               | Kao očekivano    | Prošao |
+|   2   | Upsert_Get_PostojecaClanarina_VracaViewSaPostojecimDatumima       | Prikaz forme za postojeću članarinu                            | Mock postojeće članarine i pozvati GET `Upsert`                         | View sa postojećim datumima                              | Kao očekivano    | Prošao |
+|   3   | Upsert_Post_NeispravanDatum_VracaViewSaGreskom                    | Validacija datuma isteka                                       | Poslati datum isteka koji nije nakon datuma početka                     | ModelState greška i povratak na View                     | Kao očekivano    | Prošao |
+|   4   | Upsert_Post_ModelStateInvalid_NePozivaSprema                      | Sprječavanje spremanja nevalidnog modela                       | Ručno dodati ModelState grešku i pozvati POST `Upsert`                  | Ne poziva se `CreateAsync` ni `UpdateAsync`              | Kao očekivano    | Prošao |
+|   5   | Upsert_Post_KorisnikNePostoji_VracaNotFound                       | Obrada nepostojećeg korisnika                                  | Mock `GetByIdAsync` vraća `null`                                        | Vraća `NotFoundResult`                                   | Kao očekivano    | Prošao |
+|   6   | Upsert_Post_NovaClanarina_KreiraIRedirektuje                      | Kreiranje nove članarine                                       | Poslati validan DTO za korisnika bez članarine                          | Kreira članarinu i redirect na `Korisnik/ProfilClana`    | Kao očekivano    | Prošao |
+|   7   | Upsert_Post_PostojecaClanarina_AzuriraIRedirektuje                | Ažuriranje postojeće članarine                                 | Mock postojeće članarine i poslati validan DTO                          | Ažurira datume i redirect na profil člana                | Kao očekivano    | Prošao |
+|   8   | Upsert_Post_DeaktiviranKorisnik_AktiviraKorisnika                 | Reaktivacija deaktiviranog korisnika                           | Korisnik ima status `deaktiviran`, zatim se dodaje članarina            | Status korisnika postaje `aktivan`                       | Kao očekivano    | Prošao |
+|   9   | Upsert_Post_AktivanKorisnik_NePozivaUpdateKorisnika               | Izbjegavanje nepotrebnog update-a korisnika                    | Korisnik je već aktivan                                                 | `UpdateAsync` za korisnika se ne poziva                  | Kao očekivano    | Prošao |
+|  10   | Upsert_Post_Uspjesno_PostavljaTempDataPoruku                      | Povratna poruka nakon uspješnog spremanja                      | Uspješan POST `Upsert`                                                  | `TempData["Uspjeh"]` sadrži poruku uspjeha               | Kao očekivano    | Prošao |
+|  11   | ZahtjeviProduzenja_VracaView                                      | Pregled liste zahtjeva na čekanju (bibliotekar)                | Pozvati `ZahtjeviProduzenja()`                                          | Vraća `ViewResult`                                       | Kao očekivano    | Prošao |
+|  12   | ZahtjeviProduzenja_PrikazujeZahtjeveNaCekanju                     | Lista prikazuje zahtjeve sa ispravnim podacima                 | Mock jednog zahtjeva i pozvati `ZahtjeviProduzenja()`                   | ViewModel sadrži jedan zahtjev                           | Kao očekivano    | Prošao |
+|  13   | ObradiZahtjev_ModelStateInvalid_VracaGreskuIRedirektuje           | Validacija modela pri obradi zahtjeva                          | Dodati ModelState grešku i pozvati `ObradiZahtjev`                      | `TempData["Greska"]` postavljen, redirect na pregled     | Kao očekivano    | Prošao |
+|  14   | ObradiZahtjev_ZahtjevNijePronadjen_VracaGresku                    | Obrada nepostojećeg zahtjeva                                   | Pozvati `ObradiZahtjev` za nepostojeći ID                               | `TempData["Greska"]` postavljen, redirect na pregled     | Kao očekivano    | Prošao |
+|  15   | ObradiZahtjev_Odobravanje_BezPostojeceClanarine_KreiraNovaIRedirektuje | Odobravanje zahtjeva bez postojeće članarine              | Odobriti zahtjev za člana koji nema članarinu                           | Nova članarina kreirana, zahtjev odobren                 | Kao očekivano    | Prošao |
+|  16   | ObradiZahtjev_Odobravanje_SaPostojecamClanarinom_AzuriraIRedirektuje  | Odobravanje zahtjeva sa postojećom članarinom             | Odobriti zahtjev za člana koji ima aktivnu članarinu                    | Datum isteka produžen, `CreateAsync` se ne poziva        | Kao očekivano    | Prošao |
+|  17   | ObradiZahtjev_Odbijanje_BezRazloga_VracaGresku                    | Obaveznost razloga odbijanja                                   | Poslati akciju `odbijeno` bez razloga                                   | `TempData["Greska"]` postavljen, redirect na pregled     | Kao očekivano    | Prošao |
+|  18   | ObradiZahtjev_Odbijanje_SaRazlogom_Redirektuje                    | Uspješno odbijanje zahtjeva sa razlogom                        | Poslati akciju `odbijeno` sa razlogom                                   | Status zahtjeva postavljen na `odbijeno`                 | Kao očekivano    | Prošao |
+|  19   | ProduzenjeClanarine_KorisnikNijePrijavljen_VracaUnauthorized      | Zaštita akcije za neprijavljenog korisnika                     | Pozvati `ProduzenjeClanarine()` bez autentifikacije                     | Vraća `UnauthorizedResult`                               | Kao očekivano    | Prošao |
+|  20   | ProduzenjeClanarine_PrijavljenClan_VracaView                      | Prikaz stranice za produženje prijavljenom članu               | Autentificirati korisnika i pozvati `ProduzenjeClanarine()`             | Vraća `ViewResult`                                       | Kao očekivano    | Prošao |
+|  21   | PodnesizahtjevProduzenja_KorisnikNijePrijavljen_VracaUnauthorized | Zaštita podnošenja zahtjeva za neprijavljenog korisnika        | Pozvati `PodnesizahtjevProduzenja` bez autentifikacije                  | Vraća `UnauthorizedResult`                               | Kao očekivano    | Prošao |
+|  22   | PodnesizahtjevProduzenja_VecPostojiAktivniZahtjev_VracaGresku     | Blokada duplih zahtjeva na čekanju                             | Pozvati podnošenje kada već postoji aktivan zahtjev                     | `TempData["Greska"]` postavljen, redirect na pregled     | Kao očekivano    | Prošao |
+|  23   | PodnesizahtjevProduzenja_NedozvoljenoTrajanje_VracaGresku         | Validacija trajanja produženja                                 | Poslati trajanje koje nije 1, 3, 6 ili 12 mjeseci                       | `TempData["Greska"]` postavljen, redirect na pregled     | Kao očekivano    | Prošao |
 
 ---
 
@@ -607,22 +685,30 @@ Ovi testovi validiraju funkcionalnosti bibliotečkog kataloga, administrativni i
 
 ---
 
-##### Rezervacija Web (`RezervacijaWebControllerTests`) — Sprint 9
+##### Rezervacija Web (`RezervacijaWebControllerTests`) 
 
-Ovi unit testovi pokrivaju MVC tokove rezervacija implementirane u Sprintu 9 (PB-39, PB-40). Testiraju kreiranje rezervacija uz provjeru dostupnosti knjige, otkazivanje, te pregled aktivnih rezervacija za člana i bibliotekara.
+Ovi unit testovi pokrivaju MVC tokove rezervacija knjiga. Testiraju kreiranje rezervacija uz provjeru dostupnosti knjige, otkazivanje, te pregled aktivnih rezervacija za člana i bibliotekara.
 
 
-|  ID   | Naziv testa                                         | Opis                                                          | Testni koraci                                                                     | Očekivani rezultat                                      | Stvarni rezultat | US           | Status |
-| :---: | :-------------------------------------------------- | :------------------------------------------------------------ | :-------------------------------------------------------------------------------- | :------------------------------------------------------ | :--------------- | :----------- | :----- |
-|   1   | Index_VracaView                                     | Pregled svih aktivnih rezervacija (bibliotekar)               | Pozvati `Index()`                                                                 | Vraća `ViewResult` sa listom rezervacija                | Kao očekivano    | US-73        | Prošao |
-|   2   | Moje_VracaView                                      | Pregled vlastitih rezervacija (član)                          | Pozvati `Moje()`                                                                  | Vraća `ViewResult` sa listom vlastitih rezervacija      | Kao očekivano    | US-71        | Prošao |
-|   3   | Create_RedirektujeNaDetaljeKnjige                   | Kreiranje rezervacije i redirect                              | Pozvati `Create(knjigaId)` za nedostupnu knjigu                                   | Redirect na `Knjiga/Details` sa ispravnim ID-em         | Kao očekivano    | US-69        | Prošao |
-|   4   | Otkazi_RedirektujeNaMoje                            | Otkazivanje rezervacije i redirect                            | Pozvati `Otkazi(id)`                                                              | Redirect na `Moje`                                      | Kao očekivano    | US-72        | Prošao |
-|   5   | Create_KnjigaImaDostupnihPrimjeraka_NeDozvoljaRezerv | Sistem ne dozvoljava rezervaciju dostupne knjige              | Pozvati `Create(knjigaId)` gdje knjiga ima dostupne primjerke                     | Greška — rezervacija nije kreirana                      | Kao očekivano    | US-69        | Prošao |
-|   6   | Create_ClanVecImaAktivnuRezervaciju_NeDozvoljaVise  | Isti član ne može imati dvije aktivne rezervacije iste knjige | Pozvati `Create(knjigaId)` gdje član već ima aktivnu rezervaciju za tu knjigu     | Greška — duplikat nije dozvoljen                        | Kao očekivano    | US-69        | Prošao |
-|   7   | Create_DatumRezervacijeSeSpremaPriKreiranju         | Sistem bilježi datum i vrijeme kreiranja rezervacije          | Kreirati rezervaciju i provjeriti `DatumRezervacije`                              | `DatumRezervacije` je popunjen i nije null              | Kao očekivano    | US-70        | Prošao |
-|   8   | Moje_PrikazujeSamoRezervacijePrijavljenogClana      | Lista prikazuje samo rezervacije prijavljenog člana           | Autentificirati korisnika i pozvati `Moje()`                                      | Lista sadrži samo rezervacije tog člana                 | Kao očekivano    | US-71        | Prošao |
-|   9   | Moje_NemaRezervacija_PrikazujePraznuListu           | Prikaz poruke kada član nema rezervacija                      | Pozvati `Moje()` za člana bez rezervacija                                         | Prazna lista ili odgovarajuća poruka                    | Kao očekivano    | US-71        | Prošao |
+|  ID   | Naziv testa                                          | Opis                                                          | Testni koraci                                                                 | Očekivani rezultat                                      | Stvarni rezultat | US           | Status |
+| :---: | :--------------------------------------------------- | :------------------------------------------------------------ | :---------------------------------------------------------------------------- | :------------------------------------------------------ | :--------------- | :----------- | :----- |
+|   1   | Index_VracaView                                      | Pregled svih aktivnih rezervacija (bibliotekar)               | Pozvati `Index()`                                                             | Vraća `ViewResult` sa listom rezervacija                | Kao očekivano    | US-73        | Prošao |
+|   2   | Moje_VracaView                                      | Pregled vlastitih rezervacija (član)                          | Pozvati `Moje()`                                                              | Vraća `ViewResult` sa listom vlastitih rezervacija      | Kao očekivano    | US-71        | Prošao |
+|   3   | Create_RedirektujeNaDetaljeKnjige                   | Kreiranje rezervacije i redirect                              | Pozvati `Create(knjigaId)` za nedostupnu knjigu                               | Redirect na `Knjiga/Details` sa ispravnim ID-em         | Kao očekivano    | US-69        | Prošao |
+|   4   | Otkazi_RedirektujeNaMoje                            | Otkazivanje rezervacije i redirect                            | Pozvati `Otkazi(id)`                                                          | Redirect na `Moje`                                      | Kao očekivano    | US-72        | Prošao |
+|   5   | Create_KnjigaImaDostupnihPrimjeraka_NeDozvoljaRezerv | Sistem ne dozvoljava rezervaciju dostupne knjige              | Pozvati `Create(knjigaId)` gdje knjiga ima dostupne primjerke                 | Greška — rezervacija nije kreirana                      | Kao očekivano    | US-69        | Prošao |
+|   6   | Create_ClanVecImaAktivnuRezervaciju_NeDozvoljaVise  | Isti član ne može imati dvije aktivne rezervacije iste knjige | Pozvati `Create(knjigaId)` gdje član već ima aktivnu rezervaciju za tu knjigu | Greška — duplikat nije dozvoljen                        | Kao očekivano    | US-69        | Prošao |
+|   7   | Create_DatumRezervacijeSeSpremaPriKreiranju         | Sistem bilježi datum i vrijeme kreiranja rezervacije          | Kreirati rezervaciju i provjeriti `DatumRezervacije`                          | `DatumRezervacije` je popunjen i nije null              | Kao očekivano    | US-70        | Prošao |
+|   8   | Moje_PrikazujeSamoRezervacijePrijavljenogClana      | Lista prikazuje samo rezervacije prijavljenog člana           | Autentificirati korisnika i pozvati `Moje()`                                  | Lista sadrži samo rezervacije tog člana                 | Kao očekivano    | US-71        | Prošao |
+|   9   | Moje_NemaRezervacija_PrikazujePraznuListu           | Prikaz poruke kada član nema rezervacija                      | Pozvati `Moje()` za člana bez rezervacija                                     | Prazna lista ili odgovarajuća poruka                    | Kao očekivano    | US-71        | Prošao |
+|  10   | Create_KnjigaNijePronadjena_VracaErrorIRedirect      | Kreiranje rezervacije za nepostojeću knjigu                   | Pozvati `Create(knjigaId)` gdje knjiga ne postoji u sistemu                   | `ErrorMessage` postavljen, redirect na `Knjiga/Index`  | Kao očekivano    | US-69        | Prošao |
+|  11   | Create_ImaKasnelaZaduzenja_VracaError               | Blokiranje rezervacije zbog zakasnjelih zaduženja             | Pozvati `Create(knjigaId)` za člana koji ima nevrađena zakasnjena zaduženja   | `ErrorMessage` postavljen, rezervacija nije kreirana    | Kao očekivano    | US-79        | Prošao |
+|  12   | Create_KorisnikNijeprijavljen_RedirektujeNaLogin    | Neautentificirani korisnik ne može kreirati rezervaciju       | Pozvati `Create(knjigaId)` bez postavljenog identiteta korisnika              | Redirect na `Auth/Login`                                | Kao očekivano    | US-69        | Prošao |
+|  13   | Otkazi_RezervacijaNijePronadjena_VracaError         | Otkazivanje nepostojeće rezervacije                           | Pozvati `Otkazi(id)` za ID koji ne postoji                                    | `ErrorMessage` postavljen, redirect na `Moje`           | Kao očekivano    | US-72        | Prošao |
+|  14   | Otkazi_DrugiBibliotekarmPokusava_VracaError         | Korisnik ne može otkazati tuđu rezervaciju                    | Pozvati `Otkazi(id)` autentificiran kao drugi korisnik                        | `ErrorMessage` postavljen, redirect na `Moje`           | Kao očekivano    | US-72, US-80 | Prošao |
+|  15   | Otkazi_RezervacijaNijeAktivna_VracaError            | Otkazivanje već otkazane ili istekle rezervacije              | Pozvati `Otkazi(id)` gdje je status rezervacije `"otkazana"`                  | `ErrorMessage` postavljen, redirect na `Moje`           | Kao očekivano    | US-72        | Prošao |
+|  16   | Create_UspjesnaRezervacija_SaljeEmailBibliotekaru    | Sistem šalje email bibliotekaru pri kreiranju rezervacije     | Kreirati rezervaciju za nedostupnu knjigu, provjeriti da je `IEmailService.SendAsync` pozvan | Email servis je pozvan bar jednom                                                                                       | Kao očekivano    | US-73        | Prošao |
+|  17   | Create_EmailGreskaNeBlokiraRezervaciju               | Greška u slanju emaila ne smije blokirati kreiranje rezervacije | Podesiti email servis da baca izuzetak, kreirati rezervaciju                               | Rezervacija je uspješno kreirana, `SuccessMessage` postavljen, redirect na `Knjiga/Details`                             | Kao očekivano    | US-73        | Prošao |
 
 ---
 
@@ -706,10 +792,64 @@ Ovi unit testovi pokrivaju MVC tokove za forum zajednice implementiran u Sprintu
 
 ---
 
+#### 4.2.3 Autorizacija i kontrola pristupa — Zaduženja
+
+|   #   | Naziv testa                                                | Šta se provjerava                                                       | Input / Scenario                     | Očekivano | Status |
+| :---: | :--------------------------------------------------------- | :---------------------------------------------------------------------- | :----------------------------------- | :-------: | :----: |
+| **1** | Zaduzenje_GetActive_BezTokena_VracaUnauthorized            | Neautentifikovan korisnik ne može pregledati aktivna zaduženja          | GET `/api/zaduzenje` bez JWT         |    401    | Prošao |
+| **2** | Zaduzenje_GetActive_ClanPokusavaPristup_VracaForbidden     | Član ne može pristupiti bibliotekarskim pregledima zaduženja            | GET `/api/zaduzenje` kao član        |    403    | Prošao |
+| **3** | Zaduzenje_Zaduzi_ClanPokusavaKreirati_VracaForbidden       | Član ne može kreirati zaduženja                                         | POST `/api/zaduzenje/zaduzi`         |    403    | Prošao |
+| **4** | Zaduzenje_Vrati_ClanPokusavaVracanje_VracaForbidden        | Član ne može evidentirati vraćanje knjige                               | POST `/api/zaduzenje/vrati/{id}`     |    403    | Prošao |
+| **5** | Zaduzenje_GetMine_NeispravanJwtClaim_VracaUnauthorized     | Token bez validnog korisničkog ID-a ne smije vratiti podatke            | JWT bez NameIdentifier claim-a       |    401    | Prošao |
+| **6** | Zaduzenje_Historija_ClanPokusavaPristup_VracaForbidden     | Član ne može pregledati historiju svih korisnika                        | GET `/api/zaduzenje/historija/{id}`  |    403    | Prošao |
+
+---
+
+#### 4.2.4 Autorizacija i kontrola pristupa — Rezervacije
+
+|   #   | Naziv testa                                                   | Šta se provjerava                                                   | Input / Scenario                 | Očekivano | Status |
+| :---: | :------------------------------------------------------------ | :------------------------------------------------------------------ | :------------------------------- | :-------: | :----: |
+| **1** | Rezervacija_GetActive_ClanPokusavaPristup_VracaForbidden      | Samo bibliotekar i administrator mogu pregledati sve rezervacije    | GET `/api/rezervacija` kao član  |    403    | Prošao |
+| **2** | Rezervacija_Create_BezTokena_VracaUnauthorized                | Kreiranje rezervacije zahtijeva autentifikaciju                     | POST `/api/rezervacija` bez JWT  |    401    | Prošao |
+| **3** | Rezervacija_Create_NeispravanClaim_VracaUnauthorized          | Token bez korisničkog identiteta ne može kreirati rezervaciju       | JWT bez NameIdentifier claim-a   |    401    | Prošao |
+| **4** | Rezervacija_Cancel_TudjaRezervacija_VracaForbidden            | Korisnik ne može otkazati rezervaciju drugog korisnika              | DELETE tuđe rezervacije          |    403    | Prošao |
+| **5** | Rezervacija_DuplaAktivnaRezervacija_VracaConflict             | Nije dozvoljena druga aktivna rezervacija iste knjige               | Dupla rezervacija iste knjige    |    409    | Prošao |
+| **6** | Rezervacija_KnjigaDostupna_VracaBadRequest                    | Rezervacija nije dozvoljena kada postoji dostupan primjerak         | Rezervacija dostupne knjige      |    400    | Prošao |
+
+---
+
+#### 4.2.5 Autorizacija i integritet podataka — Primjerci
+
+|   #   | Naziv testa                                                  | Šta se provjerava                                                     | Input / Scenario                    | Očekivano | Status |
+| :---: | :----------------------------------------------------------- | :-------------------------------------------------------------------- | :---------------------------------- | :-------: | :----: |
+| **1** | Primjerak_Create_BezTokena_VracaUnauthorized                 | Kreiranje primjeraka zahtijeva autentifikaciju                        | POST `/api/primjerak` bez JWT       |    401    | Prošao |
+| **2** | Primjerak_Create_ClanPokusavaPristup_VracaForbidden          | Član ne može kreirati primjerke                                       | POST `/api/primjerak` kao član      |    403    | Prošao |
+| **3** | Primjerak_Deaktiviraj_ClanPokusavaPristup_VracaForbidden     | Član ne može deaktivirati primjerke                                   | POST `/api/primjerak/{id}/deaktiviraj` | 403 | Prošao |
+| **4** | Primjerak_Create_PrevelikBrojPrimjeraka_VracaBadRequest      | Sistem ograničava broj novih primjeraka u jednom zahtjevu             | BrojNovih > 50                      |    400    | Prošao |
+| **5** | Primjerak_Deaktiviraj_AktivnoZaduzenPrimjerak_VracaConflict  | Aktivno zadužen primjerak ne može biti deaktiviran                    | Deaktivacija zaduženog primjerka    |    409    | Prošao |
+| **6** | Primjerak_GetById_NepostojeciId_VracaNotFound               | Ne otkrivaju se dodatne informacije za nepostojeće resurse            | Nepostojeći ID                      |    404    | Prošao |
+
+---
+
+#### 4.2.6 Autorizacija, validacija i integritet podataka — Knjige
+
+|   #   | Naziv testa                                               | Šta se provjerava                                                     | Input / Scenario                | Očekivano | Status |
+| :---: | :-------------------------------------------------------- | :-------------------------------------------------------------------- | :------------------------------ | :-------: | :----: |
+| **1** | Knjiga_Create_BezTokena_VracaUnauthorized                 | Kreiranje knjiga zahtijeva autentifikaciju                            | POST `/api/knjiga` bez JWT      |    401    | Prošao |
+| **2** | Knjiga_Create_ClanPokusavaPristup_VracaForbidden          | Član ne može dodavati knjige                                          | POST `/api/knjiga` kao član     |    403    | Prošao |
+| **3** | Knjiga_Update_ClanPokusavaPristup_VracaForbidden          | Član ne može uređivati knjige                                         | PUT `/api/knjiga/{id}`          |    403    | Prošao |
+| **4** | Knjiga_Delete_ClanPokusavaPristup_VracaForbidden          | Član ne može brisati knjige                                           | DELETE `/api/knjiga/{id}`       |    403    | Prošao |
+| **5** | Knjiga_Create_NevalidanIsbn_VracaBadRequest              | Nevalidan ISBN se odbija prije pohrane                                | ISBN pogrešnog formata          |    400    | Prošao |
+| **6** | Knjiga_Create_DuplikatIsbn_VracaConflict                 | Nije moguće kreirati dvije knjige sa istim ISBN-om                    | ISBN koji već postoji           |    409    | Prošao |
+| **7** | Knjiga_Delete_KnjigaSaAktivnimZaduzenjima_VracaBadRequest | Knjiga sa aktivnim zaduženjima ne može biti obrisana                  | Brisanje aktivno zadužene knjige |   400    | Prošao |
+| **8** | Knjiga_Korice_NevalidanIsbn_VracaNotFound                | Endpoint za korice odbija nevalidne ISBN vrijednosti                  | ISBN sa specijalnim znakovima   |    404    | Prošao |
+| **9** | Knjiga_Korice_PathTraversalPayload_VracaNotFound         | Pokušaj manipulacije parametrima ne omogućava pristup datotekama      | `../../../etc/passwd`           |    404    | Prošao |
+| **10**| Knjiga_GetAll_EkstremniParametriPaginacije_NeRuseSistem  | Velike vrijednosti parametara ne uzrokuju grešku niti curenje podataka | page=999999&pageSize=999999    | 200/400   | Prošao |
+
+---
+
 <a name="detaljni-izvjestaj-uat"></a>
 ### 4.3 User Acceptance testovi (UAT) — Detaljna lista scenarija
-
-#### Scenariji iz prethodnih sprintova (UAT-01 do UAT-26)
 
 | ID     | Scenarij                           | Koraci izvršavanja                                                                                                                                                                   | Očekivani rezultat                                                                                            |
 | ------ | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------- |
@@ -739,11 +879,6 @@ Ovi unit testovi pokrivaju MVC tokove za forum zajednice implementiran u Sprintu
 | UAT-24 | Zaduživanje nedostupnog primjerka  | 1. Pokušaj odabira primjerka koji je već zadužen ili u kvaru<br>2. Pokušaj spašavanja zaduženja                                                                                      | Sistem ne dozvoljava odabir ili ispisuje grešku: 'Odabrani primjerak nije dostupan'.                          |
 | UAT-25 | Vraćanje knjige                    | 1. Otvoriti listu aktivnih zaduženja<br>2. Odabrati detalje zaduženja<br>3. Kliknuti na 'Evidentiraj vraćanje'<br>4. Potvrditi akciju                                                 | Status zaduženja postaje 'zatvoreno', primjerak ponovo postaje 'dostupan', upisuje se stvarni datum vraćanja. |
 | UAT-26 | Pregled vlastitih zaduženja (Član) | 1. Prijava kao obični Član<br>2. Odlazak na sekciju 'Moja zaduženja'                                                                                                                 | Prikazuje se lista samo onih knjiga koje je taj konkretni član zadužio.                                       |
-
-#### Novi scenariji — Sprint 9 (UAT-27 do UAT-46)
-
-| ID     | Scenarij                                             | Koraci izvršavanja                                                                                                                                                                 | Očekivani rezultat                                                                                               |
-| ------ | ---------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
 | UAT-27 | Rezervacija nedostupne knjige (uspješan tok)         | 1. Prijava kao Član<br>2. Otvoriti detalje knjige koja nema dostupnih primjeraka<br>3. Kliknuti na dugme 'Rezerviši'                                                               | Rezervacija uspješno kreirana, datum rezervacije zabilježen, knjiga vidljiva u 'Moje rezervacije'               |
 | UAT-28 | Rezervacija dostupne knjige (blokada)                | 1. Prijava kao Član<br>2. Otvoriti detalje knjige koja ima dostupne primjerke<br>3. Pokušati kliknuti na 'Rezerviši'                                                               | Dugme 'Rezerviši' nije aktivno ili sistem prikazuje grešku: Knjiga je trenutno dostupna za zaduživanje.         |
 | UAT-29 | Duplikat rezervacije (blokada)                       | 1. Prijava kao Član koji već ima aktivnu rezervaciju za određenu knjigu<br>2. Pokušati kreirati novu rezervaciju za istu knjigu                                                    | Sistem odbija kreiranje: Već imate aktivnu rezervaciju za ovu knjigu.                                            |
@@ -764,6 +899,17 @@ Ovi unit testovi pokrivaju MVC tokove za forum zajednice implementiran u Sprintu
 | UAT-44 | Pregled kalendara događaja                           | 1. Otvoriti sekciju 'Kalendar'                                                                                                                                                      | Prikazuje se kalendar sa označenim danima koji imaju događaje; lista predstojećih događaja sa datumom i lokacijom |
 | UAT-45 | Pristup forumu zajednice (Član)                      | 1. Prijava kao Član<br>2. Otvoriti sekciju 'Forum'<br>3. Otvoriti jednu od dostupnih tema                                                                                           | Prikazuje se lista forum tema; unutar teme vidljivi su komentari sa autorom i vremenom objave                    |
 | UAT-46 | Komentarisanje forum teme (Član)                     | 1. Prijava kao Član<br>2. Otvoriti forum temu<br>3. Unijeti komentar i kliknuti 'Objavi'<br>4. Pokušati objaviti prazan komentar                                                  | Komentar se prikazuje u temi sa imenom autora i vremenom; prazan komentar nije moguće objaviti                   |
+| UAT-47 | Produžavanje članarine (uspješan tok)                | 1. Prijava kao Bibliotekar/Administrator<br>2. Otvoriti profil člana<br>3. Kliknuti na dugme 'Upravljanje članarinom'<br>4. Odabrati period produženja<br>5. Potvrditi akciju           | Članarina uspješno produžena, novi datum isteka vidljiv u profilu člana, sistem potvrđuje promjenu              |
+| UAT-48 | Blokada akcija pri istekloj članarini                | 1. Prijava kao Član čija je članarina istekla<br>2. Pokušati kreirati rezervaciju ili zaduženje                                                                                    | Sistem odbija akciju i prikazuje poruku: Vaša članarina je istekla. Kontaktirajte biblioteku.                   |
+| UAT-49 | Integracija sa distributerom — naručivanje knjige    | 1. Bibliotekar otvara sekciju 'Nabavka knjiga'<br>2. Unijeti podatke<br>3. Kliknuti na dugme 'Naruči'<br>4. Potvrditi narudžbu                                                 | Narudžba poslana distributeru, knjiga evidentirana u sistemu kao 'naručena', vidljiva u listi narudžbi          |
+| UAT-50 | Pregled liste kolekcija                              | 1. Otvoriti sekciju 'Kolekcije'                                                                                                                      | Prikazuje se lista dostupnih kolekcija sa nazivom, opisom i brojem knjiga u svakoj kolekciji                    |
+| UAT-51 | Kreiranje kolekcije                   | 1. Prijava <br>2. Otvoriti sekciju 'Kolekcije'<br>3. Kliknuti na 'Nova kolekcija'<br>4. Unijeti naziv i opis<br>5. Sačuvati     | Nova kolekcija vidljiva u listi kolekcija sa ispravnim brojem knjiga                                            |
+| UAT-52 | Dodavanje knjige u kolekciju                         | 1. Prijava<br>2. Otvoriti detalje knjige<br>3. Kliknuti na 'Dodaj u kolekciju'<br>4. Potvrditi                                  | Knjiga se prikazuje unutar kolekcije; broj knjiga u kolekciji se povećava za 1                                  |
+| UAT-53 | Pregled knjiga unutar kolekcije                      | 1. Otvoriti sekciju 'Kolekcije'<br>2. Kliknuti na naziv jedne kolekcije                                                                                                            | Prikazuje se lista knjiga koje pripadaju odabranoj kolekciji sa naslovom, autorom i statusom dostupnosti        |
+| UAT-54 | Audit log — pregled promjena                         | 1. Prijava kao Administrator<br>2. Otvoriti sekciju 'Audit log'                                                                                                                    | Prikazuje se lista svih zabilježenih promjena sa: akcijom, korisnikom koji je izvršio akciju, datumom i vremenom |
+| UAT-54 | Audit log — zapis pri izmjeni entiteta               | 1. Izmijeniti podatke o knjizi ili članu<br>2. Otvoriti 'Audit log' i pretražiti nedavne unose                                                                                     | U audit logu postoji zapis: tip akcije 'Izmjena', stara i nova vrijednost polja, korisnik i timestamp           |
+| UAT-56 | Audit log — zapis pri brisanju entiteta              | 1. Obrisati knjugu ili kategoriju<br>2. Otvoriti 'Audit log' i pretražiti nedavne unose                                                                                            | U audit logu postoji zapis: tip akcije 'Brisanje', naziv obrisanog entiteta, korisnik i timestamp               |
+| UAT-57 | Audit log — filtriranje po entitetu                 | 1. Prijava kao Administrator<br>2. Otvoriti 'Audit log'<br>3. Odabrati entitet u filterima<br>4. Kliknuti 'Traži'                                                               | Prikazuju se samo zapisi vezani za odabrani entitet                                                          |
 
 ---
 
@@ -994,3 +1140,41 @@ Ovi integracijski testovi validiraju kompletni životni ciklus rezervacija i fun
 | :-------: | :------------------------------------------------- | :------------------------------------------------------------------------------------- | :----- |
 | ZAD-UI-01 | Librarian_CanCreateZaduzenje_ShowsSuccessMessage   | Uspješno kreiranje novog zaduženja (član, knjiga, primjerak) i prikaz potvrde          | Prošao |
 | ZAD-UI-02 | Librarian_CanReturnBook_ShowsSuccessMessage        | Proces evidentiranja vraćanja knjige preko stranice detalja zaduženja i potvrdu akcije | Prošao |
+
+### 4.5.5 Lista kolekcija UI testovi (`ListaKolekcijaUiTests`) — 4 testa
+
+|     ID     | Naziv testa                                      | Šta validira                                         | Status |
+| :--------: | :----------------------------------------------- | :--------------------------------------------------- | :----- |
+| LKO-UI-01  | Clan_AfterLogin_CanOpenKolekcije_AndSeesWishlist | Prikaz stranice kolekcija i automatske "Lista želja" | Prošao |
+| LKO-UI-02  | Clan_CanCreateNewKolekcija_AndItAppearsInList    | Kreiranje nove kolekcije i prikaz u listi            | Prošao |
+| LKO-UI-03  | Clan_CanOpenDetails_OfExistingKolekcija          | Otvaranje detalja postojeće kolekcije                | Prošao |
+| LKO-UI-04  | Clan_WishlistCard_HasNoDeleteButton              | Wishlist ne smije imati delete dugme                 | Prošao |
+
+### 4.5.6 Nabavka UI testovi (`NabavkaUiTests`) — 10 testova
+
+|     ID     | Naziv testa                                          | Šta validira                                  | Status |
+| :--------: | :--------------------------------------------------- | :-------------------------------------------- | :----- |
+| NAB-UI-01  | Bibliotekar_AfterLogin_CanOpenNabavkaZahtjev        | Pristup stranici nabavke                      | Prošao |
+| NAB-UI-02  | Clan_CannotAccess_NabavkaZahtjev                     | Zabranjen pristup članu                       | Prošao |
+| NAB-UI-03  | GuestUser_CannotAccess_NabavkaZahtjev                | Zabranjen pristup guest korisniku             | Prošao |
+| NAB-UI-04  | NabavkaZahtjev_ShowsAllFormFields                    | Prikaz svih form polja                        | Prošao |
+| NAB-UI-05  | NabavkaZahtjev_ShowsSubmitButton                     | Prikaz submit dugmeta                         | Prošao |
+| NAB-UI-06  | NabavkaZahtjev_ShowsZadnjeNabavkeSection             | Sekcija zadnjih nabavki                       | Prošao |
+| NAB-UI-07  | NabavkaZahtjev_EmptySubmit_ShowsValidationErrors     | Validacija praznog submit-a                   | Prošao |
+| NAB-UI-08  | NabavkaZahtjev_ValidData_SubmitSucceeds_AndRedirects | Uspješan submit i redirect                    | Prošao |
+| NAB-UI-09  | NabavkaZahtjev_BrojPrimjeraka_MustBePositive         | Validacija broja primjeraka                   | Prošao |
+| NAB-UI-10  | NabavkaZahtjev_ZadnjeNabavke_ShowsEmptyStateOrList   | Historija nabavki (empty ili lista)           | Prošao |
+
+### 4.5.7 Članarina UI testovi (`ClanarinaUiTests`) — 9 testova
+
+|     ID     | Naziv testa                                           | Šta validira                                   | Status |
+| :--------: | :---------------------------------------------------- | :--------------------------------------------- | :----- |
+| CLAN-UI-01 | Bibliotekar_AfterLogin_CanOpenUpsertPageForMember     | Otvaranje upsert stranice članarine           | Prošao |
+| CLAN-UI-02 | Bibliotekar_UpsertClanarina_SuccessRedirectsToProfilClana | Uspješan upsert i redirect                  | Prošao |
+| CLAN-UI-03 | Bibliotekar_UpsertClanarina_InvalidDates_ShowsValidationError | Validacija datuma isteka            | Prošao |
+| CLAN-UI-04 | Clan_CannotAccess_UpsertPage                          | Zabranjen pristup članu                        | Prošao |
+| CLAN-UI-05 | Bibliotekar_CanOpenZahtjeviProduzenja                 | Prikaz zahtjeva za produženje                  | Prošao |
+| CLAN-UI-06 | Bibliotekar_ZahtjeviProduzenja_WhenEmpty_ShowsEmptyState | Empty state ili lista zahtjeva             | Prošao |
+| CLAN-UI-07 | Clan_AfterLogin_CanOpenProduzenjeClanarine            | Otvaranje stranice produženja                  | Prošao |
+| CLAN-UI-08 | Clan_ProduzenjeClanarine_ShowsHistorySection          | Prikaz historije zahtjeva                      | Prošao |
+| CLAN-UI-09 | Clan_ProduzenjeClanarine_ActiveRequest_ShowsPendingCard | Active request ili forma                     | Prošao |

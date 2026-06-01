@@ -102,6 +102,10 @@ builder.Services.AddScoped<IKategorijaRepository, KategorijaRepository>();
 builder.Services.AddScoped<IZaduzenjeRepository, ZaduzenjeRepository>();
 builder.Services.AddScoped<IRezervacijaRepository, RezervacijaRepository>();
 builder.Services.AddHostedService<DeactivatedAccountCleanupService>();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IAuditLogRepository, AuditLogRepository>();
+builder.Services.AddScoped<AuditLogService>();
+
 
 // JWT Authentication - US-07, US-08
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

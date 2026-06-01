@@ -1,10 +1,13 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SmartLib.Core.Interfaces;
+using SmartLib.Core.Models;
 
 namespace SmartLib.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Roles = RoleNames.Administrator)]
     public class AuditLogController : ControllerBase
     {
         private readonly IAuditLogRepository _auditRepo;

@@ -41,13 +41,19 @@ public sealed class AuthUiTests : SmartLibUiTest
         // ostaje na home
         await Expect(Page).ToHaveURLAsync(new Regex(".*/$"));
 
-        var nav = Page.GetByRole(AriaRole.Navigation);
+        var nav = Page.Locator("#nav-menu");
 
         await Expect(
             nav.GetByRole(AriaRole.Link, new() { Name = "Katalog" })
         ).ToBeVisibleAsync();
-        await Expect(Page.GetByText("Moja zaduženja")).ToBeVisibleAsync();
-        await Expect(Page.GetByRole(AriaRole.Button, new() { Name = "Odjava" })).ToBeVisibleAsync();
+
+        await Expect(
+            nav.GetByText("Moja zaduženja")
+        ).ToBeVisibleAsync();
+
+        await Expect(
+            nav.GetByRole(AriaRole.Button, new() { Name = "Odjava" })
+        ).ToBeVisibleAsync();
     }
 
     [Test]
@@ -72,7 +78,12 @@ public sealed class AuthUiTests : SmartLibUiTest
 
         // Početna (Home/Index) prijavljenom korisniku prikazuje samo "Dashboard" u navu — Odjava je na ostalim stranicama.
         await Page.GotoAsync("/Knjiga");
-        await Page.GetByRole(AriaRole.Button, new() { Name = "Odjava" }).ClickAsync();
+        var nav = Page.Locator("#nav-menu");
+
+        await nav.GetByRole(
+            AriaRole.Button,
+            new() { Name = "Odjava" }
+        ).ClickAsync();
 
         await Expect(Page).ToHaveURLAsync(new Regex("/Auth/Login", RegexOptions.IgnoreCase));
         await Expect(Page.GetByRole(AriaRole.Heading, new() { Name = "Prijava u sistem" })).ToBeVisibleAsync();

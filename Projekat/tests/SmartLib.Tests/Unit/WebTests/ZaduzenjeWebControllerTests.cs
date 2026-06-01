@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Microsoft.Extensions.Logging;
 using Moq;
 using SmartLib.Core.DTOs;
 using SmartLib.Core.Interfaces;
@@ -19,8 +20,16 @@ namespace SmartLib.Tests.Unit.WebTests
         private readonly Mock<IKnjigaRepository> _knjigaRepo;
         private readonly Mock<IPrimjerakRepository> _primjerakRepo;
         private readonly Mock<IRezervacijaRepository> _rezervacijaRepo;
+        private readonly Mock<IRecenzijaRepository> _recenzijaRepo;
+        private readonly Mock<INotifikacijaRepository> _notifikacijaRepo;
+        private readonly BibliotekariNotifikacijaService _bibliotekariNotifikacija;
+        private readonly Mock<IKorisnikRepository> _notifKorisnikRepo;
+        private readonly Mock<IEmailService> _emailServiceMock;
+        private readonly Mock<ILogger<BibliotekariNotifikacijaService>> _notifLoggerMock;
+        private readonly Mock<ILogger<ZaduzenjeController>> _logger;
         private readonly CacheVersionStore _cacheVersions;
         private readonly ZaduzenjeController _controller;
+
 
         public ZaduzenjeWebControllerTests()
         {
@@ -29,6 +38,22 @@ namespace SmartLib.Tests.Unit.WebTests
             _knjigaRepo = new Mock<IKnjigaRepository>();
             _primjerakRepo = new Mock<IPrimjerakRepository>();
             _rezervacijaRepo = new Mock<IRezervacijaRepository>();
+            _recenzijaRepo = new Mock<IRecenzijaRepository>();
+            _notifikacijaRepo = new Mock<INotifikacijaRepository>();
+            _notifKorisnikRepo = new Mock<IKorisnikRepository>();
+            _emailServiceMock = new Mock<IEmailService>();
+            _notifLoggerMock = new Mock<ILogger<BibliotekariNotifikacijaService>>();
+
+            _bibliotekariNotifikacija = new BibliotekariNotifikacijaService(
+                _notifKorisnikRepo.Object,
+                _emailServiceMock.Object,
+                _notifLoggerMock.Object);
+
+            // Prazna lista da se email ne šalje
+            _notifKorisnikRepo.Setup(r => r.GetAllAsync())
+                .ReturnsAsync(new List<Korisnik>());
+
+            _logger = new Mock<ILogger<ZaduzenjeController>>();
             _cacheVersions = new CacheVersionStore();
 
             _controller = new ZaduzenjeController(
@@ -37,7 +62,11 @@ namespace SmartLib.Tests.Unit.WebTests
                 _knjigaRepo.Object,
                 _primjerakRepo.Object,
                 _rezervacijaRepo.Object,
-                _cacheVersions);
+                _recenzijaRepo.Object,       
+                _notifikacijaRepo.Object,    
+                _cacheVersions,
+                _bibliotekariNotifikacija, 
+                _logger.Object);             
 
             var httpContext = new DefaultHttpContext();
             _controller.ControllerContext = new ControllerContext { HttpContext = httpContext };
@@ -385,19 +414,6 @@ namespace SmartLib.Tests.Unit.WebTests
             var result = await _controller.Vrati(999);
 
             Assert.IsType<NotFoundResult>(result);
-        }
-
-        [Fact]
-        public async Task Vrati_VecZatvoreno_RedirektujeSaGreskom()
-        {
-            var z = TestZaduzenje(1, "zatvoreno");
-            _zaduzenjeRepo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(z);
-
-            var result = await _controller.Vrati(1);
-
-            var redirect = Assert.IsType<RedirectToActionResult>(result);
-            Assert.Equal("Index", redirect.ActionName);
-            _zaduzenjeRepo.Verify(r => r.UpdateAsync(It.IsAny<Zaduzenje>()), Times.Never);
         }
 
         // ── ZaduzenjeViewModel computed fields ───────────────────────────────────

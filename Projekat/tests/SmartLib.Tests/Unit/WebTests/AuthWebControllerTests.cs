@@ -1,15 +1,18 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Mvc.Routing;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Microsoft.AspNetCore.Session;
 using Moq;
 using SmartLib.Core.DTOs;
 using SmartLib.Core.Interfaces;
 using SmartLib.Core.Models;
-using SmartLib.Web.Controllers;
 using SmartLib.Infrastructure.Security;
+using SmartLib.Web.Controllers;
 using Xunit;
+
 
 namespace SmartLib.Tests.Unit.WebTests
 {
@@ -48,6 +51,12 @@ namespace SmartLib.Tests.Unit.WebTests
             {
                 RequestServices = serviceProviderMock.Object
             };
+
+            httpContext.Features.Set<ISessionFeature>(
+                new SessionFeature
+                {
+                    Session = new TestSession()
+                });
 
             var emailServiceMock = new Mock<IEmailService>();
             var loggerMock = new Mock<Microsoft.Extensions.Logging.ILogger<AuthController>>();
@@ -355,5 +364,30 @@ namespace SmartLib.Tests.Unit.WebTests
             Assert.Null(korisnik.ResetTokenExpiry);
             _repoMock.Verify(r => r.UpdateAsync(korisnik), Times.Once);
         }
+    }
+public class TestSession : ISession
+    {
+        private readonly Dictionary<string, byte[]> _storage = new();
+
+        public IEnumerable<string> Keys => _storage.Keys;
+        public string Id => Guid.NewGuid().ToString();
+        public bool IsAvailable => true;
+
+        public void Clear() => _storage.Clear();
+
+        public Task CommitAsync(CancellationToken cancellationToken = default)
+            => Task.CompletedTask;
+
+        public Task LoadAsync(CancellationToken cancellationToken = default)
+            => Task.CompletedTask;
+
+        public void Remove(string key)
+            => _storage.Remove(key);
+
+        public void Set(string key, byte[] value)
+            => _storage[key] = value;
+
+        public bool TryGetValue(string key, out byte[] value)
+            => _storage.TryGetValue(key, out value!);
     }
 }
