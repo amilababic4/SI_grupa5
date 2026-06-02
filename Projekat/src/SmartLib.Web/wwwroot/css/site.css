@@ -3495,6 +3495,24 @@ body.home-page footer {
     letter-spacing: 0.08em;
 }
 
+.collection-card-owner {
+    font-size: 0.8rem;
+    color: var(--sl-muted);
+    margin-top: -0.25rem;
+}
+
+.collection-owner-link {
+    color: var(--sl-accent, #2563eb);
+    font-weight: 600;
+    text-decoration: none;
+    position: relative;
+    z-index: 2;
+}
+
+    .collection-owner-link:hover {
+        text-decoration: underline;
+    }
+
 .collection-delete-form {
     position: absolute;
     top: -14px;
@@ -3523,6 +3541,52 @@ body.home-page footer {
     align-items: center;
     gap: 0.5rem;
     flex-wrap: wrap;
+}
+
+.collection-tab-bar {
+    display: flex;
+    gap: 0.25rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid rgba(148, 163, 184, 0.2);
+    padding-bottom: 0;
+}
+
+.collection-tab {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.55rem 1.1rem;
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--sl-muted);
+    text-decoration: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: color 0.18s ease, border-color 0.18s ease;
+    border-radius: 0;
+}
+
+    .collection-tab:hover {
+        color: var(--sl-blue);
+        text-decoration: none;
+    }
+
+    .collection-tab.is-active {
+        color: var(--sl-blue);
+        border-bottom-color: var(--sl-blue);
+    }
+
+[data-theme="dark"] .collection-tab {
+    color: rgba(148, 163, 184, 0.7);
+}
+
+[data-theme="dark"] .collection-tab:hover,
+[data-theme="dark"] .collection-tab.is-active {
+    color: #93c5fd;
+    border-bottom-color: #93c5fd;
+}
+
+[data-theme="dark"] .collection-tab-bar {
+    border-bottom-color: rgba(148, 163, 184, 0.12);
 }
 
 .collection-chip-row {
@@ -3561,6 +3625,7 @@ body.home-page footer {
         color: #ffffff;
         box-shadow: 0 10px 20px rgba(23, 59, 99, 0.25);
     }
+
 
 .collection-updated {
     display: inline-flex;
@@ -3760,6 +3825,10 @@ body.home-page footer {
 [data-theme="dark"] .collection-updated {
     background: rgba(16, 185, 129, 0.2);
     color: #a7f3d0;
+}
+
+[data-theme="dark"] .collection-owner-link {
+    color: #93c5fd;
 }
 
 [data-theme="dark"] .icon-btn {

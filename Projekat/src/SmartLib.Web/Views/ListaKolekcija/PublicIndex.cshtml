@@ -1,0 +1,100 @@
+@model SmartLib.Web.Models.JavneKolekcijeListViewModel
+@{
+    ViewData["Title"] = "Javne kolekcije";
+}
+
+@functions {
+    public string GetStavkeText(int count)
+    {
+        int lastDigit = count % 10;
+        int lastTwoDigits = count % 100;
+
+        if (lastDigit == 1 && lastTwoDigits != 11)
+            return "stavka";
+        if (lastDigit >= 2 && lastDigit <= 4 && (lastTwoDigits < 10 || lastTwoDigits >= 20))
+            return "stavke";
+        return "stavki";
+    }
+}
+
+<div class="details-topbar">
+    <a asp-controller="Knjiga" asp-action="Index" class="btn btn-secondary">← Nazad na katalog</a>
+</div>
+
+<div class="collection-tab-bar">
+    <a asp-controller="ListaKolekcija" asp-action="Index"
+       class="collection-tab">Moje kolekcije</a>
+    <a asp-controller="ListaKolekcija" asp-action="PublicIndex"
+       class="collection-tab is-active">Javne kolekcije</a>
+</div>
+
+<div class="katalog-header collection-header">
+    <h2>@ViewData["Title"]</h2>
+</div>
+
+<div class="card collection-panel" style="margin-bottom: 1.5rem;">
+    <form asp-controller="ListaKolekcija" asp-action="PublicIndex" method="get" class="search-row">
+        <div class="form-group" style="flex:2; margin-bottom:0; min-width: 220px;">
+            <label for="Query" class="details-label" style="margin-bottom:0.25rem;">Pretraga</label>
+            <input id="Query" name="q" type="text" value="@Model.Query" placeholder="Naziv, opis ili ime člana" />
+        </div>
+
+        <div class="form-group" style="margin-bottom:0; min-width: 190px;">
+            <label for="Sort" class="details-label" style="margin-bottom:0.25rem;">Sortiranje</label>
+            <select id="Sort" name="sort" class="filter-select">
+                <option value="updated" selected="@(Model.Sort == "updated")">Zadnje azurirane</option>
+                <option value="created" selected="@(Model.Sort == "created")">Najnovije</option>
+                <option value="items" selected="@(Model.Sort == "items")">Najvise stavki</option>
+                <option value="name" selected="@(Model.Sort == "name")">Naziv (A-Z)</option>
+            </select>
+        </div>
+
+        <div style="display:flex; gap:0.5rem; align-items:flex-end;">
+            <button type="submit" class="btn btn-primary">Primijeni</button>
+            @if (!string.IsNullOrWhiteSpace(Model.Query) || Model.Sort != "updated")
+            {
+                <a asp-controller="ListaKolekcija" asp-action="PublicIndex" class="btn btn-secondary">Resetuj</a>
+            }
+        </div>
+    </form>
+    <div class="collection-filter-meta">
+        <span>Prikazano: <strong>@Model.Kolekcije.Count</strong> / @Model.TotalCount</span>
+    </div>
+</div>
+
+@if (!Model.Kolekcije.Any())
+{
+    <p class="empty-note">Nema javnih kolekcija koje odgovaraju pretrazi.</p>
+}
+else
+{
+    <div class="collection-grid-wrap">
+        <div class="collection-grid">
+            @foreach (var k in Model.Kolekcije)
+            {
+                var lastUpdate = k.DatumAzuriranja ?? k.DatumKreiranja;
+                var isRecentlyUpdated = lastUpdate >= DateTime.UtcNow.AddDays(-7);
+                <article class="collection-card">
+                    <a asp-controller="ListaKolekcija" asp-action="Public" asp-route-id="@k.Id"
+                       class="stretched-link" aria-label="Otvori kolekciju @k.Naziv"></a>
+                    <div class="collection-card-header">
+                        <h3 class="collection-card-title">@k.Naziv</h3>
+                        <span class="visibility-pill is-public">JAVNA</span>
+                    </div>
+                    <p class="collection-card-desc">@(string.IsNullOrWhiteSpace(k.Opis) ? "Bez opisa" : k.Opis)</p>
+                    <div class="collection-card-meta">
+                        <span class="collection-count">@k.BrojStavki @GetStavkeText(k.BrojStavki)</span>
+                        @if (isRecentlyUpdated)
+                        {
+                            <span class="collection-updated">Azurirano</span>
+                        }
+                    </div>
+                    <div class="collection-card-owner">
+                        <a asp-controller="Korisnik" asp-action="ProfilClana" asp-route-id="@k.KorisnikId"
+                           class="collection-owner-link">@k.KorisnikIme</a>
+                    </div>
+                </article>
+            }
+        </div>
+    </div>
+}
