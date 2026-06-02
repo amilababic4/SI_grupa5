@@ -6777,8 +6777,6 @@ body.home-page footer {
     word-break: break-word;
 }
 
-PB-44: Dodatni filteri pretrage — dodaj na kraj site.css
-═══════════════════════════════════════════════════════════════════════════ */
 /* ── Toggle dugme sa aktivnim indikatorom ──────────────────────────────────── */
 #btn-advanced-toggle {
     position: relative;
