@@ -19,9 +19,10 @@ Tokom ovog sprinta implementiraju se funkcionalnosti vezane za:
 | PB-41 | Slanje email upozorenja | Automatsko slanje podsjetnika i upozorenja članovima o isteku roka vraćanja knjiga i kašnjenjima. | Nizak | M | **Završeno** |
 | PB-42 | Obavještavanje bibliotekara o novoj rezervaciji | Sistem automatski šalje email bibliotekaru kada član kreira novu rezervaciju knjige. | Nizak | S | **Završeno** |
 | PB-46 | Audit log promjena | Automatsko evidentiranje svih promjena knjiga i korisničkih naloga sa detaljima o akciji, vremenu i korisniku. | Nizak | M | **Završeno** |
-| PB-47 | Kazne za kasno vraćanje knjiga | Automatski obračun kazni po danu kašnjenja i pregled ukupnog duga na profilu člana. | Nizak | M | **Završeno** |
+| PB-47 | Kazne za kasno vraćanje knjiga | Onemogućavanje novih zaduženja i rezervacija za člana sa zakašnjelim zaduženjima. | Nizak | M | **Završeno** |
 | PB-48 | Online produžetak članarine | Član može podnijeti zahtjev za produženje članarine, a bibliotekar ga pregledava i odobrava ili odbija. | Srednji | L | **Završeno** |
 | PB-49 | Integracija sa distributerom knjiga | Bibliotekar može kreirati i poslati zahtjev za nabavku knjige direktno distributeru putem emaila iz sistema. | Nizak | M | **Završeno** |
+| PB-50 | Lista kolekcija člana | Član može kreirati kolekcije, dodavati knjige u iste te ih pretraživati i filtrirati. | Srednji | M | **Završeno** |
 <br>
 
 ## Sprint Backlog stavke:
