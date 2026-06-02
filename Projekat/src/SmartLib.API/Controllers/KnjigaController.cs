@@ -106,7 +106,9 @@ namespace SmartLib.API.Controllers
         {
             var titleKey = NormalizeCachePart(naslov);
             var authorKey = NormalizeCachePart(autor);
-            var cacheKey = $"api_books_v1_{_cacheVersions.BooksVersion}_{_cacheVersions.CategoriesVersion}_{titleKey}_{authorKey}_{page}_{pageSize}";
+            var version = _cacheVersions.BooksVersion;
+            var cacheKey = CacheKeyBuilder.CatalogListKey(version, page, pageSize, $"{titleKey}_{authorKey}");
+            Response.Headers.Append("X-Cache-Version", version.ToString());
 
             var cached = await _cache.GetRecordAsync<KnjigaListResponse>(cacheKey);
             if (cached != null)
@@ -133,7 +135,10 @@ namespace SmartLib.API.Controllers
         [HttpGet("{id:int}")]
         public async Task<ActionResult<KnjigaDto>> GetById(int id)
         {
-            var cacheKey = $"api_book_{id}_v1_{_cacheVersions.BooksVersion}_{_cacheVersions.CategoriesVersion}";
+            var version = _cacheVersions.BooksVersion;
+            var cacheKey = CacheKeyBuilder.CatalogBookKey(version, id);
+            Response.Headers.Append("X-Cache-Version", version.ToString());
+
             var cached = await _cache.GetRecordAsync<KnjigaDto>(cacheKey);
             if (cached != null)
             {

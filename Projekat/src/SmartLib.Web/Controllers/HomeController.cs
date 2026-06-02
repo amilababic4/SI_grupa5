@@ -38,52 +38,52 @@ namespace SmartLib.Web.Controllers
         {
             var viewModel = new Models.HomeViewModel();
 
-            // Dohvatamo nasumične 4 knjige za landing page
             var booksVersion = _cacheVersions.BooksVersion;
-            var categoriesVersion = _cacheVersions.CategoriesVersion;
-            var randomCacheKey = $"home_random_v1_{booksVersion}_{categoriesVersion}";
-            var randomDtos = await _cache.GetRecordAsync<List<KnjigaDto>>(randomCacheKey);
-            if (randomDtos == null)
-            {
-                var randomKnjige = await _knjigaRepository.GetRandomAsync(4);
-                randomDtos = randomKnjige.Select(k => new KnjigaDto
-                {
-                    Id = k.Id,
-                    Naslov = k.Naslov,
-                    Autor = k.Autor,
-                    Isbn = k.Isbn,
-                    Kategorija = k.Kategorija?.Naziv,
-                    GodinaIzdanja = k.GodinaIzdanja
-                }).ToList();
+            Response.Headers.Append("X-Cache-Version", booksVersion.ToString());
 
-                await _cache.SetRecordAsync(randomCacheKey, randomDtos, TimeSpan.FromMinutes(5));
-            }
+            // Dohvatamo nasumične 4 knjige za landing page
+            var randomCacheKey = CacheKeyBuilder.HomeRandomKey(booksVersion);
+            var randomDtos = await _cache.GetOrCreateRecordAsync(
+                randomCacheKey,
+                TimeSpan.FromMinutes(3),
+                async () => 
+                {
+                    var randomKnjige = await _knjigaRepository.GetRandomAsync(4);
+                    return randomKnjige.Select(k => new KnjigaDto
+                    {
+                        Id = k.Id,
+                        Naslov = k.Naslov,
+                        Autor = k.Autor,
+                        Isbn = k.Isbn,
+                        Kategorija = k.Kategorija?.Naziv,
+                        GodinaIzdanja = k.GodinaIzdanja
+                    }).ToList();
+                }) ?? new List<KnjigaDto>();
             viewModel.RandomKnjige = randomDtos;
 
             // Ako je korisnik prijavljen, dohvatamo preporuke
             if (User.Identity?.IsAuthenticated ?? false)
             {
-                // Za sada koristimo dummy ID 1 ili dohvatamo pravi ID iz claimova ako postoji
                 var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
                 if (int.TryParse(userIdClaim, out int userId))
                 {
-                    var recoCacheKey = $"home_reco_{userId}_{booksVersion}_{categoriesVersion}";
-                    var recoDtos = await _cache.GetRecordAsync<List<KnjigaDto>>(recoCacheKey);
-                    if (recoDtos == null)
-                    {
-                        var recommended = await _bookRecommender.GetRecommendationsForUserAsync(userId);
-                        recoDtos = recommended.Select(k => new KnjigaDto
+                    var recoCacheKey = CacheKeyBuilder.HomeRecommendationsKey(booksVersion, userId);
+                    var recoDtos = await _cache.GetOrCreateRecordAsync(
+                        recoCacheKey,
+                        TimeSpan.FromMinutes(2),
+                        async () => 
                         {
-                            Id = k.Id,
-                            Naslov = k.Naslov,
-                            Autor = k.Autor,
-                            Isbn = k.Isbn,
-                            Kategorija = k.Kategorija?.Naziv,
-                            GodinaIzdanja = k.GodinaIzdanja
-                        }).ToList();
-
-                        await _cache.SetRecordAsync(recoCacheKey, recoDtos, TimeSpan.FromMinutes(5));
-                    }
+                            var recommended = await _bookRecommender.GetRecommendationsForUserAsync(userId);
+                            return recommended.Select(k => new KnjigaDto
+                            {
+                                Id = k.Id,
+                                Naslov = k.Naslov,
+                                Autor = k.Autor,
+                                Isbn = k.Isbn,
+                                Kategorija = k.Kategorija?.Naziv,
+                                GodinaIzdanja = k.GodinaIzdanja
+                            }).ToList();
+                        }) ?? new List<KnjigaDto>();
                     viewModel.RecommendedKnjige = recoDtos;
                 }
             }

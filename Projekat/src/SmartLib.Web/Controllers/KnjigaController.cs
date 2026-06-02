@@ -179,7 +179,10 @@ namespace SmartLib.Web.Controllers
                 ? await GetReadStampAsync(userId.Value)
                 : "0";
 
-            var cacheKey = $"books_index_v2_{booksVersion}_{categoriesVersion}_{titleKey}_{authorKey}_{katKey}_{izdKey}_{godKey}_{page}_{pageSize}_{userKey}_{readKey}_{readStamp}";
+            var cacheKey = CacheKeyBuilder.CatalogListKey(booksVersion, page, pageSize, 
+                $"{titleKey}_{authorKey}_{katKey}_{izdKey}_{godKey}_{userKey}_{readKey}_{readStamp}");
+
+            Response.Headers.Append("X-Cache-Version", booksVersion.ToString());
 
             var cachedModel = await _cache.GetRecordAsync<KatalogViewModel>(cacheKey);
             if (cachedModel != null)
@@ -500,7 +503,9 @@ namespace SmartLib.Web.Controllers
             ViewBag.Procitana = procitana;
             ViewBag.BrojZaduzenja = await _zaduzenjeRepository.CountByKnjigaIdAsync(id);
 
-            var cacheKey = $"book_details_v1_{_cacheVersions.BooksVersion}_{_cacheVersions.CategoriesVersion}_{id}";
+            var cacheKey = CacheKeyBuilder.CatalogBookKey(_cacheVersions.BooksVersion, id);
+            Response.Headers.Append("X-Cache-Version", _cacheVersions.BooksVersion.ToString());
+
             var cachedEntry = await _cache.GetRecordAsync<KnjigaDetailsCacheEntry>(cacheKey);
             if (cachedEntry != null)
             {

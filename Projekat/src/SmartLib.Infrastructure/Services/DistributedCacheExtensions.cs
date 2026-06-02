@@ -58,5 +58,23 @@ namespace SmartLib.Infrastructure.Services
 
             return cache.SetAsync(key, value, options);
         }
+
+        public static async Task<T?> GetOrCreateRecordAsync<T>(
+            this IDistributedCache cache,
+            string key,
+            TimeSpan ttl,
+            Func<Task<T?>> factory)
+        {
+            var cached = await cache.GetRecordAsync<T>(key);
+            if (cached != null) return cached;
+
+            var data = await factory();
+            if (data != null)
+            {
+                await cache.SetRecordAsync(key, data, ttl);
+            }
+
+            return data;
+        }
     }
 }

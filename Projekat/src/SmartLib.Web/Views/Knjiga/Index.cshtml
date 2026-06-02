@@ -517,7 +517,26 @@ else
 }
 
 @section Scripts {
+    <script src="~/js/cache-service.js" asp-append-version="true"></script>
     <script>
+        // ── Cache Service init ──────────────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', () => {
+            const serverVersion = document.documentElement.getAttribute('data-cache-version') || document.body.getAttribute('data-cache-version');
+            if (serverVersion) {
+                const cachedModel = SmartLibCache.get('catalog:current-page', parseInt(serverVersion));
+                if (cachedModel) {
+                    console.log('Using cached catalog data');
+                }
+            }
+        });
+
+        function handleLogout() {
+            if (typeof SmartLibCache !== 'undefined') {
+                SmartLibCache.clearAll();
+            }
+            window.location.href = '/Auth/Logout';
+        }
+
         // ── List / Grid toggle ────────────────────────────────────────────────────
         const btnList   = document.getElementById('btn-list-view');
         const btnGrid   = document.getElementById('btn-grid-view');

@@ -28,7 +28,10 @@ namespace SmartLib.Web.Controllers
         // US-31: Prikaz liste svih kategorija
         public async Task<IActionResult> Index()
         {
-            var cacheKey = $"categories_v1_{_cacheVersions.CategoriesVersion}_{_cacheVersions.BooksVersion}";
+            var version = _cacheVersions.CategoriesVersion;
+            var cacheKey = CacheKeyBuilder.CatalogCategoriesKey(version);
+            Response.Headers.Append("X-Cache-Version", version.ToString());
+
             var cached = await _cache.GetRecordAsync<List<Kategorija>>(cacheKey);
             if (cached != null)
                 return View(cached);
