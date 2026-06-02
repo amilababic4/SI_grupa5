@@ -37,6 +37,13 @@
     <div class="alert alert-error">@errorMsg</div>
 }
 
+<div class="collection-tab-bar">
+    <a asp-controller="ListaKolekcija" asp-action="Index"
+       class="collection-tab is-active">Moje kolekcije</a>
+    <a asp-controller="ListaKolekcija" asp-action="PublicIndex"
+       class="collection-tab">Javne kolekcije</a>
+</div>
+
 <div class="katalog-header collection-header">
     <h2>@ViewData["Title"]</h2>
     <div class="collection-quick-filters">

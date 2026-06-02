@@ -103,6 +103,35 @@ namespace SmartLib.Web.Controllers
 
         [HttpGet]
         [AllowAnonymous]
+        public async Task<IActionResult> PublicIndex(string? q = null, string? sort = "updated")
+        {
+            var lists = await _listaKolekcijaRepository.GetAllPublicAsync(q, sort);
+
+            var model = new JavneKolekcijeListViewModel
+            {
+                Query = q,
+                Sort = string.IsNullOrWhiteSpace(sort) ? "updated" : sort,
+                TotalCount = lists.Count,
+                Kolekcije = lists.Select(l => new JavneKolekcijeCardViewModel
+                {
+                    Id = l.Id,
+                    Naziv = l.Naziv,
+                    Opis = l.Opis,
+                    BrojStavki = l.Stavke?.Count ?? 0,
+                    DatumKreiranja = l.DatumKreiranja,
+                    DatumAzuriranja = l.DatumAzuriranja,
+                    KorisnikId = l.KorisnikId,
+                    KorisnikIme = l.Korisnik != null
+                        ? $"{l.Korisnik.Ime} {l.Korisnik.Prezime}"
+                        : "—"
+                }).ToList()
+            };
+
+            return View(model);
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> Public(int id)
         {
             var lista = await _listaKolekcijaRepository.GetByIdAsync(id, includeItems: true);

@@ -14,5 +14,6 @@ namespace SmartLib.Core.Interfaces
         Task AddItemAsync(int listaId, int knjigaId);
         Task RemoveItemAsync(int listaId, int knjigaId);
         Task UpdateOrderAsync(int listaId, IReadOnlyList<int> stavkaIds);
+        Task<List<ListaKolekcija>> GetAllPublicAsync(string? query = null, string? sort = null);
     }
 }

@@ -162,6 +162,35 @@ namespace SmartLib.Infrastructure.Repositories
             await _db.SaveChangesAsync();
         }
 
+        public async Task<List<ListaKolekcija>> GetAllPublicAsync(string? query = null, string? sort = null)
+        {
+            var q = _db.ListaKolekcije
+                .Include(l => l.Korisnik)
+                .Include(l => l.Stavke)
+                .Where(l => l.Javna)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(query))
+            {
+                var lower = query.Trim().ToLower();
+                q = q.Where(l =>
+                    l.Naziv.ToLower().Contains(lower) ||
+                    (l.Opis != null && l.Opis.ToLower().Contains(lower)) ||
+                    l.Korisnik!.Ime.ToLower().Contains(lower) ||
+                    l.Korisnik!.Prezime.ToLower().Contains(lower));
+            }
+
+            q = (sort ?? string.Empty).Trim().ToLower() switch
+            {
+                "name" => q.OrderBy(l => l.Naziv),
+                "items" => q.OrderByDescending(l => l.Stavke.Count).ThenBy(l => l.Naziv),
+                "created" => q.OrderByDescending(l => l.DatumKreiranja),
+                _ => q.OrderByDescending(l => l.DatumAzuriranja ?? l.DatumKreiranja)
+            };
+
+            return await q.ToListAsync();
+        }
+
         public async Task UpdateOrderAsync(int listaId, IReadOnlyList<int> stavkaIds)
         {
             var items = await _db.ListaKolekcijaStavke

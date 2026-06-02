@@ -46,4 +46,24 @@ namespace SmartLib.Web.Models
         public string? SlikaUrl { get; set; }
         public int BrojDostupnih { get; set; }
     }
+
+    public class JavneKolekcijeListViewModel
+    {
+        public List<JavneKolekcijeCardViewModel> Kolekcije { get; set; } = new();
+        public string? Query { get; set; }
+        public string Sort { get; set; } = "updated";
+        public int TotalCount { get; set; }
+    }
+
+    public class JavneKolekcijeCardViewModel
+    {
+        public int Id { get; set; }
+        public string Naziv { get; set; } = string.Empty;
+        public string? Opis { get; set; }
+        public int BrojStavki { get; set; }
+        public DateTime DatumKreiranja { get; set; }
+        public DateTime? DatumAzuriranja { get; set; }
+        public int KorisnikId { get; set; }
+        public string KorisnikIme { get; set; } = string.Empty;
+    }
 }
