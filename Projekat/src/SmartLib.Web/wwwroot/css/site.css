@@ -3327,6 +3327,7 @@ body.home-page footer {
     margin: 0;
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
@@ -3970,6 +3971,7 @@ body.home-page footer {
     color: var(--sl-text);
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
@@ -4004,6 +4006,7 @@ body.home-page footer {
 
     .lb-description {
         -webkit-line-clamp: 1;
+        line-clamp: 1;
     }
 
     .lb-body-bottom {
@@ -6706,19 +6709,19 @@ body.home-page footer {
     justify-content: center;
 }
 
-    .photo-slot svg {
-        width: 100%;
-        height: 100%;
-        display: block;
-    }
+.photo-slot svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
 
-    .photo-slot img {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-        object-position: center;
-        display: block;
-    }
+.photo-slot img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+    display: block;
+}
 
 
 .about-photos {
@@ -6741,14 +6744,14 @@ body.home-page footer {
     justify-content: center;
 }
 
-    .photo-slot img {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-        object-position: center;
-        display: block;
-        transform: scale(1.15);
-    }
+.photo-slot img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+    display: block;
+    transform: scale(1.15);
+}
 
 .audit-json-table {
     display: flex;
