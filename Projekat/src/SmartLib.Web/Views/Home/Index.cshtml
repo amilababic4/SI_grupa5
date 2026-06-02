@@ -18,6 +18,15 @@
         padding: 4rem 2rem;
     }
 
+    .immersive-hero::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to right, rgba(4, 10, 24, 0.9) 0%, rgba(4, 10, 24, 0.6) 40%, transparent 70%);
+        z-index: 2;
+        pointer-events: none;
+    }
+
     .hero-zoom-stage {
         position: relative;
         z-index: 5;
@@ -71,47 +80,40 @@
     
     .hero-book-showcase {
         position: absolute;
-        right: -5%;
-        top: 50%;
-        transform: translateY(-50%) rotateY(-15deg) rotateX(5deg);
-        width: 55vw;
-        max-width: 800px;
-        z-index: 2;
-        perspective: 1500px;
-        filter: drop-shadow(-20px 30px 40px rgba(0,0,0,0.6));
+        inset: 0;
+        z-index: 1;
+        pointer-events: none;
     }
-    
+
     .hero-showcase-img {
         width: 100%;
-        height: auto;
-        border-radius: 12px;
-        opacity: 0.85;
+        height: 100%;
+        object-fit: cover;
+        object-position: 65% center;
+        opacity: 0.45;
         mix-blend-mode: screen;
-        mask-image: linear-gradient(to right, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%);
-        -webkit-mask-image: linear-gradient(to right, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%);
+        mask-image: linear-gradient(to right, transparent 0%, rgba(0,0,0,0.55) 35%, rgba(0,0,0,0.9) 100%);
+        -webkit-mask-image: linear-gradient(to right, transparent 0%, rgba(0,0,0,0.55) 35%, rgba(0,0,0,0.9) 100%);
     }
     
     .premium-glass-panel {
         position: relative;
         z-index: 10;
-        max-width: 700px;
+        max-width: 620px;
+        margin-left: clamp(1.5rem, 8vw, 7rem);
         margin-right: auto;
-        padding: 3.5rem;
-        background: rgba(11, 22, 44, 0.65);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-left: 4px solid #c8974a;
-        border-radius: 16px;
-        box-shadow: 0 30px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
-        transform: translateZ(30px);
+        padding: 3rem 0;
+        background: none;
+        border: none;
+        border-radius: 0;
+        box-shadow: none;
         animation: panelReveal 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both,
                    panelFloat 6s ease-in-out 1.2s infinite alternate;
     }
     
     @@keyframes panelFloat {
-        0% { transform: translateY(0) translateZ(30px); }
-        100% { transform: translateY(-10px) translateZ(30px); }
+        0% { transform: translateY(0); }
+        100% { transform: translateY(-8px); }
     }
 
     @@keyframes heroZoomIn {
@@ -125,8 +127,8 @@
     }
 
     @@keyframes panelReveal {
-        0% { opacity: 0; transform: translateY(18px) translateZ(30px); }
-        100% { opacity: 1; transform: translateY(0) translateZ(30px); }
+        0% { opacity: 0; transform: translateY(20px); }
+        100% { opacity: 1; transform: translateY(0); }
     }
 
     @@keyframes titleGlow {
@@ -176,55 +178,63 @@
     }
     
     .premium-lead {
-        font-family: 'Georgia', serif;
-        font-size: 1.15rem;
-        line-height: 1.7;
-        color: #B0C4DE;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 1.05rem;
+        line-height: 1.78;
+        color: rgba(176, 196, 222, 0.82);
         margin-bottom: 2.5rem;
-        max-width: 90%;
+        max-width: 92%;
+        font-weight: 400;
+        letter-spacing: 0.01em;
     }
     
     .immersive-search {
         display: flex;
-        background: rgba(4, 10, 24, 0.8);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 8px;
-        padding: 0.5rem;
-        box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+        background: rgba(4, 10, 24, 0.55);
+        border: 1px solid rgba(255, 255, 255, 0.13);
+        border-radius: 50px;
+        padding: 0.35rem;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
     }
-    
+
     .immersive-search input {
         flex: 1;
         background: transparent;
         border: none;
         color: white;
-        padding: 0.8rem 1.2rem;
+        padding: 0.85rem 1.4rem;
         font-family: 'Plus Jakarta Sans', sans-serif;
-        font-size: 1rem;
+        font-size: 0.95rem;
+        font-weight: 400;
     }
-    
+
     .immersive-search input::placeholder {
-        color: rgba(255,255,255,0.4);
+        color: rgba(255,255,255,0.35);
     }
-    
+
     .immersive-search input:focus {
         outline: none;
     }
-    
+
     .immersive-search button {
-        background: #173b63;
-        color: white;
-        border: none;
-        padding: 0 2rem;
-        border-radius: 6px;
-        font-weight: 700;
-        cursor: pointer;
-        transition: all 0.3s;
-    }
-    
-    .immersive-search button:hover {
-        background: #c8974a;
+        background: linear-gradient(135deg, #c8974a 0%, #a67c3b 100%);
         color: #040A18;
+        border: none;
+        padding: 0.75rem 1.8rem;
+        border-radius: 50px;
+        font-weight: 700;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 0.88rem;
+        letter-spacing: 0.04em;
+        cursor: pointer;
+        transition: box-shadow 0.25s, opacity 0.25s;
+    }
+
+    .immersive-search button:hover {
+        opacity: 0.88;
+        box-shadow: 0 6px 20px rgba(200, 151, 74, 0.4);
     }
     
     .immersive-btn-primary, .immersive-btn-secondary {
@@ -264,16 +274,21 @@
     }
     
     @@media (max-width: 900px) {
-        .hero-book-showcase {
-            opacity: 0.3;
-            transform: translateY(-50%) translateX(20%);
+        .hero-showcase-img {
+            opacity: 0.2;
+            object-position: center center;
+        }
+        .immersive-hero::before {
+            background: rgba(4, 10, 24, 0.82);
         }
         .premium-glass-panel {
-            padding: 2.5rem 1.5rem;
-            margin: 0 auto;
+            padding: 2rem 0;
+            margin-left: auto;
+            margin-right: auto;
             text-align: center;
         }
         .premium-lead { margin: 0 auto 2rem; }
+        .immersive-search { border-radius: 50px; }
     }
 
     @@media (prefers-reduced-motion: reduce) {
@@ -1017,7 +1032,7 @@
         var anims  = ['sp-a','sp-b','sp-c','sp-d'];
         var colors = [[90,128,200],[196,217,255],[255,255,255],[27,61,143],[150,185,255]];
         var cfg = [
-            {sel:'.home-hero',           n:55},
+            {sel:'.home-hero',           n:55, z:3},
             {sel:'.ticker-wrap',         n:14},
             {sel:'.sec-reading',         n:34},
             {sel:'.sec-features',        n:24},
@@ -1031,7 +1046,7 @@
             s.style.overflow = 'hidden';
             var L = document.createElement('div');
             L.setAttribute('aria-hidden','true');
-            L.style.cssText = 'position:absolute;inset:0;pointer-events:none;z-index:0;overflow:hidden;';
+            L.style.cssText = 'position:absolute;inset:0;pointer-events:none;z-index:' + (item.z || 0) + ';overflow:hidden;';
             s.insertBefore(L, s.firstChild);
             for (var i = 0; i < item.n; i++) {
                 var el   = document.createElement('span');
