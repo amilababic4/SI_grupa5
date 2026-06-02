@@ -305,3 +305,64 @@ Tokom ovog sprinta implementiraju se funkcionalnosti vezane za:
 ---
 
 <br>
+
+## PB-50: Liste kolekcija člana
+
+### Naziv: Pregled vlastitih kolekcija
+### US-101: Kao član biblioteke, želim imati pristup stranici svojih kolekcija kako bih mogao pregledati, organizovati i upravljati listama knjiga koje sam kreirao.
+**Acceptance Criteria:**
+- Kada je član prijavljen, može pristupiti stranici "Moje kolekcije" putem navigacije
+- Stranica prikazuje sve kolekcije člana (javne i privatne)
+- Svaka kolekcija prikazuje: naziv, opis, vidljivost (Javna/Privatna), broj stavki i datum zadnje izmjene
+- Član može filtrirati kolekcije po vidljivosti: Sve / Javne / Privatne
+- Prikazuje se ukupan broj pronađenih kolekcija
+
+<br>
+
+---
+
+### Naziv: Pretraga i sortiranje kolekcija
+### US-102: Kao član biblioteke, želim moći pretraživati i sortirati svoje kolekcije kako bih brže pronašao željenu listu.
+**Acceptance Criteria:**
+- Član može pretraživati kolekcije po nazivu ili opisu
+- Član može sortirati kolekcije (npr. Zadnje ažurirane, Naziv A-Z)
+- Lista se ažurira klikom na "Primijeni"
+- Kada nijedna kolekcija ne odgovara pretrazi, prikazuje se odgovarajuća poruka
+
+<br>
+
+---
+
+### Naziv: Kreiranje nove kolekcije
+### US-103: Kao član biblioteke, želim kreirati novu kolekciju kako bih mogao organizovati knjige prema vlastitim kriterijima.
+**Acceptance Criteria:**
+- Član može otvoriti formu za kreiranje klikom na "+ Nova kolekcija"
+- Forma sadrži polja: naziv kolekcije (obavezno) i opis (opcionalno)
+- Član može odabrati vidljivost kolekcije: Javna ili Privatna
+- Klikom na "Kreiraj" kolekcija se kreira i pojavljuje u listi
+- Sistem validira da naziv nije prazan
+
+<br>
+
+---
+
+### Naziv: Dodavanje knjige u kolekciju
+### US-104: Kao član biblioteke, želim dodati knjigu u jednu od svojih kolekcija sa stranice detalja knjige kako bih je organizovao u odgovarajuću listu.
+**Acceptance Criteria:**
+- Na stranici detalja knjige član vidi dugme "Dodaj u kolekciju"
+- Klikom na dugme otvara se lista njegovih kolekcija
+- Član odabire željenu kolekciju i knjiga se dodaje
+- Ako knjiga već postoji u odabranoj kolekciji, prikazuje se odgovarajuća info poruka
+- Nakon uspješnog dodavanja prikazuje se potvrda
+
+<br>
+
+---
+
+| **Prioritet** | Srednji |
+|---------------|-------|
+| **Poslovna vrijednost** | Omogućava članovima personalizovano organizovanje knjiga u tematske liste, što poboljšava korisničko iskustvo i angažman sa bibliotečkim fondom. |
+| **Pretpostavke / Otvorena pitanja** | Član je prijavljen u sistem. Javne kolekcije — da li ih mogu vidjeti i drugi članovi? Da li postoji limit broja kolekcija po članu? |
+| **Veze i zavisnosti** | Katalog knjiga i pregled detalja knjige. |
+
+---
