@@ -594,6 +594,17 @@
                 _drawer.querySelectorAll('button[type="submit"]').forEach(b => b.addEventListener("click", closeDrawer));
             }
             document.addEventListener("keydown", e => { if (e.key === "Escape") closeDrawer(); });
+
+            // ── Modal teleport ───────────────────────────────────────────────
+            // Move all overlay modals to <body> so position:fixed is always
+            // relative to the viewport, not a transformed ancestor (<main>).
+            document.querySelectorAll(
+                '.sl-modal-overlay, .collection-create-overlay, .confirm-modal-overlay, .image-modal-overlay, .kat-modal-overlay'
+            ).forEach(function (el) {
+                if (el.parentElement !== document.body) {
+                    document.body.appendChild(el);
+                }
+            });
         });
     </script>
 
