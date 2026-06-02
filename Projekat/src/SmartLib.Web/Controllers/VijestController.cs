@@ -2,16 +2,19 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SmartLib.Core.Interfaces;
 using SmartLib.Core.Models;
+using SmartLib.Infrastructure.Services;
 
 namespace SmartLib.Web.Controllers
 {
     public class VijestController : Controller
     {
         private readonly IVijestRepository _repo;
+        private readonly CacheVersionStore _cacheVersions;
 
-        public VijestController(IVijestRepository repo)
+        public VijestController(IVijestRepository repo, CacheVersionStore cacheVersions)
         {
             _repo = repo;
+            _cacheVersions = cacheVersions;
         }
 
         public async Task<IActionResult> Index()
@@ -48,6 +51,7 @@ namespace SmartLib.Web.Controllers
             if (vijest.DatumObjave == default)
                 vijest.DatumObjave = DateTime.UtcNow;
             await _repo.CreateAsync(vijest);
+            _cacheVersions.BumpNewsVersion();
 
             if (isAjax) return Json(new { success = true });
             return RedirectToAction(nameof(Index));
@@ -85,6 +89,7 @@ namespace SmartLib.Web.Controllers
             existing.Kategorija = vijest.Kategorija;
             existing.SlikaUrl = vijest.SlikaUrl;
             await _repo.UpdateAsync(existing);
+            _cacheVersions.BumpNewsVersion();
 
             if (isAjax) return Json(new { success = true });
             return RedirectToAction(nameof(Index));
@@ -97,6 +102,7 @@ namespace SmartLib.Web.Controllers
         {
             bool isAjax = Request.Headers.ContainsKey("X-Requested-With");
             await _repo.DeleteAsync(id);
+            _cacheVersions.BumpNewsVersion();
             if (isAjax) return Json(new { success = true });
             return RedirectToAction(nameof(Index));
         }

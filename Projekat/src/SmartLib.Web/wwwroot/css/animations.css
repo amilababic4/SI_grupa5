@@ -768,11 +768,69 @@
    Cinematic bookshelf → book pull-out → zoom into gap → white-out → navigate
    ═══════════════════════════════════════════════════════════════════════════════ */
 
+/* Hero zoom overlay for home page catalog entrance */
+.cts-hero-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9994;
+  background: radial-gradient(circle at 30% 30%, rgba(200, 151, 74, 0.25) 0%, transparent 55%),
+        rgba(4, 10, 24, 0.55);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+
+.cts-hero-overlay.cts-hero-active {
+  opacity: 1;
+}
+
+.cts-hero-clone {
+  position: fixed;
+  z-index: 9999;
+  border-radius: 12px;
+  object-fit: cover;
+  box-shadow: 0 50px 140px rgba(3, 8, 18, 0.65);
+  transform: translate3d(0, 0, 0) scale(1);
+  transition: transform var(--cts-hero-zoom-duration, 900ms) cubic-bezier(0.16, 1, 0.3, 1),
+        opacity 0.35s ease;
+  opacity: 0.95;
+  pointer-events: none;
+}
+
+.cts-hero-whiteout {
+  position: fixed;
+  inset: 0;
+  background: #ffffff;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 10000;
+  transition: opacity 0.35s ease;
+}
+
+.cts-hero-whiteout.cts-hero-active {
+  opacity: 1;
+}
+
+[data-theme="dark"] .cts-hero-whiteout {
+  background: #0f172a;
+}
+
 #catalog-transition-shelf {
     position: fixed;
     inset: 0;
     z-index: 9998;  /* Below #book-overlay (9999) but above everything else */
     pointer-events: all;
+  perspective: 1400px;
+  perspective-origin: 50% 45%;
+  --cts-pull-duration: 650ms;
+  --cts-fall-duration: 780ms;
+  --cts-zoom-duration: 900ms;
+  --cts-whiteout-delay: 0ms;
+}
+
+#catalog-transition-shelf.cts-hero-mode {
+  z-index: 9998;
+  pointer-events: none;
 }
 
 .cts-backdrop {
@@ -796,10 +854,22 @@
     padding: 2rem 3rem 0 3rem;
     opacity: 0;
     transition: opacity 0.4s ease 0.15s, transform 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-style: preserve-3d;
+}
+
+.cts-shelf-body {
+  transform-style: preserve-3d;
+  transform-origin: 50% 100%;
 }
 
 #catalog-transition-shelf.cts-active .cts-shelf {
     opacity: 1;
+}
+
+#catalog-transition-shelf.cts-hero-mode .cts-shelf {
+  transform: translate(-50%, -42%) scale(0.82);
+  opacity: 0.85;
+  filter: saturate(0.9);
 }
 
 /* When zooming into the gap, the shelf scales up and centers on the gap */
@@ -807,7 +877,7 @@
     transform: translate(-50%, -50%) scale(3);
     filter: blur(3px);
     opacity: 0;
-    transition: transform 1s cubic-bezier(0.65, 0, 0.35, 1),
+  transition: transform var(--cts-zoom-duration) cubic-bezier(0.65, 0, 0.35, 1),
                 filter 0.8s ease,
                 opacity 0.8s ease 0.3s;
 }
@@ -856,13 +926,19 @@
     z-index: 5;
     box-shadow: inset -2px 0 4px rgba(0,0,0,0.3), 2px 0 8px rgba(0,0,0,0.3),
                 0 0 20px rgba(200, 151, 74, 0.2);
-    transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1),
-                opacity 0.4s ease;
+  transform-origin: 50% 98%;
+  transition: transform var(--cts-pull-duration) cubic-bezier(0.16, 1, 0.3, 1),
+        opacity 0.4s ease;
 }
 
 #catalog-transition-shelf.cts-pull .cts-target {
     transform: translateZ(200px) translateY(-30px) scale(1.3);
-    opacity: 0;
+  opacity: 1;
+}
+
+#catalog-transition-shelf.cts-fall .cts-target {
+  animation: ctsBookFall var(--cts-fall-duration) cubic-bezier(0.14, 0.74, 0.18, 1) forwards;
+  opacity: 1;
 }
 
 /* The gap — starts at width 0, expands when the book slides out */
@@ -876,6 +952,14 @@
 
 #catalog-transition-shelf.cts-pull .cts-gap {
     width: 50px;
+}
+
+#catalog-transition-shelf.cts-fall .cts-shelf-body {
+  animation: ctsShelfHinge var(--cts-fall-duration) cubic-bezier(0.12, 0.8, 0.2, 1) both;
+}
+
+#catalog-transition-shelf.cts-fall .cts-books-row {
+  animation: ctsShelfShake 420ms ease-in-out;
 }
 
 /* Warm glow from behind the gap */
@@ -915,9 +999,9 @@
     transition: opacity 0.4s ease;
 }
 
-#catalog-transition-shelf.cts-zoom .cts-whiteout {
+#catalog-transition-shelf.cts-whiteout .cts-whiteout {
     opacity: 1;
-    transition: opacity 0.5s ease 0.6s;
+  transition: opacity 0.5s ease var(--cts-whiteout-delay);
 }
 
 /* Wooden plank */
@@ -927,6 +1011,10 @@
     border-radius: 0 0 3px 3px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.4), inset 0 2px 0 rgba(255,255,255,0.1);
     margin-top: 0;
+}
+
+#catalog-transition-shelf.cts-fall .cts-plank {
+  animation: ctsPlankShake 420ms ease-in-out;
 }
 
 /* Dark theme adjustments */
@@ -945,6 +1033,48 @@
         animation: none !important;
         transition-duration: 0.01ms !important;
     }
+}
+
+@keyframes ctsBookFall {
+  0% {
+    transform: translateZ(210px) translateY(-34px) scale(1.3) rotateX(0deg) rotateZ(0deg);
+    opacity: 1;
+  }
+  18% {
+    transform: translateZ(230px) translateY(-6px) scale(1.28) rotateX(6deg) rotateZ(-2deg);
+  }
+  52% {
+    transform: translateZ(185px) translateY(140px) scale(1.18) rotateX(22deg) rotateZ(5deg);
+  }
+  82% {
+    transform: translateZ(140px) translateY(265px) scale(1.12) rotateX(36deg) rotateZ(9deg);
+  }
+  100% {
+    transform: translateZ(110px) translateY(340px) scale(1.06) rotateX(46deg) rotateZ(12deg);
+    opacity: 0;
+  }
+}
+
+@keyframes ctsShelfHinge {
+  0% { transform: rotateX(0deg) rotateZ(0deg); }
+  30% { transform: rotateX(1.5deg) rotateZ(0.4deg); }
+  60% { transform: rotateX(-0.6deg) rotateZ(-0.2deg); }
+  100% { transform: rotateX(0deg) rotateZ(0deg); }
+}
+
+@keyframes ctsShelfShake {
+  0% { transform: translateX(0) translateY(0); }
+  25% { transform: translateX(-2px) translateY(1px); }
+  50% { transform: translateX(2px) translateY(-1px); }
+  75% { transform: translateX(-1px) translateY(1px); }
+  100% { transform: translateX(0) translateY(0); }
+}
+
+@keyframes ctsPlankShake {
+  0% { transform: translateY(0); }
+  30% { transform: translateY(2px); }
+  60% { transform: translateY(-1px); }
+  100% { transform: translateY(0); }
 }
 
 /* Fix BUG 1: Light/Dark Theme Flash on First Load */

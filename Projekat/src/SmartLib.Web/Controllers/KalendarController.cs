@@ -2,16 +2,19 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SmartLib.Core.Interfaces;
 using SmartLib.Core.Models;
+using SmartLib.Infrastructure.Services;
 
 namespace SmartLib.Web.Controllers
 {
     public class KalendarController : Controller
     {
         private readonly IDogadjajRepository _repo;
+        private readonly CacheVersionStore _cacheVersions;
 
-        public KalendarController(IDogadjajRepository repo)
+        public KalendarController(IDogadjajRepository repo, CacheVersionStore cacheVersions)
         {
             _repo = repo;
+            _cacheVersions = cacheVersions;
         }
 
         public async Task<IActionResult> Index()
@@ -48,6 +51,7 @@ namespace SmartLib.Web.Controllers
             if (dogadjaj.Datum == default)
                 dogadjaj.Datum = DateTime.Today;
             await _repo.CreateAsync(dogadjaj);
+            _cacheVersions.BumpEventsVersion();
 
             if (isAjax) return Json(new { success = true, id = dogadjaj.Id, datum = dogadjaj.Datum.ToString("yyyy-MM-dd") });
             return RedirectToAction(nameof(Index));
@@ -87,6 +91,7 @@ namespace SmartLib.Web.Controllers
             existing.Lokacija  = dogadjaj.Lokacija;
             existing.Kategorija = dogadjaj.Kategorija;
             await _repo.UpdateAsync(existing);
+            _cacheVersions.BumpEventsVersion();
 
             if (isAjax) return Json(new { success = true });
             return RedirectToAction(nameof(Index));
@@ -99,6 +104,7 @@ namespace SmartLib.Web.Controllers
         {
             bool isAjax = Request.Headers.ContainsKey("X-Requested-With");
             await _repo.DeleteAsync(id);
+            _cacheVersions.BumpEventsVersion();
             if (isAjax) return Json(new { success = true });
             return RedirectToAction(nameof(Index));
         }

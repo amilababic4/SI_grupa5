@@ -17,6 +17,10 @@ namespace SmartLib.Web.Controllers
         private readonly CacheVersionStore _cacheVersions;
         private readonly IVijestRepository _vijestRepository;
         private readonly IDogadjajRepository _dogadjajRepository;
+        private static readonly TimeSpan HomeRandomCacheTtl = TimeSpan.FromMinutes(5);
+        private static readonly TimeSpan HomeRecoCacheTtl = TimeSpan.FromMinutes(5);
+        private static readonly TimeSpan HomeNewsCacheTtl = TimeSpan.FromMinutes(3);
+        private static readonly TimeSpan HomeEventsCacheTtl = TimeSpan.FromMinutes(2);
 
         public HomeController(
             IKnjigaRepository knjigaRepository,
@@ -42,11 +46,10 @@ namespace SmartLib.Web.Controllers
             var booksVersion = _cacheVersions.BooksVersion;
             var categoriesVersion = _cacheVersions.CategoriesVersion;
             var randomCacheKey = $"home_random_v1_{booksVersion}_{categoriesVersion}";
-            var randomDtos = await _cache.GetRecordAsync<List<KnjigaDto>>(randomCacheKey);
-            if (randomDtos == null)
+            var randomDtos = await _cache.GetOrCreateRecordAsync(randomCacheKey, HomeRandomCacheTtl, async () =>
             {
                 var randomKnjige = await _knjigaRepository.GetRandomAsync(4);
-                randomDtos = randomKnjige.Select(k => new KnjigaDto
+                return randomKnjige.Select(k => new KnjigaDto
                 {
                     Id = k.Id,
                     Naslov = k.Naslov,
@@ -55,9 +58,7 @@ namespace SmartLib.Web.Controllers
                     Kategorija = k.Kategorija?.Naziv,
                     GodinaIzdanja = k.GodinaIzdanja
                 }).ToList();
-
-                await _cache.SetRecordAsync(randomCacheKey, randomDtos, TimeSpan.FromMinutes(5));
-            }
+            });
             viewModel.RandomKnjige = randomDtos;
 
             // Ako je korisnik prijavljen, dohvatamo preporuke
@@ -68,11 +69,10 @@ namespace SmartLib.Web.Controllers
                 if (int.TryParse(userIdClaim, out int userId))
                 {
                     var recoCacheKey = $"home_reco_{userId}_{booksVersion}_{categoriesVersion}";
-                    var recoDtos = await _cache.GetRecordAsync<List<KnjigaDto>>(recoCacheKey);
-                    if (recoDtos == null)
+                    var recoDtos = await _cache.GetOrCreateRecordAsync(recoCacheKey, HomeRecoCacheTtl, async () =>
                     {
                         var recommended = await _bookRecommender.GetRecommendationsForUserAsync(userId);
-                        recoDtos = recommended.Select(k => new KnjigaDto
+                        return recommended.Select(k => new KnjigaDto
                         {
                             Id = k.Id,
                             Naslov = k.Naslov,
@@ -81,22 +81,43 @@ namespace SmartLib.Web.Controllers
                             Kategorija = k.Kategorija?.Naziv,
                             GodinaIzdanja = k.GodinaIzdanja
                         }).ToList();
-
-                        await _cache.SetRecordAsync(recoCacheKey, recoDtos, TimeSpan.FromMinutes(5));
-                    }
+                    });
                     viewModel.RecommendedKnjige = recoDtos;
                 }
             }
 
-            var allVijesti = await _vijestRepository.GetAllAsync();
-            viewModel.RecentVijesti = allVijesti.Take(4).ToList();
+            var newsCacheKey = $"home_news_v1_{_cacheVersions.NewsVersion}";
+            var newsDtos = await _cache.GetOrCreateRecordAsync(newsCacheKey, HomeNewsCacheTtl, async () =>
+            {
+                var recent = await _vijestRepository.GetRecentAsync(4);
+                return recent.Select(v => new Models.HomeVijestDto
+                {
+                    Id = v.Id,
+                    Naslov = v.Naslov,
+                    Sadrzaj = v.Sadrzaj,
+                    Kategorija = v.Kategorija,
+                    SlikaUrl = v.SlikaUrl,
+                    DatumObjave = v.DatumObjave
+                }).ToList();
+            });
+            viewModel.RecentVijesti = newsDtos;
 
-            var allDogadjaji = await _dogadjajRepository.GetAllAsync();
-            viewModel.UpcomingDogadjaji = allDogadjaji
-                .Where(d => d.Datum.Date >= DateTime.Today)
-                .OrderBy(d => d.Datum)
-                .Take(4)
-                .ToList();
+            var todayKey = DateTime.Today.ToString("yyyyMMdd");
+            var eventsCacheKey = $"home_events_v1_{_cacheVersions.EventsVersion}_{todayKey}";
+            var eventDtos = await _cache.GetOrCreateRecordAsync(eventsCacheKey, HomeEventsCacheTtl, async () =>
+            {
+                var upcoming = await _dogadjajRepository.GetUpcomingAsync(DateTime.Today, 4);
+                return upcoming.Select(d => new Models.HomeDogadjajDto
+                {
+                    Id = d.Id,
+                    Naslov = d.Naslov,
+                    Kategorija = d.Kategorija,
+                    Datum = d.Datum,
+                    Sat = d.Sat,
+                    Lokacija = d.Lokacija
+                }).ToList();
+            });
+            viewModel.UpcomingDogadjaji = eventDtos;
 
             return View(viewModel);
         }

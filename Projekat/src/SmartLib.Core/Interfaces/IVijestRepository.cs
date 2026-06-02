@@ -5,6 +5,7 @@ namespace SmartLib.Core.Interfaces
     public interface IVijestRepository
     {
         Task<IEnumerable<Vijest>> GetAllAsync();
+        Task<IReadOnlyList<Vijest>> GetRecentAsync(int take);
         Task<Vijest?> GetByIdAsync(int id);
         Task<Vijest> CreateAsync(Vijest vijest);
         Task UpdateAsync(Vijest vijest);

@@ -10,53 +10,209 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  const isHomePage = document.body?.classList.contains('home-page');
+  const ENABLE_HERO_ZOOM = false;
+  let catalogTransitionInFlight = false;
+
+  const CTS_TIMINGS = {
+    PULL_DELAY_MS: 420,
+    PULL_DURATION_MS: 650,
+    FALL_DURATION_MS: 780,
+    ZOOM_DURATION_MS: 900,
+    WHITEOUT_DELAY_MS: 260,
+    NAVIGATE_BUFFER_MS: 320
+  };
+
+  const CTS_PHASES = {
+    FALL_START_MS: CTS_TIMINGS.PULL_DELAY_MS + CTS_TIMINGS.PULL_DURATION_MS,
+    ZOOM_START_MS: CTS_TIMINGS.PULL_DELAY_MS + CTS_TIMINGS.PULL_DURATION_MS + CTS_TIMINGS.FALL_DURATION_MS,
+    WHITEOUT_START_MS: CTS_TIMINGS.PULL_DELAY_MS + CTS_TIMINGS.PULL_DURATION_MS + CTS_TIMINGS.FALL_DURATION_MS + CTS_TIMINGS.WHITEOUT_DELAY_MS,
+    NAVIGATE_MS: CTS_TIMINGS.PULL_DELAY_MS + CTS_TIMINGS.PULL_DURATION_MS + CTS_TIMINGS.FALL_DURATION_MS + CTS_TIMINGS.ZOOM_DURATION_MS + CTS_TIMINGS.NAVIGATE_BUFFER_MS
+  };
+
+  const HERO_TIMINGS = {
+    ZOOM_START_MS: CTS_PHASES.FALL_START_MS + 120,
+    ZOOM_DURATION_MS: CTS_TIMINGS.ZOOM_DURATION_MS,
+    WHITEOUT_START_MS: CTS_PHASES.WHITEOUT_START_MS,
+    NAVIGATE_MS: CTS_PHASES.NAVIGATE_MS
+  };
+
   const overlay = document.getElementById('book-overlay');
   const book = document.querySelector('.book');
   const $menu = document.getElementById('nav-menu');
 
   // ─── Catalog Transition: Bookshelf → Pull Book → Zoom Gap → Navigate ─────────
+  function markCatalogSeen() {
+    try { sessionStorage.setItem('smartlib-catalog-seen', '1'); } catch (err) {}
+  }
+
+  function runHeroZoomTransition(targetUrl) {
+    if (!ENABLE_HERO_ZOOM) return false;
+    if (!isHomePage) return false;
+
+    const heroImg = document.querySelector('.hero-book-showcase .hero-showcase-img');
+    if (!heroImg) return false;
+
+    const rect = heroImg.getBoundingClientRect();
+    if (rect.width < 40 || rect.height < 40) return false;
+
+    if (catalogTransitionInFlight) return true;
+    catalogTransitionInFlight = true;
+
+    runShelfFallBackdrop();
+
+    const overlay = document.createElement('div');
+    overlay.className = 'cts-hero-overlay';
+
+    const whiteout = document.createElement('div');
+    whiteout.className = 'cts-hero-whiteout';
+
+    const clone = document.createElement('img');
+    clone.className = 'cts-hero-clone';
+    clone.alt = '';
+    clone.src = heroImg.currentSrc || heroImg.src;
+    clone.style.left = `${rect.left}px`;
+    clone.style.top = `${rect.top}px`;
+    clone.style.width = `${rect.width}px`;
+    clone.style.height = `${rect.height}px`;
+    clone.style.setProperty('--cts-hero-zoom-duration', `${HERO_TIMINGS.ZOOM_DURATION_MS}ms`);
+
+    document.body.appendChild(overlay);
+    document.body.appendChild(clone);
+    document.body.appendChild(whiteout);
+
+    const centerX = window.innerWidth / 2;
+    const centerY = window.innerHeight / 2;
+    const startX = rect.left + rect.width / 2;
+    const startY = rect.top + rect.height / 2;
+    const translateX = centerX - startX;
+    const translateY = centerY - startY;
+    const scale = rect.width > window.innerWidth * 0.6 ? 1.25 : 1.45;
+
+    requestAnimationFrame(() => {
+      overlay.classList.add('cts-hero-active');
+    });
+
+    setTimeout(() => {
+      clone.classList.add('cts-hero-zoom');
+      clone.style.transform = `translate3d(${translateX}px, ${translateY}px, 0) scale(${scale}) rotate(-3deg)`;
+    }, HERO_TIMINGS.ZOOM_START_MS);
+
+    setTimeout(() => {
+      whiteout.classList.add('cts-hero-active');
+    }, HERO_TIMINGS.WHITEOUT_START_MS);
+
+    setTimeout(() => {
+      window.location.href = targetUrl;
+    }, HERO_TIMINGS.NAVIGATE_MS);
+
+    return true;
+  }
+
+  function resetShelfState(shelf) {
+    shelf.classList.remove('cts-active', 'cts-pull', 'cts-fall', 'cts-zoom', 'cts-whiteout', 'cts-hero-mode');
+  }
+
+  function runShelfFallBackdrop() {
+    const shelf = document.getElementById('catalog-transition-shelf');
+    if (!shelf) return;
+
+    resetShelfState(shelf);
+    shelf.style.setProperty('--cts-pull-duration', `${CTS_TIMINGS.PULL_DURATION_MS}ms`);
+    shelf.style.setProperty('--cts-fall-duration', `${CTS_TIMINGS.FALL_DURATION_MS}ms`);
+    shelf.style.setProperty('--cts-zoom-duration', `${CTS_TIMINGS.ZOOM_DURATION_MS}ms`);
+    shelf.style.setProperty('--cts-whiteout-delay', `${CTS_TIMINGS.WHITEOUT_DELAY_MS}ms`);
+
+    shelf.style.display = 'block';
+    void shelf.offsetWidth;
+
+    shelf.classList.add('cts-active', 'cts-hero-mode');
+
+    setTimeout(() => {
+      shelf.classList.add('cts-pull');
+    }, CTS_TIMINGS.PULL_DELAY_MS);
+
+    setTimeout(() => {
+      shelf.classList.add('cts-fall');
+    }, CTS_PHASES.FALL_START_MS);
+
+    const cleanupDelay = CTS_PHASES.FALL_START_MS + CTS_TIMINGS.FALL_DURATION_MS + 160;
+    setTimeout(() => {
+      resetShelfState(shelf);
+      shelf.style.display = 'none';
+    }, cleanupDelay);
+  }
+
+  function runShelfTransition(targetUrl) {
+    const shelf = document.getElementById('catalog-transition-shelf');
+    if (!shelf) return false;
+
+    if (catalogTransitionInFlight) return true;
+    catalogTransitionInFlight = true;
+
+    resetShelfState(shelf);
+
+    shelf.style.setProperty('--cts-pull-duration', `${CTS_TIMINGS.PULL_DURATION_MS}ms`);
+    shelf.style.setProperty('--cts-fall-duration', `${CTS_TIMINGS.FALL_DURATION_MS}ms`);
+    shelf.style.setProperty('--cts-zoom-duration', `${CTS_TIMINGS.ZOOM_DURATION_MS}ms`);
+    shelf.style.setProperty('--cts-whiteout-delay', `${CTS_TIMINGS.WHITEOUT_DELAY_MS}ms`);
+
+    shelf.style.display = 'block';
+    void shelf.offsetWidth; // force reflow
+
+    // BEAT 1: Backdrop fades in, shelf appears
+    shelf.classList.add('cts-active');
+
+    // BEAT 2: Target book slides out, gap opens
+    setTimeout(() => {
+      shelf.classList.add('cts-pull');
+    }, CTS_TIMINGS.PULL_DELAY_MS);
+
+    // BEAT 3: The book tips and falls from the shelf
+    setTimeout(() => {
+      shelf.classList.add('cts-fall');
+    }, CTS_PHASES.FALL_START_MS);
+
+    // BEAT 4: Camera dives into the gap
+    setTimeout(() => {
+      shelf.classList.add('cts-zoom');
+    }, CTS_PHASES.ZOOM_START_MS);
+
+    // BEAT 4.5: Whiteout after the fall completes
+    setTimeout(() => {
+      shelf.classList.add('cts-whiteout');
+    }, CTS_PHASES.WHITEOUT_START_MS);
+
+    // BEAT 5: Navigate
+    setTimeout(() => {
+      window.location.href = targetUrl;
+    }, CTS_PHASES.NAVIGATE_MS);
+
+    return true;
+  }
+
   const katalogLinks = document.querySelectorAll('.katalog-nav-link');
   katalogLinks.forEach(link => {
-      link.addEventListener('click', function(e) {
-          if (disableAnimations || prefersReduced) return; // normal navigation
+    link.addEventListener('click', function (e) {
+      if (disableAnimations || prefersReduced) {
+        markCatalogSeen();
+        return; // normal navigation
+      }
 
-          try {
-              if (sessionStorage.getItem('smartlib-catalog-seen')) return; // normal navigation
-          } catch(err) {}
+      try {
+        if (sessionStorage.getItem('smartlib-catalog-seen')) return; // normal navigation
+      } catch (err) {}
 
-          e.preventDefault();
-          const targetUrl = this.href;
+      e.preventDefault();
+      const targetUrl = this.href;
 
-          try { sessionStorage.setItem('smartlib-catalog-seen', '1'); } catch(err) {}
+      markCatalogSeen();
 
-          const shelf = document.getElementById('catalog-transition-shelf');
-          if (!shelf) {
-              window.location.href = targetUrl;
-              return;
-          }
+      if (runHeroZoomTransition(targetUrl)) return;
+      if (runShelfTransition(targetUrl)) return;
 
-          // Show the shelf container
-          shelf.style.display = 'block';
-          void shelf.offsetWidth; // force reflow
-
-          // BEAT 1: Backdrop fades in, shelf appears
-          shelf.classList.add('cts-active');
-
-          // BEAT 2: Target book slides out, gap opens
-          setTimeout(() => {
-              shelf.classList.add('cts-pull');
-          }, 500);
-
-          // BEAT 3 & 4: Zoom into the gap, glow expands, white-out
-          setTimeout(() => {
-              shelf.classList.add('cts-zoom');
-          }, 1400);
-
-          // BEAT 5: Navigate
-          setTimeout(() => {
-              window.location.href = targetUrl;
-          }, 2800);
-      });
+      window.location.href = targetUrl;
+    });
   });
 
   // ─── Menu Reveal (hardware-accelerated stagger) ────────────────────────────

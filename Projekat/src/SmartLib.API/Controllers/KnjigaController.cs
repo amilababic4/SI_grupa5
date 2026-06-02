@@ -108,24 +108,20 @@ namespace SmartLib.API.Controllers
             var authorKey = NormalizeCachePart(autor);
             var cacheKey = $"api_books_v1_{_cacheVersions.BooksVersion}_{_cacheVersions.CategoriesVersion}_{titleKey}_{authorKey}_{page}_{pageSize}";
 
-            var cached = await _cache.GetRecordAsync<KnjigaListResponse>(cacheKey);
-            if (cached != null)
+            var response = await _cache.GetOrCreateRecordAsync(cacheKey, ApiBooksCacheTtl, async () =>
             {
-                return Ok(cached);
-            }
+                var (knjige, ukupno) = await _knjigaRepository.GetPagedAsync(naslov, autor, page, pageSize);
+                var dtos = knjige.Select(MapToDto).ToList();
 
-            var (knjige, ukupno) = await _knjigaRepository.GetPagedAsync(naslov, autor, page, pageSize);
-            var dtos = knjige.Select(MapToDto).ToList();
+                return new KnjigaListResponse
+                {
+                    Podaci = dtos,
+                    UkupnoStavki = ukupno,
+                    Stranica = page,
+                    UkupnoStranica = (int)Math.Ceiling((double)ukupno / pageSize)
+                };
+            });
 
-            var response = new KnjigaListResponse
-            {
-                Podaci = dtos,
-                UkupnoStavki = ukupno,
-                Stranica = page,
-                UkupnoStranica = (int)Math.Ceiling((double)ukupno / pageSize)
-            };
-
-            await _cache.SetRecordAsync(cacheKey, response, ApiBooksCacheTtl);
             return Ok(response);
         }
 

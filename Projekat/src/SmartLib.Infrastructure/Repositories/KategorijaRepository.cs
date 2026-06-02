@@ -32,6 +32,21 @@ namespace SmartLib.Infrastructure.Repositories
                 .FirstOrDefaultAsync(k => k.Id == id);
         }
 
+        public async Task<bool> ExistsByNameAsync(string naziv, int? excludeId = null)
+        {
+            if (string.IsNullOrWhiteSpace(naziv)) return false;
+
+            var normalized = naziv.Trim().ToLowerInvariant();
+            var query = _db.Kategorije.AsNoTracking().Where(k => k.Naziv.ToLower() == normalized);
+
+            if (excludeId.HasValue)
+            {
+                query = query.Where(k => k.Id != excludeId.Value);
+            }
+
+            return await query.AnyAsync();
+        }
+
         public async Task<Kategorija> CreateAsync(Kategorija kategorija)
         {
             _db.Kategorije.Add(kategorija);

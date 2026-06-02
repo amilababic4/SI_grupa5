@@ -16,6 +16,14 @@ namespace SmartLib.Infrastructure.Repositories
                 .OrderBy(d => d.Datum)
                 .ToListAsync();
 
+        public async Task<IReadOnlyList<Dogadjaj>> GetUpcomingAsync(DateTime fromDate, int take)
+            => await _db.Dogadjaji
+                .AsNoTracking()
+                .Where(d => d.Datum >= fromDate)
+                .OrderBy(d => d.Datum)
+                .Take(take)
+                .ToListAsync();
+
         public async Task<Dogadjaj?> GetByIdAsync(int id)
             => await _db.Dogadjaji
                 .Include(d => d.Autor)

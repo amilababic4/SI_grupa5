@@ -6,6 +6,7 @@ namespace SmartLib.Core.Interfaces
     {
         Task<IEnumerable<Kategorija>> GetAllAsync();
         Task<Kategorija?> GetByIdAsync(int id);
+        Task<bool> ExistsByNameAsync(string naziv, int? excludeId = null);
         Task<Kategorija> CreateAsync(Kategorija kategorija);
         Task UpdateAsync(Kategorija kategorija);
         Task<bool> DeleteAsync(int id);

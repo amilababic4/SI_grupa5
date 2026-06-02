@@ -37,20 +37,18 @@ namespace SmartLib.API.Controllers
         public async Task<IActionResult> GetAll()
         {
             var cacheKey = $"api_categories_v1_{_cacheVersions.CategoriesVersion}_{_cacheVersions.BooksVersion}";
-            var cached = await _cache.GetRecordAsync<List<KategorijaResponse>>(cacheKey);
-            if (cached != null)
-                return Ok(cached);
-
-            var kategorije = await _kategorijaRepository.GetAllAsync();
-            var result = kategorije.Select(k => new KategorijaResponse
+            var result = await _cache.GetOrCreateRecordAsync(cacheKey, CategoriesCacheTtl, async () =>
             {
-                Id = k.Id,
-                Naziv = k.Naziv,
-                Opis = k.Opis,
-                BrojKnjiga = k.Knjige.Count
-            }).ToList();
+                var kategorije = await _kategorijaRepository.GetAllAsync();
+                return kategorije.Select(k => new KategorijaResponse
+                {
+                    Id = k.Id,
+                    Naziv = k.Naziv,
+                    Opis = k.Opis,
+                    BrojKnjiga = k.Knjige.Count
+                }).ToList();
+            });
 
-            await _cache.SetRecordAsync(cacheKey, result, CategoriesCacheTtl);
             return Ok(result);
         }
 
@@ -95,8 +93,7 @@ namespace SmartLib.API.Controllers
             var naziv = request.Naziv.Trim();
 
             // US-30 AC: Kategorija već postoji
-            var sve = await _kategorijaRepository.GetAllAsync();
-            if (sve.Any(k => k.Naziv.Equals(naziv, StringComparison.OrdinalIgnoreCase)))
+            if (await _kategorijaRepository.ExistsByNameAsync(naziv))
                 return Conflict(new { message = $"Kategorija \"{naziv}\" već postoji u sistemu." });
 
             var kategorija = await _kategorijaRepository.CreateAsync(new Kategorija
@@ -134,8 +131,7 @@ namespace SmartLib.API.Controllers
             var naziv = request.Naziv.Trim();
 
             // US-33 AC: Naziv već postoji kod druge kategorije
-            var sve = await _kategorijaRepository.GetAllAsync();
-            if (sve.Any(k => k.Id != id && k.Naziv.Equals(naziv, StringComparison.OrdinalIgnoreCase)))
+            if (await _kategorijaRepository.ExistsByNameAsync(naziv, id))
                 return Conflict(new { message = $"Kategorija \"{naziv}\" već postoji u sistemu." });
 
             kategorija.Naziv = naziv;

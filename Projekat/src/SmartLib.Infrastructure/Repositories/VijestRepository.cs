@@ -16,6 +16,13 @@ namespace SmartLib.Infrastructure.Repositories
                 .OrderByDescending(v => v.DatumObjave)
                 .ToListAsync();
 
+        public async Task<IReadOnlyList<Vijest>> GetRecentAsync(int take)
+            => await _db.Vijesti
+                .AsNoTracking()
+                .OrderByDescending(v => v.DatumObjave)
+                .Take(take)
+                .ToListAsync();
+
         public async Task<Vijest?> GetByIdAsync(int id)
             => await _db.Vijesti
                 .Include(v => v.Autor)
