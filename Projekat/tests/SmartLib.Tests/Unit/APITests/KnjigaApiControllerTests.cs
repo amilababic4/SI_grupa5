@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
@@ -37,6 +38,12 @@ namespace SmartLib.Tests.Unit.APITests
                 new Mock<IHttpClientFactory>().Object,
                 _cache,
                 _cacheVersions);
+
+            // Postavljamo HttpContext da Response.Headers ne bude null u unit testovima
+            _controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext()
+            };
         }
 
         // Pomoćne metode za testne podatke
