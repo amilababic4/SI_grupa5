@@ -1,4 +1,4 @@
-name: Build, Push Docker & Deploy to Render
+name: Build, Test, Push Docker & Deploy to Render
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
     branches: ["main"]
 
 jobs:
-  build-push-deploy:
+  build-test-deploy:
     if: |
       github.event_name == 'push' ||
       (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
@@ -17,6 +17,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # ── .NET Test Phase ──────────────────────────────────────────────
+      - name: Setup .NET 8 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore NuGet packages
+        run: dotnet restore Projekat/SmartLib.sln
+
+      - name: Build solution
+        run: dotnet build Projekat/SmartLib.sln --no-restore --configuration Release
+
+      - name: Run tests (Unit, Integration, Security — without UI)
+        run: dotnet test Projekat/SmartLib.sln --no-build --configuration Release --verbosity normal --filter "FullyQualifiedName!~UiTests"
+
+      # ── Docker Build & Push Phase ────────────────────────────────────
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
@@ -32,5 +48,6 @@ jobs:
       - name: Push image
         run: docker push docker.io/${{ secrets.DOCKERHUB_USERNAME }}/smartlib-web:latest
 
+      # ── Deploy Phase ─────────────────────────────────────────────────
       - name: Trigger Render deploy
         run: curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"

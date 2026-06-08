@@ -15,30 +15,44 @@
 11. [Provjera uspješnosti deploymenta](#11-provjera-uspješnosti-deploymenta)
 12. [Ručni koraci (opravdanje)](#12-ručni-koraci-opravdanje)
 13. [Ponovljivost deploymenta](#13-ponovljivost-deploymenta)
+14. [Produkcijski URL](#14-produkcijski-url)
+15. [Poznata ograničenja deploymenta](#15-poznata-ograničenja-deploymenta)
+16. [Rješavanje čestih problema](#16-rješavanje-čestih-problema)
 
 ---
 
 ## 1. Pregled CD pipeline-a
 
-SmartLib koristi potpuno automatizovan **Continuous Deployment pipeline** baziran na **GitHub Actions**, **Docker Hub** i **Render** platformi.
+SmartLib koristi potpuno automatizovan **Continuous Deployment pipeline** baziran na **GitHub Actions**, **Docker Hub** i **Render** platformi. Pipeline uključuje **automatsko testiranje** kao quality gate — ako testovi padnu, deployment se ne izvršava.
 
 ### Tok deploymenta — od koda do produkcije
 
 ```
-┌─────────────────┐         ┌─────────────────────────────────────────────────────┐
-│   Developer     │         │              GitHub Actions (CI/CD)                  │
-│   push na main  │────────▶│                                                     │
-│   ili merge PR  │         │  ┌─────────────┐  ┌────────────┐  ┌──────────────┐  │
-└─────────────────┘         │  │  Checkout    │─▶│ Docker     │─▶│ Build Docker │  │
-                            │  │  repozitorij │  │ Hub Login  │  │ image        │  │
-                            │  └─────────────┘  └────────────┘  └──────┬───────┘  │
-                            │                                          │          │
-                            │  ┌──────────────┐  ┌────────────┐  ┌─────▼───────┐  │
-                            │  │  Trigger     │◀─│ Push image │◀─│ Tag image   │  │
-                            │  │  Render      │  │ na Docker  │  │ latest      │  │
-                            │  │  Deploy Hook │  │ Hub        │  │             │  │
-                            │  └──────┬───────┘  └────────────┘  └─────────────┘  │
-                            └─────────┼───────────────────────────────────────────┘
+┌─────────────────┐         ┌───────────────────────────────────────────────────────────────────┐
+│   Developer     │         │                    GitHub Actions (CI/CD)                          │
+│   push na main  │────────▶│                                                                   │
+│   ili merge PR  │         │  ┌─────────────┐  ┌────────────┐  ┌──────────────┐                │
+└─────────────────┘         │  │  Checkout    │─▶│ Setup .NET │─▶│ Restore +    │                │
+                            │  │  repozitorij │  │ 8 SDK      │  │ Build        │                │
+                            │  └─────────────┘  └────────────┘  └──────┬───────┘                │
+                            │                                          │                        │
+                            │                                   ┌──────▼───────┐                │
+                            │                                   │  Run Tests   │                │
+                            │                                   │  (Unit,      │                │
+                            │                                   │  Integration,│                │
+                            │                                   │  Security)   │                │
+                            │                                   └──────┬───────┘                │
+                            │                                          │                        │
+                            │                                    ✅ Pass? / ❌ Fail?             │
+                            │                                     │           │                 │
+                            │                                     │      STOP (no deploy)       │
+                            │                                     ▼                             │
+                            │  ┌──────────────┐  ┌────────────┐  ┌──────────────┐               │
+                            │  │  Trigger     │◀─│ Push image │◀─│ Docker       │               │
+                            │  │  Render      │  │ na Docker  │  │ Build + Tag  │               │
+                            │  │  Deploy Hook │  │ Hub        │  │              │               │
+                            │  └──────┬───────┘  └────────────┘  └──────────────┘               │
+                            └─────────┼─────────────────────────────────────────────────────────┘
                                       │
                                       ▼
                             ┌─────────────────────────────────────────┐
@@ -64,7 +78,8 @@ SmartLib koristi potpuno automatizovan **Continuous Deployment pipeline** bazira
 
 ### Ključne karakteristike pipeline-a
 
-- **Potpuno automatizovan:** Push na `main` → aplikacija je live bez ikakve ručne intervencije
+- **Potpuno automatizovan:** Push na `main` → testovi → aplikacija je live bez ikakve ručne intervencije
+- **Quality gate:** Testovi služe kao kontrolna tačka — samo testiran kod dospijeva u produkciju
 - **Ponovljiv:** Svaki deployment prolazi identične korake
 - **Idempotentan:** Aplikacija pri pokretanju sama kreira/ažurira bazu i seed podatke
 - **Rollback:** Moguć putem Docker Hub image historije ili git revert + push
@@ -120,7 +135,7 @@ Sve skripte i konfiguracije za CD pipeline se nalaze u repozitoriju:
 ### Kompletni sadržaj workflow fajla
 
 ```yaml
-name: Build, Push Docker & Deploy to Render
+name: Build, Test, Push Docker & Deploy to Render
 
 on:
   push:
@@ -130,7 +145,7 @@ on:
     branches: ["main"]
 
 jobs:
-  build-push-deploy:
+  build-test-deploy:
     if: |
       github.event_name == 'push' ||
       (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
@@ -139,6 +154,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # ── .NET Test Phase ──────────────────────────────────────────────
+      - name: Setup .NET 8 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore NuGet packages
+        run: dotnet restore Projekat/SmartLib.sln
+
+      - name: Build solution
+        run: dotnet build Projekat/SmartLib.sln --no-restore --configuration Release
+
+      - name: Run tests (Unit, Integration, Security — without UI)
+        run: dotnet test Projekat/SmartLib.sln --no-build --configuration Release --verbosity normal --filter "FullyQualifiedName!~UiTests"
+
+      # ── Docker Build & Push Phase ────────────────────────────────────
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
@@ -154,6 +185,7 @@ jobs:
       - name: Push image
         run: docker push docker.io/${{ secrets.DOCKERHUB_USERNAME }}/smartlib-web:latest
 
+      # ── Deploy Phase ─────────────────────────────────────────────────
       - name: Trigger Render deploy
         run: curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"
 ```
@@ -185,6 +217,10 @@ if: |
 
 Osigurava da se deployment ne pokrene za **zatvorene ali ne-merged PR-ove**. Samo stvarno merged PR-ovi triggeruju deployment.
 
+---
+
+### Faza 1: Testiranje (Quality Gate)
+
 #### Korak 1: Checkout repozitorija
 
 ```yaml
@@ -194,7 +230,73 @@ Osigurava da se deployment ne pokrene za **zatvorene ali ne-merged PR-ove**. Sam
 
 Klonira kompletni repozitorij u GitHub Actions runner (Ubuntu VM). Koristi službeni `actions/checkout` action v4.
 
-#### Korak 2: Docker Hub prijava
+#### Korak 2: Setup .NET 8 SDK
+
+```yaml
+- name: Setup .NET 8 SDK
+  uses: actions/setup-dotnet@v4
+  with:
+    dotnet-version: '8.0.x'
+```
+
+Instalira .NET 8 SDK na GitHub Actions runner. Koristi službeni `actions/setup-dotnet` action v4. Ovo je potrebno jer runner dolazi sa minimalnim alatima — SDK se mora eksplicitno instalirati.
+
+#### Korak 3: Restore NuGet paketa
+
+```yaml
+- name: Restore NuGet packages
+  run: dotnet restore Projekat/SmartLib.sln
+```
+
+Preuzima sve NuGet zavisnosti definisane u `.csproj` fajlovima. Ovo uključuje zavisnosti za sve projekte u solution-u: `SmartLib.Core`, `SmartLib.Infrastructure`, `SmartLib.Web`, `SmartLib.API` i `SmartLib.Tests`.
+
+#### Korak 4: Build solution-a
+
+```yaml
+- name: Build solution
+  run: dotnet build Projekat/SmartLib.sln --no-restore --configuration Release
+```
+
+Kompajlira cijeli solution u Release konfiguraciji. `--no-restore` preskače restore jer je već obavljen u prethodnom koraku. Ovo osigurava da se svi projekti uspješno kompajliraju prije pokretanja testova.
+
+#### Korak 5: Pokretanje testova
+
+```yaml
+- name: Run tests (Unit, Integration, Security — without UI)
+  run: dotnet test Projekat/SmartLib.sln --no-build --configuration Release --verbosity normal --filter "FullyQualifiedName!~UiTests"
+```
+
+Pokreće sve testove **osim UI/Playwright testova**. Ovo uključuje:
+
+| Kategorija testova | Broj fajlova | Šta testiraju |
+|--------------------|-------------|---------------|
+| **Unit testovi (API)** | 6 fajlova | API kontroleri sa mockovanim zavisnostima |
+| **Unit testovi (Web)** | 10 fajlova | Web kontroleri sa mockovanim zavisnostima |
+| **Integracioni testovi** | 10 fajlova | End-to-end tokovi putem WebApplicationFactory + InMemory baze |
+| **Sigurnosni testovi** | 1 fajl | SQL injection, XSS, JWT manipulacija, autorizacija |
+
+Parametri:
+- `--no-build` — preskače build jer je već obavljen
+- `--configuration Release` — koristi Release build
+- `--verbosity normal` — prikazuje nazive testova i rezultate
+- `--filter "FullyQualifiedName!~UiTests"` — **isključuje UI/Playwright testove** jer oni zahtijevaju pokrenut browser i live aplikaciju, što nije dostupno u GitHub Actions okruženju bez dodatne konfiguracije
+
+**Zašto su UI testovi isključeni?** Playwright testovi (`SmartLib.UiTests` namespace) zahtijevaju:
+1. Instaliran Chromium/Firefox/WebKit browser na runneru
+2. Pokrenutu SmartLib aplikaciju na `http://localhost:5000`
+3. Pokrenutu MySQL bazu sa seed podacima
+
+Ovo bi značajno zakomplikovalo pipeline, a unit, integracioni i sigurnosni testovi već pružaju dovoljnu pokrivenost za quality gate.
+
+**Ako bilo koji test padne**, `dotnet test` vraća exit code ≠ 0, što automatski zaustavlja GitHub Actions workflow. Nijedan naredni korak (Docker build, push, deploy) se **ne izvršava**. Ovo je ključna funkcija quality gate-a.
+
+> **Napomena:** Svi integracioni i sigurnosni testovi koriste **InMemory bazu podataka** (EF Core InMemory provider), tako da ne zahtijevaju MySQL server u pipeline-u. Ovo pojednostavljuje konfiguraciju i ubrzava izvršavanje.
+
+---
+
+### Faza 2: Docker Build & Push
+
+#### Korak 6: Docker Hub prijava
 
 ```yaml
 - name: Log in to Docker Hub
@@ -208,7 +310,7 @@ Autentificira se na Docker Hub koristeći **GitHub Secrets**:
 - `DOCKERHUB_USERNAME` — korisničko ime na Docker Hub-u
 - `DOCKERHUB_TOKEN` — Access Token (ne lozinka!) generisan na Docker Hub → Account Settings → Security → Access Tokens
 
-#### Korak 3: Build Docker image-a
+#### Korak 7: Build Docker image-a
 
 ```yaml
 - name: Build image
@@ -225,7 +327,7 @@ Parametri:
 - `-t smartlib-web:latest` — lokalni tag za image
 - `Projekat` — build context (direktorij iz kojeg se kopiraju fajlovi)
 
-#### Korak 4: Tag image-a
+#### Korak 8: Tag image-a
 
 ```yaml
 - name: Tag image
@@ -234,7 +336,7 @@ Parametri:
 
 Tagira lokalno izgradeni image sa Docker Hub putanjom u formatu: `docker.io/{username}/smartlib-web:latest`
 
-#### Korak 5: Push image-a na Docker Hub
+#### Korak 9: Push image-a na Docker Hub
 
 ```yaml
 - name: Push image
@@ -243,7 +345,11 @@ Tagira lokalno izgradeni image sa Docker Hub putanjom u formatu: `docker.io/{use
 
 Upload-uje Docker image na Docker Hub registry. Ovo čini image dostupnim za Render da ga pull-uje.
 
-#### Korak 6: Trigger Render deploy
+---
+
+### Faza 3: Deployment
+
+#### Korak 10: Trigger Render deploy
 
 ```yaml
 - name: Trigger Render deploy
@@ -419,10 +525,12 @@ Postaviti na Render dashboardu: **Service → Environment tab → Add Environmen
 | `EmailSettings__SenderEmail` | Email adresa pošiljaoca (`theofficialsmartlibrary@gmail.com`) | Brevo sender |
 | `EmailSettings__SenderName` | Ime pošiljaoca (`SmartLib`) | Brevo sender name |
 | `GOOGLE_BOOKS_API_KEY` | Google Books API ključ (`AIzaSyBAO54pQlK7WKNctuxmuwPtNFyogwKm178`) | Pretraga knjiga |
-| `UPSTASH_REDIS_URL` | Redis TCP URL | Distributed cache |
-| `UPSTASH_REDIS_PASSWORD` | Redis lozinka | Distributed cache |
-| `UPSTASH_REDIS_REST_URL` | Redis REST URL | REST API cache pristup |
-| `UPSTASH_REDIS_REST_TOKEN` | Redis REST token | REST API autentifikacija |
+| `UPSTASH_REDIS_URL` | Redis TCP URL | Distributed cache (koristi se aktivno) |
+| `UPSTASH_REDIS_PASSWORD` | Redis lozinka | Distributed cache (koristi se aktivno) |
+| `UPSTASH_REDIS_REST_URL` | Redis REST URL | Upstash ga automatski generiše (trenutno se ne koristi u kodu) |
+| `UPSTASH_REDIS_REST_TOKEN` | Redis REST token | Upstash ga automatski generiše (trenutno se ne koristi u kodu) |
+
+> **Napomena o Redis varijablama:** Aplikacija koristi `StackExchange.Redis` paket koji komunicira sa Redisom putem standardnog **TCP protokola** (koristeći `UPSTASH_REDIS_URL` i `UPSTASH_REDIS_PASSWORD`). Upstash dashboard automatski generiše i REST API kredencijale (`REST_URL` i `REST_TOKEN`) koji su postavljeni na Render-u za kompletnost, ali se trenutno u kodu ne koriste. REST API se tipično koristi u serverless okruženjima (npr. Cloudflare Workers, Vercel Edge) gdje standardne TCP konekcije nisu dozvoljene.
 
 ### Lokalni `.env` fajl
 
@@ -578,10 +686,16 @@ git push origin feature/nova-funkcionalnost
 
 **Korak 4:** GitHub Actions automatski pokreće `deploy.yml` workflow:
 1. ✅ Checkout repozitorija
-2. ✅ Login na Docker Hub
-3. ✅ Build Docker image-a
-4. ✅ Tag + Push na Docker Hub
-5. ✅ Trigger Render Deploy Hook
+2. ✅ Setup .NET 8 SDK
+3. ✅ Restore NuGet paketa
+4. ✅ Build solution-a
+5. ✅ Pokretanje testova (unit, integracioni, sigurnosni) — **quality gate**
+6. ✅ Login na Docker Hub
+7. ✅ Build Docker image-a
+8. ✅ Tag + Push na Docker Hub
+9. ✅ Trigger Render Deploy Hook
+
+> **Napomena:** Ako bilo koji test padne u koraku 5, workflow se zaustavlja i koraci 6-9 se ne izvršavaju.
 
 **Korak 5:** Render automatski:
 1. ✅ Pull-uje najnoviji image
@@ -664,7 +778,8 @@ curl https://smartlib-web.onrender.com/health/redis
 
 | Simptom | Vjerovatni uzrok |
 |---------|-----------------|
-| GitHub Actions: ❌ crveni X | Build error ili Docker Hub login failed |
+| GitHub Actions: ❌ crveni X na test koraku | Jedan ili više testova je pao — deployment je blokiran |
+| GitHub Actions: ❌ crveni X na build/push koraku | Build error ili Docker Hub login failed |
 | Render: "Deploy failed" | Aplikacija se crashuje pri pokretanju |
 | 502 Bad Gateway | Kontejner radi ali aplikacija nije spremna |
 | Stranica se učitava ali nema podataka | Baza nije dostupna ili connection string je pogrešan |
@@ -691,6 +806,7 @@ Sljedeći koraci su ručni i izvršavaju se **samo jednom** pri inicijalnom post
 
 Sljedeće stvari su **potpuno automatizovane** i ne zahtijevaju ručnu intervenciju:
 
+- ✅ Pokretanje automatskih testova (unit, integracioni, sigurnosni) kao quality gate
 - ✅ Build aplikacije (backend + frontend)
 - ✅ Kreiranje Docker image-a
 - ✅ Push image-a na Docker Hub
@@ -773,6 +889,106 @@ git push origin main
 
 ---
 
+## 14. Produkcijski URL
+
+Nakon uspješnog CD pipeline-a, aplikacija je dostupna na:
+
+| Servis | URL | Opis |
+|--------|-----|------|
+| **Web aplikacija** | https://smartlib-web.onrender.com/ | Glavna stranica — login, katalog, upravljanje knjigama |
+| **Redis Health Check** | https://smartlib-web.onrender.com/health/redis | Provjera konekcije sa Upstash Redis servisom |
+
+---
+
+## 15. Poznata ograničenja deploymenta
+
+### Render Free Tier — spin down
+
+Render Free Tier automatski gasi kontejner nakon **15 minuta neaktivnosti**. Prvi zahtjev nakon toga traje **30-60 sekundi** dok se kontejner ponovo pokrene (cold start). Ovo je ograničenje besplatnog plana i ne može se izbjeći bez nadogradnje na plaćeni plan.
+
+**Posljedica:** Evaluator može doživjeti sporo učitavanje pri prvom pristupu. Svaki naredni zahtjev je normalne brzine.
+
+### TiDB Cloud Serverless — connection pooling
+
+TiDB Cloud Serverless ima ograničenje na broj istovremenih konekcija. U besplatnom planu, limit je dovoljan za razvojne svrhe ali nije za visok promet.
+
+### Upstash Redis — mjesečni limit komandi
+
+Upstash Free Tier dozvoljava 10.000 komandi dnevno / 500.000 mjesečno. Trenutna potrošnja (vidljivo na dashboardu: 472K/500K) je blizu limita. Ako se limit dostigne, cache operacije će failovati ali aplikacija nastavlja raditi koristeći In-Memory Cache fallback.
+
+### Render — blokiran SMTP
+
+Render blokira odlazne SMTP portove (25, 465, 587), zato se u produkciji koristi **Brevo HTTP API** umjesto SMTP-a za slanje emailova. SMTP radi samo u lokalnom razvoju.
+
+### Docker image tag — samo `:latest`
+
+Pipeline koristi samo `latest` tag za Docker image. Ovo znači da rollback na prethodni image zahtijeva git revert + novi deployment, jer se prethodni image prepiše. Za poboljšanje, mogao bi se koristiti commit SHA kao dodatni tag.
+
+### Nema automatskog health check-a u pipeline-u
+
+GitHub Actions workflow ne vrši eksplicitnu provjeru da li je aplikacija uspješno pokrenuta nakon Render Deploy Hook-a. Uspjeh deploymenta se provjerava ručno ili putem Render dashboarda.
+
+---
+
+## 16. Rješavanje čestih problema
+
+### GitHub Actions workflow pada na test koraku
+
+**Simptom:** ❌ crveni X na "Run tests" koraku.
+
+**Rješenje:**
+1. Otvoriti GitHub → Actions → kliknuti na failani workflow run
+2. Proširiti "Run tests" korak i pročitati koji test je pao
+3. Lokalno pokrenuti iste testove: `dotnet test Projekat/SmartLib.sln --filter "FullyQualifiedName!~UiTests"`
+4. Ispraviti kod i ponovo pushati
+
+### GitHub Actions workflow pada na Docker build koraku
+
+**Simptom:** ❌ na "Build image" ili "Push image" koraku.
+
+**Rješenje:**
+- Provjeriti da su `DOCKERHUB_USERNAME` i `DOCKERHUB_TOKEN` ispravno postavljeni u GitHub Secrets
+- Provjeriti da Docker Hub Access Token nije istekao
+- Lokalno testirati build: `docker build -f Projekat/src/SmartLib.Web/Dockerfile -t test Projekat`
+
+### Aplikacija se učitava ali nema podataka (prazne stranice)
+
+**Simptom:** Stranica se otvara ali nema knjiga, kategorija, itd.
+
+**Rješenje:**
+- Provjeriti `ConnectionStrings__DefaultConnection` na Render dashboardu
+- Provjeriti Render logove za database connection greške
+- Provjeriti da TiDB Cloud cluster nije pauziran (Serverless se automatski pauzira nakon dužeg perioda neaktivnosti)
+
+### 502 Bad Gateway na Render-u
+
+**Simptom:** Stranica prikazuje Render 502 error.
+
+**Rješenje:**
+- Kontejner se pokreće ali aplikacija nije spremna — sačekati 30-60 sekundi (cold start)
+- Ako se ne oporavi — provjeriti Render logove za crash poruke
+- Provjeriti da environment varijable nisu pogrešno formatirane (posebno connection string — ne smije imati extra razmake ili navodnike)
+
+### Redis health check vraća "Unhealthy"
+
+**Simptom:** `/health/redis` vraća status "Unhealthy".
+
+**Rješenje:**
+- Provjeriti `UPSTASH_REDIS_URL` i `UPSTASH_REDIS_PASSWORD` na Render dashboardu
+- Provjeriti da Upstash instanca nije obrisana ili pauzirana
+- Aplikacija nastavlja raditi — koristi In-Memory Cache kao fallback
+
+### Email se ne šalje u produkciji
+
+**Simptom:** Registracija i ostale email akcije ne šalju email.
+
+**Rješenje:**
+- Provjeriti `EmailSettings__BrevoApiKey` na Render dashboardu
+- Provjeriti Brevo dashboard za kvote i status naloga
+- Provjeriti Render logove za "Brevo API returned" poruke sa error statusom
+
+---
+
 *Dokument pripremila: SI Grupa 5, ETF Sarajevo*
 *Datum: Juni 2026.*
-*Verzija: 1.0*
+*Verzija: 2.0*

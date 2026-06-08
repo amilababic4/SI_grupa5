@@ -216,7 +216,7 @@ Aplikacija koristi `.env` fajl u root-u `Projekat/` direktorija za lokalni razvo
 | `UPSTASH_REDIS_URL` | Upstash Redis TCP URL (za StackExchange.Redis klijent) | `rediss://default:TOKEN@host:6379` |
 | `UPSTASH_REDIS_PASSWORD` | Upstash Redis lozinka | `gQAAAAAAAf9vAAIgcDFl...` |
 
-> **Napomena:** Ako Redis varijable nisu postavljene, aplikacija automatski koristi **In-Memory Distributed Cache** kao fallback. Funkcionalnost aplikacije nije narušena, ali cache nije perzistentan između restarta.
+> **Napomena o Redis varijablama:** Aplikacija koristi `StackExchange.Redis` paket koji komunicira sa Redisom putem standardnog **TCP protokola** (koristeći `UPSTASH_REDIS_URL` i `UPSTASH_REDIS_PASSWORD`). Upstash dashboard automatski generiše i REST API kredencijale (`REST_URL` i `REST_TOKEN`) koji su dokumentovani i postavljeni na Render-u za slučaj da se u budućnosti pređe na serverless arhitekturu, ali se trenutno u kodu ne koriste. Ako nijedna Redis varijabla nije postavljena, aplikacija automatski koristi In-Memory Cache kao fallback.
 
 ### Kompletni `.env` fajl za lokalni razvoj
 
@@ -568,21 +568,44 @@ pwsh bin/Debug/net8.0/playwright.ps1 install
 
 > **Napomena:** Playwright testovi zahtijevaju pokrenutu aplikaciju na očekivanom URL-u. Provjeriti konfiguraciju u test fajlovima.
 
+### Testovi u CI/CD pipeline-u
+
+Testovi se automatski pokreću u GitHub Actions pipeline-u **prije svakog deploymenta** kao quality gate. Ako bilo koji test padne, deployment se **ne izvršava**.
+
+```bash
+# Komanda koja se koristi u pipeline-u (isključuje UI testove):
+dotnet test Projekat/SmartLib.sln --no-build --configuration Release --filter "FullyQualifiedName!~UiTests"
+```
+
+Pipeline pokreće sljedeće kategorije testova:
+
+| Kategorija | Broj fajlova | Zahtijeva MySQL? | Uključena u pipeline? |
+|------------|-------------|------------------|----------------------|
+| Unit testovi (API) | 6 | ❌ (InMemory) | ✅ Da |
+| Unit testovi (Web) | 10 | ❌ (InMemory) | ✅ Da |
+| Integracioni testovi | 10 | ❌ (InMemory) | ✅ Da |
+| Sigurnosni testovi | 1 | ❌ (InMemory) | ✅ Da |
+| UI/Playwright testovi | 13 | ✅ Da + Browser | ❌ Ne (zahtijevaju live aplikaciju) |
+
+> **Napomena:** UI/Playwright testovi su isključeni iz pipeline-a jer zahtijevaju pokrenut browser i live aplikaciju. Pokreću se samo lokalno.
+
 ---
 
 ## 10. Produkcijski / Cloud deployment
 
 ### Pregled CI/CD pipeline-a
 
-SmartLib koristi **GitHub Actions** za automatski deployment na **Render** putem Docker Hub-a.
+SmartLib koristi **GitHub Actions** za automatski deployment na **Render** putem Docker Hub-a. Pipeline uključuje **automatsko testiranje** kao quality gate — deployment se ne izvršava ako testovi padnu.
 
 ```
-┌────────────┐     ┌──────────────┐     ┌──────────────┐     ┌──────────────┐
-│  Push na   │────▶│ GitHub       │────▶│  Docker Hub  │────▶│    Render    │
-│  main      │     │ Actions      │     │  (Image)     │     │  (Deploy)    │
-│  branch    │     │ Build+Push   │     │              │     │              │
-└────────────┘     └──────────────┘     └──────────────┘     └──────────────┘
+┌────────────┐     ┌──────────────┐     ┌──────────────┐     ┌──────────────┐     ┌──────────────┐
+│  Push na   │────▶│ GitHub       │────▶│  Testovi     │────▶│  Docker Hub  │────▶│    Render    │
+│  main      │     │ Actions      │     │  (Quality    │     │  (Image)     │     │  (Deploy)    │
+│  branch    │     │ Setup+Build  │     │   Gate) ✅/❌ │     │              │     │              │
+└────────────┘     └──────────────┘     └──────────────┘     └──────────────┘     └──────────────┘
 ```
+
+> **Napomena:** Ako bilo koji test padne (unit, integracioni ili sigurnosni), pipeline se zaustavlja i Docker build/push/deploy se **ne izvršavaju**. Ovo osigurava da samo testiran i provjeren kod dospije u produkciju.
 
 ### Trigger-i za deployment
 
@@ -596,12 +619,21 @@ Lokacija: `.github/workflows/deploy.yml`
 
 Workflow izvršava sljedeće korake:
 
+**Faza 1: Testiranje (Quality Gate)**
 1. **Checkout** — klonira repozitorij
-2. **Docker Hub Login** — prijava na Docker Hub koristeći GitHub Secrets
-3. **Build image** — gradi Docker image iz `Projekat/src/SmartLib.Web/Dockerfile`
-4. **Tag image** — tagira image sa `latest` tagom
-5. **Push image** — pushuje image na Docker Hub
-6. **Trigger Render deploy** — šalje POST request na Render Deploy Hook URL
+2. **Setup .NET 8 SDK** — instalira .NET 8 SDK na GitHub Actions runner
+3. **Restore NuGet packages** — preuzima sve zavisnosti (`dotnet restore`)
+4. **Build solution** — kompajlira cijeli projekat u Release modu (`dotnet build`)
+5. **Run tests** — pokreće unit, integracione i sigurnosne testove (`dotnet test`). UI/Playwright testovi su isključeni jer zahtijevaju pokrenut browser i live aplikaciju.
+
+**Faza 2: Docker Build & Push**
+6. **Docker Hub Login** — prijava na Docker Hub koristeći GitHub Secrets
+7. **Build image** — gradi Docker image iz `Projekat/src/SmartLib.Web/Dockerfile`
+8. **Tag image** — tagira image sa `latest` tagom
+9. **Push image** — pushuje image na Docker Hub
+
+**Faza 3: Deployment**
+10. **Trigger Render deploy** — šalje POST request na Render Deploy Hook URL
 
 ### Potrebni GitHub Secrets
 
