@@ -376,7 +376,7 @@ Registracija posudbe kada član fizički dodje u biblioteku.
 
 **Očekivani rezultat:** Nalog je odmah aktivan. Član se može prijaviti s dodijeljenim kredencijalima.
 
-![Novi član](screenshots/19-novi-clan.png)
+![Novi član](screenshots/27-novi-clan.png)
 *Slika 6.2 - Forma za registraciju novog člana*
 
 ---
