@@ -122,7 +122,7 @@ ASP.NET Core MVC aplikacija koja renderuje Razor stranice na serveru i komunicir
 
 **Lokacija:** `Projekat/src/SmartLib.API/`
 
-Čisti REST API koji izlaže JSON endpoint-e. Koristi JWT za autentikaciju. Namijenjen je potencijalnom odvojenom frontend-u ili mobilnoj aplikaciji.
+Čisti REST API koji izlaže JSON endpoint-e. Koristi JWT za autentikaciju. 
 
 **API Kontroleri:**
 
@@ -148,7 +148,7 @@ ASP.NET Core MVC aplikacija koja renderuje Razor stranice na serveru i komunicir
 
 **Lokacija:** `Projekat/src/SmartLib.Core/`
 
-Sadrži definicije entiteta i interfejse koji su neovisni o infrastrukturi. Svi ostali slojevi ovise o Core-u, ali Core ne ovisi ni o kome — to ga čini stabilnim centrom sistema.
+Sadrži definicije entiteta i interfejse koji su neovisni o infrastrukturi. Svi ostali slojevi ovise o Core-u, ali Core ne ovisi ni o kome - to ga čini stabilnim centrom sistema.
 
 ```
 SmartLib.Core/
@@ -163,26 +163,26 @@ SmartLib.Core/
 
 **Lokacija:** `Projekat/src/SmartLib.Infrastructure/`
 
-Implementacija domenskih interfejsa — pristup bazi, email servis, cache, pozadinski procesi.
+Implementacija domenskih interfejsa - pristup bazi, email servis, cache, pozadinski procesi.
 
 ```
 SmartLib.Infrastructure/
 ├── Data/
-│   └── ApplicationDbContext.cs    # EF Core DbContext (27+ DbSet-ova)
-├── Migrations/                    # EF Core migracije
-├── Repositories/                  # Implementacija repozitorija
+│   └── ApplicationDbContext.cs           # EF Core DbContext (27+ DbSet-ova)
+├── Migrations/                           # EF Core migracije
+├── Repositories/                         # Implementacija repozitorija
 ├── Services/
-│   ├── EmailService               # Brevo/Mailtrap
-│   ├── BookRecommender            # Algoritam preporuka
-│   ├── IzvjestajService           # Generiranje izvještaja
-│   ├── AuditLogService            # Audit trail
+│   ├── EmailService                      # Brevo/Mailtrap
+│   ├── BookRecommender                   # Algoritam preporuka
+│   ├── IzvjestajService                  # Generiranje izvještaja
+│   ├── AuditLogService                   # Audit trail
 │   ├── DeactivatedAccountCleanupService  # Pozadinski job (12h)
 │   ├── RokVracanjaReminderService        # Podsjetnici (rok vraćanja)
 │   ├── BibliotekariNotifikacijaService   # Notifikacije bibliotekarima
-│   ├── CacheKeyBuilder            # Upravljanje cache ključevima
-│   └── CacheVersionStore          # Verzioniranje cache-a
+│   ├── CacheKeyBuilder                   # Upravljanje cache ključevima
+│   └── CacheVersionStore                 # Verzioniranje cache-a
 └── Security/
-    └── PasswordHasher.cs          # PBKDF2 hashiranje lozinki
+    └── PasswordHasher.cs                 # PBKDF2 hashiranje lozinki
 ```
 
 ---
@@ -216,23 +216,23 @@ SmartLib.Infrastructure/
 
 #### Pozajmice i rezervacije
 
-| Tabela | Ključna polja | Napomena |
-|--------|---------------|----------|
-| `Zaduzenja` | id, korisnik_id, primjerak_id, datum_zaduzivanja, datum_vracao, status | |
-| `Rezervacije` | id, korisnik_id, knjiga_id, datum_rezervacije, status | |
-| `Clanarine` | id, korisnik_id, datum_pocetka, datum_isteka, status | |
-| `ZahtjeviProduzenja` | id, korisnik_id, trajanje, status | |
+| Tabela | Ključna polja  |
+|--------|---------------|
+| `Zaduzenja` | id, korisnik_id, primjerak_id, datum_zaduzivanja, datum_vracao, status | 
+| `Rezervacije` | id, korisnik_id, knjiga_id, datum_rezervacije, status | 
+| `Clanarine` | id, korisnik_id, datum_pocetka, datum_isteka, status | 
+| `ZahtjeviProduzenja` | id, korisnik_id, trajanje, status | 
 
 #### Zajednica i sadržaj
 
-| Tabela | Ključna polja | Napomena |
-|--------|---------------|----------|
-| `Recenzije` | id, knjiga_id, korisnik_id, ocjena, komentar | |
-| `ForumObjave` | id, naslov, sadrzaj, kategorija, korisnik_id | |
-| `ForumKomentari` | id, sadrzaj, objava_id, korisnik_id | |
-| `ForumReakcije` | id, tip, objava_id, korisnik_id | |
-| `Vijesti` | id, naslov, sadrzaj, kategorija, autor_id | |
-| `Dogadjaji` | id, naslov, opis, datum, lokacija, autor_id | |
+| Tabela | Ključna polja |
+|--------|---------------|
+| `Recenzije` | id, knjiga_id, korisnik_id, ocjena, komentar | 
+| `ForumObjave` | id, naslov, sadrzaj, kategorija, korisnik_id |
+| `ForumKomentari` | id, sadrzaj, objava_id, korisnik_id | 
+| `ForumReakcije` | id, tip, objava_id, korisnik_id | 
+| `Vijesti` | id, naslov, sadrzaj, kategorija, autor_id  |
+| `Dogadjaji` | id, naslov, opis, datum, lokacija, autor_id | 
 
 #### Sistem
 
