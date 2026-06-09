@@ -251,99 +251,124 @@ Ovim sprintom SmartLib je dobio i operativne i administrativne nadogradnje koje 
 
 ---
 
-## 7. Pregled završenih stavki i finalne isporuke
+## 7. Product Backlog
 
-### 7.1 Pregled po sedmicama / sprintovima
+## Opis dokumenta
 
-U nastavku je pregled rada po sedmicama, u formatu sličnom product backlogu. Statusi su izvedeni iz sprint review dokumenata, ažuriranog product backloga i stvarnog stanja implementacije u kodu.
+Ovaj dokument predstavlja ažurirani Product Backlog projekta **Bibliotečki informacioni sistem** u sklopu Sprint 11. Ovo je posljednja verzija Product Backloga koja sadrži finalno stanje. Backlog sadrži stavke koje su trenutno poznate timu. Njegova svrha je da omogući pregled planiranog obima sistema, olakša prioritizaciju rada po sprintovima i služi kao osnova za dalju razradu.
 
-| Sedmica / Sprint | PB ID | Stavka | Status | Napomena |
-|---|---|---|---|---|
-| Sedmica 1 / Sprint 1 | PB-1 | Team Charter | Završeno | Definisan način rada tima i osnovna pravila saradnje. |
-| Sedmica 1 / Sprint 1 | PB-2 | Product Vision | Završeno | Definisani svrha sistema, problem i MVP okvir. |
-| Sedmica 1 / Sprint 1 | PB-3 | Stakeholder Map | Završeno | Identifikovani glavni korisnici i stakeholderi projekta. |
-| Sedmica 1 / Sprint 1 | PB-4 | Početni Product Backlog | Završeno | Postavljena početna lista funkcionalnosti i artefakata. |
-| Sedmica 2 / Sprint 2 | PB-5 | Definisanje poslovnih pravila | Završeno | Razrađena osnovna pravila rada biblioteke. |
-| Sedmica 2 / Sprint 2 | PB-6 | Razrada User Storyja i acceptance kriterija | Završeno | Pripremljena detaljna osnova za implementaciju funkcionalnosti. |
-| Sedmica 2 / Sprint 2 | PB-7 | Nefunkcionalni zahtjevi | Završeno | Definisani zahtjevi za kvalitet, sigurnost i održavanje. |
-| Sedmica 3 / Sprint 3 | PB-8 | Definisanje objekata sistema | Završeno | Modelovani glavni entiteti sistema. |
-| Sedmica 3 / Sprint 3 | PB-9 | Risk Register | Završeno | Identifikovani glavni projektni i tehnički rizici. |
-| Sedmica 3 / Sprint 3 | PB-10 | Domain Model i Use Case Model | Završeno | Razrađeni glavni poslovni scenariji. |
-| Sedmica 3 / Sprint 3 | PB-11 | Architecture Overview | Završeno | Definisan arhitektonski pristup i podjela odgovornosti. |
-| Sedmica 3 / Sprint 3 | PB-12 | Test Strategy | Završeno | Definisan pristup unit, integracionom, UI i security testiranju. |
-| Sedmica 4 / Sprint 4 | PB-13 | Dizajn i implementacija baze podataka | Završeno | Postavljena baza i inicijalna podatkovna osnova. |
-| Sedmica 4 / Sprint 4 | PB-14 | Početna struktura projekta | Završeno | Kreirani `Core`, `Infrastructure`, `Web` i `API` projekti. |
-| Sedmica 4 / Sprint 4 | PB-15 | Definition of Done | Završeno | Dogovoreni kriteriji završenosti backlog stavki. |
-| Sedmica 4 / Sprint 4 | PB-16 | Initial Release Plan | Završeno | Isplanirani sprintovi i inkrementi. |
-| Sedmica 5 / Sprint 5 | PB-17 | Sistem prijave korisnika | Završeno | Implementirane prijava, odjava, sesija i zaštita ruta. |
-| Sedmica 5 / Sprint 5 | PB-18 | Kreiranje naloga člana | Završeno | Bibliotekar i admin mogu kreirati nove članove. |
-| Sedmica 5 / Sprint 5 | PB-19 | AI i Decision Log | Završeno | Uspostavljena evidencija AI korištenja i tehničkih odluka. |
-| Sedmica 6 / Sprint 6 | PB-22 | Dodavanje nove knjige | Završeno | Validacija ISBN-a i kreiranje primjeraka su implementirani. |
-| Sedmica 6 / Sprint 6 | PB-23 | Uređivanje podataka o knjizi | Završeno | Omogućeno ažuriranje knjiga iz administratorskog dijela. |
-| Sedmica 6 / Sprint 6 | PB-25 | Upravljanje kategorijama knjiga | Završeno | Dodavanje, izmjena i brisanje kategorija. |
-| Sedmica 6 / Sprint 6 | PB-26 | Upravljanje primjercima knjige | Završeno | Evidencija i status fizičkih primjeraka. |
-| Sedmica 6 / Sprint 6 | PB-27 | Brisanje knjige i deaktivacija primjerka | Završeno | Uvedena zaštita od brisanja vezanog za aktivna zaduženja. |
-| Sedmica 6 / Sprint 6 | PB-28 | Pregled kataloga | Završeno | Katalog sa paginacijom je funkcionalan. |
-| Sedmica 7 / Sprint 7 | PB-24 | Prikaz detalja knjige | Završeno | Detalji knjige i dostupnost su dostupni korisnicima. |
-| Sedmica 7 / Sprint 7 | PB-29 | Pretraga knjiga | Završeno | Pretraga po naslovu i autoru je implementirana. |
-| Sedmica 7 / Sprint 7 | PB-30 | Pregled dostupnosti knjige | Završeno | Prikazan broj slobodnih primjeraka i status knjige. |
-| Sedmica 7 / Sprint 7 | PB-31 | Evidencija zaduživanja i vraćanja | Završeno | Implementiran glavni poslovni tok biblioteke. |
-| Sedmica 7 / Sprint 7 | PB-35 | Pregled vlastitih zaduženja | Završeno | Član vidi aktivna zaduženja i rok vraćanja. |
-| Sedmica 7 / Sprint 7 | PB-36 | Pregled trenutnih zaduženja | Završeno | Bibliotekar vidi sva aktivna zaduženja. |
-| Sedmica 8 / Sprint 8 | PB-20 | Pregled profila člana | Završeno | Profil povezan sa podacima o korisniku i zaduženjima. |
-| Sedmica 8 / Sprint 8 | PB-21 | Pregled i pretraga članova biblioteke | Završeno | Bibliotekar i admin mogu pretraživati članove. |
-| Sedmica 8 / Sprint 8 | PB-32 | Upravljanje korisnicima od strane admina | Završeno | Promjena uloga i deaktivacija su podržani. |
-| Sedmica 8 / Sprint 8 | PB-33 | Upravljanje statusom članarine | Završeno | Evidencija i ažuriranje članarine su implementirani. |
-| Sedmica 8 / Sprint 8 | PB-34 | Pregled statusa članarine za člana | Završeno | Član vidi trajanje i status članarine. |
-| Sedmica 8 / Sprint 8 | PB-37 | Pregled historije zaduženja | Završeno | Dostupan pregled završenih i ranijih zaduženja. |
-| Sedmica 8 / Sprint 8 | PB-38 | Početno testiranje | Završeno | Uspostavljen širi testni set za integrisanu verziju. |
-| Sedmica 8 / Sprint 8 | PB-56 | Upravljanje lozinkom korisničkog naloga | Završeno | Promjena i reset lozinke putem emaila. |
-| Sedmica 9 / Sprint 9 | PB-39 | Rezervacija knjige | Završeno | Rezervacije nedostupnih knjiga rade kroz UI. |
-| Sedmica 9 / Sprint 9 | PB-40 | Pregled aktivnih rezervacija | Završeno | Bibliotekar može pregledati aktivne rezervacije. |
-| Sedmica 9 / Sprint 9 | PB-43 | Automatsko otkazivanje rezervacije | Završeno | Rezervacije se zatvaraju po isteku roka. |
-| Sedmica 9 / Sprint 9 | PB-44 | Napredna pretraga i filteri | Završeno | Kombinovani filteri po kategoriji, izdavaču i godini. |
-| Sedmica 9 / Sprint 9 | PB-45 | Mjesečni izvještaji za upravu | Završeno | Implementirani izvještaji i pregled statistike. |
-| Sedmica 9 / Sprint 9 | PB-56 | Unapređenje korisničkog interfejsa | Završeno | Poboljšan izgled i responzivnost ključnih stranica. |
-| Sedmica 9 / Sprint 9 | PB-57 | Modul vijesti i novosti | Završeno | Dodan modul vijesti i obavještenja biblioteke. |
-| Sedmica 9 / Sprint 9 | PB-58 | Kalendar događaja | Završeno | Dodan kalendar i pregled događaja. |
-| Sedmica 9 / Sprint 9 | PB-59 | Forum zajednice za članove | Završeno | Implementirane teme, komentari i reakcije. |
-| Sedmica 10 / Sprint 10 | PB-41 | Slanje email upozorenja | Završeno | Podsjetnici za rok vraćanja i kašnjenje su implementirani. |
-| Sedmica 10 / Sprint 10 | PB-42 | Notifikacija bibliotekara o novoj rezervaciji | Završeno | Bibliotekar prima email obavijest o rezervaciji. |
-| Sedmica 10 / Sprint 10 | PB-46 | Audit log promjena | Završeno | Administratorski pregled promjena nad sistemom. |
-| Sedmica 10 / Sprint 10 | PB-47 | Kazne za kasno vraćanje | Završeno | Realizovano prema usvojenom Sprint 10 obimu kroz automatsko prepoznavanje kašnjenja i blokiranje novih zaduženja i rezervacija. |
-| Sedmica 10 / Sprint 10 | PB-48 | Online produženje članarine | Završeno | Član podnosi online zahtjev, bira period produženja i prati status, dok bibliotekar zahtjev odobrava ili odbija. |
-| Sedmica 10 / Sprint 10 | PB-49 | Integracija sa distributerom knjiga | Završeno | Realizovana dogovorena integracija slanjem evidentiranog email zahtjeva distributeru direktno iz sistema. |
-| Sedmica 10 / Sprint 10 | PB-50 (oznaka iz Sprint 10 review-a) | Lista kolekcija člana | Završeno | Član može praviti i uređivati vlastite kolekcije; u dokumentaciji postoji preklapanje oznake PB-50 sa kasnijom backlog stavkom za stabilizaciju sistema. |
-| Sedmica 11 / Sprint 11 | PB-50 | Stabilizacija sistema | Završeno | Sistem je stabilizovan, evidentirani bugovi su riješeni, a 613 automatizovanih unit, integracijskih i sigurnosnih testova prolazi bez greške. |
-| Sedmica 11 / Sprint 11 | PB-51 | Lista poznatih ograničenja i tehničkog duga | Završeno | Ograničenja, sigurnosni rizici i tehnički dug dokumentovani su u `KnownIssues.md`. |
-| Sedmica 11 / Sprint 11 | PB-52 | Release Notes | Završeno | Finalna isporuka opisana je u `ReleaseNotes.md`, uz povezane upute za instalaciju i pokretanje u deployment dokumentaciji. |
-| Sedmica 11 / Sprint 11 | PB-53 | Korisnička dokumentacija | Završeno | Pripremljeni su `UserManual.md` i PDF priručnik sa uputama, scenarijima i screenshotovima za sve korisničke uloge. |
-| Sedmica 11 / Sprint 11 | PB-54 | Tehnička dokumentacija | Završeno | Završeni su arhitektonski pregled, deployment procedura, CD dokumentacija, test summary i završni AI usage summary. |
-| Sedmica 11 / Sprint 11 | PB-55 | Završna demonstracija | Završeno | Sistem i prateći materijali pripremljeni su i predstavljeni u okviru završne prezentacije 9. juna 2026. |
+> **Napomena o ažuriranju Product Backloga:**  
+> U Product Backlogu su ažurirani statusi stavki koje odgovaraju deliverable-ima **Sprinta 11**.  
+> Konkretno, sljedeće stavke:
+> - **Dokumentovanje rada**
+> - **Deployment procedura**
+> - **Continuous Deployment skripta / pipeline**
+> - **Korisnički priručnik**
+> - **Konačni status Product Backloga**
+> - **Release Notes**
+> - **Test Summary / QA izvještaj**
+> - **Arhitektonski / tehnički pregled**
+> - **Finalni sažetak AI upotrebe**
+> - **Poznata ograničenja / limiti**
+>
+> Ove stavke, kao i sve ostale stavke u backlogu su označene kao:
+> - **Završeno u Sprintu X** - za potpuno dovršene stavke
+> - **Djelimično završeno** - za stavke koje nisu u potpunosti dovršene
+> - **Nije završeno** - za stavke koje nisu dovršene ili je odlučeno da ne budu implementirane
+> - **Odgođeno** / ostavljeno za budući rad - za stavke koje mogu biti urađene u budućnosti
+>
 
-### 7.2 Završene stavke realizovane u dogovorenom projektnom obimu
+## Tabela 
 
-Sve stavke finalnog Product Backloga imaju status **Završeno**. Kod pojedinih funkcionalnosti tim je tokom sprint planiranja precizirao obim koji je realno isporučiv u okviru studentskog projekta:
 
-| Stavka | Završena realizacija | Moguće buduće proširenje izvan finalnog obima |
-|---|---|---|
-| PB-47 Kazne za kasno vraćanje | Sistem prepoznaje zakašnjela zaduženja i blokira nova zaduživanja i rezervacije dok član ne vrati knjigu. | Finansijski model kazni, naplata i historija plaćanja. |
-| PB-48 Online produženje članarine | Član online podnosi zahtjev i bira period, a bibliotekar ga obrađuje; status i historija zahtjeva dostupni su u sistemu. | Povezivanje sa eksternim platnim servisom. |
-| PB-49 Integracija sa distributerom knjiga | Bibliotekar iz sistema kreira, šalje i evidentira email zahtjev na konfigurisanu adresu distributera. | Dvosmjerna API razmjena i automatsko praćenje narudžbe. |
-| API sloj | REST API sa JWT autentifikacijom pokriva ključne bibliotečke entitete i procese. | Proširenje API-ja na svaki dodatni MVC modul. |
-| Moderacija sadržaja | Implementirane su prijave recenzija, forumskih objava i komentara te akcije bibliotekara i administratora. | Napredna automatizovana pravila moderacije. |
+| ID | Naziv stavke | Kratak opis | Tip | Prioritet | Procjena napora | Status | Veza sa sprintom ili release planom | Napomena |
+|:--:| :----------: | :---------: | :-: | :-------: | :-------------: | :----: | :---------------------------------: | :------: |
+| PB-1 | Team Charter | Izrada i usaglašavanje timskog chartera | Documentation | Visok | S | Završeno u Sprintu 1 | Sprint 1 | Obavezni artefakt |
+| PB-2 | Product Vision | Definisanje problema, korisnika i MVP scope-a | Documentation | Visok | S | Završeno u Sprintu 1 | Sprint 1 | Obavezni artefakt |
+| PB-3 | Stakeholder Map | Identifikacija stakeholdera i njihovog utjecaja | Documentation | Visok | S | Završeno u Sprintu 1 | Sprint 1 | Obavezni artefakt |
+| PB-4 | Početni Product Backlog | Početno definisanje bitnih artefakata i taskova | Documentation | Visok | M | Završeno u Sprintu 1 | Sprint 1 | Obavezni artefakt |
+| PB-5 | Definisanje specifičnih poslovnih pravila | Istražiti i zapisati specifična pravila kako sistem treba da funkcioniše | Research | Visok | S | Završeno u Sprintu 2 | Sprint 1 / Sprint 2 | Ključno za logiku sistema |
+| PB-6 | Razrada prioritetnih User Stories i Acceptance Criteria | Definisanje User Stories i kriterija prihvatanja za ključne stavke backloga | Documentation | Visok | M | Završeno u Sprintu 2 | Sprint 2 | Obavezni artefakt |
+| PB-7 | Razrada nefunkcionalnih zahtjeva | Definisanje zahtjeva koji određuju kvalitet sistema, uključujući performanse, sigurnost, pouzdanost, upotrebljivost i održavanje | Documentation | Visok | S | Završeno u Sprintu 2 | Sprint 2 | Obavezni artefakt |
+| PB-8 | Definisanje objekata sistema | Određivanje svih entiteta koje naš sistem treba da posjeduje | Technical Task | Visok | M | Završeno u Sprintu 3 | Sprint 3 | Preduslov za bazu podataka |
+| PB-9 | Risk Register | Identifikacija projektnih rizika, procjena njihovog uticaja i definisanje planova mitigacije | Documentation | Visok | M | Završeno u Sprintu 3 | Sprint 3 | Obavezni artefakt |
+| PB-10 | Domain Model i Use Case Model | Modeliranje domene sistema kroz entitete, odnose i ključne use-case scenarije | Documentation | Visok | M | Završeno u Sprintu 3 | Sprint 3 | Obavezni artefakt |
+| PB-11 | Architecture Overview | Definisanje osnovnog arhitektonskog pravca sistema, glavnih komponenti i njihovih odgovornosti | Documentation | Visok | M | Završeno u Sprintu 3 | Sprint 3 | Obavezni artefakt |
+| PB-12 | Test Strategy | Definisanje pristupa testiranju, nivoa testiranja i veze sa acceptance kriterijima | Documentation | Visok | S | Završeno u Sprintu 3 | Sprint 3 | Obavezni artefakt |
+| PB-13 | Dizajn i implementacija baze podataka | Kreiranje sheme baze, migracija i inicijalnih seed podataka | Technical Task | Visok | M | Završeno u Sprintu 4 | Sprint 4 | Preduslov za sve feature sprintove |
+| PB-14 | Početna struktura projekta | Odabir tehnologija i arhitekture projekta | Technical Task | Visok | S | Završeno u Sprintu 4 | Sprint 4 | Osnovni tehnički setup i struktura projekta |
+| PB-15 | Definition of Done | Definisanje zajedničkih kriterija na osnovu kojih tim smatra stavku završenom | Documentation | Visok | S | Završeno u Sprintu 4 | Sprint 4 | Obavezni artefakt |
+| PB-16 | Initial Release Plan | Planiranje inkremenata, glavnih funkcionalnosti, zavisnosti i okvirnih sprintova realizacije | Documentation | Visok | M | Završeno u Sprintu 4 | Sprint 4 | Obavezni artefakt |
+| PB-17 | Sistem prijave korisnika | Registrovani korisnici se prijavljuju i odjavljuju iz sistema u skladu sa svojom ulogom | Feature | Visok | M | Završeno u Sprintu 5 | Sprint 5 | Osnova za sve dalje |
+| PB-18 | Kreiranje naloga člana | Bibliotekar ili administrator kreira nalog novog člana biblioteke unosom njegovih osnovnih podataka | Feature | Visok | S | Završeno u Sprintu 5 | Sprint 5 | Zamjenjuje samostalnu registraciju člana |
+| PB-19 | AI i Decision Log | Uspostava za praćenje rada na projektu | Technical Task | Srednji | S | Završeno u Sprintu 5 | Sprint 5 |  |
+| PB-20 | Pregled profila člana | Sistem prikazuje osnovne podatke člana i njegova zaduženja | Feature | Visok | M | Završeno u Sprintu 8 | Sprint 8 |  |
+| PB-21 | Pregled i pretraga članova biblioteke | Bibliotekar ili administrator može pregledati i pretraživati članove biblioteke | Feature | Visok | M | Završeno u Sprintu 8 | Sprint 8 | Osnova rada sa članovima |
+| PB-22 | Dodavanje nove knjige | Administrator ili bibliotekar dodaje novu knjigu u fond | Feature | Visok | M | Završeno u Sprintu 6 | Sprint 6 | Osnova kataloga |
+| PB-23 | Uređivanje podataka o knjizi | Administrator ili bibliotekar može izmijeniti osnovne podatke knjige | Feature | Srednji | S | Završeno u Sprintu 6 | Sprint 6 | Nema historiju promjena |
+| PB-24 | Prikaz detalja knjige | Članovi mogu pregledati osnovne podatke knjiga | Feature | Srednji | S | Završeno u Sprintu 6 | Sprint 6 | Sadrži osnovne podatke |
+| PB-25 | Upravljanje kategorijama knjiga | Administrator ili bibliotekar dodaje, uređuje i briše kategorije koje se koriste pri dodavanju knjiga | Feature | Srednji | S | Završeno u Sprintu 6 | Sprint 6 |  |
+| PB-26 | Upravljanje primjercima knjige | Evidencija više primjeraka iste knjige i njihovog statusa | Feature | Visok | M | Završeno u Sprintu 6 | Sprint 6 |  |
+| PB-27 | Brisanje knjige i deaktivacija primjerka | Bibliotekar ili administrator može ukloniti knjigu ili deaktivirati primjerak iz sistema | Feature | Srednji | S | Završeno u Sprintu 6 | Sprint 6 | Nije dozvoljeno ako postoji aktivno zaduženje |
+| PB-28 | Pregled kataloga | Korisnik može pregledati listu dostupnih knjiga | Feature | Visok | M | Završeno u Sprintu 6 | Sprint 6 | Zavisi od knjiga i njihovog broja |
+| PB-29 | Pretraga knjiga | Korisnik može pretraživati knjige po naslovu, autoru ili ključnoj riječi | Feature | Visok | M | Završeno u Sprintu 7 | Sprint 7 | Nadogradnja kataloga |
+| PB-30 | Pregled dostupnosti knjige | Sistem prikazuje da li je knjiga dostupna i broj primjeraka | Feature | Visok | M | Završeno u Sprintu 7 | Sprint 7 |  |
+| PB-35 | Pregled vlastitih zaduženja | Član biblioteke vidi koje knjige trenutno ima zadužene | Feature | Visok | S | Završeno u Sprintu 8 | Sprint 8 | Zavisi od zaduživanja |
+| PB-36 | Pregled trenutnih zaduženja | Bibliotekar vidi koje su knjige trenutno zadužene od strane članova | Feature | Visok | S | Završeno u Sprintu 8 | Sprint 8 | Zavisi od zaduživanja |
+| PB-37 | Pregled historije zaduženja | Sistem prikazuje ranija zaduženja člana | Feature | Nizak | M | Završeno u Sprintu 8 | Sprint 8 | Nadogradnja evidencije |
+| PB-31 | Evidencija zaduživanja i vraćanja | Bibliotekar evidentira da je član zadužio određenu knjigu ili je vratio | Feature | Visok | M | Završeno u Sprintu 7 | Sprint 7 | Core funkcionalnost |
+| PB-32 | Upravljanje korisnicima od strane admina | Administrator može pregledati sve korisnike, promijeniti ulogu ili deaktivirati nalog | Feature | Srednji | M | Završeno u Sprintu 8 | Sprint 8 | Osnova za administraciju sistema |
+| PB-33 | Upravljanje statusom članarine | Bibliotekar ili administrator može pregledati, ažurirati i evidentirati status članarine korisnika | Feature | Srednji | M | Završeno u Sprintu 8 | Sprint 8 | Osnova za administraciju sistema |
+| PB-34 | Pregled statusa članarine za člana | Član biblioteke može vidjeti trenutni status i datum isteka svoje članarine | Feature | Srednji | S | Završeno u Sprintu 8 | Sprint 8 |  |
+| PB-38 | Početno testiranje | Testiranje prve verzije sistema | Technical Task | Nizak | M | Završeno u Sprintu 8 | Sprint 8 | Testiranje ključnih funkcionalnosti prve integrisane verzije sistema |
+| PB-39 | Rezervacija knjige | Član ili bibliotekar može rezervisati nedostupnu knjigu | Feature | Srednji | M | Završeno u Sprintu 9 | Sprint 9 | Zavisi od dostupnosti |
+| PB-40 | Pregled aktivnih rezervacija | Bibliotekar vidi listu aktivnih rezervacija | Feature | Srednji | M | Završeno u Sprintu 9 | Sprint 9 | Nad rezervacijama |
+| PB-41 | Slanje email upozorenja | Sistem automatski šalje podsjetnike za istek roka vraćanja | Feature | Nizak | M | Završeno u Sprintu 10 | Sprint 10 | Nadogradnja |
+| PB-42 | Notifikacija bibliotekara o novoj rezervaciji | Bibliotekar dobija email obavijest kada član kreira rezervaciju | Feature | Nizak | S | Završeno u Sprintu 10 | Sprint 10 | Zavisi od email sistema |
+| PB-43 | Automatsko otkazivanje rezervacije | Ako član ne preuzme knjigu u roku X dana, rezervacija se automatski otkazuje | Feature | Nizak | M | Završeno u Sprintu 9 | Sprint 9 | Zavisi od CRON joba i poslovnog pravila |
+| PB-44 | Napredna pretraga i filteri | Filtriranje po žanru, godini, izdavaču i slično | Feature | Nizak | M | Završeno u Sprintu 9 | Sprint 9 | Poboljšanje UX |
+| PB-45 | Mjesečni izvještaji za upravu | Pregled statistike zaduženja, rezervacija i članstva | Feature | Nizak | L | Završeno u Sprintu 10 | Sprint 10 | Analitika |
+| PB-46 | Audit log promjena | Evidencija važnih promjena u sistemu | Technical Task | Nizak | M | Završeno u Sprintu 10 | Sprint 10 | Napredno praćenje |
+| PB-47 | Kazne za kasno vraćanje | Evidencija i obračun kazni za prekoračenje roka vraćanja | Feature | Nizak | M | Završeno u Sprintu 10 | Sprint 10 | Ovisi o notifikacionom sistemu i poslovnoj politici |
+| PB-48 | Online produžetak članarine | Omogućiti korisniku produženje članarine putem sistema | Feature | Nizak | M | Završeno u Sprintu 10 | Sprint 10 | Zahtijeva integraciju sistema za online plaćanje |
+| PB-49 | Integracija sa distributerom knjiga | Povezivanje sistema sa vanjskim servisom za nabavku knjiga | Technical Task | Nizak | L | Završeno u Sprintu 10 | Sprint 10 |  |
+| PB-56 | Upravljanje lozinkom korisničkog naloga | Reset zaboravljene lozinke putem emaila i promjena postojeće lozinke | Feature | Visok | L | Završeno u Sprintu 8 | Sprint 8 |
+| PB-50 | Stabilizacija sistema | Bug fixing i optimizacija | Technical Task | Visok | M | Završeno u Sprintu 11 | Sprint 11 | Nakon početnog testiranja |
+| PB-51 | Izrada liste poznatih ograničenja i tehničkog duga | Popis ograničenja i nedovršenih dijelova | Documentation | Visok | M | Završeno u Sprintu 11 | Sprint 11 |  |
+| PB-52 | Release Notes | Opis funkcionalnosti kroz verzije | Documentation | Visok | M | Završeno u Sprintu 11 | Sprint 11 |  |
+| PB-53 | Korisnička dokumentacija | Izrada dokumentacije za upotrebu | Documentation | Visok | M | Završeno u Sprintu 11 | Sprint 11 | Bez tehničkih dijelova |
+| PB-54 | Tehnička dokumentacija | Izrada dokumentacije za opis sistema | Documentation | Visok | M | Završeno u Sprintu 11 | Sprint 11 | Detaljan opis |
+| PB-55 | Završna demonstracija | Finalizacija projekta | Documentation | Visok | M | Završeno u Sprintu 11 | Sprint 11 |  |
+| PB-56 | Unapređenje korisničkog interfejsa | Poboljšanje izgleda i responzivnosti ključnih stranica sistema, uz bolju navigaciju i usklađen vizuelni stil. | Feature | Srednji | M | Završeno u Sprintu 9 | Sprint 9 | Fokus na bolji UX i preglednost sistema. |
+| PB-57 | Modul vijesti i novosti | Prikaz bibliotečkih vijesti i obavještenja korisnicima kroz posebnu javnu stranicu. | Feature | Srednji | M | Završeno u Sprintu 9 | Sprint 9 | Informisanje korisnika o novostima u biblioteci. |
+| PB-58 | Kalendar događaja | Prikaz planiranih bibliotečkih događaja kroz kalendar i listu predstojećih aktivnosti. | Feature | Srednji | M | Završeno u Sprintu 9 | Sprint 9 | Omogućava korisnicima lakše praćenje aktivnosti. |
+| PB-59 | Forum zajednice za članove | Omogućavanje članovima biblioteke da učestvuju u diskusijama i razmjeni preporuka kroz forum zajednice. | Feature | Srednji | M | Završeno u Sprintu 9 | Sprint 9 | Podstiče interakciju i angažman članova. |
 
-### 7.3 Buduća unapređenja izvan finalnog Product Backloga
 
-Sljedeće oblasti nisu otvorene ili nezavršene PB stavke, nego mogući pravci razvoja nakon završne isporuke:
+## Legenda
 
-| Oblast | Status u finalnoj isporuci | Moguće unapređenje |
-|---|---|---|
-| Upravljanje šemom baze | Završeno u projektnom obimu | Postepeni prelazak sa `EnsureCreated()` i pomoćnih SQL izmjena na potpuno standardizovane EF Core migracije. |
-| Produženje članarine | Završeno u projektnom obimu | Dodavanje produkcijskog payment gateway servisa. |
-| Backup i disaster recovery | Izvan finalnog obima | Uvođenje automatizovanih backup procedura i formalnog plana oporavka. |
-| Horizontalno skaliranje | Izvan finalnog obima | Prilagođavanje sistema radu na više aplikacijskih instanci pri većem opterećenju. |
-| Automatizacija infrastrukture | Završeno za aplikacijski deployment | Dodatna automatizacija inicijalnog kreiranja eksternih cloud servisa. |
+### Tip stavke
+- **Feature** - funkcionalnost vidljiva korisniku ili važna mogućnost sistema
+- **Technical Task** - tehnički zadatak potreban za implementaciju, arhitekturu ili kvalitet sistema
+- **Research** - istraživačka stavka za razjašnjavanje pravila i sličnog
+- **Documentation** - projektni artefakt ili dokument
+- **Bug** - ispravka greške u postojeće funkcionalnosti
+
+### Prioritet
+- **Visok** - bitno za MVP ili početne sprintove
+- **Srednji** - važno, međutim nije presudno za prvu verziju sistema
+- **Nizak** - korisno proširenje ili neka kasnija nadogradnja
+
+### Procjena napora
+- **S** - mali zadatak
+- **M** - srednji zadatak
+- **L** - veliki zadatak
+
+### Status
+- **Završeno** - stavka realizovana i pregledana
+- **U toku** - rad na stavci je započet
+- **U backlogu** - stavka je evidentirana, ali još nije započeta
+- **Odgođeno** - stavka je svjesno pomjerena za kasniji period
 
 ---
 
@@ -458,8 +483,3 @@ Tim je kroz jedanaest sprintova izgradio, stabilizovao, dokumentovao i pripremio
 Najveće snage projekta su obim implementiranih funkcionalnosti, jasan razvoj kroz sprintove, postojanje testova na više nivoa i uspostavljen deployment pipeline. Najveći prostor za napredak nalazi se u tehničkoj stabilizaciji baze, dovršavanju pojedinih poslovnih tokova do produkcijskog nivoa i dodatnom smanjenju tehničkog duga.
 
 U cjelini, SmartLib predstavlja uspješno realizovan studentski projekat koji je izrastao iz osnovnog bibliotečkog sistema u znatno bogatiju platformu za rad biblioteke i interakciju sa njenim članovima.
-
----
-
-*Dokument pripremila: SI Grupa 5*  
-*Datum: Juni 2026.*
