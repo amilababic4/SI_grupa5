@@ -20,11 +20,19 @@
 
 ## 1. Pregled sistema
 
-SmartLib je web aplikacija za upravljanje bibliotekom namijenjena bibliotekama s više vrsta korisnika: članovima, bibliotekarima i administratorima. Sistem pokriva kompletan životni ciklus bibliotečkog poslovanja — od upravljanja katalogom knjiga i primjeraka, pozajmica i rezervacija, do foruma, recenzija, članarina i administrativnih izvještaja.
+SmartLib je web aplikacija za upravljanje bibliotekom namijenjena bibliotekama s više vrsta korisnika: članovima, bibliotekarima i administratorima. Sistem pokriva kompletan životni ciklus bibliotečkog poslovanja - od upravljanja katalogom knjiga i primjeraka, pozajmica i rezervacija, do foruma, recenzija, članarina i administrativnih izvještaja.
 
-Aplikacija je izgrađena kao **N-tier slojevita arhitektura** podijeljena u četiri projekta: prezentacijski sloj (`SmartLib.Web` i `SmartLib.API`), domenski sloj (`SmartLib.Core`) i infrastrukturni sloj (`SmartLib.Infrastructure`). Ovakva podjela osigurava jasno razdvajanje odgovornosti — svaki sloj ima točno definisanu ulogu i ne zalazi u domenu drugog.
+SmartLib je projektovan kao web aplikacija s MVC prezentacijskim slojem i zasebnim REST API backendom, koji interno koristi modularnu organizaciju po funkcionalnim cjelinama. MVC aplikacija (`SmartLib.Web`) renderuje HTML stranice na serveru i komunicira s REST API-jem (`SmartLib.API`) putem HTTP poziva. API izlaže JSON endpoint-e zaštićene JWT autentikacijom i predstavlja jedinu tačku pristupa podacima. Oba projekta dijele isti domenski i infrastrukturni kod, deployuju se zajedno putem Docker Compose-a, i zajedno čine jedinstven sistem.
 
-Korisnici pristupaju sistemu putem web browsera kroz MVC aplikaciju koja renderuje stranice na serveru. Iza nje stoji REST API koji izlaže JSON endpoint-e za sve operacije nad podacima, zaštićene JWT autentikacijom. Podaci se čuvaju u MySQL bazi podataka putem Entity Framework Core ORM-a, a za poboljšanje performansi koristi se Redis distribuirani cache. Slanje emailova (reset lozinke, obavještenja) obavlja se putem Brevo API-ja. Cijela aplikacija je kontejnerizovana Docker-om i hostovana na Render.com platformi.
+Arhitektura se sastoji od tri fundamentalna nivoa:
+
+- **Prezentacioni sloj** obuhvata server-side renderovane Razor Views stranice (`.cshtml`) koje služe kao primarni interfejs za interakciju korisnika sa sistemom, te REST API endpoint-e za programatski pristup. Razor Views se generiraju na serveru od strane MVC kontrolera i nikada direktno ne pristupaju bazi podataka. Prezentacioni sloj je odgovoran za renderovanje korisničkog interfejsa, klijentsku validaciju formi i prilagođavanje prikaza prema ulozi prijavljenog korisnika (Član, Bibliotekar, Administrator).
+
+- **Aplikacioni sloj (MVC kontroleri i servisi, modularni monolit)** je centralni dio aplikacije koji implementira kompletnu poslovnu logiku sistema. Organizovan je po funkcionalnim modulima (Auth, Korisnici, Katalog, Zaduženja, Članarina, Rezervacije, Forum, Recenzije, Notifikacije, Izvještaji, Audit), pri čemu svaki modul ima jasno definisanu odgovornost i interni interfejs.
+
+- **Sloj podataka (Relacijska baza podataka)** je centralizovana trajna pohrana svih podataka sistema. Baza provodi integritetna ograničenja, referencijalne veze i jedinstvene vrijednosti, čime se osigurava konzistentnost podataka nezavisno od aplikacione logike.
+
+Podaci se čuvaju u MySQL bazi podataka putem Entity Framework Core ORM-a, a za poboljšanje performansi koristi se Redis distribuirani cache. Slanje emailova (reset lozinke, obavještenja) obavlja se putem Brevo API-ja. Cijela aplikacija je kontejnerizovana Docker-om i hostovana na Render.com platformi.
 
 ---
 
