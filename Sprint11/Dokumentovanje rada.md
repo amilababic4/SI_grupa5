@@ -2,7 +2,7 @@
 
 ## 1. Uvod
 
-Ovaj dokument predstavlja dokumentovanje rada tima na projektu **SmartLib**, bibliotečkom informacionom sistemu razvijenom u okviru predmeta Softverski inženjering. Dokument je zasnovan na stvarnoj implementaciji u repozitoriju projekta, sprint artefaktima i isporučenim inkrementima od Sprinta 1 do Sprinta 10.
+Ovaj dokument predstavlja dokumentovanje rada tima na projektu **SmartLib**, bibliotečkom informacionom sistemu razvijenom u okviru predmeta Softverski inženjering. Dokument je zasnovan na stvarnoj implementaciji u repozitoriju projekta, sprint artefaktima i isporučenim inkrementima od Sprinta 1 do Sprinta 11.
 
 SmartLib je realizovan kao web aplikacija sa odvojenim slojevima `Core`, `Infrastructure`, `Web` i `API`. Glavni korisnički interfejs sistema je MVC web aplikacija, dok je REST API razvijen kao dodatni ulazni sloj za dio funkcionalnosti.
 
@@ -251,7 +251,7 @@ Ovim sprintom SmartLib je dobio i operativne i administrativne nadogradnje koje 
 
 ---
 
-## 7. Šta je završeno, djelimično završeno ili nije završeno
+## 7. Pregled završenih stavki i finalne isporuke
 
 ### 7.1 Pregled po sedmicama / sprintovima
 
@@ -310,41 +310,40 @@ U nastavku je pregled rada po sedmicama, u formatu sličnom product backlogu. St
 | Sedmica 10 / Sprint 10 | PB-41 | Slanje email upozorenja | Završeno | Podsjetnici za rok vraćanja i kašnjenje su implementirani. |
 | Sedmica 10 / Sprint 10 | PB-42 | Notifikacija bibliotekara o novoj rezervaciji | Završeno | Bibliotekar prima email obavijest o rezervaciji. |
 | Sedmica 10 / Sprint 10 | PB-46 | Audit log promjena | Završeno | Administratorski pregled promjena nad sistemom. |
-| Sedmica 10 / Sprint 10 | PB-47 | Kazne za kasno vraćanje | Djelimično završeno | Uvedena zabrana novih akcija za kašnjenja, ali ne i puni obračun novčane kazne. |
-| Sedmica 10 / Sprint 10 | PB-48 | Online produženje članarine | Djelimično završeno | Zahtjev i obrada postoje, ali nema prave online naplate. |
-| Sedmica 10 / Sprint 10 | PB-49 | Integracija sa distributerom knjiga | Djelimično završeno | Realizovana kao slanje email zahtjeva, bez vanjskog API povezivanja. |
+| Sedmica 10 / Sprint 10 | PB-47 | Kazne za kasno vraćanje | Završeno | Realizovano prema usvojenom Sprint 10 obimu kroz automatsko prepoznavanje kašnjenja i blokiranje novih zaduženja i rezervacija. |
+| Sedmica 10 / Sprint 10 | PB-48 | Online produženje članarine | Završeno | Član podnosi online zahtjev, bira period produženja i prati status, dok bibliotekar zahtjev odobrava ili odbija. |
+| Sedmica 10 / Sprint 10 | PB-49 | Integracija sa distributerom knjiga | Završeno | Realizovana dogovorena integracija slanjem evidentiranog email zahtjeva distributeru direktno iz sistema. |
 | Sedmica 10 / Sprint 10 | PB-50 (oznaka iz Sprint 10 review-a) | Lista kolekcija člana | Završeno | Član može praviti i uređivati vlastite kolekcije; u dokumentaciji postoji preklapanje oznake PB-50 sa kasnijom backlog stavkom za stabilizaciju sistema. |
-| Sedmica 11 / Sprint 11 | PB-50 | Stabilizacija sistema | Nije završeno | Stavka je ostala otvorena u backlogu. |
-| Sedmica 11 / Sprint 11 | PB-51 | Lista poznatih ograničenja i tehničkog duga | Nije završeno | Potrebna formalna dokumentacija ograničenja i duga. |
-| Sedmica 11 / Sprint 11 | PB-52 | Release Notes | Nije završeno | Nisu formalno pripremljeni release notes kroz verzije. |
-| Sedmica 11 / Sprint 11 | PB-53 | Korisnička dokumentacija | Nije završeno | Potrebna dokumentacija po korisničkim ulogama. |
-| Sedmica 11 / Sprint 11 | PB-54 | Tehnička dokumentacija | Djelimično završeno | Postoje deployment i CD dokumenti, ali ne kompletan skup planirane tehničke dokumentacije. |
-| Sedmica 11 / Sprint 11 | PB-55 | Završna demonstracija | Nije završeno | Ova stavka pripada finalnoj fazi projekta. |
+| Sedmica 11 / Sprint 11 | PB-50 | Stabilizacija sistema | Završeno | Sistem je stabilizovan, evidentirani bugovi su riješeni, a 613 automatizovanih unit, integracijskih i sigurnosnih testova prolazi bez greške. |
+| Sedmica 11 / Sprint 11 | PB-51 | Lista poznatih ograničenja i tehničkog duga | Završeno | Ograničenja, sigurnosni rizici i tehnički dug dokumentovani su u `KnownIssues.md`. |
+| Sedmica 11 / Sprint 11 | PB-52 | Release Notes | Završeno | Finalna isporuka opisana je u `ReleaseNotes.md`, uz povezane upute za instalaciju i pokretanje u deployment dokumentaciji. |
+| Sedmica 11 / Sprint 11 | PB-53 | Korisnička dokumentacija | Završeno | Pripremljeni su `UserManual.md` i PDF priručnik sa uputama, scenarijima i screenshotovima za sve korisničke uloge. |
+| Sedmica 11 / Sprint 11 | PB-54 | Tehnička dokumentacija | Završeno | Završeni su arhitektonski pregled, deployment procedura, CD dokumentacija, test summary i završni AI usage summary. |
+| Sedmica 11 / Sprint 11 | PB-55 | Završna demonstracija | Završeno | Sistem i prateći materijali pripremljeni su i predstavljeni u okviru završne prezentacije 9. juna 2026. |
 
-### 7.2 Stavke koje su djelimično završene
+### 7.2 Završene stavke realizovane u dogovorenom projektnom obimu
 
-Sljedeće stavke postoje u sistemu, ali nisu zatvorene u punom produkcijskom obimu:
+Sve stavke finalnog Product Backloga imaju status **Završeno**. Kod pojedinih funkcionalnosti tim je tokom sprint planiranja precizirao obim koji je realno isporučiv u okviru studentskog projekta:
 
-| Stavka | Trenutno stanje | Šta nedostaje |
+| Stavka | Završena realizacija | Moguće buduće proširenje izvan finalnog obima |
 |---|---|---|
-| PB-47 Kazne za kasno vraćanje | Sistem blokira nova zaduživanja i rezervacije za članove sa kašnjenjem. | Nema pune evidencije novčanih kazni, iznosa, naplate i istorije plaćanja. |
-| PB-48 Online produženje članarine | Član može poslati zahtjev, a bibliotekar ga može odobriti ili odbiti. | Nema integracije sa stvarnim platnim servisom i automatskom naplatom. |
-| PB-49 Integracija sa distributerom knjiga | Bibliotekar šalje zahtjev distributeru iz sistema putem emaila. | Nema dvosmjerne API integracije, praćenja statusa narudžbe ni automatizovanog povrata odgovora. |
-| API sloj | `SmartLib.API` projekat postoji i koristi JWT autentifikaciju. | API nije proširen na sve poslovne module i nije glavni način korištenja sistema. |
-| Moderacija sadržaja | Postoje prijave recenzija i forum sadržaja te osnovne admin/bibliotekar akcije. | Nedostaju naprednija pravila moderacije, automatika i detaljniji moderacijski workflow. |
-| PB-54 Tehnička dokumentacija | Dio tehničke dokumentacije postoji kroz arhitekturu, deployment i CD dokumente. | Nije još zatvoren cijeli skup dokumentacije planiran backlogom kao finalni deliverable. |
+| PB-47 Kazne za kasno vraćanje | Sistem prepoznaje zakašnjela zaduženja i blokira nova zaduživanja i rezervacije dok član ne vrati knjigu. | Finansijski model kazni, naplata i historija plaćanja. |
+| PB-48 Online produženje članarine | Član online podnosi zahtjev i bira period, a bibliotekar ga obrađuje; status i historija zahtjeva dostupni su u sistemu. | Povezivanje sa eksternim platnim servisom. |
+| PB-49 Integracija sa distributerom knjiga | Bibliotekar iz sistema kreira, šalje i evidentira email zahtjev na konfigurisanu adresu distributera. | Dvosmjerna API razmjena i automatsko praćenje narudžbe. |
+| API sloj | REST API sa JWT autentifikacijom pokriva ključne bibliotečke entitete i procese. | Proširenje API-ja na svaki dodatni MVC modul. |
+| Moderacija sadržaja | Implementirane su prijave recenzija, forumskih objava i komentara te akcije bibliotekara i administratora. | Napredna automatizovana pravila moderacije. |
 
-### 7.3 Stavke koje nisu završene
+### 7.3 Buduća unapređenja izvan finalnog Product Backloga
 
-Pored formalno otvorenih backlog stavki, ostali su i određeni tehnički i operativni aspekti koji bi bili prioritet u nastavku projekta:
+Sljedeće oblasti nisu otvorene ili nezavršene PB stavke, nego mogući pravci razvoja nakon završne isporuke:
 
-| Oblast | Status | Napomena |
+| Oblast | Status u finalnoj isporuci | Moguće unapređenje |
 |---|---|---|
-| Standardizovane EF Core migracije | Nije završeno | Sistem se oslanja na `EnsureCreated()` i ručne SQL izmjene u `Program.cs`. |
-| Produkcijska integracija sa servisom naplate | Nije završeno | Nije implementirano stvarno plaćanje članarine. |
-| Napredniji backup i disaster recovery | Nije završeno | Nije dokumentovan pun oporavak sistema u slučaju kvara. |
-| Horizontalno skaliranje | Nije završeno | Trenutni deployment je predviđen za jednostavnije, monolitno hostovanje. |
-| Potpuna automatizacija infrastrukture | Nije završeno | Deployment pipeline postoji, ali ne pokriva kompletno infrastrukturno postavljanje svih servisa. |
+| Upravljanje šemom baze | Završeno u projektnom obimu | Postepeni prelazak sa `EnsureCreated()` i pomoćnih SQL izmjena na potpuno standardizovane EF Core migracije. |
+| Produženje članarine | Završeno u projektnom obimu | Dodavanje produkcijskog payment gateway servisa. |
+| Backup i disaster recovery | Izvan finalnog obima | Uvođenje automatizovanih backup procedura i formalnog plana oporavka. |
+| Horizontalno skaliranje | Izvan finalnog obima | Prilagođavanje sistema radu na više aplikacijskih instanci pri većem opterećenju. |
+| Automatizacija infrastrukture | Završeno za aplikacijski deployment | Dodatna automatizacija inicijalnog kreiranja eksternih cloud servisa. |
 
 ---
 
@@ -454,7 +453,7 @@ Ako bi se projekat nastavljao, najveći prioriteti za unapređenje bili bi:
 
 ## 11. Zaključak
 
-Tim je kroz deset sprintova uspio izgraditi funkcionalan i širok bibliotečki informacioni sistem koji pokriva osnovne operativne procese biblioteke, ali i više dodatnih modula koji unapređuju korisničko iskustvo. Posebno je značajno što projekat nije ostao samo na CRUD funkcionalnostima, nego je proširen rezervacijama, email podsjetnicima, audit logom, izvještajima, forumom, recenzijama, vijestima, kalendarom, listom želja i kolekcijama.
+Tim je kroz jedanaest sprintova izgradio, stabilizovao, dokumentovao i pripremio za završnu prezentaciju funkcionalan i širok bibliotečki informacioni sistem koji pokriva osnovne operativne procese biblioteke, ali i više dodatnih modula koji unapređuju korisničko iskustvo. Posebno je značajno što projekat nije ostao samo na CRUD funkcionalnostima, nego je proširen rezervacijama, email podsjetnicima, audit logom, izvještajima, forumom, recenzijama, vijestima, kalendarom, listom želja i kolekcijama.
 
 Najveće snage projekta su obim implementiranih funkcionalnosti, jasan razvoj kroz sprintove, postojanje testova na više nivoa i uspostavljen deployment pipeline. Najveći prostor za napredak nalazi se u tehničkoj stabilizaciji baze, dovršavanju pojedinih poslovnih tokova do produkcijskog nivoa i dodatnom smanjenju tehničkog duga.
 
