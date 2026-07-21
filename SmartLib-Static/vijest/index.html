@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="bs" id="theme-root">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vijesti — SmartLib</title>
+<script>(function(){var t=localStorage.getItem('smartlib-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');})();</script>
+<link rel="stylesheet" href="../assets/css/site.css" />
+<link rel="stylesheet" href="../assets/css/animations.css" />
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+<style>
+.nav-hamburger { width: 36px; height: 36px; border-radius: 9px; border: 1.5px solid transparent; background: transparent; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; flex-shrink: 0; margin-left: -6px; }
+.nav-hamburger span { display: block; width: 17px; height: 1.8px; border-radius: 2px; background: rgba(255,255,255,.85); }
+.nav-drawer-overlay { position: fixed; inset: 0; z-index: 9000; background: rgba(6,15,58,.6); opacity: 0; pointer-events: none; transition: opacity .3s ease; }
+.nav-drawer-overlay.open { opacity: 1; pointer-events: all; }
+.nav-drawer { position: fixed; top: 0; left: 0; bottom: 0; z-index: 9001; width: 300px; max-width: 90vw; background: linear-gradient(180deg,#fff 0%,#f5f8ff 55%,#eef2ff 100%); box-shadow: 12px 0 45px rgba(6,15,58,.18); transform: translateX(-100%); transition: transform .38s cubic-bezier(.16,1,.3,1); display: flex; flex-direction: column; overflow-y: auto; }
+.nav-drawer.open { transform: translateX(0); }
+.nav-drawer-header { display: flex; align-items: center; justify-content: space-between; padding: 1.1rem 1.3rem; border-bottom: 1px solid rgba(27,61,143,.08); }
+.nav-drawer-brand { display: flex; align-items: center; gap: .5rem; font-weight: 800; color: #1B3D8F; text-decoration: none; }
+.nav-drawer-brand-icon { width: 28px; height: 28px; border-radius: 7px; background: linear-gradient(135deg,#173b63,#2563eb); display: flex; align-items: center; justify-content: center; font-size: .84rem; }
+.nav-drawer-close { width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid rgba(27,61,143,.13); background: transparent; cursor: pointer; }
+.nav-drawer-links { list-style: none; padding: 1.5rem .5rem; margin: 0; }
+.nav-drawer-links li { padding: 0 .5rem; margin-bottom: .6rem; }
+.nav-drawer-links li a, .nav-drawer-links li .nd-logout-btn { display: block; padding: .75rem 1.25rem; border-radius: 14px; color: #1a202c; font-weight: 600; text-decoration: none; border: 1px solid transparent; background: transparent; cursor: pointer; width: 100%; text-align: left; }
+.nav-drawer-section { padding: 0 1.2rem; margin: 1rem 0 .35rem; font-size: .7rem; font-weight: 800; text-transform: uppercase; color: rgba(27,61,143,.6); }
+.nd-logout-btn { color: #b42318 !important; }
+.vijest-hero { background: var(--sl-dark); color: #fff; padding: 3rem 1.5rem; text-align: center; }
+.vijest-hero h1 { font-family:"Plus Jakarta Sans",sans-serif; font-size: 2.2rem; margin-bottom:.5rem; }
+.cat-filter-bar { display: flex; gap: .5rem; justify-content: center; flex-wrap: wrap; padding: 1.25rem 1.5rem; }
+.cat-chip { padding: .45rem 1rem; border-radius: 999px; border: 1.5px solid var(--sl-border); background: var(--sl-card-solid); cursor: pointer; font-weight: 600; font-size: .85rem; }
+.cat-chip.active { background: var(--sl-blue); color: #fff; border-color: var(--sl-blue); }
+.vijest-grid { max-width: 1100px; margin: 0 auto; padding: 1.5rem; display: grid; grid-template-columns: repeat(auto-fill,minmax(280px,1fr)); gap: 1.5rem; }
+.vijest-card { background: var(--sl-card-solid); border-radius: var(--sl-radius-lg); box-shadow: var(--sl-shadow); overflow: hidden; cursor: pointer; display: flex; flex-direction: column; }
+.vijest-card img { width: 100%; height: 160px; object-fit: cover; }
+.vijest-card .body { padding: 1.1rem; }
+.vijest-card .cat { font-size: .72rem; font-weight: 700; color: var(--sl-blue); text-transform: uppercase; }
+.vijest-card h3 { margin: .4rem 0; font-size: 1.05rem; }
+.vijest-card .date { font-size: .8rem; color: var(--sl-muted); }
+.vijest-reader { max-width: 720px; margin: 0 auto; padding: 1.5rem; }
+.vijest-reader-content { background: var(--sl-card-solid); border-radius: var(--sl-radius-lg); box-shadow: var(--sl-shadow); padding: 2rem; }
+.vijest-fab { position: fixed; bottom: 2rem; right: 2rem; width: 56px; height: 56px; border-radius: 50%; background: var(--sl-blue); color: #fff; font-size: 1.6rem; border: none; cursor: pointer; box-shadow: var(--sl-shadow-hover); z-index: 500; }
+.sl-modal-overlay { position: fixed; inset: 0; background: rgba(6,15,58,.55); z-index: 9500; display: flex; align-items: center; justify-content: center; }
+.sl-modal-overlay[hidden] { display: none; }
+.sl-modal { background: var(--sl-card-solid); border-radius: var(--sl-radius-lg); padding: 1.75rem; max-width: 560px; width: 92%; max-height: 88vh; overflow-y: auto; }
+</style>
+</head>
+<body>
+
+<nav id="main-nav" class="smartlib-navbar smartlib-navbar-dark">
+    <div class="smartlib-nav-inner">
+        <div class="nav-brand">
+            <button class="nav-hamburger" id="nav-hamburger" data-auth="in" style="display:none;" aria-label="Otvori meni"><span></span><span></span><span></span></button>
+            <a data-nav-href="index.html"><span class="brand-icon">📚</span><span class="brand-text">SmartLib</span></a>
+        </div>
+        <ul class="nav-links" id="nav-menu">
+            <li data-role="Administrator,Bibliotekar,Član"><a data-nav-href="knjiga/index.html" class="katalog-nav-link menu-item">Katalog</a></li>
+            <li data-auth="in"><a data-nav-href="notifikacija/index.html" class="menu-item">Obavještenja<span class="notif-badge" style="display:none;"></span></a></li>
+            <li data-auth="in"><a data-nav-href="korisnik/profil.html" class="menu-item">Moj profil</a></li>
+            <li data-auth="in"><button type="button" class="nav-link-btn menu-item" data-action="logout">Odjava</button></li>
+            <li data-auth="out"><a data-nav-href="kalendar/index.html" class="menu-item">Kalendar</a></li>
+            <li class="menu-item" data-auth="out"><a data-nav-href="auth/login.html" class="nav-login-link">Prijava</a></li>
+            <li class="menu-item">
+                <button id="theme-toggle" class="theme-toggle-btn" aria-label="Promijeni temu">
+                    <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                    <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                </button>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<div class="nav-drawer-overlay" id="nav-drawer-overlay" data-auth="in"></div>
+<nav class="nav-drawer" id="nav-drawer" data-auth="in">
+    <div class="nav-drawer-header">
+        <a data-nav-href="index.html" class="nav-drawer-brand"><span class="nav-drawer-brand-icon">📚</span>SmartLib</a>
+        <button class="nav-drawer-close" id="nav-drawer-close">✕</button>
+    </div>
+    <ul class="nav-drawer-links">
+        <li class="nav-drawer-section">Glavno</li>
+        <li><a data-nav-href="index.html">Početna</a></li>
+        <li><a data-nav-href="vijest/index.html">Vijesti</a></li>
+        <li><a data-nav-href="kalendar/index.html">Kalendar</a></li>
+        <li><a data-nav-href="knjiga/index.html" class="katalog-nav-link">Katalog</a></li>
+        <li class="nav-drawer-section">Nalog</li>
+        <li><a data-nav-href="korisnik/profil.html">Moj profil</a></li>
+        <li><button type="button" class="nd-logout-btn" data-action="logout">Odjava</button></li>
+    </ul>
+</nav>
+
+<main class="page-shell" style="padding:0;max-width:none;">
+    <div class="vijest-hero">
+        <h1>Vijesti</h1>
+        <p>Obavještenja i novosti iz SmartLib biblioteke</p>
+    </div>
+    <div class="cat-filter-bar" id="cat-filter-bar"></div>
+    <div id="vijest-reader" class="vijest-reader" style="display:none;">
+        <button class="btn btn-secondary" id="close-reader-btn" style="margin-bottom:1rem;">← Nazad na sve vijesti</button>
+        <div class="vijest-reader-content" id="vijest-reader-content"></div>
+    </div>
+    <div class="vijest-grid" id="vijest-grid"></div>
+</main>
+
+<button class="vijest-fab" id="vijest-fab" data-role="Administrator,Bibliotekar" style="display:none;" title="Nova vijest">+</button>
+
+<div class="sl-modal-overlay" id="vijest-modal" hidden>
+    <div class="sl-modal">
+        <h2 id="vijest-modal-title">Nova vijest</h2>
+        <div id="vijest-modal-alert"></div>
+        <form id="vijest-form">
+            <input type="hidden" id="vijest-id" />
+            <div class="form-group"><label>Naslov</label><input type="text" id="vijest-naslov" required /></div>
+            <div class="form-group"><label>Kategorija</label>
+                <select id="vijest-kategorija">
+                    <option>Obavještenje</option><option>Događaj</option>
+                </select>
+            </div>
+            <div class="form-group"><label>URL slike (opcionalno)</label><input type="text" id="vijest-slika" placeholder="../assets/images/booooks.png" /></div>
+            <div class="form-group"><label>Sadržaj (Markdown podržan)</label><textarea id="vijest-sadrzaj" rows="6" required></textarea></div>
+            <div style="display:flex;gap:.5rem;">
+                <button type="submit" class="btn btn-primary">Sačuvaj</button>
+                <button type="button" class="btn btn-secondary" id="vijest-cancel-btn">Otkaži</button>
+                <button type="button" class="btn btn-danger" id="vijest-delete-btn" style="display:none;margin-left:auto;">Obriši</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<footer><p>&copy; 2026 SmartLib — SI Grupa 5, ETF Sarajevo</p></footer>
+
+<script src="../assets/js/db.js"></script>
+<script src="../assets/js/mock-data.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script src="../assets/js/common.js"></script>
+<script src="../assets/js/layout.js"></script>
+<script src="../assets/js/animations.js" defer></script>
+<script src="../assets/js/pages/vijest-index.js"></script>
+</body>
+</html>

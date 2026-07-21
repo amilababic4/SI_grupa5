@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="bs" id="theme-root">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Kalendar — SmartLib</title>
+<script>(function(){var t=localStorage.getItem('smartlib-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');})();</script>
+<link rel="stylesheet" href="../assets/css/site.css" />
+<link rel="stylesheet" href="../assets/css/animations.css" />
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+.nav-hamburger { width: 36px; height: 36px; border-radius: 9px; border: 1.5px solid transparent; background: transparent; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; flex-shrink: 0; margin-left: -6px; }
+.nav-hamburger span { display: block; width: 17px; height: 1.8px; border-radius: 2px; background: rgba(255,255,255,.85); }
+.nav-drawer-overlay { position: fixed; inset: 0; z-index: 9000; background: rgba(6,15,58,.6); opacity: 0; pointer-events: none; transition: opacity .3s ease; }
+.nav-drawer-overlay.open { opacity: 1; pointer-events: all; }
+.nav-drawer { position: fixed; top: 0; left: 0; bottom: 0; z-index: 9001; width: 300px; max-width: 90vw; background: linear-gradient(180deg,#fff 0%,#f5f8ff 55%,#eef2ff 100%); box-shadow: 12px 0 45px rgba(6,15,58,.18); transform: translateX(-100%); transition: transform .38s cubic-bezier(.16,1,.3,1); display: flex; flex-direction: column; overflow-y: auto; }
+.nav-drawer.open { transform: translateX(0); }
+.nav-drawer-header { display: flex; align-items: center; justify-content: space-between; padding: 1.1rem 1.3rem; border-bottom: 1px solid rgba(27,61,143,.08); }
+.nav-drawer-brand { display: flex; align-items: center; gap: .5rem; font-weight: 800; color: #1B3D8F; text-decoration: none; }
+.nav-drawer-brand-icon { width: 28px; height: 28px; border-radius: 7px; background: linear-gradient(135deg,#173b63,#2563eb); display: flex; align-items: center; justify-content: center; font-size: .84rem; }
+.nav-drawer-close { width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid rgba(27,61,143,.13); background: transparent; cursor: pointer; }
+.nav-drawer-links { list-style: none; padding: 1.5rem .5rem; margin: 0; }
+.nav-drawer-links li { padding: 0 .5rem; margin-bottom: .6rem; }
+.nav-drawer-links li a, .nav-drawer-links li .nd-logout-btn { display: block; padding: .75rem 1.25rem; border-radius: 14px; color: #1a202c; font-weight: 600; text-decoration: none; border: 1px solid transparent; background: transparent; cursor: pointer; width: 100%; text-align: left; }
+.nav-drawer-section { padding: 0 1.2rem; margin: 1rem 0 .35rem; font-size: .7rem; font-weight: 800; text-transform: uppercase; color: rgba(27,61,143,.6); }
+.nd-logout-btn { color: #b42318 !important; }
+.kal-shell { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; }
+@media (max-width: 800px) { .kal-shell { grid-template-columns: 1fr; } }
+.kal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+.kal-header .title { font-size: 1.3rem; font-weight: 800; }
+.kal-nav-btn { background: var(--sl-card-solid); border: 1px solid var(--sl-border); border-radius: 8px; width: 34px; height: 34px; cursor: pointer; }
+.kal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; }
+.kal-dow { text-align: center; font-size: .75rem; font-weight: 700; color: var(--sl-muted); padding: .4rem 0; }
+.kal-cell { min-height: 74px; border: 1px solid var(--sl-border); border-radius: 8px; padding: .35rem; font-size: .78rem; background: var(--sl-card-solid); cursor: pointer; }
+.kal-cell.empty { background: transparent; border-color: transparent; cursor: default; }
+.kal-cell.today { border-color: var(--sl-blue); border-width: 2px; }
+.kal-cell .d-num { font-weight: 700; }
+.kal-cell .ev-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--sl-blue); margin-right: 2px; }
+.kal-upcoming .card { margin-bottom: .75rem; padding: .9rem 1.1rem; }
+.kal-fab { position: fixed; bottom: 2rem; right: 2rem; width: 56px; height: 56px; border-radius: 50%; background: var(--sl-blue); color: #fff; font-size: 1.6rem; border: none; cursor: pointer; box-shadow: var(--sl-shadow-hover); z-index: 500; }
+.sl-modal-overlay { position: fixed; inset: 0; background: rgba(6,15,58,.55); z-index: 9500; display: flex; align-items: center; justify-content: center; }
+.sl-modal-overlay[hidden] { display: none; }
+.sl-modal { background: var(--sl-card-solid); border-radius: var(--sl-radius-lg); padding: 1.75rem; max-width: 520px; width: 92%; max-height: 88vh; overflow-y: auto; }
+</style>
+</head>
+<body>
+
+<nav id="main-nav" class="smartlib-navbar smartlib-navbar-dark">
+    <div class="smartlib-nav-inner">
+        <div class="nav-brand">
+            <button class="nav-hamburger" id="nav-hamburger" data-auth="in" style="display:none;" aria-label="Otvori meni"><span></span><span></span><span></span></button>
+            <a data-nav-href="index.html"><span class="brand-icon">📚</span><span class="brand-text">SmartLib</span></a>
+        </div>
+        <ul class="nav-links" id="nav-menu">
+            <li data-role="Administrator,Bibliotekar,Član"><a data-nav-href="knjiga/index.html" class="katalog-nav-link menu-item">Katalog</a></li>
+            <li data-auth="in"><a data-nav-href="notifikacija/index.html" class="menu-item">Obavještenja<span class="notif-badge" style="display:none;"></span></a></li>
+            <li data-auth="in"><a data-nav-href="korisnik/profil.html" class="menu-item">Moj profil</a></li>
+            <li data-auth="in"><button type="button" class="nav-link-btn menu-item" data-action="logout">Odjava</button></li>
+            <li data-auth="out"><a data-nav-href="vijest/index.html" class="menu-item">Vijesti</a></li>
+            <li class="menu-item" data-auth="out"><a data-nav-href="auth/login.html" class="nav-login-link">Prijava</a></li>
+            <li class="menu-item">
+                <button id="theme-toggle" class="theme-toggle-btn" aria-label="Promijeni temu">
+                    <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                    <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                </button>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<div class="nav-drawer-overlay" id="nav-drawer-overlay" data-auth="in"></div>
+<nav class="nav-drawer" id="nav-drawer" data-auth="in">
+    <div class="nav-drawer-header">
+        <a data-nav-href="index.html" class="nav-drawer-brand"><span class="nav-drawer-brand-icon">📚</span>SmartLib</a>
+        <button class="nav-drawer-close" id="nav-drawer-close">✕</button>
+    </div>
+    <ul class="nav-drawer-links">
+        <li class="nav-drawer-section">Glavno</li>
+        <li><a data-nav-href="index.html">Početna</a></li>
+        <li><a data-nav-href="vijest/index.html">Vijesti</a></li>
+        <li><a data-nav-href="kalendar/index.html">Kalendar</a></li>
+        <li><a data-nav-href="knjiga/index.html" class="katalog-nav-link">Katalog</a></li>
+        <li class="nav-drawer-section">Nalog</li>
+        <li><a data-nav-href="korisnik/profil.html">Moj profil</a></li>
+        <li><button type="button" class="nd-logout-btn" data-action="logout">Odjava</button></li>
+    </ul>
+</nav>
+
+<main class="page-shell" style="max-width:none;padding:0;">
+<div class="kal-shell">
+    <div>
+        <div class="kal-header">
+            <button class="kal-nav-btn" id="kal-prev">‹</button>
+            <div class="title" id="kal-month-title"></div>
+            <button class="kal-nav-btn" id="kal-next">›</button>
+        </div>
+        <div class="kal-grid" id="kal-grid"></div>
+        <div id="kal-day-detail" style="margin-top:1.25rem;"></div>
+    </div>
+    <div class="kal-upcoming">
+        <h3>Predstojeći događaji</h3>
+        <div id="kal-upcoming-list"></div>
+    </div>
+</div>
+</main>
+
+<button class="kal-fab" id="kal-fab" data-role="Administrator,Bibliotekar" style="display:none;" title="Novi događaj">+</button>
+
+<div class="sl-modal-overlay" id="kal-modal" hidden>
+    <div class="sl-modal">
+        <h2 id="kal-modal-title">Novi događaj</h2>
+        <form id="kal-form">
+            <input type="hidden" id="kal-id" />
+            <div class="form-group"><label>Naslov</label><input type="text" id="kal-naslov" required /></div>
+            <div class="form-group"><label>Datum</label><input type="date" id="kal-datum" required /></div>
+            <div class="form-group"><label>Vrijeme</label><input type="time" id="kal-sat" /></div>
+            <div class="form-group"><label>Lokacija</label><input type="text" id="kal-lokacija" /></div>
+            <div class="form-group"><label>Kategorija</label>
+                <select id="kal-kategorija"><option>Edukacija</option><option>Radionica</option><option>Događaj</option></select>
+            </div>
+            <div class="form-group"><label>Opis</label><textarea id="kal-opis" rows="3"></textarea></div>
+            <div style="display:flex;gap:.5rem;">
+                <button type="submit" class="btn btn-primary">Sačuvaj</button>
+                <button type="button" class="btn btn-secondary" id="kal-cancel-btn">Otkaži</button>
+                <button type="button" class="btn btn-danger" id="kal-delete-btn" style="display:none;margin-left:auto;">Obriši</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<footer><p>&copy; 2026 SmartLib — SI Grupa 5, ETF Sarajevo</p></footer>
+
+<script src="../assets/js/db.js"></script>
+<script src="../assets/js/mock-data.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script src="../assets/js/common.js"></script>
+<script src="../assets/js/layout.js"></script>
+<script src="../assets/js/animations.js" defer></script>
+<script src="../assets/js/pages/kalendar-index.js"></script>
+</body>
+</html>

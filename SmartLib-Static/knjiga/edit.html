@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="bs" id="theme-root">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Uredi knjigu — SmartLib</title>
+<script>(function(){var t=localStorage.getItem('smartlib-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');})();</script>
+<link rel="stylesheet" href="../assets/css/site.css" />
+<link rel="stylesheet" href="../assets/css/animations.css" />
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+.nav-hamburger { width: 36px; height: 36px; border-radius: 9px; border: 1.5px solid transparent; background: transparent; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; flex-shrink: 0; margin-left: -6px; }
+.nav-hamburger span { display: block; width: 17px; height: 1.8px; border-radius: 2px; background: #334155; }
+.nav-drawer-overlay { position: fixed; inset: 0; z-index: 9000; background: rgba(6,15,58,.6); opacity: 0; pointer-events: none; transition: opacity .3s ease; }
+.nav-drawer-overlay.open { opacity: 1; pointer-events: all; }
+.nav-drawer { position: fixed; top: 0; left: 0; bottom: 0; z-index: 9001; width: 300px; max-width: 90vw; background: linear-gradient(180deg,#fff 0%,#f5f8ff 55%,#eef2ff 100%); box-shadow: 12px 0 45px rgba(6,15,58,.18); transform: translateX(-100%); transition: transform .38s cubic-bezier(.16,1,.3,1); display: flex; flex-direction: column; overflow-y: auto; }
+.nav-drawer.open { transform: translateX(0); }
+.nav-drawer-header { display: flex; align-items: center; justify-content: space-between; padding: 1.1rem 1.3rem; border-bottom: 1px solid rgba(27,61,143,.08); }
+.nav-drawer-links { list-style: none; padding: 1.5rem .5rem; margin: 0; }
+.nav-drawer-links li { padding: 0 .5rem; margin-bottom: .6rem; }
+.nav-drawer-links li a, .nav-drawer-links li .nd-logout-btn { display: block; padding: .75rem 1.25rem; border-radius: 14px; color: #1a202c; font-weight: 600; text-decoration: none; border: 1px solid transparent; background: transparent; cursor: pointer; width: 100%; text-align: left; }
+.nav-drawer-brand { display:flex;align-items:center;gap:.5rem;font-weight:800;color:#1B3D8F;text-decoration:none; }
+.nav-drawer-brand-icon { width: 28px; height: 28px; border-radius: 7px; background: linear-gradient(135deg,#173b63,#2563eb); display: flex; align-items: center; justify-content: center; font-size: .84rem; }
+.nav-drawer-close { width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid rgba(27,61,143,.13); background: transparent; cursor: pointer; }
+.nd-logout-btn { color: #b42318 !important; }
+.form-shell { max-width: 560px; margin: 0 auto; }
+</style>
+</head>
+<body>
+<nav id="main-nav" class="smartlib-navbar smartlib-navbar-app">
+    <div class="smartlib-nav-inner">
+        <div class="nav-brand">
+            <button class="nav-hamburger" id="nav-hamburger" aria-label="Otvori meni"><span></span><span></span><span></span></button>
+            <a data-nav-href="index.html"><span class="brand-icon">📚</span><span class="brand-text">SmartLib</span></a>
+        </div>
+        <ul class="nav-links" id="nav-menu">
+            <li><a data-nav-href="knjiga/index.html" class="katalog-nav-link menu-item">Katalog</a></li>
+            <li><a data-nav-href="korisnik/profil.html" class="menu-item">Moj profil</a></li>
+            <li><button type="button" class="nav-link-btn menu-item" data-action="logout">Odjava</button></li>
+            <li class="menu-item"><button id="theme-toggle" class="theme-toggle-btn" aria-label="Promijeni temu">🌙</button></li>
+        </ul>
+    </div>
+</nav>
+<div class="nav-drawer-overlay" id="nav-drawer-overlay"></div>
+<nav class="nav-drawer" id="nav-drawer">
+    <div class="nav-drawer-header"><a data-nav-href="index.html" class="nav-drawer-brand"><span class="nav-drawer-brand-icon">📚</span>SmartLib</a><button class="nav-drawer-close" id="nav-drawer-close">✕</button></div>
+    <ul class="nav-drawer-links"><li><a data-nav-href="knjiga/index.html">Katalog</a></li><li><button type="button" class="nd-logout-btn" data-action="logout">Odjava</button></li></ul>
+</nav>
+<main class="page-shell">
+<div class="form-shell">
+    <a href="#" id="back-link" class="btn-back">← Nazad na knjigu</a>
+    <h2 style="margin-top:1rem;">Uredi knjigu</h2>
+    <div id="alert-container"></div>
+    <div class="card">
+        <form id="book-form">
+            <div class="form-group"><label>Naslov</label><input type="text" id="naslov" required /></div>
+            <div class="form-group"><label>Autor</label><input type="text" id="autor" required /></div>
+            <div class="form-group"><label>ISBN</label><input type="text" id="isbn" disabled /></div>
+            <div class="form-group"><label>Kategorija</label><select id="kategorija" required></select></div>
+            <div class="form-group"><label>Izdavač</label><input type="text" id="izdavac" /></div>
+            <div class="form-group"><label>Godina izdanja</label><input type="number" id="godina" /></div>
+            <div class="form-group"><label>Opis</label><textarea id="opis" rows="4"></textarea></div>
+            <button type="submit" class="btn btn-primary">Sačuvaj izmjene</button>
+        </form>
+    </div>
+</div>
+</main>
+<footer><p>&copy; 2026 SmartLib — SI Grupa 5, ETF Sarajevo</p></footer>
+<script src="../assets/js/db.js"></script>
+<script src="../assets/js/mock-data.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script src="../assets/js/common.js"></script>
+<script src="../assets/js/layout.js"></script>
+<script src="../assets/js/animations.js" defer></script>
+<script src="../assets/js/pages/knjiga-edit.js"></script>
+</body>
+</html>

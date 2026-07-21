@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="bs" id="theme-root">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Prijava — SmartLib</title>
+<script>(function(){var t=localStorage.getItem('smartlib-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');})();</script>
+<link rel="stylesheet" href="../assets/css/site.css" />
+<link rel="stylesheet" href="../assets/css/animations.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+.nav-brand { display: flex; align-items: center; gap: .4rem; }
+.nav-drawer-overlay { position: fixed; inset: 0; z-index: 9000; background: rgba(6,15,58,.6); opacity: 0; pointer-events: none; }
+.auth-shell { max-width: 440px; margin: 3.5rem auto; }
+.auth-card { background: var(--sl-card-solid); border-radius: var(--sl-radius-lg); box-shadow: var(--sl-shadow); padding: 2.25rem; }
+.auth-card h1 { font-size: 1.5rem; margin-bottom: .35rem; text-align: center; }
+.auth-card .sub { text-align: center; color: var(--sl-muted); margin-bottom: 1.5rem; font-size: .92rem; }
+.password-field { position: relative; }
+.password-field input { width: 100%; padding-right: 2.5rem; }
+.password-toggle { position: absolute; right: .6rem; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--sl-muted); }
+.auth-links { text-align: center; margin-top: 1.25rem; font-size: .9rem; }
+.demo-accounts { margin-top: 1.5rem; padding: .9rem 1rem; border-radius: var(--sl-radius-sm); background: var(--sl-blue-light); font-size: .8rem; color: var(--sl-muted); }
+.demo-accounts strong { color: var(--sl-text); }
+</style>
+</head>
+<body>
+
+<nav id="main-nav" class="smartlib-navbar smartlib-navbar-app">
+    <div class="smartlib-nav-inner">
+        <div class="nav-brand"><a data-nav-href="index.html"><span class="brand-icon">📚</span><span class="brand-text">SmartLib</span></a></div>
+        <ul class="nav-links" id="nav-menu">
+            <li><a data-nav-href="vijest/index.html" class="menu-item">Vijesti</a></li>
+            <li><a data-nav-href="kalendar/index.html" class="menu-item">Kalendar</a></li>
+            <li class="menu-item">
+                <button id="theme-toggle" class="theme-toggle-btn" aria-label="Promijeni temu">
+                    <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                    <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                </button>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<main class="page-shell">
+<div class="auth-shell">
+    <div class="auth-card">
+        <h1>Prijava</h1>
+        <p class="sub">Prijavite se na svoj SmartLib nalog</p>
+        <div id="alert-container"></div>
+        <form id="login-form">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required />
+            </div>
+            <div class="form-group">
+                <label for="password">Lozinka</label>
+                <div class="password-field">
+                    <input type="password" id="password" name="password" required />
+                    <button type="button" class="password-toggle" aria-label="Prikaži lozinku">👁</button>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%;">Prijavi se</button>
+        </form>
+        <div class="auth-links">
+            <a data-nav-href="auth/forgot-password.html">Zaboravili ste lozinku?</a>
+            &nbsp;·&nbsp;
+            <a data-nav-href="korisnik/create.html">Registruj se</a>
+        </div>
+        <div class="demo-accounts">
+            <strong>Demo nalozi:</strong><br/>
+            Administrator: admin@smartlib.ba / admin123<br/>
+            Bibliotekar: bibliotekar@smartlib.ba / biblio123<br/>
+            Član: clan@smartlib.ba / clan123
+        </div>
+    </div>
+</div>
+</main>
+
+<footer><p>&copy; 2026 SmartLib — SI Grupa 5, ETF Sarajevo</p></footer>
+
+<script src="../assets/js/db.js"></script>
+<script src="../assets/js/mock-data.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script src="../assets/js/common.js"></script>
+<script src="../assets/js/layout.js"></script>
+<script src="../assets/js/animations.js" defer></script>
+<script src="../assets/js/pages/login.js"></script>
+</body>
+</html>

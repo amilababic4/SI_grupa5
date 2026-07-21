@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="bs" id="theme-root">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Detalji knjige — SmartLib</title>
+<script>(function(){var t=localStorage.getItem('smartlib-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');})();</script>
+<link rel="stylesheet" href="../assets/css/site.css" />
+<link rel="stylesheet" href="../assets/css/animations.css" />
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+.nav-hamburger { width: 36px; height: 36px; border-radius: 9px; border: 1.5px solid transparent; background: transparent; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; flex-shrink: 0; margin-left: -6px; }
+.nav-hamburger span { display: block; width: 17px; height: 1.8px; border-radius: 2px; background: #334155; }
+.nav-drawer-overlay { position: fixed; inset: 0; z-index: 9000; background: rgba(6,15,58,.6); opacity: 0; pointer-events: none; transition: opacity .3s ease; }
+.nav-drawer-overlay.open { opacity: 1; pointer-events: all; }
+.nav-drawer { position: fixed; top: 0; left: 0; bottom: 0; z-index: 9001; width: 300px; max-width: 90vw; background: linear-gradient(180deg,#fff 0%,#f5f8ff 55%,#eef2ff 100%); box-shadow: 12px 0 45px rgba(6,15,58,.18); transform: translateX(-100%); transition: transform .38s cubic-bezier(.16,1,.3,1); display: flex; flex-direction: column; overflow-y: auto; }
+.nav-drawer.open { transform: translateX(0); }
+.nav-drawer-header { display: flex; align-items: center; justify-content: space-between; padding: 1.1rem 1.3rem; border-bottom: 1px solid rgba(27,61,143,.08); }
+.nav-drawer-brand { display: flex; align-items: center; gap: .5rem; font-weight: 800; color: #1B3D8F; text-decoration: none; }
+.nav-drawer-brand-icon { width: 28px; height: 28px; border-radius: 7px; background: linear-gradient(135deg,#173b63,#2563eb); display: flex; align-items: center; justify-content: center; font-size: .84rem; }
+.nav-drawer-close { width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid rgba(27,61,143,.13); background: transparent; cursor: pointer; }
+.nav-drawer-links { list-style: none; padding: 1.5rem .5rem; margin: 0; }
+.nav-drawer-links li { padding: 0 .5rem; margin-bottom: .6rem; }
+.nav-drawer-links li a, .nav-drawer-links li .nd-logout-btn { display: block; padding: .75rem 1.25rem; border-radius: 14px; color: #1a202c; font-weight: 600; text-decoration: none; border: 1px solid transparent; background: transparent; cursor: pointer; width: 100%; text-align: left; }
+.nav-drawer-section { padding: 0 1.2rem; margin: 1rem 0 .35rem; font-size: .7rem; font-weight: 800; text-transform: uppercase; color: rgba(27,61,143,.6); }
+.nd-logout-btn { color: #b42318 !important; }
+.details-header { display: flex; gap: 2rem; flex-wrap: wrap; margin-bottom: 2rem; }
+.details-cover img { width: 220px; border-radius: var(--sl-radius-lg); box-shadow: var(--sl-shadow); cursor: pointer; }
+.details-info { flex: 1; min-width: 260px; }
+.details-info h1 { margin: 0 0 .3rem; }
+.details-author { color: var(--sl-muted); margin-bottom: .75rem; }
+.details-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(150px,1fr)); gap: .75rem 1.5rem; margin: 1rem 0; }
+.details-grid .label { font-size: .78rem; color: var(--sl-muted); text-transform: uppercase; }
+.details-grid .value { font-weight: 600; }
+.details-actions { display: flex; gap: .6rem; flex-wrap: wrap; margin-top: 1rem; }
+.section-block { margin-bottom: 2.5rem; }
+.section-block h2 { font-size: 1.2rem; margin-bottom: 1rem; }
+.sl-modal-overlay { position: fixed; inset: 0; background: rgba(6,15,58,.55); z-index: 9500; display: flex; align-items: center; justify-content: center; }
+.sl-modal-overlay[hidden] { display: none; }
+.sl-modal { background: var(--sl-card-solid); border-radius: var(--sl-radius-lg); padding: 1.75rem; max-width: 480px; width: 92%; max-height: 88vh; overflow-y: auto; }
+.image-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.8); z-index: 9600; display: flex; align-items: center; justify-content: center; }
+.image-modal-overlay[hidden] { display: none; }
+.image-modal-overlay img { max-width: 90vw; max-height: 90vh; border-radius: 12px; }
+.review-item { border-bottom: 1px solid var(--sl-border); padding: 1rem 0; }
+.review-item:last-child { border-bottom: none; }
+.sl-toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: var(--sl-dark); color: #fff; padding: .75rem 1.25rem; border-radius: 10px; z-index: 9700; box-shadow: var(--sl-shadow-hover); }
+</style>
+</head>
+<body>
+
+<nav id="main-nav" class="smartlib-navbar smartlib-navbar-app">
+    <div class="smartlib-nav-inner">
+        <div class="nav-brand">
+            <button class="nav-hamburger" id="nav-hamburger" aria-label="Otvori meni"><span></span><span></span><span></span></button>
+            <a data-nav-href="index.html"><span class="brand-icon">📚</span><span class="brand-text">SmartLib</span></a>
+        </div>
+        <ul class="nav-links" id="nav-menu">
+            <li><a data-nav-href="knjiga/index.html" class="katalog-nav-link menu-item">Katalog</a></li>
+            <li data-auth="in"><a data-nav-href="notifikacija/index.html" class="menu-item">Obavještenja<span class="notif-badge" style="display:none;"></span></a></li>
+            <li data-auth="in"><a data-nav-href="korisnik/profil.html" class="menu-item">Moj profil</a></li>
+            <li data-auth="in"><button type="button" class="nav-link-btn menu-item" data-action="logout">Odjava</button></li>
+            <li class="menu-item">
+                <button id="theme-toggle" class="theme-toggle-btn" aria-label="Promijeni temu">
+                    <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.79"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                    <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                </button>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<div class="nav-drawer-overlay" id="nav-drawer-overlay" data-auth="in"></div>
+<nav class="nav-drawer" id="nav-drawer" data-auth="in">
+    <div class="nav-drawer-header">
+        <a data-nav-href="index.html" class="nav-drawer-brand"><span class="nav-drawer-brand-icon">📚</span>SmartLib</a>
+        <button class="nav-drawer-close" id="nav-drawer-close">✕</button>
+    </div>
+    <ul class="nav-drawer-links">
+        <li><a data-nav-href="knjiga/index.html" class="katalog-nav-link">Katalog</a></li>
+        <li><a data-nav-href="korisnik/profil.html">Moj profil</a></li>
+        <li><button type="button" class="nd-logout-btn" data-action="logout">Odjava</button></li>
+    </ul>
+</nav>
+
+<main class="page-shell">
+    <a href="index.html" class="btn-back">← Nazad na katalog</a>
+    <div id="alert-container" style="margin-top:1rem;"></div>
+    <div class="details-header" style="margin-top:1rem;">
+        <div class="details-cover"><img id="book-cover-img" src="" alt="" /></div>
+        <div class="details-info">
+            <h1 id="book-naslov"></h1>
+            <div class="details-author" id="book-autor"></div>
+            <div id="book-rating"></div>
+            <div class="details-grid">
+                <div><div class="label">ISBN</div><div class="value" id="book-isbn"></div></div>
+                <div><div class="label">Kategorija</div><div class="value" id="book-kategorija"></div></div>
+                <div><div class="label">Izdavač</div><div class="value" id="book-izdavac"></div></div>
+                <div><div class="label">Godina</div><div class="value" id="book-godina"></div></div>
+                <div><div class="label">Primjerci</div><div class="value" id="book-primjerci-count"></div></div>
+                <div><div class="label">Dostupno</div><div class="value" id="book-dostupno"></div></div>
+            </div>
+            <p id="book-opis"></p>
+            <div class="details-actions">
+                <a href="#" id="edit-book-btn" class="btn btn-secondary" data-role="Administrator,Bibliotekar" style="display:none;">Uredi</a>
+                <button id="delete-book-btn" class="btn btn-danger" data-role="Administrator,Bibliotekar" style="display:none;">Obriši</button>
+                <button id="reserve-btn" class="btn btn-primary" data-role="Član" style="display:none;">Rezerviši</button>
+                <button id="collection-btn" class="btn btn-secondary" data-role="Član" style="display:none;">+ Dodaj u kolekciju</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-block" data-role="Administrator,Bibliotekar" style="display:none;">
+        <h2>Primjerci</h2>
+        <form id="add-primjerak-form" style="display:flex;gap:.5rem;align-items:flex-end;margin-bottom:1rem;">
+            <div class="form-group" style="margin-bottom:0;"><label>Broj novih primjeraka</label><input type="number" id="broj-novih" min="1" value="1" style="width:110px;" /></div>
+            <button type="submit" class="btn btn-secondary">Dodaj primjerke</button>
+        </form>
+        <div class="table-responsive">
+            <table class="sl-table">
+                <thead><tr><th>Inv. broj</th><th>Status</th><th>Datum nabave</th><th></th></tr></thead>
+                <tbody id="primjerci-tbody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="section-block">
+        <h2>Recenzije</h2>
+        <div id="reviews-list"></div>
+    </div>
+</main>
+
+<div class="sl-modal-overlay" id="collection-modal" hidden>
+    <div class="sl-modal">
+        <h2>Dodaj u kolekciju</h2>
+        <div id="collection-modal-list"></div>
+        <button type="button" class="btn btn-secondary" id="collection-modal-close" style="margin-top:1rem;">Zatvori</button>
+    </div>
+</div>
+
+<div class="image-modal-overlay" id="image-modal" hidden>
+    <img id="image-modal-img" src="" alt="" />
+</div>
+
+<footer><p>&copy; 2026 SmartLib — SI Grupa 5, ETF Sarajevo</p></footer>
+
+<script src="../assets/js/db.js"></script>
+<script src="../assets/js/mock-data.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script src="../assets/js/common.js"></script>
+<script src="../assets/js/layout.js"></script>
+<script src="../assets/js/animations.js" defer></script>
+<script src="../assets/js/pages/knjiga-details.js"></script>
+</body>
+</html>
