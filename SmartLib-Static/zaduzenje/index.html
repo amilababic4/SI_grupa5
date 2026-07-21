@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Zaduženja — SmartLib</title>
+<title>Aktivna zaduženja — SmartLib</title>
 <script>(function(){var t=localStorage.getItem('smartlib-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');})();</script>
 <link rel="stylesheet" href="../assets/css/site.css" />
 <link rel="stylesheet" href="../assets/css/animations.css" />
@@ -23,7 +23,6 @@
 .nav-drawer-brand-icon { width: 28px; height: 28px; border-radius: 7px; background: linear-gradient(135deg,#173b63,#2563eb); display: flex; align-items: center; justify-content: center; font-size: .84rem; }
 .nav-drawer-close { width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid rgba(27,61,143,.13); background: transparent; cursor: pointer; }
 .nd-logout-btn { color: #b42318 !important; }
-.search-row { display: flex; gap: .75rem; margin-bottom: 1rem; }
 </style>
 </head>
 <body>
@@ -34,8 +33,7 @@
             <a data-nav-href="index.html"><span class="brand-icon">📚</span><span class="brand-text">SmartLib</span></a>
         </div>
         <ul class="nav-links" id="nav-menu">
-            <li><a data-nav-href="knjiga/index.html" class="katalog-nav-link menu-item">Katalog</a></li>
-            <li><a data-nav-href="korisnik/profil.html" class="menu-item">Moj profil</a></li>
+            <li><a data-nav-href="zaduzenje/index.html" class="menu-item">Zaduženja</a></li>
             <li><button type="button" class="nav-link-btn menu-item" data-action="logout">Odjava</button></li>
             <li class="menu-item"><button id="theme-toggle" class="theme-toggle-btn" aria-label="Promijeni temu">🌙</button></li>
         </ul>
@@ -44,23 +42,54 @@
 <div class="nav-drawer-overlay" id="nav-drawer-overlay"></div>
 <nav class="nav-drawer" id="nav-drawer">
     <div class="nav-drawer-header"><a data-nav-href="index.html" class="nav-drawer-brand"><span class="nav-drawer-brand-icon">📚</span>SmartLib</a><button class="nav-drawer-close" id="nav-drawer-close">✕</button></div>
-    <ul class="nav-drawer-links"><li><a data-nav-href="knjiga/index.html">Katalog</a></li><li><a data-nav-href="zaduzenje/historija.html">Historija zaduženja</a></li><li><button type="button" class="nd-logout-btn" data-action="logout">Odjava</button></li></ul>
+    <ul class="nav-drawer-links"><li><a data-nav-href="zaduzenje/index.html">Zaduženja</a></li><li><button type="button" class="nd-logout-btn" data-action="logout">Odjava</button></li></ul>
 </nav>
 <main class="page-shell">
     <div class="katalog-header">
         <h2>Aktivna zaduženja</h2>
-        <div style="display:flex;gap:.5rem;">
+        <div style="display:flex; gap:0.6rem;">
             <a href="historija.html" class="btn btn-secondary">Historija zaduženja</a>
             <a href="create.html" class="btn btn-primary">+ Novo zaduživanje</a>
         </div>
     </div>
+
     <div id="alert-container"></div>
-    <div class="search-row"><input type="text" id="search-input" placeholder="Pretraga po članu ili knjizi..." style="flex:1;" /></div>
-    <div class="table-responsive">
-        <table class="sl-table">
-            <thead><tr><th>Član</th><th>Knjiga</th><th>Datum zaduživanja</th><th>Rok vraćanja</th><th>Status</th><th></th></tr></thead>
-            <tbody id="loans-tbody"></tbody>
-        </table>
+
+    <div class="card katalog-search">
+        <form id="search-form">
+            <div class="search-row">
+                <div class="form-group" style="flex:1; margin-bottom:0;">
+                    <input type="text" id="clan-input" placeholder="Pretraga po imenu ili emailu člana..." />
+                </div>
+                <div style="display:flex; gap:0.5rem; align-items:flex-end;">
+                    <button type="submit" class="btn btn-primary">Traži</button>
+                    <button type="button" id="reset-btn" class="btn btn-secondary">Reset</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div id="empty-wrap" class="card katalog-empty" style="display:none;">
+        <p id="empty-msg">Nema aktivnih zaduženja.</p>
+    </div>
+
+    <div id="table-wrap" class="card katalog-card">
+        <div class="katalog-table-wrap">
+            <table class="katalog-table">
+                <thead>
+                    <tr>
+                        <th>Član</th>
+                        <th>Email</th>
+                        <th>Knjiga</th>
+                        <th>Inv. br.</th>
+                        <th>Zaduženo</th>
+                        <th>Rok vraćanja</th>
+                        <th>Akcije</th>
+                    </tr>
+                </thead>
+                <tbody id="loans-tbody"></tbody>
+            </table>
+        </div>
     </div>
 </main>
 <footer><p>&copy; 2026 SmartLib — SI Grupa 5, ETF Sarajevo</p></footer>

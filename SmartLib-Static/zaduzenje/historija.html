@@ -45,13 +45,49 @@
     <ul class="nav-drawer-links"><li><a data-nav-href="zaduzenje/index.html">Aktivna zaduženja</a></li><li><button type="button" class="nd-logout-btn" data-action="logout">Odjava</button></li></ul>
 </nav>
 <main class="page-shell">
-    <div class="katalog-header"><h2>Historija zaduženja</h2><a href="index.html" class="btn btn-secondary">Aktivna zaduženja</a></div>
-    <div class="search-row" style="margin-bottom:1rem;"><input type="text" id="search-input" placeholder="Pretraga po članu..." style="width:100%;" /></div>
-    <div class="table-responsive">
-        <table class="sl-table">
-            <thead><tr><th>Član</th><th>Knjiga</th><th>Zadužena</th><th>Vraćena</th></tr></thead>
-            <tbody id="hist-tbody"></tbody>
-        </table>
+    <div class="katalog-header">
+        <h2>Historija zaduženja</h2>
+        <a href="index.html" class="btn btn-secondary">← Aktivna zaduženja</a>
+    </div>
+
+    <div class="card katalog-search">
+        <form id="search-form">
+            <div class="search-row">
+                <div class="form-group" style="flex:1; margin-bottom:0;">
+                    <input type="text" id="clan-input" placeholder="Pretraga po imenu ili emailu člana..." />
+                </div>
+                <div style="display:flex; gap:0.5rem; align-items:flex-end;">
+                    <button type="submit" class="btn btn-primary">Traži</button>
+                    <button type="button" id="reset-btn" class="btn btn-secondary">Reset</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <p class="katalog-meta" id="meta-line"></p>
+
+    <div id="empty-wrap" class="card katalog-empty" style="display:none;">
+        <p id="empty-msg"></p>
+    </div>
+
+    <div id="table-wrap" class="card katalog-card">
+        <div class="katalog-table-wrap">
+            <table class="katalog-table">
+                <thead>
+                    <tr>
+                        <th>Član</th>
+                        <th>Email</th>
+                        <th>Knjiga</th>
+                        <th>Inv. br.</th>
+                        <th>Zaduženo</th>
+                        <th>Rok vraćanja</th>
+                        <th>Vraćeno</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="hist-tbody"></tbody>
+            </table>
+        </div>
     </div>
 </main>
 <footer><p>&copy; 2026 SmartLib — SI Grupa 5, ETF Sarajevo</p></footer>

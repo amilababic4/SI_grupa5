@@ -10,13 +10,13 @@
     const knjiga = DB.find("knjige", zaduzenje.knjigaId);
     const primjerak = DB.find("primjerci", zaduzenje.primjerakId);
 
-    document.getElementById("details-grid").innerHTML = `
-        <div><div class="label">Član</div><div class="value">${korisnik ? Common.escapeHtml(korisnik.ime + " " + korisnik.prezime) : "—"}</div></div>
-        <div><div class="label">Knjiga</div><div class="value">${knjiga ? Common.escapeHtml(knjiga.naslov) : "—"}</div></div>
-        <div><div class="label">Inv. broj</div><div class="value">${primjerak ? Common.escapeHtml(primjerak.inventarniBroj) : "—"}</div></div>
-        <div><div class="label">Datum zaduživanja</div><div class="value">${Common.formatDate(zaduzenje.datumZaduzivanja)}</div></div>
-        <div><div class="label">Rok vraćanja</div><div class="value">${Common.formatDate(zaduzenje.datumPlaniranogVracanja)}</div></div>
-    `;
+    document.getElementById("back-link").setAttribute("href", "details.html?id=" + id);
+    document.getElementById("cancel-link").setAttribute("href", "details.html?id=" + id);
+
+    document.getElementById("v-knjiga").querySelector("strong").textContent = knjiga ? knjiga.naslov : "—";
+    document.getElementById("v-invbroj").textContent = primjerak ? primjerak.inventarniBroj : "—";
+    document.getElementById("v-clan").textContent = korisnik ? korisnik.ime + " " + korisnik.prezime : "—";
+    document.getElementById("v-rok").textContent = Common.formatDate(zaduzenje.datumPlaniranogVracanja);
 
     document.getElementById("confirm-form").addEventListener("submit", (e) => {
         e.preventDefault();
@@ -24,7 +24,6 @@
         DB.update("zaduzenja", id, { status: "zatvoreno", datumStvarnogVracanja: today });
         DB.update("primjerci", zaduzenje.primjerakId, { status: "dostupan" });
 
-        // Auto-fulfill the oldest active reservation for this book, if any.
         if (knjiga) {
             const rez = DB.query("rezervacije", (r) => r.knjigaId === knjiga.id && r.status === "aktivna")
                 .sort((a, b) => a.datumRezervacije.localeCompare(b.datumRezervacije))[0];

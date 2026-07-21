@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Historija zaduženja — SmartLib</title>
+<title>Historija mojih zaduženja — SmartLib</title>
 <script>(function(){var t=localStorage.getItem('smartlib-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');})();</script>
 <link rel="stylesheet" href="../assets/css/site.css" />
 <link rel="stylesheet" href="../assets/css/animations.css" />
@@ -46,14 +46,36 @@
     <ul class="nav-drawer-links"><li><a data-nav-href="knjiga/index.html">Katalog</a></li><li><a data-nav-href="zaduzenje/moja.html">Aktivna zaduženja</a></li><li><button type="button" class="nd-logout-btn" data-action="logout">Odjava</button></li></ul>
 </nav>
 <main class="page-shell">
-    <div class="katalog-header"><h2>Historija zaduženja</h2><a href="moja.html" class="btn btn-secondary">Aktivna zaduženja</a></div>
-    <div class="table-responsive">
-        <table class="sl-table">
-            <thead><tr><th>Knjiga</th><th>Datum zaduživanja</th><th>Datum vraćanja</th><th></th></tr></thead>
-            <tbody id="hist-tbody"></tbody>
-        </table>
+    <div class="katalog-header">
+        <h2>Historija mojih zaduženja</h2>
+        <a href="moja.html" class="btn btn-secondary">← Aktivna zaduženja</a>
     </div>
-    <p id="empty-msg" style="display:none;color:var(--sl-muted);">Nemate historiju zaduženja.</p>
+
+    <p class="katalog-meta" id="meta-line"></p>
+
+    <div id="alert-container"></div>
+
+    <div id="empty-wrap" class="card katalog-empty" style="display:none;">
+        <p>Nema zatvorenih zaduženja u posljednje 3 godine.</p>
+    </div>
+
+    <div id="table-wrap" class="card katalog-card">
+        <div class="katalog-table-wrap">
+            <table class="katalog-table">
+                <thead>
+                    <tr>
+                        <th>Knjiga</th>
+                        <th>Inv. br.</th>
+                        <th>Zaduženo</th>
+                        <th>Rok vraćanja</th>
+                        <th>Vraćeno</th>
+                        <th>Akcija</th>
+                    </tr>
+                </thead>
+                <tbody id="hist-tbody"></tbody>
+            </table>
+        </div>
+    </div>
 </main>
 <footer><p>&copy; 2026 SmartLib — SI Grupa 5, ETF Sarajevo</p></footer>
 <script src="../assets/js/db.js"></script>

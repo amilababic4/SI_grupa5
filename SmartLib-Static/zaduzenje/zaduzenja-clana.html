@@ -45,13 +45,37 @@
     <ul class="nav-drawer-links"><li><a data-nav-href="zaduzenje/index.html">Zaduženja</a></li><li><button type="button" class="nd-logout-btn" data-action="logout">Odjava</button></li></ul>
 </nav>
 <main class="page-shell">
-    <a href="#" id="back-link" class="btn-back">← Nazad na profil</a>
-    <h2 style="margin-top:1rem;" id="page-heading">Aktivna zaduženja člana</h2>
-    <div class="table-responsive">
-        <table class="sl-table">
-            <thead><tr><th>Knjiga</th><th>Zadužena</th><th>Rok</th><th>Status</th></tr></thead>
-            <tbody id="tbody"></tbody>
-        </table>
+    <div class="details-topbar">
+        <a href="#" id="back-link" class="btn btn-secondary">← Nazad na profil</a>
+    </div>
+
+    <div class="katalog-header">
+        <h2>Aktivna zaduženja</h2>
+        <span class="profil-id-badge" style="align-self:center;" id="clan-badge"></span>
+    </div>
+
+    <p class="katalog-meta" id="meta-line"></p>
+
+    <div id="empty-wrap" class="card katalog-empty" style="display:none;">
+        <p>Ovaj član nema aktivnih zaduženja.</p>
+    </div>
+
+    <div id="table-wrap" class="card katalog-card">
+        <div class="katalog-table-wrap">
+            <table class="katalog-table">
+                <thead>
+                    <tr>
+                        <th>Knjiga</th>
+                        <th>Inv. br.</th>
+                        <th>Zaduženo</th>
+                        <th>Rok vraćanja</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="tbody"></tbody>
+            </table>
+        </div>
     </div>
 </main>
 <footer><p>&copy; 2026 SmartLib — SI Grupa 5, ETF Sarajevo</p></footer>

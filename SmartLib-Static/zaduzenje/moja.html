@@ -46,15 +46,31 @@
     <ul class="nav-drawer-links"><li><a data-nav-href="knjiga/index.html">Katalog</a></li><li><a data-nav-href="zaduzenje/moja-historija.html">Historija zaduženja</a></li><li><button type="button" class="nd-logout-btn" data-action="logout">Odjava</button></li></ul>
 </nav>
 <main class="page-shell">
-    <div class="katalog-header"><h2>Moja zaduženja</h2><a href="moja-historija.html" class="btn btn-secondary">Historija</a></div>
-    <div id="alert-container"></div>
-    <div class="table-responsive">
-        <table class="sl-table">
-            <thead><tr><th>Knjiga</th><th>Datum zaduživanja</th><th>Rok vraćanja</th><th>Status</th></tr></thead>
-            <tbody id="moja-tbody"></tbody>
-        </table>
+    <div class="katalog-header">
+        <h2>Moja zaduženja</h2>
+        <a href="moja-historija.html" class="btn btn-secondary">Historija zaduženja</a>
     </div>
-    <p id="empty-msg" style="display:none;color:var(--sl-muted);">Trenutno nemate aktivnih zaduženja.</p>
+
+    <div id="empty-wrap" class="card katalog-empty" style="display:none;">
+        <p>Nema aktivnih zaduženja.</p>
+    </div>
+
+    <div id="table-wrap" class="card katalog-card">
+        <div class="katalog-table-wrap">
+            <table class="katalog-table">
+                <thead>
+                    <tr>
+                        <th>Knjiga</th>
+                        <th>Inv. br.</th>
+                        <th>Zaduženo</th>
+                        <th>Rok vraćanja</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="moja-tbody"></tbody>
+            </table>
+        </div>
+    </div>
 </main>
 <footer><p>&copy; 2026 SmartLib — SI Grupa 5, ETF Sarajevo</p></footer>
 <script src="../assets/js/db.js"></script>

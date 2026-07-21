@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Zaduženja primjerka — SmartLib</title>
+<title>Detalji zaduženja — SmartLib</title>
 <script>(function(){var t=localStorage.getItem('smartlib-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');})();</script>
 <link rel="stylesheet" href="../assets/css/site.css" />
 <link rel="stylesheet" href="../assets/css/animations.css" />
@@ -45,39 +45,60 @@
     <ul class="nav-drawer-links"><li><a data-nav-href="zaduzenje/index.html">Zaduženja</a></li><li><button type="button" class="nd-logout-btn" data-action="logout">Odjava</button></li></ul>
 </nav>
 <main class="page-shell">
-    <div class="details-topbar">
-        <a href="#" id="back-link" class="btn btn-secondary">← Nazad na detalje knjige</a>
-    </div>
 
-    <div class="katalog-header">
-        <h2>Zaduženja primjerka</h2>
-        <span class="profil-id-badge" style="align-self:center;" id="primjerak-badge"></span>
-    </div>
+<div class="details-topbar">
+    <a href="#" id="back-link" class="btn btn-secondary">← Nazad na listu</a>
+</div>
 
-    <p class="katalog-meta" id="meta-line"></p>
+<div id="alert-container"></div>
 
-    <div id="empty-wrap" class="card katalog-empty" style="display:none;">
-        <p>Ovaj primjerak nikad nije bio zadužen.</p>
-    </div>
-
-    <div id="table-wrap" class="card katalog-card">
-        <div class="katalog-table-wrap">
-            <table class="katalog-table">
-                <thead>
-                    <tr>
-                        <th>Član</th>
-                        <th>Email</th>
-                        <th>Zaduženo</th>
-                        <th>Rok vraćanja</th>
-                        <th>Vraćeno</th>
-                        <th>Status</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody id="tbody"></tbody>
-            </table>
+<div class="card">
+    <div class="details-header">
+        <div>
+            <h2 id="page-title">Zaduženje</h2>
+            <p class="details-autor" id="knjiga-naslov"></p>
+        </div>
+        <div class="details-actions" id="actions-wrap" style="display:none;">
+            <a href="#" id="vrati-link" class="btn btn-primary">Evidentiraj vraćanje</a>
         </div>
     </div>
+
+    <div class="details-grid">
+        <div class="details-item">
+            <span class="details-label">Član</span>
+            <span class="details-value" id="v-clan"></span>
+        </div>
+        <div class="details-item">
+            <span class="details-label">Email člana</span>
+            <span class="details-value" id="v-email"></span>
+        </div>
+        <div class="details-item">
+            <span class="details-label">Knjiga</span>
+            <span class="details-value" id="v-knjiga"></span>
+        </div>
+        <div class="details-item">
+            <span class="details-label">Inventarni broj</span>
+            <span class="details-value katalog-isbn" id="v-invbroj"></span>
+        </div>
+        <div class="details-item">
+            <span class="details-label">Datum zaduženja</span>
+            <span class="details-value" id="v-datum-zaduzenja"></span>
+        </div>
+        <div class="details-item">
+            <span class="details-label">Rok vraćanja</span>
+            <span class="details-value" id="v-rok"></span>
+            <span id="v-rok-badge"></span>
+        </div>
+        <div class="details-item">
+            <span class="details-label">Datum vraćanja</span>
+            <span class="details-value" id="v-datum-vracanja"></span>
+        </div>
+        <div class="details-item">
+            <span class="details-label">Status</span>
+            <span id="v-status"></span>
+        </div>
+    </div>
+</div>
 </main>
 <footer><p>&copy; 2026 SmartLib — SI Grupa 5, ETF Sarajevo</p></footer>
 <script src="../assets/js/db.js"></script>
@@ -86,6 +107,6 @@
 <script src="../assets/js/common.js"></script>
 <script src="../assets/js/layout.js"></script>
 <script src="../assets/js/animations.js" defer></script>
-<script src="../assets/js/pages/zaduzenje-zaduzenja-primjerka.js"></script>
+<script src="../assets/js/pages/zaduzenje-details.js"></script>
 </body>
 </html>
