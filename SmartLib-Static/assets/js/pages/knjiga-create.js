@@ -22,9 +22,9 @@
             kategorijaId: Number(katSelect.value),
             izdavac: document.getElementById("izdavac").value.trim(),
             godinaIzdanja: Number(document.getElementById("godina").value) || null,
-            opis: document.getElementById("opis").value.trim(),
+            opis: "",
         });
-        const brojPrimjeraka = Number(document.getElementById("broj-primjeraka").value) || 1;
+        const brojPrimjeraka = Number(document.getElementById("broj-primjeraka").value) || 0;
         for (let i = 1; i <= brojPrimjeraka; i++) {
             DB.insert("primjerci", { knjigaId: knjiga.id, inventarniBroj: `INV-${knjiga.id}-${i}`, status: "dostupan", datumNabave: new Date().toISOString().slice(0, 10) });
         }

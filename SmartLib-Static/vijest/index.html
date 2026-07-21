@@ -7,7 +7,8 @@
 <script>(function(){var t=localStorage.getItem('smartlib-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');})();</script>
 <link rel="stylesheet" href="../assets/css/site.css" />
 <link rel="stylesheet" href="../assets/css/animations.css" />
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,600;0,800;1,400;1,600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
 <style>
 .nav-hamburger { width: 36px; height: 36px; border-radius: 9px; border: 1.5px solid transparent; background: transparent; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; flex-shrink: 0; margin-left: -6px; }
@@ -17,36 +18,144 @@
 .nav-drawer { position: fixed; top: 0; left: 0; bottom: 0; z-index: 9001; width: 300px; max-width: 90vw; background: linear-gradient(180deg,#fff 0%,#f5f8ff 55%,#eef2ff 100%); box-shadow: 12px 0 45px rgba(6,15,58,.18); transform: translateX(-100%); transition: transform .38s cubic-bezier(.16,1,.3,1); display: flex; flex-direction: column; overflow-y: auto; }
 .nav-drawer.open { transform: translateX(0); }
 .nav-drawer-header { display: flex; align-items: center; justify-content: space-between; padding: 1.1rem 1.3rem; border-bottom: 1px solid rgba(27,61,143,.08); }
-.nav-drawer-brand { display: flex; align-items: center; gap: .5rem; font-weight: 800; color: #1B3D8F; text-decoration: none; }
-.nav-drawer-brand-icon { width: 28px; height: 28px; border-radius: 7px; background: linear-gradient(135deg,#173b63,#2563eb); display: flex; align-items: center; justify-content: center; font-size: .84rem; }
-.nav-drawer-close { width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid rgba(27,61,143,.13); background: transparent; cursor: pointer; }
 .nav-drawer-links { list-style: none; padding: 1.5rem .5rem; margin: 0; }
 .nav-drawer-links li { padding: 0 .5rem; margin-bottom: .6rem; }
 .nav-drawer-links li a, .nav-drawer-links li .nd-logout-btn { display: block; padding: .75rem 1.25rem; border-radius: 14px; color: #1a202c; font-weight: 600; text-decoration: none; border: 1px solid transparent; background: transparent; cursor: pointer; width: 100%; text-align: left; }
-.nav-drawer-section { padding: 0 1.2rem; margin: 1rem 0 .35rem; font-size: .7rem; font-weight: 800; text-transform: uppercase; color: rgba(27,61,143,.6); }
+.nav-drawer-brand { display:flex;align-items:center;gap:.5rem;font-weight:800;color:#1B3D8F;text-decoration:none; }
+.nav-drawer-brand-icon { width: 28px; height: 28px; border-radius: 7px; background: linear-gradient(135deg,#173b63,#2563eb); display: flex; align-items: center; justify-content: center; font-size: .84rem; }
+.nav-drawer-close { width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid rgba(27,61,143,.13); background: transparent; cursor: pointer; }
 .nd-logout-btn { color: #b42318 !important; }
-.vijest-hero { background: var(--sl-dark); color: #fff; padding: 3rem 1.5rem; text-align: center; }
-.vijest-hero h1 { font-family:"Plus Jakarta Sans",sans-serif; font-size: 2.2rem; margin-bottom:.5rem; }
-.cat-filter-bar { display: flex; gap: .5rem; justify-content: center; flex-wrap: wrap; padding: 1.25rem 1.5rem; }
-.cat-chip { padding: .45rem 1rem; border-radius: 999px; border: 1.5px solid var(--sl-border); background: var(--sl-card-solid); cursor: pointer; font-weight: 600; font-size: .85rem; }
-.cat-chip.active { background: var(--sl-blue); color: #fff; border-color: var(--sl-blue); }
-.vijest-grid { max-width: 1100px; margin: 0 auto; padding: 1.5rem; display: grid; grid-template-columns: repeat(auto-fill,minmax(280px,1fr)); gap: 1.5rem; }
-.vijest-card { background: var(--sl-card-solid); border-radius: var(--sl-radius-lg); box-shadow: var(--sl-shadow); overflow: hidden; cursor: pointer; display: flex; flex-direction: column; }
-.vijest-card img { width: 100%; height: 160px; object-fit: cover; }
-.vijest-card .body { padding: 1.1rem; }
-.vijest-card .cat { font-size: .72rem; font-weight: 700; color: var(--sl-blue); text-transform: uppercase; }
-.vijest-card h3 { margin: .4rem 0; font-size: 1.05rem; }
-.vijest-card .date { font-size: .8rem; color: var(--sl-muted); }
-.vijest-reader { max-width: 720px; margin: 0 auto; padding: 1.5rem; }
-.vijest-reader-content { background: var(--sl-card-solid); border-radius: var(--sl-radius-lg); box-shadow: var(--sl-shadow); padding: 2rem; }
-.vijest-fab { position: fixed; bottom: 2rem; right: 2rem; width: 56px; height: 56px; border-radius: 50%; background: var(--sl-blue); color: #fff; font-size: 1.6rem; border: none; cursor: pointer; box-shadow: var(--sl-shadow-hover); z-index: 500; }
-.sl-modal-overlay { position: fixed; inset: 0; background: rgba(6,15,58,.55); z-index: 9500; display: flex; align-items: center; justify-content: center; }
-.sl-modal-overlay[hidden] { display: none; }
-.sl-modal { background: var(--sl-card-solid); border-radius: var(--sl-radius-lg); padding: 1.75rem; max-width: 560px; width: 92%; max-height: 88vh; overflow-y: auto; }
+
+.vijesti-page-root{padding:0;margin:0;}
+:root{--sl-dark:#07111f;--cream:#F7F2EB;--royal:#1B3D8F;--midnight:#060F3A;--china:#5A80C8;--dawn:#C4D9FF;--ink:#0d1b2e;--ink-mid:#3d4f70;--ink-muted:#6b7a99;}
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .75s cubic-bezier(.16,1,.3,1),transform .75s cubic-bezier(.16,1,.3,1);}
+.reveal.in{opacity:1;transform:none;}
+.d1{transition-delay:.08s}.d2{transition-delay:.16s}.d3{transition-delay:.24s}
+.news-hero{position:relative;overflow:hidden;padding:7rem 2rem 5rem;background:linear-gradient(135deg,#07111f 0%,#0e2444 45%,#1B3D8F 100%);color:white;}
+.hero-orb{position:absolute;border-radius:50%;pointer-events:none;}
+.news-hero-inner{max-width:1200px;margin:0 auto;position:relative;z-index:1;display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:end;}
+.news-hero-kicker{display:flex;align-items:center;gap:.7rem;font-size:.78rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--china);margin-bottom:1.4rem;}
+.news-hero-kicker::before{content:'';display:block;width:28px;height:2px;background:var(--china);}
+.news-hero-title{font-size:clamp(4.5rem,11vw,9rem);font-weight:800;letter-spacing:-.06em;line-height:.9;color:white;font-family:"Plus Jakarta Sans",Arial,sans-serif;}
+.news-hero-title em{font-style:italic;color:var(--china);}
+.news-hero-desc{font-size:1.05rem;color:rgba(255,255,255,.65);line-height:1.76;margin-bottom:2rem;}
+.news-stats{display:flex;gap:2.5rem;flex-wrap:wrap;}
+.news-stat-num{font-family:"Plus Jakarta Sans",sans-serif;font-size:2.4rem;font-weight:800;letter-spacing:-.05em;color:white;line-height:1;display:block;}
+.news-stat-label{font-size:.75rem;color:rgba(255,255,255,.45);font-weight:700;letter-spacing:.06em;text-transform:uppercase;display:block;margin-top:.2rem;}
+.news-live-row{display:flex;align-items:center;gap:.6rem;margin-top:1.5rem;font-size:.82rem;color:rgba(255,255,255,.45);font-weight:600;}
+.news-live-dot{width:7px;height:7px;border-radius:50%;background:#22c55e;box-shadow:0 0 8px rgba(34,197,94,.7);animation:vLivePulse 2s ease infinite;flex-shrink:0;}
+@keyframes vLivePulse{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.4);opacity:.7;}}
+.news-filter{position:sticky;top:65px;z-index:100;background:rgba(247,242,235,.96);backdrop-filter:blur(16px);border-bottom:1px solid rgba(27,61,143,.1);padding:.85rem 2rem;}
+.news-filter-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;}
+.filter-btn{padding:.45rem 1.1rem;border-radius:999px;border:1.5px solid rgba(27,61,143,.15);background:transparent;font-family:"Manrope",sans-serif;font-size:.85rem;font-weight:700;color:var(--ink-mid);cursor:pointer;transition:all .22s;white-space:nowrap;}
+.filter-btn:hover{border-color:var(--royal);color:var(--royal);}
+.filter-btn.active{background:var(--royal);border-color:var(--royal);color:white;}
+.filter-count{font-size:.7rem;background:rgba(27,61,143,.1);color:var(--royal);padding:.08rem .4rem;border-radius:999px;margin-left:.3rem;}
+.filter-btn.active .filter-count{background:rgba(255,255,255,.2);color:white;}
+.news-content{max-width:1200px;margin:0 auto;padding:4rem 2rem 6rem;background:var(--cream);}
+.featured-article{display:grid;grid-template-columns:1.2fr 1fr;border-radius:24px;overflow:hidden;box-shadow:0 24px 60px rgba(6,15,58,.12);background:white;margin-bottom:3.5rem;cursor:pointer;transition:box-shadow .3s;}
+.featured-article:hover{box-shadow:0 32px 80px rgba(6,15,58,.18);}
+.feat-media{position:relative;overflow:hidden;min-height:460px;}
+.feat-media svg,.feat-media img{width:100%;height:100%;display:block;object-fit:cover;}
+.feat-badges{position:absolute;top:1.2rem;left:1.2rem;display:flex;gap:.5rem;}
+.feat-badge{padding:.32rem .82rem;border-radius:999px;background:var(--royal);color:white;font-size:.7rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;}
+.feat-body{padding:2.8rem 2.4rem;display:flex;flex-direction:column;gap:1.1rem;justify-content:center;}
+.feat-cat{font-size:.73rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--royal);display:flex;align-items:center;gap:.5rem;}
+.feat-cat::before{content:'';display:block;width:18px;height:1.5px;background:var(--royal);}
+.feat-title{font-size:clamp(1.35rem,2.2vw,1.85rem);color:var(--ink);line-height:1.22;font-family:"Plus Jakarta Sans",Arial,sans-serif;font-weight:800;letter-spacing:-.03em;}
+.feat-excerpt{font-size:.94rem;color:var(--ink-mid);line-height:1.76;}
+.feat-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-top:auto;padding-top:1rem;border-top:1px solid rgba(27,61,143,.07);}
+.feat-meta{display:flex;align-items:center;gap:.8rem;font-size:.8rem;color:var(--ink-muted);font-weight:600;}
+.feat-link{display:inline-flex;align-items:center;gap:.5rem;padding:.6rem 1.35rem;border-radius:999px;background:var(--royal);color:white;font-weight:700;font-size:.86rem;text-decoration:none;transition:all .2s;border:none;cursor:pointer;font-family:"Manrope",sans-serif;}
+.feat-link:hover{opacity:.88;transform:translateY(-1px);color:white;text-decoration:none;}
+.feat-link svg{width:13px;height:13px;}
+.section-label{display:flex;align-items:center;gap:1rem;margin-bottom:1.6rem;}
+.section-label-text{font-size:.72rem;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-muted);white-space:nowrap;}
+.section-label::after{content:'';flex:1;height:1px;background:rgba(27,61,143,.1);}
+.news-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.4rem;}
+.news-card{background:white;border-radius:20px;overflow:hidden;border:1px solid rgba(27,61,143,.07);display:flex;flex-direction:column;transition:transform .3s cubic-bezier(.16,1,.3,1),box-shadow .3s;cursor:pointer;}
+.news-card:hover{transform:translateY(-6px);box-shadow:0 22px 55px rgba(6,15,58,.12);}
+.news-card-media{height:196px;overflow:hidden;position:relative;flex-shrink:0;}
+.news-card-media svg,.news-card-media img{width:100%;height:100%;display:block;object-fit:cover;}
+.nc-tag{position:absolute;bottom:.8rem;left:.8rem;padding:.26rem .68rem;border-radius:999px;font-size:.68rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;}
+.news-card-body{padding:1.55rem;flex:1;display:flex;flex-direction:column;gap:.65rem;}
+.nc-title{font-family:"Plus Jakarta Sans",sans-serif;font-size:1.02rem;font-weight:800;letter-spacing:-.03em;color:var(--ink);line-height:1.3;}
+.nc-excerpt{font-size:.86rem;color:var(--ink-mid);line-height:1.68;flex:1;}
+.nc-footer{display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:.75rem;border-top:1px solid rgba(27,61,143,.06);}
+.nc-date{font-size:.76rem;color:var(--ink-muted);font-weight:600;}
+.news-card.filtered-out,.featured-article.filtered-out{display:none;}
+.tc-obavještenje,.tc-obaviještenje{background:rgba(27,61,143,.12);color:var(--royal);}
+.tc-forum{background:rgba(13,51,115,.12);color:#0D3373;}
+.tc-edukacija{background:rgba(90,128,200,.18);color:var(--china);}
+.tc-događaji{background:rgba(6,15,58,.1);color:#0D3373;}
+.tc-djeca{background:rgba(196,217,255,.55);color:var(--royal);}
+.vijesti-empty{text-align:center;padding:6rem 2rem;color:var(--ink-muted);}
+.vijesti-empty svg{width:64px;height:64px;opacity:.3;margin-bottom:1.2rem;display:block;margin-left:auto;margin-right:auto;}
+.vijesti-empty h3{font-size:1.3rem;color:var(--ink-mid);margin-bottom:.5rem;}
+.nd-modal{position:fixed;inset:0;z-index:10000;display:flex;align-items:flex-start;justify-content:center;padding:24px;background:rgba(6,15,58,.65);backdrop-filter:blur(8px);overflow-y:auto;overscroll-behavior:contain;opacity:0;pointer-events:none;transition:opacity .3s ease;}
+.nd-modal.open{opacity:1;pointer-events:all;}
+.nd-backdrop{position:absolute;inset:0;cursor:pointer;}
+.nd-sheet{position:relative;z-index:1;width:min(700px,100%);max-height:calc(100dvh - 48px);background:var(--cream);border-radius:24px;overflow:hidden;transform:scale(.96) translateY(12px);transition:transform .38s cubic-bezier(.16,1,.3,1),opacity .3s ease;opacity:0;box-shadow:0 32px 80px rgba(6,15,58,.32);display:flex;flex-direction:column;margin:auto;}
+.nd-modal.open .nd-sheet{transform:scale(1) translateY(0);opacity:1;}
+.nd-topbar{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.5rem;background:white;border-bottom:1px solid rgba(27,61,143,.07);flex-shrink:0;gap:1rem;}
+.nd-close{width:36px;height:36px;border-radius:50%;border:1.5px solid rgba(27,61,143,.15);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--ink-mid);transition:all .18s;flex-shrink:0;}
+.nd-close:hover{background:var(--royal);border-color:var(--royal);color:white;}
+.nd-close svg{width:13px;height:13px;}
+.nd-tag-bar{display:flex;align-items:center;gap:.6rem;flex:1;}
+.nd-pill{padding:.26rem .72rem;border-radius:999px;font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;}
+.nd-media{width:100%;height:220px;flex-shrink:0;overflow:hidden;}
+.nd-media svg,.nd-media img{width:100%;height:100%;display:block;object-fit:cover;}
+.nd-body{padding:2rem 2rem 2.5rem;flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;}
+.nd-meta{font-size:.8rem;color:var(--ink-muted);font-weight:600;display:flex;align-items:center;gap:.55rem;flex-wrap:wrap;margin-bottom:.9rem;}
+.nd-title{font-size:clamp(1.4rem,3vw,2rem);color:var(--ink);margin-bottom:1.6rem;line-height:1.15;font-family:"Plus Jakarta Sans",Arial,sans-serif;font-weight:800;letter-spacing:-.04em;}
+.nd-article p{font-size:.95rem;color:var(--ink-mid);line-height:1.84;margin-bottom:1.2rem;}
+.nd-article h3{font-family:"Plus Jakarta Sans",sans-serif;font-size:1.05rem;font-weight:800;color:var(--ink);letter-spacing:-.03em;margin:1.6rem 0 .5rem;}
+.nd-article strong,.nd-article b{font-weight:700;color:var(--ink);}
+.nd-footer{margin-top:2.4rem;padding-top:1.4rem;border-top:1px solid rgba(27,61,143,.1);}
+.nd-back{display:inline-flex;align-items:center;gap:.5rem;padding:.62rem 1.3rem;border-radius:999px;border:1.5px solid rgba(27,61,143,.15);background:transparent;font-size:.86rem;font-weight:700;color:var(--ink-mid);cursor:pointer;transition:all .18s;font-family:"Manrope",sans-serif;}
+.nd-back:hover{border-color:var(--royal);color:var(--royal);}
+.nd-back svg{width:13px;height:13px;}
+.card-admin-bar{display:flex;gap:.4rem;margin-top:.6rem;padding-top:.6rem;border-top:1px solid rgba(27,61,143,.08);}
+.btn-card-edit,.btn-card-delete{font-size:.75rem;font-weight:700;padding:.3rem .75rem;border-radius:999px;border:none;cursor:pointer;text-decoration:none;transition:opacity .18s;font-family:"Manrope",sans-serif;}
+.btn-card-edit{background:rgba(27,61,143,.1);color:var(--royal);}
+.btn-card-edit:hover{background:rgba(27,61,143,.2);color:var(--royal);}
+.btn-card-delete{background:rgba(180,35,24,.1);color:#c0392b;}
+.btn-card-delete:hover{background:rgba(180,35,24,.2);color:#c0392b;}
+.adm-fab{position:fixed;bottom:2rem;right:2rem;z-index:400;padding:.75rem 1.4rem;border-radius:999px;background:linear-gradient(135deg,var(--midnight),var(--royal));color:white;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:.5rem;font-family:"Manrope",sans-serif;font-size:.88rem;font-weight:700;box-shadow:0 10px 28px rgba(27,61,143,.38);transition:transform .2s,box-shadow .2s;}
+.adm-fab:hover{transform:translateY(-2px);box-shadow:0 14px 36px rgba(27,61,143,.48);color:white;}
+.adm-fab svg{width:16px;height:16px;}
+.adm-overlay{position:fixed;inset:0;z-index:10000;background:rgba(6,15,58,.58);backdrop-filter:blur(6px);display:flex;align-items:flex-start;justify-content:center;padding:24px;overflow-y:auto;overscroll-behavior:contain;opacity:0;pointer-events:none;transition:opacity .3s ease;}
+.adm-overlay.open{opacity:1;pointer-events:all;}
+.adm-drawer{position:relative;width:min(640px,100%);max-height:calc(100dvh - 48px);background:white;border-radius:24px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 32px 80px rgba(6,15,58,.32);transform:scale(.94) translateY(16px);opacity:0;transition:transform .38s cubic-bezier(.16,1,.3,1),opacity .3s ease;margin:auto;}
+.adm-overlay.open .adm-drawer{transform:scale(1) translateY(0);opacity:1;}
+.adm-form-body{flex:1;overflow-y:auto;min-height:0;padding:1.8rem;-webkit-overflow-scrolling:touch;}
+.adm-hdr{padding:1.5rem 1.8rem;background:linear-gradient(135deg,var(--midnight) 0%,#0e2878 48%,var(--royal) 100%);color:white;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.adm-hdr-label{font-size:.68rem;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.48);margin-bottom:.25rem;}
+.adm-hdr-title-text{font-family:"Plus Jakarta Sans",sans-serif;font-size:1.35rem;font-weight:800;letter-spacing:-.03em;}
+.adm-hdr-close{width:36px;height:36px;border-radius:50%;border:1.5px solid rgba(255,255,255,.22);background:rgba(255,255,255,.08);cursor:pointer;display:flex;align-items:center;justify-content:center;color:white;transition:all .18s;flex-shrink:0;}
+.adm-hdr-close:hover{background:rgba(255,255,255,.22);}
+.adm-hdr-close svg{width:14px;height:14px;}
+.af{margin-bottom:1.1rem;}
+.af label{display:block;margin-bottom:.4rem;font-size:.83rem;font-weight:700;color:#344054;}
+.af input,.af select,.af textarea{width:100%;min-height:46px;padding:.7rem .85rem;border:1.5px solid rgba(27,61,143,.14);border-radius:12px;background:rgba(247,242,235,.6);color:var(--ink);font-size:.93rem;font-family:"Manrope",sans-serif;outline:none;transition:border-color .18s,box-shadow .18s,background .18s;resize:vertical;}
+.af input:focus,.af select:focus,.af textarea:focus{border-color:rgba(27,61,143,.42);background:white;box-shadow:0 0 0 4px rgba(27,61,143,.07);}
+.af textarea{min-height:140px;}
+.af-row{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;}
+.af-hint{font-size:.75rem;color:var(--ink-muted);margin-top:.28rem;}
+.af-error{border-color:rgba(180,35,24,.5) !important;}
+.adm-footer-bar{padding:1.2rem 1.8rem;border-top:1px solid rgba(27,61,143,.08);display:flex;gap:.7rem;flex-shrink:0;background:white;}
+.adm-cancel{padding:.68rem 1.3rem;border-radius:999px;border:1.5px solid rgba(27,61,143,.15);background:transparent;font-family:"Manrope",sans-serif;font-size:.88rem;font-weight:700;color:var(--ink-mid);cursor:pointer;transition:all .18s;}
+.adm-cancel:hover{border-color:var(--royal);color:var(--royal);}
+.adm-submit{flex:1;padding:.72rem 1.5rem;border-radius:999px;border:none;background:linear-gradient(135deg,var(--midnight),var(--royal));color:white;font-family:"Manrope",sans-serif;font-size:.92rem;font-weight:700;cursor:pointer;transition:all .18s;box-shadow:0 8px 22px rgba(27,61,143,.22);}
+.adm-submit:hover{opacity:.9;transform:translateY(-1px);}
+.adm-submit:disabled{opacity:.55;transform:none;cursor:not-allowed;}
+.adm-toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(90px);background:var(--midnight);color:white;padding:.8rem 1.6rem;border-radius:999px;font-size:.88rem;font-weight:700;z-index:10100;transition:transform .38s cubic-bezier(.16,1,.3,1);pointer-events:none;white-space:nowrap;box-shadow:0 8px 24px rgba(6,15,58,.3);}
+.adm-toast.show{transform:translateX(-50%) translateY(0);}
+@media(max-width:900px){ .news-hero-inner,.featured-article{grid-template-columns:1fr;} .feat-media{min-height:260px;} .news-grid{grid-template-columns:repeat(2,1fr);} }
+@media(max-width:580px){ .news-grid{grid-template-columns:1fr;} .news-hero-title{font-size:clamp(3rem,14vw,5rem);} .adm-overlay{padding:8px;} .adm-drawer{max-height:calc(100dvh - 16px);border-radius:20px;width:100%;} .af-row{grid-template-columns:1fr;} }
 </style>
 </head>
 <body>
-
 <nav id="main-nav" class="smartlib-navbar smartlib-navbar-dark">
     <div class="smartlib-nav-inner">
         <div class="nav-brand">
@@ -60,71 +169,93 @@
             <li data-auth="in"><button type="button" class="nav-link-btn menu-item" data-action="logout">Odjava</button></li>
             <li data-auth="out"><a data-nav-href="kalendar/index.html" class="menu-item">Kalendar</a></li>
             <li class="menu-item" data-auth="out"><a data-nav-href="auth/login.html" class="nav-login-link">Prijava</a></li>
-            <li class="menu-item">
-                <button id="theme-toggle" class="theme-toggle-btn" aria-label="Promijeni temu">
-                    <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-                    <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-                </button>
-            </li>
+            <li class="menu-item"><button id="theme-toggle" class="theme-toggle-btn" aria-label="Promijeni temu">🌙</button></li>
         </ul>
     </div>
 </nav>
-
 <div class="nav-drawer-overlay" id="nav-drawer-overlay" data-auth="in"></div>
 <nav class="nav-drawer" id="nav-drawer" data-auth="in">
-    <div class="nav-drawer-header">
-        <a data-nav-href="index.html" class="nav-drawer-brand"><span class="nav-drawer-brand-icon">📚</span>SmartLib</a>
-        <button class="nav-drawer-close" id="nav-drawer-close">✕</button>
-    </div>
-    <ul class="nav-drawer-links">
-        <li class="nav-drawer-section">Glavno</li>
-        <li><a data-nav-href="index.html">Početna</a></li>
-        <li><a data-nav-href="vijest/index.html">Vijesti</a></li>
-        <li><a data-nav-href="kalendar/index.html">Kalendar</a></li>
-        <li><a data-nav-href="knjiga/index.html" class="katalog-nav-link">Katalog</a></li>
-        <li class="nav-drawer-section">Nalog</li>
-        <li><a data-nav-href="korisnik/profil.html">Moj profil</a></li>
-        <li><button type="button" class="nd-logout-btn" data-action="logout">Odjava</button></li>
-    </ul>
+    <div class="nav-drawer-header"><a data-nav-href="index.html" class="nav-drawer-brand"><span class="nav-drawer-brand-icon">📚</span>SmartLib</a><button class="nav-drawer-close" id="nav-drawer-close">✕</button></div>
+    <ul class="nav-drawer-links"><li><a data-nav-href="index.html">Početna</a></li><li><a data-nav-href="knjiga/index.html" class="katalog-nav-link">Katalog</a></li><li><a data-nav-href="korisnik/profil.html">Moj profil</a></li><li><button type="button" class="nd-logout-btn" data-action="logout">Odjava</button></li></ul>
 </nav>
 
-<main class="page-shell" style="padding:0;max-width:none;">
-    <div class="vijest-hero">
-        <h1>Vijesti</h1>
-        <p>Obavještenja i novosti iz SmartLib biblioteke</p>
+<main class="vijesti-page-root">
+<section class="news-hero">
+  <div class="hero-orb" style="width:650px;height:650px;right:-150px;top:-200px;background:radial-gradient(circle,rgba(27,61,143,.38) 0%,transparent 70%);"></div>
+  <div class="hero-orb" style="width:300px;height:300px;left:-60px;bottom:-80px;background:radial-gradient(circle,rgba(90,128,200,.22) 0%,transparent 70%);"></div>
+  <div class="news-hero-inner">
+    <div>
+      <div class="news-hero-kicker">SmartLib — Novosti</div>
+      <h1 class="news-hero-title">Vijesti<br><em>&amp; novosti</em></h1>
     </div>
-    <div class="cat-filter-bar" id="cat-filter-bar"></div>
-    <div id="vijest-reader" class="vijest-reader" style="display:none;">
-        <button class="btn btn-secondary" id="close-reader-btn" style="margin-bottom:1rem;">← Nazad na sve vijesti</button>
-        <div class="vijest-reader-content" id="vijest-reader-content"></div>
+    <div>
+      <p class="news-hero-desc">Sve što se dešava u SmartLib zajednici — novi naslovi, događaji, forumske diskusije i obavještenja biblioteke.</p>
+      <div class="news-stats">
+        <div><span class="news-stat-num" id="stat-total">0</span><span class="news-stat-label">Objavljenih članaka</span></div>
+        <div><span class="news-stat-num" id="stat-cats">0</span><span class="news-stat-label">Kategorija</span></div>
+      </div>
+      <div class="news-live-row"><span class="news-live-dot"></span>Ažurirano: <span id="stat-latest">—</span></div>
     </div>
-    <div class="vijest-grid" id="vijest-grid"></div>
-</main>
+  </div>
+</section>
 
-<button class="vijest-fab" id="vijest-fab" data-role="Administrator,Bibliotekar" style="display:none;" title="Nova vijest">+</button>
-
-<div class="sl-modal-overlay" id="vijest-modal" hidden>
-    <div class="sl-modal">
-        <h2 id="vijest-modal-title">Nova vijest</h2>
-        <div id="vijest-modal-alert"></div>
-        <form id="vijest-form">
-            <input type="hidden" id="vijest-id" />
-            <div class="form-group"><label>Naslov</label><input type="text" id="vijest-naslov" required /></div>
-            <div class="form-group"><label>Kategorija</label>
-                <select id="vijest-kategorija">
-                    <option>Obavještenje</option><option>Događaj</option>
-                </select>
-            </div>
-            <div class="form-group"><label>URL slike (opcionalno)</label><input type="text" id="vijest-slika" placeholder="../assets/images/booooks.png" /></div>
-            <div class="form-group"><label>Sadržaj (Markdown podržan)</label><textarea id="vijest-sadrzaj" rows="6" required></textarea></div>
-            <div style="display:flex;gap:.5rem;">
-                <button type="submit" class="btn btn-primary">Sačuvaj</button>
-                <button type="button" class="btn btn-secondary" id="vijest-cancel-btn">Otkaži</button>
-                <button type="button" class="btn btn-danger" id="vijest-delete-btn" style="display:none;margin-left:auto;">Obriši</button>
-            </div>
-        </form>
-    </div>
+<div class="news-filter">
+  <div class="news-filter-inner" id="filter-bar"></div>
 </div>
+
+<div class="news-content" id="news-content"></div>
+
+<div class="nd-modal" id="nd-modal" role="dialog" aria-modal="true">
+  <div class="nd-backdrop" id="nd-backdrop"></div>
+  <div class="nd-sheet">
+    <div class="nd-topbar">
+      <button class="nd-close" id="nd-close" aria-label="Zatvori"><svg viewBox="0 0 14 14" fill="none"><path d="M2 2l10 10M12 2L2 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+      <div class="nd-tag-bar"><span class="nd-pill" id="nd-pill"></span></div>
+    </div>
+    <div class="nd-media" id="nd-media"></div>
+    <div class="nd-body">
+      <div class="nd-meta" id="nd-meta"></div>
+      <h1 class="nd-title" id="nd-title"></h1>
+      <div class="nd-article" id="nd-article"></div>
+      <div class="nd-footer">
+        <button class="nd-back" id="nd-back"><svg viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Povratak na vijesti</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="adm-overlay" id="adm-overlay" data-role="Administrator,Bibliotekar" style="display:none;">
+  <div class="adm-drawer" id="adm-drawer" role="dialog" aria-modal="true" onclick="event.stopPropagation()">
+    <div class="adm-hdr">
+      <div><div class="adm-hdr-label">Admin panel</div><div class="adm-hdr-title-text" id="adm-hdr-title-text">Nova vijest</div></div>
+      <button class="adm-hdr-close" id="adm-close" aria-label="Zatvori"><svg viewBox="0 0 14 14" fill="none"><path d="M2 2l10 10M12 2L2 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+    </div>
+    <div class="adm-form-body">
+      <form id="adm-form" novalidate>
+        <input type="hidden" id="af-id" value="0">
+        <div class="af"><label for="af-title">Naslov vijesti *</label><input id="af-title" type="text" placeholder="Unesite naslov vijesti…" autocomplete="off"></div>
+        <div class="af-row">
+          <div class="af"><label for="af-cat">Kategorija</label>
+            <select id="af-cat"><option value="Obavještenje">Obavještenje</option><option value="Forum">Forum</option><option value="Edukacija">Edukacija</option><option value="Događaji">Događaji</option><option value="Djeca">Djeca</option></select>
+          </div>
+          <div class="af"><label for="af-date-display">Datum objave</label><input id="af-date-display" type="text" placeholder="dd/MM/yyyy" autocomplete="off" maxlength="10"><input id="af-date" type="hidden"></div>
+        </div>
+        <div class="af"><label for="af-content">Sadržaj vijesti *</label><textarea id="af-content" rows="9" placeholder="Unesite tekst vijesti…"></textarea><div class="af-hint">Podržava Markdown: **bold**, ### naslov, > citat, liste i linkove.</div></div>
+        <div class="af"><label for="af-img">URL slike naslovnice (opcionalno)</label><input id="af-img" type="text" placeholder="../assets/images/booooks.png ili URL"><div class="af-hint">Preporučeni format 16:9 · min. 1200×675 px</div></div>
+      </form>
+    </div>
+    <div class="adm-footer-bar">
+      <button class="adm-cancel" id="adm-cancel">Odustani</button>
+      <button class="adm-submit" id="adm-submit">Objavi vijest</button>
+    </div>
+  </div>
+</div>
+
+<button class="adm-fab" id="adm-fab" data-role="Administrator,Bibliotekar" style="display:none;" title="Nova vijest">
+  <svg viewBox="0 0 22 22" fill="none"><path d="M11 4v14M4 11h14" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>Dodaj vijest
+</button>
+<div class="adm-toast" id="adm-toast">Vijest uspješno objavljena!</div>
+</main>
 
 <footer><p>&copy; 2026 SmartLib — SI Grupa 5, ETF Sarajevo</p></footer>
 

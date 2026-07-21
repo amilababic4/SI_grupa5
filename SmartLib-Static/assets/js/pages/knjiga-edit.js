@@ -6,7 +6,8 @@
     const knjiga = DB.find("knjige", bookId);
     if (!knjiga) { document.querySelector("main").innerHTML = "<p>Knjiga nije pronađena.</p>"; return; }
 
-    document.getElementById("back-link").setAttribute("href", "details.html?id=" + bookId);
+    document.getElementById("back-link").setAttribute("href", "index.html");
+    document.getElementById("cancel-link").setAttribute("href", "index.html");
 
     const katSelect = document.getElementById("kategorija");
     DB.getAll("kategorije").sort((a, b) => a.naziv.localeCompare(b.naziv)).forEach((k) => {
@@ -19,7 +20,6 @@
     katSelect.value = knjiga.kategorijaId;
     document.getElementById("izdavac").value = knjiga.izdavac || "";
     document.getElementById("godina").value = knjiga.godinaIzdanja || "";
-    document.getElementById("opis").value = knjiga.opis || "";
 
     document.getElementById("book-form").addEventListener("submit", (e) => {
         e.preventDefault();
@@ -29,7 +29,6 @@
             kategorijaId: Number(katSelect.value),
             izdavac: document.getElementById("izdavac").value.trim(),
             godinaIzdanja: Number(document.getElementById("godina").value) || null,
-            opis: document.getElementById("opis").value.trim(),
         });
         Common.Flash.set("success", "Izmjene su sačuvane.");
         window.location.href = "details.html?id=" + bookId;

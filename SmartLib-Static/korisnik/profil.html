@@ -23,18 +23,6 @@
 .nav-drawer-brand-icon { width: 28px; height: 28px; border-radius: 7px; background: linear-gradient(135deg,#173b63,#2563eb); display: flex; align-items: center; justify-content: center; font-size: .84rem; }
 .nav-drawer-close { width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid rgba(27,61,143,.13); background: transparent; cursor: pointer; }
 .nd-logout-btn { color: #b42318 !important; }
-.profile-shell { max-width: 720px; margin: 0 auto; }
-.profile-header { display: flex; gap: 1.25rem; align-items: center; margin-bottom: 1.5rem; }
-.avatar-circle { width: 72px; height: 72px; border-radius: 50%; background: linear-gradient(135deg,#173b63,#2563eb); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 800; flex-shrink: 0; }
-.profile-actions { display: flex; gap: .5rem; flex-wrap: wrap; margin: 1rem 0; }
-.details-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(150px,1fr)); gap: .75rem 1.5rem; margin: 1rem 0; }
-.details-grid .label { font-size: .78rem; color: var(--sl-muted); text-transform: uppercase; }
-.details-grid .value { font-weight: 600; }
-.section-block { margin-bottom: 2rem; }
-.section-block h3 { font-size: 1.05rem; margin-bottom: .75rem; }
-.achievement-chip { display: inline-block; background: var(--sl-blue-light); border-radius: 999px; padding: .4rem .9rem; font-size: .85rem; margin: .2rem; }
-.collection-preview-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(120px,1fr)); gap: .75rem; }
-.collection-preview-grid a { text-decoration: none; color: inherit; background: var(--sl-card-solid); border-radius: var(--sl-radius-md); padding: .75rem; box-shadow: var(--sl-shadow); font-size: .85rem; font-weight: 600; text-align: center; }
 </style>
 </head>
 <body>
@@ -57,41 +45,63 @@
     <div class="nav-drawer-header"><a data-nav-href="index.html" class="nav-drawer-brand"><span class="nav-drawer-brand-icon">📚</span>SmartLib</a><button class="nav-drawer-close" id="nav-drawer-close">✕</button></div>
     <ul class="nav-drawer-links"><li><a data-nav-href="knjiga/index.html">Katalog</a></li><li><button type="button" class="nd-logout-btn" data-action="logout">Odjava</button></li></ul>
 </nav>
+
 <main class="page-shell">
-<div class="profile-shell">
+    <div class="details-topbar"><a href="#" id="back-link" class="btn btn-secondary">← Nazad</a></div>
     <div id="alert-container"></div>
-    <div class="profile-header">
-        <div class="avatar-circle" id="avatar-initials"></div>
-        <div>
-            <h2 id="profil-ime" style="margin:0;"></h2>
-            <div style="color:var(--sl-muted);" id="profil-email"></div>
-            <div id="profil-role-status" style="margin-top:.3rem;"></div>
+
+    <div class="card profil-card">
+        <div class="profil-layout">
+            <div class="profil-avatar-wrapper">
+                <div class="profil-avatar"><span class="profil-avatar-inicijali" id="avatar-initials"></span></div>
+            </div>
+            <div class="profil-info-content">
+                <div class="details-header">
+                    <div><h2 id="profil-ime"></h2><p class="details-autor" id="profil-uloga"></p></div>
+                    <div class="details-actions" id="profile-actions"></div>
+                </div>
+
+                <div class="profil-grid">
+                    <div class="details-item"><span class="details-label">Ime</span><span class="details-value" id="grid-ime"></span></div>
+                    <div class="details-item"><span class="details-label">Prezime</span><span class="details-value" id="grid-prezime"></span></div>
+                    <div class="details-item profil-grid-full"><span class="details-label">E-mail adresa</span><span class="profil-email details-value" id="grid-email"></span></div>
+                    <div class="details-item"><span class="details-label">Uloga</span><span id="grid-uloga-badge"></span></div>
+                    <div class="details-item"><span class="details-label">Status računa</span><span class="details-value--center" id="grid-status"></span></div>
+                    <div class="details-item profil-grid-full"><span class="details-label">Datum kreiranja</span><span class="details-value details-value--center" id="grid-datum"></span></div>
+                </div>
+
+                <div class="profil-clanarina-section" id="membership-block" style="display:none;">
+                    <div class="profil-clanarina-header">
+                        <span class="profil-clanarina-naslov">Članarina</span>
+                        <a href="#" id="membership-manage-link" class="btn-clanarina-upravljaj" style="display:none;"></a>
+                    </div>
+                    <div id="membership-body"></div>
+                </div>
+
+                <div class="profil-zaduzenja-bar" id="staff-links-block" style="display:none;">
+                    <a href="#" id="link-zaduzenja-aktivna" class="btn btn-zaduzenja-aktivna">Aktivna zaduženja</a>
+                    <a href="#" id="link-zaduzenja-historija" class="btn btn-zaduzenja-historija">Historija zaduženja</a>
+                </div>
+
+                <div class="profil-clanarina-section" id="achievements-block" style="display:none;">
+                    <div class="profil-clanarina-header"><span class="profil-clanarina-naslov">Postignuća</span></div>
+                    <div class="details-grid" style="margin-top: 0.5rem; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));" id="achievements-list"></div>
+                </div>
+
+                <div class="profil-clanarina-section" id="collections-block" style="display:none;">
+                    <div class="profil-clanarina-header">
+                        <span class="profil-clanarina-naslov">Kolekcije</span>
+                        <a href="#" id="collections-manage-link" class="btn-clanarina-upravljaj" style="display:none;">Moje kolekcije</a>
+                    </div>
+                    <div class="details-grid" style="margin-top: 0.5rem; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));" id="collections-list"></div>
+                </div>
+            </div>
         </div>
     </div>
-    <div class="profile-actions" id="profile-actions"></div>
-
-    <div class="section-block" id="membership-block" style="display:none;">
-        <h3>Članarina</h3>
-        <div class="details-grid" id="membership-grid"></div>
-    </div>
-
-    <div class="section-block" id="staff-links-block" style="display:none;">
-        <h3>Brzi pristup</h3>
-        <div class="profile-actions" id="staff-links"></div>
-    </div>
-
-    <div class="section-block" id="achievements-block" style="display:none;">
-        <h3>Postignuća</h3>
-        <div id="achievements-list"></div>
-    </div>
-
-    <div class="section-block" id="collections-block" style="display:none;">
-        <h3>Kolekcije</h3>
-        <div class="collection-preview-grid" id="collections-preview"></div>
-    </div>
-</div>
 </main>
+
 <footer><p>&copy; 2026 SmartLib — SI Grupa 5, ETF Sarajevo</p></footer>
+
 <script src="../assets/js/db.js"></script>
 <script src="../assets/js/mock-data.js"></script>
 <script src="../assets/js/auth.js"></script>

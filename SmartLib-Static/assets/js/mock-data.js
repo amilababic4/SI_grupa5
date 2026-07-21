@@ -161,19 +161,21 @@
         // ── Vijesti ───────────────────────────────────────────────────
         const vijesti = [
             { id: 1, naslov: "SmartLib uveo novi sistem kolekcija", sadrzaj: "Članovi sada mogu kreirati i dijeliti svoje kolekcije knjiga sa drugima. Nova opcija se nalazi u meniju **Kolekcije**.", kategorija: "Obavještenje", slikaUrl: "../assets/images/booooks.png", datumObjave: "2026-07-01", autorId: 2 },
-            { id: 2, naslov: "Ljetni program čitanja za mlade", sadrzaj: "Ovog ljeta organizujemo poseban program čitanja za mlađe članove uz nagrade za najaktivnije čitaoce.", kategorija: "Događaj", slikaUrl: "../assets/images/kidsBookEvent.png", datumObjave: "2026-06-15", autorId: 2 },
+            { id: 2, naslov: "Ljetni program čitanja za mlade", sadrzaj: "Ovog ljeta organizujemo poseban program čitanja za mlađe članove uz nagrade za najaktivnije čitaoce.", kategorija: "Djeca", slikaUrl: "../assets/images/kidsBookEvent.png", datumObjave: "2026-06-15", autorId: 2 },
             { id: 3, naslov: "Produženo radno vrijeme čitaonice", sadrzaj: "Čitaonica sada radi do 20h radnim danima kako bi izašla u susret studentima u ispitnim rokovima.", kategorija: "Obavještenje", slikaUrl: "../assets/images/chillCornerBooks.jpg", datumObjave: "2026-05-20", autorId: 3 },
             { id: 4, naslov: "Nove knjige stigle u katalog", sadrzaj: "Ovaj mjesec smo nabavili nekoliko novih naslova iz naučne fantastike i domaće književnosti.", kategorija: "Obavještenje", slikaUrl: "../assets/images/shelvesBooks.jpg", datumObjave: "2026-05-02", autorId: 2 },
+            { id: 5, naslov: "Nova tema na forumu izaziva pažnju čitalaca", sadrzaj: "Diskusija o preporukama za ljetno čitanje postala je jedna od najaktivnijih tema na forumu ovog mjeseca.", kategorija: "Forum", slikaUrl: null, datumObjave: "2026-07-08", autorId: 2 },
         ];
         DB.saveAll("vijesti", vijesti);
 
         // ── Kalendar (događaji) ───────────────────────────────────────
         const dogadjaji = [
-            { id: 1, naslov: "Književna večer: Ivo Andrić", opis: "Diskusija o djelima Ive Andrića uz čitanje odlomaka.", datum: "2026-07-28", sat: "18:00", lokacija: "Čitaonica, sprat 1", kategorija: "Edukacija", autorId: 2 },
-            { id: 2, naslov: "Radionica kreativnog pisanja", opis: "Radionica za mlade pisce, prijave na recepciji.", datum: "2026-08-05", sat: "17:00", lokacija: "Sala za sastanke", kategorija: "Radionica", autorId: 2 },
-            { id: 3, naslov: "Sajam polovnih knjiga", opis: "Razmjena i prodaja polovnih knjiga u dvorištu biblioteke.", datum: "2026-08-15", sat: "10:00", lokacija: "Dvorište biblioteke", kategorija: "Događaj", autorId: 3 },
-            { id: 4, naslov: "Klub čitalaca — jul", opis: "Mjesečni sastanak kluba čitalaca, tema: 'Derviš i smrt'.", datum: "2026-07-10", sat: "18:30", lokacija: "Čitaonica, sprat 1", kategorija: "Edukacija", autorId: 2 },
-            { id: 5, naslov: "Predavanje: Historija štampe u BiH", opis: "Gostujuće predavanje o razvoju štamparstva u regiji.", datum: "2026-06-25", sat: "19:00", lokacija: "Velika sala", kategorija: "Edukacija", autorId: 3 },
+            { id: 1, naslov: "Književna večer: Ivo Andrić", opis: "Diskusija o djelima Ive Andrića uz čitanje odlomaka.", datum: "2026-07-28", sat: "18:00", lokacija: "Čitaonica, sprat 1", kategorija: "Predavanje", autorId: 2 },
+            { id: 2, naslov: "Radionica kreativnog pisanja", opis: "Radionica za mlade pisce, prijave na recepciji.", datum: "2026-08-05", sat: "17:00", lokacija: "Sala za sastanke", kategorija: "Edukacija", autorId: 2 },
+            { id: 3, naslov: "Sajam polovnih knjiga", opis: "Razmjena i prodaja polovnih knjiga u dvorištu biblioteke.", datum: "2026-08-15", sat: "10:00", lokacija: "Dvorište biblioteke", kategorija: "Zajednica", autorId: 3 },
+            { id: 4, naslov: "Klub čitalaca — jul", opis: "Mjesečni sastanak kluba čitalaca, tema: 'Derviš i smrt'.", datum: "2026-07-10", sat: "18:30", lokacija: "Čitaonica, sprat 1", kategorija: "Zajednica", autorId: 2 },
+            { id: 5, naslov: "Predavanje: Historija štampe u BiH", opis: "Gostujuće predavanje o razvoju štamparstva u regiji.", datum: "2026-06-25", sat: "19:00", lokacija: "Velika sala", kategorija: "Predavanje", autorId: 3 },
+            { id: 6, naslov: "Radionica za djecu: Čitanje uz slikovnice", opis: "Interaktivna radionica čitanja za najmlađe posjetioce.", datum: "2026-08-02", sat: "11:00", lokacija: "Dječiji kutak", kategorija: "Djeca", autorId: 2 },
         ];
         DB.saveAll("dogadjaji", dogadjaji);
 

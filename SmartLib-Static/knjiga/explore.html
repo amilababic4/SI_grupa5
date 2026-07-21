@@ -23,17 +23,6 @@
 .nav-drawer-brand-icon { width: 28px; height: 28px; border-radius: 7px; background: linear-gradient(135deg,#173b63,#2563eb); display: flex; align-items: center; justify-content: center; font-size: .84rem; }
 .nav-drawer-close { width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid rgba(27,61,143,.13); background: transparent; cursor: pointer; }
 .nd-logout-btn { color: #b42318 !important; }
-.explore-shell { max-width: 420px; margin: 2rem auto; text-align: center; }
-.swipe-card { background: var(--sl-card-solid); border-radius: var(--sl-radius-lg); box-shadow: var(--sl-shadow-hover); padding: 1.5rem; min-height: 420px; display: flex; flex-direction: column; }
-.swipe-card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; border-radius: var(--sl-radius-md); margin-bottom: 1rem; }
-.swipe-card h3 { margin: 0 0 .3rem; }
-.swipe-card .cat { color: var(--sl-muted); font-size: .85rem; margin-bottom: .75rem; }
-.swipe-actions { display: flex; justify-content: center; gap: 1.5rem; margin-top: 1.5rem; }
-.swipe-btn { width: 58px; height: 58px; border-radius: 50%; border: none; font-size: 1.5rem; cursor: pointer; box-shadow: var(--sl-shadow); }
-.swipe-btn.skip { background: #fff; color: var(--sl-danger); }
-.swipe-btn.like { background: var(--sl-blue); color: #fff; }
-.explore-done { padding: 2rem; }
-.recommend-card { background: var(--sl-card-solid); border-radius: var(--sl-radius-lg); box-shadow: var(--sl-shadow); padding: 1.5rem; margin-top: 1.5rem; }
 </style>
 </head>
 <body>
@@ -56,14 +45,49 @@
     <div class="nav-drawer-header"><a data-nav-href="index.html" class="nav-drawer-brand"><span class="nav-drawer-brand-icon">📚</span>SmartLib</a><button class="nav-drawer-close" id="nav-drawer-close">✕</button></div>
     <ul class="nav-drawer-links"><li><a data-nav-href="knjiga/index.html">Katalog</a></li><li><button type="button" class="nd-logout-btn" data-action="logout">Odjava</button></li></ul>
 </nav>
-<main class="page-shell">
-<div class="explore-shell">
-    <h2>Želiš nešto novo?</h2>
-    <p style="color:var(--sl-muted);">Lajkuj naslove koji te zanimaju — na kraju ti pripremamo preporuku.</p>
-    <div id="swipe-container"></div>
-</div>
+
+<main class="page-shell page-shell--full">
+<section class="explore-hero">
+    <div class="explore-hero-inner">
+        <span class="explore-kicker">Novi pravac</span>
+        <h1 class="explore-title">Želiš nešto novo?</h1>
+        <p class="explore-subtitle">Na osnovu tvoje historije čitanja, pripremili smo miks poznatih žanrova i par iznenađenja.</p>
+    </div>
+</section>
+
+<section class="explore-stage">
+    <div id="explore-empty" class="explore-empty" style="display:none;">
+        <h3>Nema preporuka za sada</h3>
+        <p>Dodaj još zaduženja i vrati se po novi set preporuka.</p>
+    </div>
+
+    <div class="explore-deck-shell" id="explore-deck-shell">
+        <div>
+            <div class="explore-deck" id="explore-deck"></div>
+            <div class="explore-controls" id="explore-controls">
+                <div class="explore-progress" id="explore-progress">1/10</div>
+                <div class="explore-actions">
+                    <button type="button" class="explore-action-btn explore-action-skip" data-swipe="left">Preskoči</button>
+                    <button type="button" class="explore-action-btn explore-action-like" data-swipe="right">Sviđa mi se</button>
+                </div>
+            </div>
+            <div class="explore-end" id="explore-end" hidden></div>
+        </div>
+        <aside class="explore-sidepanel">
+            <div id="explore-sidepanel-content">
+                <h3>Kako radi</h3>
+                <p>Prevuci karticu lijevo za preskakanje ili desno ako ti se sviđa. Ograničili smo set na 10 unikatnih knjiga da ostane brzo i fokusirano.</p>
+                <p>Iznenađenja te guraju van poznatih žanrova, bez gubitka preporuka koje ti već pašu.</p>
+                <p>Ako ti treba još, vrati se kasnije i dobit ćeš novi miks.</p>
+            </div>
+            <div id="explore-recommendation" hidden></div>
+        </aside>
+    </div>
+</section>
 </main>
+
 <footer><p>&copy; 2026 SmartLib — SI Grupa 5, ETF Sarajevo</p></footer>
+
 <script src="../assets/js/db.js"></script>
 <script src="../assets/js/mock-data.js"></script>
 <script src="../assets/js/auth.js"></script>

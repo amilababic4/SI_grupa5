@@ -7,14 +7,10 @@
     }
 
     const alertContainer = document.getElementById("alert-container");
-    Common.Flash.renderInto(alertContainer);
 
     const successMsg = Common.qs("registered");
     if (successMsg) {
-        const div = document.createElement("div");
-        div.className = "alert alert-success";
-        div.textContent = "Registracija uspješna! Prijavite se svojim novim nalogom.";
-        alertContainer.appendChild(div);
+        alertContainer.innerHTML = `<div class="validation-message" style="margin-bottom: 1rem;">Registracija uspješna! Prijavite se svojim novim nalogom.</div>`;
     }
 
     document.getElementById("login-form").addEventListener("submit", (e) => {
@@ -23,7 +19,7 @@
         const password = document.getElementById("password").value;
         const result = Auth.login(email, password);
         if (!result.ok) {
-            alertContainer.innerHTML = `<div class="alert alert-error">${Common.escapeHtml(result.error)}</div>`;
+            alertContainer.innerHTML = `<div class="validation-message" style="margin-bottom: 1rem;">${Common.escapeHtml(result.error)}</div>`;
             return;
         }
         sessionStorage.setItem("smartlib-show-welcome", "true");

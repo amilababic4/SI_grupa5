@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Članovi — SmartLib</title>
+<title>Članovi biblioteke — SmartLib</title>
 <script>(function(){var t=localStorage.getItem('smartlib-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');})();</script>
 <link rel="stylesheet" href="../assets/css/site.css" />
 <link rel="stylesheet" href="../assets/css/animations.css" />
@@ -23,8 +23,6 @@
 .nav-drawer-brand-icon { width: 28px; height: 28px; border-radius: 7px; background: linear-gradient(135deg,#173b63,#2563eb); display: flex; align-items: center; justify-content: center; font-size: .84rem; }
 .nav-drawer-close { width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid rgba(27,61,143,.13); background: transparent; cursor: pointer; }
 .nd-logout-btn { color: #b42318 !important; }
-.search-row { display: flex; gap: .75rem; margin-bottom: 1rem; flex-wrap: wrap; align-items: center; }
-.search-row input[type=text] { flex: 1; min-width: 200px; }
 </style>
 </head>
 <body>
@@ -48,20 +46,46 @@
     <div class="nav-drawer-header"><a data-nav-href="index.html" class="nav-drawer-brand"><span class="nav-drawer-brand-icon">📚</span>SmartLib</a><button class="nav-drawer-close" id="nav-drawer-close">✕</button></div>
     <ul class="nav-drawer-links"><li><a data-nav-href="knjiga/index.html">Katalog</a></li><li><a data-nav-href="korisnik/index.html">Članovi</a></li><li data-role="Administrator"><a data-nav-href="korisnik/index-bibliotekar.html">Bibliotekari</a></li><li><button type="button" class="nd-logout-btn" data-action="logout">Odjava</button></li></ul>
 </nav>
+
 <main class="page-shell">
-    <h2>Članovi</h2>
-    <div class="search-row">
-        <input type="text" id="search-input" placeholder="Pretraga po imenu ili emailu..." />
-        <label><input type="checkbox" id="show-deactivated" /> Prikaži deaktivirane</label>
+    <div class="members-header">
+        <h2>Članovi biblioteke</h2>
+        <a href="create.html" class="btn btn-primary">Kreiraj nalog člana</a>
     </div>
-    <div class="table-responsive">
-        <table class="sl-table">
-            <thead><tr><th>Ime</th><th>Email</th><th>Status</th><th>Datum registracije</th></tr></thead>
-            <tbody id="members-tbody"></tbody>
-        </table>
+
+    <div id="alert-container"></div>
+
+    <div class="card katalog-search">
+        <div class="search-row">
+            <div class="form-group" style="flex:1; margin-bottom:0;">
+                <input type="text" id="search-input" placeholder="Pretraga po imenu, prezimenu ili e-mailu..." />
+            </div>
+            <div class="members-search-toggle" style="display:flex; align-items:center; gap:0.5rem; white-space:nowrap;">
+                <input type="checkbox" id="show-deactivated" />
+                <label for="show-deactivated" style="font-size:0.9rem; font-weight:600; color:var(--sl-muted); cursor:pointer; user-select:none;">Prikaži deaktivirane</label>
+            </div>
+            <div style="display:flex; gap:0.5rem; align-items:flex-end;">
+                <button type="button" class="btn btn-primary" id="search-btn">Traži</button>
+                <button type="button" class="btn btn-secondary" id="reset-btn">Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="katalog-meta" id="meta-line"></div>
+
+    <div class="card members-card">
+        <div class="members-table-wrap" id="table-wrap">
+            <table class="members-table">
+                <thead><tr><th>Ime i prezime</th><th>Email</th><th>Status</th><th>Kreiran</th></tr></thead>
+                <tbody id="members-tbody"></tbody>
+            </table>
+        </div>
+        <p id="empty-msg" style="display:none;padding:1rem;color:var(--sl-muted);"></p>
     </div>
 </main>
+
 <footer><p>&copy; 2026 SmartLib — SI Grupa 5, ETF Sarajevo</p></footer>
+
 <script src="../assets/js/db.js"></script>
 <script src="../assets/js/mock-data.js"></script>
 <script src="../assets/js/auth.js"></script>

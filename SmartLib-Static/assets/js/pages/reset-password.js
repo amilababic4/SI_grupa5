@@ -10,12 +10,12 @@
         const p2 = document.getElementById("confirm-password").value;
         const alertContainer = document.getElementById("alert-container");
         if (p1 !== p2) {
-            alertContainer.innerHTML = '<div class="alert alert-error">Lozinke se ne podudaraju.</div>';
+            alertContainer.innerHTML = '<div class="validation-message" style="margin-bottom:1rem;">Lozinke se ne podudaraju.</div>';
             return;
         }
         const result = Auth.resetPassword(email, p1);
         if (!result.ok) {
-            alertContainer.innerHTML = `<div class="alert alert-error">${Common.escapeHtml(result.error)}</div>`;
+            alertContainer.innerHTML = `<div class="validation-message" style="margin-bottom:1rem;">${Common.escapeHtml(result.error)}</div>`;
             return;
         }
         sessionStorage.removeItem("smartlib-reset-email");

@@ -45,17 +45,46 @@
     <div class="nav-drawer-header"><a data-nav-href="index.html" class="nav-drawer-brand"><span class="nav-drawer-brand-icon">📚</span>SmartLib</a><button class="nav-drawer-close" id="nav-drawer-close">✕</button></div>
     <ul class="nav-drawer-links"><li><a data-nav-href="knjiga/index.html">Katalog</a></li><li><a data-nav-href="korisnik/index.html">Članovi</a></li><li><button type="button" class="nd-logout-btn" data-action="logout">Odjava</button></li></ul>
 </nav>
+
 <main class="page-shell">
-    <div class="katalog-header"><h2>Bibliotekari</h2><a href="create-bibliotekar.html" class="btn btn-primary">+ Novi bibliotekar</a></div>
+    <div class="members-header">
+        <h2>Bibliotekari</h2>
+        <a href="create-bibliotekar.html" class="btn btn-primary">Kreiraj nalog bibliotekara</a>
+    </div>
+
     <div id="alert-container"></div>
-    <div class="table-responsive">
-        <table class="sl-table">
-            <thead><tr><th>Ime</th><th>Email</th><th>Status</th><th>Datum registracije</th></tr></thead>
-            <tbody id="biblio-tbody"></tbody>
-        </table>
+
+    <div class="card katalog-search">
+        <div class="search-row">
+            <div class="form-group" style="flex:1; margin-bottom:0;">
+                <input type="text" id="search-input" placeholder="Pretraga po imenu, prezimenu ili e-mailu..." />
+            </div>
+            <div class="members-search-toggle" style="display:flex; align-items:center; gap:0.5rem; white-space:nowrap;">
+                <input type="checkbox" id="show-deactivated" />
+                <label for="show-deactivated" style="font-size:0.9rem; font-weight:600; color:var(--sl-muted); cursor:pointer; user-select:none;">Prikaži deaktivirane</label>
+            </div>
+            <div style="display:flex; gap:0.5rem; align-items:flex-end;">
+                <button type="button" class="btn btn-primary" id="search-btn">Traži</button>
+                <button type="button" class="btn btn-secondary" id="reset-btn">Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="katalog-meta" id="meta-line"></div>
+
+    <div class="card members-card">
+        <div class="members-table-wrap" id="table-wrap">
+            <table class="members-table">
+                <thead><tr><th>Ime i prezime</th><th>Email</th><th>Status</th><th>Kreiran</th></tr></thead>
+                <tbody id="biblio-tbody"></tbody>
+            </table>
+        </div>
+        <p id="empty-msg" style="display:none;padding:1rem;color:var(--sl-muted);"></p>
     </div>
 </main>
+
 <footer><p>&copy; 2026 SmartLib — SI Grupa 5, ETF Sarajevo</p></footer>
+
 <script src="../assets/js/db.js"></script>
 <script src="../assets/js/mock-data.js"></script>
 <script src="../assets/js/auth.js"></script>
