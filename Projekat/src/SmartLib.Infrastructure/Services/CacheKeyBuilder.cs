@@ -21,5 +21,11 @@ namespace SmartLib.Infrastructure.Services
         
         public static string HomeRecommendationsKey(long version, int userId)
             => $"home:recommendations:v{version}:user={userId}";
+
+        public static string HomeVijestiKey(long version)
+            => $"home:vijesti:v{version}";
+
+        public static string HomeDogadjajiKey(long version)
+            => $"home:dogadjaji:v{version}";
     }
 }

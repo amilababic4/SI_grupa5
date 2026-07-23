@@ -36,33 +36,7 @@ if (File.Exists(envPath))
     }
 }
 
-static string? BuildRedisConfiguration()
-{
-    var connString = Environment.GetEnvironmentVariable("UPSTASH_REDIS_CONNECTION_STRING");
-    if (!string.IsNullOrWhiteSpace(connString))
-        return connString;
-
-    var redisUrl = Environment.GetEnvironmentVariable("UPSTASH_REDIS_URL");
-    if (string.IsNullOrWhiteSpace(redisUrl))
-        return null;
-
-    if (!Uri.TryCreate(redisUrl, UriKind.Absolute, out var redisUri))
-        return null;
-
-    var password = Environment.GetEnvironmentVariable("UPSTASH_REDIS_PASSWORD");
-    if (string.IsNullOrWhiteSpace(password) && !string.IsNullOrWhiteSpace(redisUri.UserInfo))
-    {
-        var parts = redisUri.UserInfo.Split(':', 2);
-        if (parts.Length == 2)
-            password = parts[1];
-    }
-
-    if (string.IsNullOrWhiteSpace(password))
-        return null;
-
-    var port = redisUri.Port > 0 ? redisUri.Port : 6379;
-    return $"{redisUri.Host}:{port},password={password},ssl=True,abortConnect=False";
-}
+static string? BuildRedisConfiguration() => SmartLib.Infrastructure.Services.RedisConfigHelper.BuildRedisConfiguration();
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -102,6 +76,7 @@ builder.Services.AddScoped<IKategorijaRepository, KategorijaRepository>();
 builder.Services.AddScoped<IZaduzenjeRepository, ZaduzenjeRepository>();
 builder.Services.AddScoped<IRezervacijaRepository, RezervacijaRepository>();
 builder.Services.AddHostedService<DeactivatedAccountCleanupService>();
+builder.Services.AddSingleton<SingleFlightCache>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IAuditLogRepository, AuditLogRepository>();
 builder.Services.AddScoped<AuditLogService>();

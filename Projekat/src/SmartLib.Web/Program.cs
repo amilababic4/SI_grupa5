@@ -38,33 +38,7 @@ if (envPath != null)
     }
 }
 
-static string? BuildRedisConfiguration()
-{
-    var connString = Environment.GetEnvironmentVariable("UPSTASH_REDIS_CONNECTION_STRING");
-    if (!string.IsNullOrWhiteSpace(connString))
-        return connString;
-
-    var redisUrl = Environment.GetEnvironmentVariable("UPSTASH_REDIS_URL");
-    if (string.IsNullOrWhiteSpace(redisUrl))
-        return null;
-
-    if (!Uri.TryCreate(redisUrl, UriKind.Absolute, out var redisUri))
-        return null;
-
-    var password = Environment.GetEnvironmentVariable("UPSTASH_REDIS_PASSWORD");
-    if (string.IsNullOrWhiteSpace(password) && !string.IsNullOrWhiteSpace(redisUri.UserInfo))
-    {
-        var parts = redisUri.UserInfo.Split(':', 2);
-        if (parts.Length == 2)
-            password = parts[1];
-    }
-
-    if (string.IsNullOrWhiteSpace(password))
-        return null;
-
-    var port = redisUri.Port > 0 ? redisUri.Port : 6379;
-    return $"{redisUri.Host}:{port},password={password},ssl=True,abortConnect=False";
-}
+static string? BuildRedisConfiguration() => SmartLib.Infrastructure.Services.RedisConfigHelper.BuildRedisConfiguration();
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -82,6 +56,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddHttpClient();
 builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<CacheVersionStore>();
+builder.Services.AddSingleton<SingleFlightCache>();
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromHours(1);
@@ -758,32 +733,16 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-// Redis Health Check Endpoint
-app.MapGet("/health/redis", async (IDistributedCache cache) =>
+// Redis Health Check Endpoint — lightweight: no full SET+GET cycle on every ping
+app.MapGet("/health/redis", (IDistributedCache cache) =>
 {
-    try
+    var isRedis = !string.IsNullOrWhiteSpace(BuildRedisConfiguration());
+    return Results.Ok(new
     {
-        var testKey = "health_check_web";
-        var testValue = DateTime.UtcNow.ToString("o");
-        await cache.SetStringAsync(testKey, testValue, new DistributedCacheEntryOptions
-        {
-            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(1)
-        });
-
-        var retrieved = await cache.GetStringAsync(testKey);
-        var isRedis = !string.IsNullOrWhiteSpace(BuildRedisConfiguration());
-        return Results.Ok(new
-        {
-            status = "Healthy",
-            backend = isRedis ? "Upstash Redis" : "In-Memory",
-            writeReadOk = retrieved == testValue,
-            time = testValue
-        });
-    }
-    catch (Exception ex)
-    {
-        return Results.Problem(detail: ex.Message, title: "Redis connection failed");
-    }
+        status = "Healthy",
+        backend = isRedis ? "Upstash Redis" : "In-Memory",
+        time = DateTime.UtcNow.ToString("o")
+    });
 });
 
 app.Run();

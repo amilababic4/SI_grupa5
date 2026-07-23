@@ -17,6 +17,7 @@ namespace SmartLib.Web.Controllers
         private readonly CacheVersionStore _cacheVersions;
         private readonly IVijestRepository _vijestRepository;
         private readonly IDogadjajRepository _dogadjajRepository;
+        private readonly SingleFlightCache _singleFlight;
 
         public HomeController(
             IKnjigaRepository knjigaRepository,
@@ -24,7 +25,8 @@ namespace SmartLib.Web.Controllers
             IDistributedCache cache,
             CacheVersionStore cacheVersions,
             IVijestRepository vijestRepository,
-            IDogadjajRepository dogadjajRepository)
+            IDogadjajRepository dogadjajRepository,
+            SingleFlightCache singleFlight)
         {
             _knjigaRepository = knjigaRepository;
             _bookRecommender = bookRecommender;
@@ -32,6 +34,7 @@ namespace SmartLib.Web.Controllers
             _cacheVersions = cacheVersions;
             _vijestRepository = vijestRepository;
             _dogadjajRepository = dogadjajRepository;
+            _singleFlight = singleFlight;
         }
 
         public async Task<IActionResult> Index()
@@ -41,12 +44,12 @@ namespace SmartLib.Web.Controllers
             var booksVersion = _cacheVersions.BooksVersion;
             Response.Headers.Append("X-Cache-Version", booksVersion.ToString());
 
-            // Dohvatamo nasumične 4 knjige za landing page
+            // Dohvatamo nasumične 4 knjige za landing page (single-flight: samo 1 request kreira cache)
             var randomCacheKey = CacheKeyBuilder.HomeRandomKey(booksVersion);
-            var randomDtos = await _cache.GetOrCreateRecordAsync(
+            var randomDtos = await _singleFlight.GetOrCreateAsync(
                 randomCacheKey,
                 TimeSpan.FromMinutes(3),
-                async () => 
+                async () =>
                 {
                     var randomKnjige = await _knjigaRepository.GetRandomAsync(4);
                     return randomKnjige.Select(k => new KnjigaDto
@@ -58,7 +61,8 @@ namespace SmartLib.Web.Controllers
                         Kategorija = k.Kategorija?.Naziv,
                         GodinaIzdanja = k.GodinaIzdanja
                     }).ToList();
-                }) ?? new List<KnjigaDto>();
+                },
+                _cache) ?? new List<KnjigaDto>();
             viewModel.RandomKnjige = randomDtos;
 
             // Ako je korisnik prijavljen, dohvatamo preporuke
@@ -68,10 +72,10 @@ namespace SmartLib.Web.Controllers
                 if (int.TryParse(userIdClaim, out int userId))
                 {
                     var recoCacheKey = CacheKeyBuilder.HomeRecommendationsKey(booksVersion, userId);
-                    var recoDtos = await _cache.GetOrCreateRecordAsync(
+                    var recoDtos = await _singleFlight.GetOrCreateAsync(
                         recoCacheKey,
                         TimeSpan.FromMinutes(2),
-                        async () => 
+                        async () =>
                         {
                             var recommended = await _bookRecommender.GetRecommendationsForUserAsync(userId);
                             return recommended.Select(k => new KnjigaDto
@@ -83,15 +87,22 @@ namespace SmartLib.Web.Controllers
                                 Kategorija = k.Kategorija?.Naziv,
                                 GodinaIzdanja = k.GodinaIzdanja
                             }).ToList();
-                        }) ?? new List<KnjigaDto>();
+                        },
+                        _cache) ?? new List<KnjigaDto>();
                     viewModel.RecommendedKnjige = recoDtos;
                 }
             }
 
-            var allVijesti = await _vijestRepository.GetAllAsync();
+            var allVijesti = await _cache.GetOrCreateRecordAsync(
+                CacheKeyBuilder.HomeVijestiKey(booksVersion),
+                TimeSpan.FromMinutes(5),
+                async () => (await _vijestRepository.GetAllAsync()).ToList()) ?? new List<Core.Models.Vijest>();
             viewModel.RecentVijesti = allVijesti.Take(4).ToList();
 
-            var allDogadjaji = await _dogadjajRepository.GetAllAsync();
+            var allDogadjaji = await _cache.GetOrCreateRecordAsync(
+                CacheKeyBuilder.HomeDogadjajiKey(booksVersion),
+                TimeSpan.FromMinutes(5),
+                async () => (await _dogadjajRepository.GetAllAsync()).ToList()) ?? new List<Core.Models.Dogadjaj>();
             viewModel.UpcomingDogadjaji = allDogadjaji
                 .Where(d => d.Datum.Date >= DateTime.Today)
                 .OrderBy(d => d.Datum)
