@@ -57,12 +57,6 @@ builder.Services.AddHttpClient();
 builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<CacheVersionStore>();
 builder.Services.AddSingleton<SingleFlightCache>();
-builder.Services.AddSession(options =>
-{
-    options.IdleTimeout = TimeSpan.FromHours(1);
-    options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true;
-});
 
 // Distributed Cache — Upstash Redis kad su dostupne TCP varijable, memorija lokalno kao fallback
 var redisConfig = BuildRedisConfiguration();
@@ -722,8 +716,6 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-
-app.UseSession();
 
 app.UseAuthentication();
 app.UseAuthorization();
