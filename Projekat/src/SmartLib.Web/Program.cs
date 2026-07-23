@@ -58,22 +58,24 @@ builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<CacheVersionStore>();
 builder.Services.AddSingleton<SingleFlightCache>();
 
-// Distributed Cache — Upstash Redis kad su dostupne TCP varijable, memorija lokalno kao fallback
-var redisConfig = BuildRedisConfiguration();
-if (!string.IsNullOrWhiteSpace(redisConfig))
-{
-    builder.Services.AddStackExchangeRedisCache(options =>
-    {
-        options.Configuration = redisConfig;
-        options.InstanceName = "smartlib_web:";
-    });
-    Console.WriteLine("[Redis] Using Upstash Redis distributed cache");
-}
-else
-{
-    builder.Services.AddDistributedMemoryCache();
-    Console.WriteLine("[Redis] Using in-memory distributed cache (missing Redis TCP credentials)");
-}
+// Distributed Cache — in-memory (Upstash Redis free plan exhausted)
+// To re-enable Redis, uncomment the block below and comment out AddDistributedMemoryCache()
+// var redisConfig = BuildRedisConfiguration();
+// if (!string.IsNullOrWhiteSpace(redisConfig))
+// {
+//     builder.Services.AddStackExchangeRedisCache(options =>
+//     {
+//         options.Configuration = redisConfig;
+//         options.InstanceName = "smartlib_web:";
+//     });
+//     Console.WriteLine("[Redis] Using Upstash Redis distributed cache");
+// }
+// else
+// {
+//     builder.Services.AddDistributedMemoryCache();
+// }
+builder.Services.AddDistributedMemoryCache();
+Console.WriteLine("[Cache] Using in-memory distributed cache");
 
 builder.Services.AddSession(options =>
 {
@@ -734,14 +736,13 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-// Redis Health Check Endpoint — lightweight: no full SET+GET cycle on every ping
-app.MapGet("/health/redis", (IDistributedCache cache) =>
+// Health Check Endpoint
+app.MapGet("/health/redis", () =>
 {
-    var isRedis = !string.IsNullOrWhiteSpace(BuildRedisConfiguration());
     return Results.Ok(new
     {
         status = "Healthy",
-        backend = isRedis ? "Upstash Redis" : "In-Memory",
+        backend = "In-Memory",
         time = DateTime.UtcNow.ToString("o")
     });
 });

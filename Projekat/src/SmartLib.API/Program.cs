@@ -54,19 +54,22 @@ builder.Services.AddHttpClient();
 builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<CacheVersionStore>();
 
-var redisConfig = BuildRedisConfiguration();
-if (!string.IsNullOrWhiteSpace(redisConfig))
-{
-    builder.Services.AddStackExchangeRedisCache(options =>
-    {
-        options.Configuration = redisConfig;
-        options.InstanceName = "smartlib:";
-    });
-}
-else
-{
-    builder.Services.AddDistributedMemoryCache();
-}
+// Distributed Cache — in-memory (Upstash Redis free plan exhausted)
+// To re-enable Redis, uncomment the block below and comment out AddDistributedMemoryCache()
+// var redisConfig = BuildRedisConfiguration();
+// if (!string.IsNullOrWhiteSpace(redisConfig))
+// {
+//     builder.Services.AddStackExchangeRedisCache(options =>
+//     {
+//         options.Configuration = redisConfig;
+//         options.InstanceName = "smartlib:";
+//     });
+// }
+// else
+// {
+//     builder.Services.AddDistributedMemoryCache();
+// }
+builder.Services.AddDistributedMemoryCache();
 
 builder.Services.AddScoped<IKorisnikRepository, KorisnikRepository>();
 builder.Services.AddScoped<IKorisnikRepository, KorisnikRepository>();
@@ -135,29 +138,15 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-// Redis Health Check Endpoint
-app.MapGet("/api/health/redis", async (Microsoft.Extensions.Caching.Distributed.IDistributedCache cache) =>
+// Health Check Endpoint
+app.MapGet("/api/health/redis", () =>
 {
-    try
+    return Results.Ok(new
     {
-        var testKey = "health_check_time";
-        var testValue = DateTime.UtcNow.ToString();
-        await cache.SetStringAsync(testKey, testValue, new Microsoft.Extensions.Caching.Distributed.DistributedCacheEntryOptions
-        {
-            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(1)
-        });
-        
-        var retrievedValue = await cache.GetStringAsync(testKey);
-        if (retrievedValue == testValue)
-        {
-            return Results.Ok(new { status = "Healthy", message = "Redis connection successful.", time = testValue });
-        }
-        return Results.StatusCode(500);
-    }
-    catch (Exception ex)
-    {
-        return Results.Problem(detail: ex.Message, title: "Redis connection failed.");
-    }
+        status = "Healthy",
+        backend = "In-Memory",
+        time = DateTime.UtcNow.ToString("o")
+    });
 });
 
 app.Run();
