@@ -127,6 +127,7 @@ Za potrebe testiranja i demonstracije sistema dostupni su sljedeći testni naloz
 
 | Uloga | E-mail adresa | Lozinka |
 |---|---|---|
+| Administrator | admin@smartlib.ba | Password123! |
 | Bibliotekar | bibliotekar@smartlib.ba | Password123! |
 | Član | clan@smartlib.ba | Password123! |
 
