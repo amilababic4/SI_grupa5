@@ -1,11 +1,18 @@
 using System.Collections.Concurrent;
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace SmartLib.Infrastructure.Services
 {
     public class SingleFlightCache
     {
         private readonly ConcurrentDictionary<string, SemaphoreSlim> _locks = new();
+        private readonly IMemoryCache _memoryCache;
+
+        public SingleFlightCache(IMemoryCache? memoryCache = null)
+        {
+            _memoryCache = memoryCache ?? new MemoryCache(new MemoryCacheOptions());
+        }
 
         public async Task<T?> GetOrCreateAsync<T>(
             string key,
@@ -13,6 +20,21 @@ namespace SmartLib.Infrastructure.Services
             Func<Task<T?>> factory,
             IDistributedCache cache)
         {
+            return await GetOrCreateAsync(key, ttl, ttl, factory, cache);
+        }
+
+        public async Task<T?> GetOrCreateAsync<T>(
+            string key,
+            TimeSpan distributedTtl,
+            TimeSpan memoryTtl,
+            Func<Task<T?>> factory,
+            IDistributedCache cache)
+        {
+            if (_memoryCache.TryGetValue(key, out T? memoryValue) && memoryValue != null)
+            {
+                return memoryValue;
+            }
+
             // Try cache first
             var cached = await cache.GetRecordAsync<T>(key);
             if (cached != null) return cached;
@@ -25,6 +47,11 @@ namespace SmartLib.Infrastructure.Services
                 await lockObj.WaitAsync();
 
                 // Double-check after acquiring lock
+                if (_memoryCache.TryGetValue(key, out memoryValue) && memoryValue != null)
+                {
+                    return memoryValue;
+                }
+
                 cached = await cache.GetRecordAsync<T>(key);
                 if (cached != null) return cached;
 
@@ -32,7 +59,8 @@ namespace SmartLib.Infrastructure.Services
                 var value = await factory();
                 if (value != null)
                 {
-                    await cache.SetRecordAsync(key, value, ttl);
+                    _memoryCache.Set(key, value, memoryTtl);
+                    await cache.SetRecordAsync(key, value, distributedTtl);
                 }
 
                 return value;

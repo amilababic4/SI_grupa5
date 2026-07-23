@@ -6,6 +6,7 @@ using SmartLib.Core.Interfaces;
 using SmartLib.Core.Models;
 using SmartLib.Web.Models;
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Net.Http.Headers;
 using System.Net.Http;
 using System.Security.Claims;
 using System.Text.Json;
@@ -32,6 +33,8 @@ namespace SmartLib.Web.Controllers
         private static readonly TimeSpan BookIndexCacheTtl = TimeSpan.FromMinutes(10);
         private static readonly TimeSpan BookDetailsCacheTtl = TimeSpan.FromMinutes(10);
         private static readonly TimeSpan ReadSetCacheTtl = TimeSpan.FromDays(30);
+        private static readonly TimeSpan BrowserCacheTtl = TimeSpan.FromMinutes(2);
+        private static readonly TimeSpan BrowserCacheMaxStale = TimeSpan.FromMinutes(1);
 
         public KnjigaController(
             IKnjigaRepository knjigaRepository,
@@ -186,7 +189,10 @@ namespace SmartLib.Web.Controllers
 
             var cachedModel = await _cache.GetRecordAsync<KatalogViewModel>(cacheKey);
             if (cachedModel != null)
+            {
+                ApplyBrowserCacheHeaders();
                 return View(cachedModel);
+            }
 
             HashSet<int> procitane = new();
             if (isClan && userId.HasValue)
@@ -266,7 +272,14 @@ namespace SmartLib.Web.Controllers
             };
 
             await _cache.SetRecordAsync(cacheKey, model, BookIndexCacheTtl);
+            ApplyBrowserCacheHeaders();
             return View(model);
+        }
+
+        private void ApplyBrowserCacheHeaders()
+        {
+            Response.Headers[HeaderNames.CacheControl] = $"private, max-age={(int)BrowserCacheTtl.TotalSeconds}, stale-while-revalidate={(int)BrowserCacheMaxStale.TotalSeconds}";
+            Response.Headers[HeaderNames.Vary] = HeaderNames.Cookie;
         }
 
         public async Task<IActionResult> Explore()

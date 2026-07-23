@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace SmartLib.Infrastructure.Services
 {
@@ -172,6 +173,51 @@ namespace SmartLib.Infrastructure.Services
                 {
                     LogRedisError(ex);
                 }
+            }
+
+            return data;
+        }
+
+        public static async Task<T?> GetOrCreateRecordAsync<T>(
+            this IDistributedCache cache,
+            IMemoryCache memoryCache,
+            string key,
+            TimeSpan distributedTtl,
+            TimeSpan memoryTtl,
+            Func<Task<T?>> factory)
+        {
+            if (cache == null) throw new ArgumentNullException(nameof(cache));
+            if (memoryCache == null) throw new ArgumentNullException(nameof(memoryCache));
+            if (string.IsNullOrWhiteSpace(key)) return await factory();
+
+            if (memoryCache.TryGetValue(key, out T? memoryValue) && memoryValue != null)
+            {
+                return memoryValue;
+            }
+
+            if (!IsCircuitOpen())
+            {
+                try
+                {
+                    var cached = await cache.GetRecordAsync<T>(key);
+                    if (cached != null)
+                    {
+                        memoryCache.Set(key, cached, memoryTtl);
+                        return cached;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogRedisError(ex);
+                    RecordFailure();
+                }
+            }
+
+            var data = await factory();
+            if (data != null)
+            {
+                memoryCache.Set(key, data, memoryTtl);
+                await cache.SetRecordAsync(key, data, distributedTtl);
             }
 
             return data;

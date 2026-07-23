@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Net.Http.Headers;
 using SmartLib.Core.Interfaces;
 using SmartLib.Core.DTOs;
 using SmartLib.Infrastructure.Services;
@@ -17,7 +19,10 @@ namespace SmartLib.Web.Controllers
         private readonly CacheVersionStore _cacheVersions;
         private readonly IVijestRepository _vijestRepository;
         private readonly IDogadjajRepository _dogadjajRepository;
+        private readonly IMemoryCache _memoryCache;
         private readonly SingleFlightCache _singleFlight;
+        private static readonly TimeSpan BrowserCacheTtl = TimeSpan.FromMinutes(2);
+        private static readonly TimeSpan BrowserCacheMaxStale = TimeSpan.FromMinutes(1);
 
         public HomeController(
             IKnjigaRepository knjigaRepository,
@@ -26,6 +31,7 @@ namespace SmartLib.Web.Controllers
             CacheVersionStore cacheVersions,
             IVijestRepository vijestRepository,
             IDogadjajRepository dogadjajRepository,
+            IMemoryCache? memoryCache,
             SingleFlightCache singleFlight)
         {
             _knjigaRepository = knjigaRepository;
@@ -34,6 +40,7 @@ namespace SmartLib.Web.Controllers
             _cacheVersions = cacheVersions;
             _vijestRepository = vijestRepository;
             _dogadjajRepository = dogadjajRepository;
+            _memoryCache = memoryCache ?? new MemoryCache(new MemoryCacheOptions());
             _singleFlight = singleFlight;
         }
 
@@ -94,14 +101,18 @@ namespace SmartLib.Web.Controllers
             }
 
             var allVijesti = await _cache.GetOrCreateRecordAsync(
+                _memoryCache,
                 CacheKeyBuilder.HomeVijestiKey(booksVersion),
                 TimeSpan.FromMinutes(5),
+                TimeSpan.FromMinutes(2),
                 async () => (await _vijestRepository.GetAllAsync()).ToList()) ?? new List<Core.Models.Vijest>();
             viewModel.RecentVijesti = allVijesti.Take(4).ToList();
 
             var allDogadjaji = await _cache.GetOrCreateRecordAsync(
+                _memoryCache,
                 CacheKeyBuilder.HomeDogadjajiKey(booksVersion),
                 TimeSpan.FromMinutes(5),
+                TimeSpan.FromMinutes(2),
                 async () => (await _dogadjajRepository.GetAllAsync()).ToList()) ?? new List<Core.Models.Dogadjaj>();
             viewModel.UpcomingDogadjaji = allDogadjaji
                 .Where(d => d.Datum.Date >= DateTime.Today)
@@ -109,7 +120,15 @@ namespace SmartLib.Web.Controllers
                 .Take(4)
                 .ToList();
 
+            ApplyBrowserCacheHeaders();
+
             return View(viewModel);
+        }
+
+        private void ApplyBrowserCacheHeaders()
+        {
+            Response.Headers[HeaderNames.CacheControl] = $"private, max-age={(int)BrowserCacheTtl.TotalSeconds}, stale-while-revalidate={(int)BrowserCacheMaxStale.TotalSeconds}";
+            Response.Headers[HeaderNames.Vary] = HeaderNames.Cookie;
         }
 
 
