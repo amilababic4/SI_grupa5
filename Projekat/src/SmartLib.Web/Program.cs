@@ -75,6 +75,13 @@ else
     Console.WriteLine("[Redis] Using in-memory distributed cache (missing Redis TCP credentials)");
 }
 
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+
 builder.Services.AddHttpContextAccessor();
 
 // Repositories
@@ -716,6 +723,8 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+app.UseSession();
 
 app.UseAuthentication();
 app.UseAuthorization();
