@@ -31,8 +31,8 @@ namespace SmartLib.Web.Controllers
             CacheVersionStore cacheVersions,
             IVijestRepository vijestRepository,
             IDogadjajRepository dogadjajRepository,
-            IMemoryCache? memoryCache,
-            SingleFlightCache singleFlight)
+            SingleFlightCache? singleFlight = null,
+            IMemoryCache? memoryCache = null)
         {
             _knjigaRepository = knjigaRepository;
             _bookRecommender = bookRecommender;
@@ -41,7 +41,7 @@ namespace SmartLib.Web.Controllers
             _vijestRepository = vijestRepository;
             _dogadjajRepository = dogadjajRepository;
             _memoryCache = memoryCache ?? new MemoryCache(new MemoryCacheOptions());
-            _singleFlight = singleFlight;
+            _singleFlight = singleFlight ?? new SingleFlightCache(_memoryCache);
         }
 
         public async Task<IActionResult> Index()

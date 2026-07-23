@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using SmartLib.Core.DTOs;
 using SmartLib.Core.Interfaces;
@@ -87,8 +88,12 @@ namespace SmartLib.Web.Controllers
               if (!string.Equals(korisnik.Uloga?.Naziv, "Bibliotekar", StringComparison.OrdinalIgnoreCase) &&
                 !string.Equals(korisnik.Uloga?.Naziv, "Administrator", StringComparison.OrdinalIgnoreCase))
               {
-                HttpContext.Session.SetString("ShowCatalogWelcomeOnce", "true");
-                HttpContext.Session.SetString("CatalogWelcomeName", $"{korisnik.Ime} {korisnik.Prezime}");
+                var session = HttpContext.Features.Get<ISessionFeature>()?.Session;
+                if (session != null)
+                {
+                    session.SetString("ShowCatalogWelcomeOnce", "true");
+                    session.SetString("CatalogWelcomeName", $"{korisnik.Ime} {korisnik.Prezime}");
+                }
               }
 
             if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
