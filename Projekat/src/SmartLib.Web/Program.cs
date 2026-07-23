@@ -58,31 +58,22 @@ builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<CacheVersionStore>();
 builder.Services.AddSingleton<SingleFlightCache>();
 
-// Distributed Cache — in-memory (Upstash Redis free plan exhausted)
-// To re-enable Redis, uncomment the block below and comment out AddDistributedMemoryCache()
-// var redisConfig = BuildRedisConfiguration();
-// if (!string.IsNullOrWhiteSpace(redisConfig))
-// {
-//     builder.Services.AddStackExchangeRedisCache(options =>
-//     {
-//         options.Configuration = redisConfig;
-//         options.InstanceName = "smartlib_web:";
-//     });
-//     Console.WriteLine("[Redis] Using Upstash Redis distributed cache");
-// }
-// else
-// {
-//     builder.Services.AddDistributedMemoryCache();
-// }
-builder.Services.AddDistributedMemoryCache();
-Console.WriteLine("[Cache] Using in-memory distributed cache");
-
-builder.Services.AddSession(options =>
+// Distributed Cache — auto-detect Redis, fallback to in-memory
+var redisConfig = BuildRedisConfiguration();
+if (!string.IsNullOrWhiteSpace(redisConfig))
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(30);
-    options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true;
-});
+    builder.Services.AddStackExchangeRedisCache(options =>
+    {
+        options.Configuration = redisConfig;
+        options.InstanceName = "smartlib_web:";
+    });
+    Console.WriteLine("[Cache] Using Upstash Redis distributed cache");
+}
+else
+{
+    builder.Services.AddDistributedMemoryCache();
+    Console.WriteLine("[Cache] Using in-memory distributed cache (no Redis credentials)");
+}
 
 builder.Services.AddHttpContextAccessor();
 
@@ -726,8 +717,6 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseSession();
-
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -739,10 +728,11 @@ app.MapControllerRoute(
 // Health Check Endpoint
 app.MapGet("/health/redis", () =>
 {
+    var isRedis = !string.IsNullOrWhiteSpace(BuildRedisConfiguration());
     return Results.Ok(new
     {
         status = "Healthy",
-        backend = "In-Memory",
+        backend = isRedis ? "Upstash Redis" : "In-Memory",
         time = DateTime.UtcNow.ToString("o")
     });
 });

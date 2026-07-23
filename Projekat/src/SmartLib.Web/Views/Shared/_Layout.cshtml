@@ -158,14 +158,8 @@
         var welcomeNameFromTemp = TempData["WelcomeName"]?.ToString();
         var welcomeRole = User.IsInRole("Bibliotekar") || User.IsInRole("Administrator") ? "staff" : "member";
 
-        var showCatalogWelcomeOnce = false;
-        string? welcomeNameFromSession = null;
-        try
-        {
-            showCatalogWelcomeOnce = Context.Session.GetString("ShowCatalogWelcomeOnce") == "true";
-            welcomeNameFromSession = Context.Session.GetString("CatalogWelcomeName");
-        }
-        catch { /* Session/Redis unavailable — degrade gracefully */ }
+        var showCatalogWelcomeOnce = TempData["ShowCatalogWelcomeOnce"]?.ToString() == "true";
+        var welcomeNameFromSession = TempData["CatalogWelcomeName"]?.ToString();
 
         // Show the login welcome immediately, and the catalog welcome once per session for members.
         var shouldShowAnimation = false;

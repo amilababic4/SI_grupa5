@@ -54,22 +54,22 @@ builder.Services.AddHttpClient();
 builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<CacheVersionStore>();
 
-// Distributed Cache — in-memory (Upstash Redis free plan exhausted)
-// To re-enable Redis, uncomment the block below and comment out AddDistributedMemoryCache()
-// var redisConfig = BuildRedisConfiguration();
-// if (!string.IsNullOrWhiteSpace(redisConfig))
-// {
-//     builder.Services.AddStackExchangeRedisCache(options =>
-//     {
-//         options.Configuration = redisConfig;
-//         options.InstanceName = "smartlib:";
-//     });
-// }
-// else
-// {
-//     builder.Services.AddDistributedMemoryCache();
-// }
-builder.Services.AddDistributedMemoryCache();
+// Distributed Cache — auto-detect Redis, fallback to in-memory
+var redisConfig = BuildRedisConfiguration();
+if (!string.IsNullOrWhiteSpace(redisConfig))
+{
+    builder.Services.AddStackExchangeRedisCache(options =>
+    {
+        options.Configuration = redisConfig;
+        options.InstanceName = "smartlib:";
+    });
+    Console.WriteLine("[Cache] Using Upstash Redis distributed cache");
+}
+else
+{
+    builder.Services.AddDistributedMemoryCache();
+    Console.WriteLine("[Cache] Using in-memory distributed cache (no Redis credentials)");
+}
 
 builder.Services.AddScoped<IKorisnikRepository, KorisnikRepository>();
 builder.Services.AddScoped<IKorisnikRepository, KorisnikRepository>();
@@ -141,10 +141,11 @@ app.MapControllers();
 // Health Check Endpoint
 app.MapGet("/api/health/redis", () =>
 {
+    var isRedis = !string.IsNullOrWhiteSpace(BuildRedisConfiguration());
     return Results.Ok(new
     {
         status = "Healthy",
-        backend = "In-Memory",
+        backend = isRedis ? "Upstash Redis" : "In-Memory",
         time = DateTime.UtcNow.ToString("o")
     });
 });
